@@ -34,12 +34,12 @@ TOML.parse(`
                       """
 
         constructor = """
-                      A valid (and should be normal) key name but currently only supported by this JavaScript implementation.
+                      A valid (in fact normal) key name but currently only supported by this JavaScript implementation.
                       一个正确（而且其实普通）但是目前仅被本 JavaScript 实现支持的键名。
                       """
 
         __proto__   = """
-                      A valid (and should be normal) key name but currently only supported by this JavaScript implementation.
+                      A valid (in fact normal) key name but currently only supported by this JavaScript implementation.
                       一个正确（而且其实普通）但是目前仅被本 JavaScript 实现支持的键名。
                       """
 
