@@ -63,4 +63,4 @@ TOML.parse(`
 
 ### `return`
 
-`Object` that extends `null`.
+The root `Table`, which is an `Object` extends `null`.
