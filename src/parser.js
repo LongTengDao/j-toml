@@ -1,4 +1,4 @@
-import { WeakSet, WeakMap, Error, TypeError, parseInt, Infinity, NaN, fromCodePoint } from './global.js';
+import { JSON, WeakSet, WeakMap, Error, TypeError, parseInt, Infinity, NaN, fromCodePoint } from './global.js';
 import { from, next, rest, done, mark, must, throwSyntaxError, throwTypeError, throwError, where } from './iterator.js';
 import { Integer, Float, Datetime, Table } from './types.js';
 
@@ -22,6 +22,17 @@ const ESCAPED_IN_SINGLE_LINE = /\\(?:([\\"])|([btnfr])|u(.{4})|U(.{4})(.{4}))/g;
 const ESCAPED_IN_MULTI_LINE = /\n|\\(?:([ \n]+)|([\\"])|([btnfr])|u(.{4})|U(.{4})(.{4}))/g;
 const unEscapeSingleLine = ($0, $1, $2, $3, $4, $5) => $1 ? $1 : $2 ? ESCAPE_ALIAS[$2] : fromCodePoint(parseInt($3 || $4+$5, 16));
 const SYM_WHITESPACE = /^[^][ \t]*/;
+const TAG_OPENING = /^<([\w-]+)((?:[ \t]+"(?:[^\\"]+|\\[^])+"[ \t]*=[ \t]*"(?:[^\\"]+|\\[^])*")*)[ \t]*/;
+const TAG_ATTRIBUTES = /^((?:[ \t]+"(?:[^\\"]+|\\[^])+"[ \t]*=[ \t]*"(?:[^\\"]+|\\[^])*")*)[ \t]*/;
+const TAB_ATTRIBUTE = /"(?:[^\\"]+|\\[^])*"/g;
+
+let useWhatToJoinMultiLineString;
+let useBigInt;
+let enableNull;
+let enableNil;
+let enableMix;
+let enableInterpolationString;
+
 const InlineArray = 0;
 const ArrayOfStrings = 1;
 const ArrayOfInlineTables = 2;
@@ -30,6 +41,7 @@ const ArrayOfBooleans = 4;
 const ArrayOfFloats = 5;
 const ArrayOfDatetimes = 6;
 const ArrayOfIntegers = 7;
+const ArrayOfNulls = 8;
 const ArraysOfTables = new WeakSet;
 const newArrayOfTables = () => {
 	const array = [];
@@ -43,7 +55,7 @@ const newInlineArray = () => {
 	return array;
 };
 const typify = (array, type) => {
-	if ( InlineArrays.get(array)===type ) { return array; }
+	if ( enableMix || InlineArrays.get(array)===type ) { return array; }
 	InlineArrays.get(array)===InlineArray || throwTypeError('Types in array must be same.');
 	InlineArrays.set(array, type);
 	return array;
@@ -60,16 +72,18 @@ const newInlineTable = () => {
 	InlineTables.add(table);
 	return table;
 };
-let useWhatToJoinMultiLineString;
-let useBigInt;
 
-export default function parse (toml_source, toml_version, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger = true) {
+export default function parse (toml_source, toml_version, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger = true, extensionOptions) {
 	if ( typeof toml_source!=='string' ) { throw new TypeError('TOML.parse(source)'); }
 	if ( toml_version!==0.5 ) { throw new Error('TOML.parse(,version)'); }
 	if ( typeof useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines!=='string' ) { throw new TypeError('TOML.parse(,,multiLineJoiner)'); }
 	if ( typeof useBigInt_forInteger!=='boolean' ) { throw new TypeError('TOML.parse(,,,useBigInt)'); }
 	useWhatToJoinMultiLineString = useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines;
 	useBigInt = useBigInt_forInteger;
+	enableNull = !!( extensionOptions && extensionOptions.null );
+	enableNil = !!( extensionOptions && extensionOptions.nil );
+	enableMix = !!( extensionOptions && extensionOptions.mix );
+	enableInterpolationString = !!( extensionOptions && extensionOptions.ins );
 	const rootTable = newTable();
 	try {
 		from(toml_source.replace(BOM, '').split(EOL));
@@ -125,6 +139,8 @@ function assignInline (lastInlineTable, lineRest) {
 			return assignInlineTable(table, finalKey, right);
 		case '[':
 			return assignInlineArray(table, finalKey, right);
+		case '<':
+			return assignInterpolationString(table, finalKey, right);
 	}
 	let literal;
 	( { 1: literal, 2: lineRest } = VALUE_REST.exec(right) || throwSyntaxError(where()) );
@@ -133,7 +149,9 @@ function assignInline (lastInlineTable, lineRest) {
 			literal==='inf' || literal==='+inf' ? Infinity : literal==='-inf' ? -Infinity :
 				literal==='nan' || literal==='+nan' || literal==='-nan' ? NaN :
 					literal.includes(':') || literal.indexOf('-')!==literal.lastIndexOf('-') ? new Datetime(literal) :
-						literal.includes('.') || literal.includes('e') || literal.includes('E') ? Float(literal) : Integer(literal, useBigInt);
+						literal.includes('.') || literal.includes('e') || literal.includes('E') ? Float(literal) :
+							enableNull && literal==='null' || enableNil && literal==='nil' ? null :
+								Integer(literal, useBigInt);
 	return lineRest;
 }
 
@@ -309,6 +327,8 @@ function pushInline (array, right) {
 			return assignInlineTable(typify(array, ArrayOfInlineTables), ''+array.length, right);
 		case '[':
 			return assignInlineArray(typify(array, ArrayOfInlineArrays), ''+array.length, right);
+		case '<':
+			return assignInterpolationString(typify(array, ArrayOfStrings), ''+array.length, right);
 	}
 	const { 1: literal, 2: lineRest } = VALUE_REST.exec(right) || throwSyntaxError(where());
 	if ( literal==='true' ) { typify(array, ArrayOfBooleans).push(true); }
@@ -324,6 +344,58 @@ function pushInline (array, right) {
 	else if ( literal.includes('.') || literal.includes('e') || literal.includes('E') ) {
 		typify(array, ArrayOfFloats).push(Float(literal));
 	}
+	else if ( enableNull && literal==='null' || enableNil && literal==='nil' ) {
+		typify(array, ArrayOfNulls).
+			push(null);
+	}
 	else { typify(array, ArrayOfIntegers).push(Integer(literal, useBigInt)); }
+	return lineRest;
+}
+
+function assignInterpolationString (table, finalKey, lineRest) {
+	enableInterpolationString || throwSyntaxError(where());
+	const start = mark();
+	let $ = TAG_OPENING.exec(lineRest) || throwSyntaxError('Interpolation String opening tag incorrect at '+where());
+	let attributes = $[2];
+	const closeTag = '</'+$[1]+'>';
+	lineRest = lineRest.slice($[0].length);
+	while ( lineRest==='' || lineRest[0]==='#' ) {
+		lineRest = must('The open tag of Interpolation String', start);
+		$ = TAG_ATTRIBUTES.exec(lineRest) || throwSyntaxError('Interpolation String attributes incorrect at '+where());
+		attributes += $[1];
+		lineRest = lineRest.slice($[0].length);
+	}
+	lineRest[0]==='>' || throwSyntaxError('Interpolation String opening tag did not close incorrectly at '+where());
+	lineRest = lineRest.slice(1);
+	const mapper = new Map;
+	$ = attributes.match(TAB_ATTRIBUTE);
+	for ( let length = $.length, index = 0; index<length; ) {
+		const search = JSON.parse($[index++]);
+		mapper.has(search) && throwError('Duplicate attribute definition at '+where());
+		mapper.set(search, JSON.parse($[index++]));
+	}
+	let inner = '';
+	let index = lineRest.indexOf(closeTag);
+	while ( index=== -1 ) {
+		inner += lineRest+'\n';
+		lineRest = must('Interpolation String', start);
+		index = lineRest.indexOf(closeTag);
+	}
+	inner += lineRest.slice(0, index);
+	lineRest = lineRest.slice(index+closeTag.length).replace(PRE_WHITESPACE, '');
+	if ( inner.charAt(0)==='\n' ) { inner = inner.slice(1); }
+	let value = '';
+	outer: for ( let length = inner.length, index = 0; index<length; ) {
+		for ( const { 0: search, 1: replacement } of mapper ) {
+			if ( inner.startsWith(search, index) ) {
+				value += replacement;
+				index += search.length;
+				continue outer;
+			}
+		}
+		value += inner[index];
+		++index;
+	}
+	table[finalKey] = value;
 	return lineRest;
 }

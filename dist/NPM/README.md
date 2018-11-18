@@ -44,8 +44,8 @@ TOML.parse(`
 `, 0.5, '\n');
 ```
 
-`TOML.parse(source, version, multiLineJoiner[, useBigInt=true])`
-----------------------------------------------------------------
+`TOML.parse(source, version, multiLineJoiner[, useBigInt=true[, xOptions]])`
+----------------------------------------------------------------------------
 
 ### `arguments`
 
@@ -75,6 +75,12 @@ TOML.parse(`
     +   desc:
         *   Specify whether you want or not to use `BigInt` for integer type value.
         *   指定你是否要用 `BigInt` 来实现整数类型的值。
+
+4.  `xOptions`
+    *   type: `[object Object]`
+    +   desc:
+        *   The features not in the spec. Include `null` supporting, mixed array, and interpolation strings (see <https://github.com/toml-lang/toml/issues/577>), etc. They are private experimental discouraged features.
+        *   标准中没有的扩展功能。包括对 `null` 值的支持，混合类型的数组，以及插值字符串（参见 <https://github.com/toml-lang/toml/issues/577>）等。私有实验期功能，不建议随意使用。
 
 ### `return`
 

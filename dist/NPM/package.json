@@ -1,7 +1,7 @@
 {
 	"name": "@ltd/toml",
 	"description": "LongTengDao's obvious, minimal implementation of Tom's Obvious, Minimal Language.",
-	"version": "0.5.10",
+	"version": "0.5.11",
 	"license": "LGPL-3.0",
 	"author": "龙腾道 <LongTengDao@LongTengDao.com> (www.LongTengDao.com)",
 	"bugs": "https://GitHub.com/LongTengDao/TOML/issues",
