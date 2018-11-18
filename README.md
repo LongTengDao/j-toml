@@ -28,20 +28,20 @@ TOML.parse(`
 
     [Table]
 
-        property    = """
-                      A normal key name that supported by any other JavaScript implementation.
-                      为所有其它 JavaScript 实现所支持的普通键名。
-                      """
+    property    = """
+                  A normal key name that supported by any other JavaScript implementation.
+                  为所有其它 JavaScript 实现所支持的普通键名。
+                  """
 
-        constructor = """
-                      A valid (in fact normal) key name but currently only supported by this JavaScript implementation.
-                      一个正确（而且其实普通）但是目前仅被本 JavaScript 实现支持的键名。
-                      """
+    constructor = """
+                  A valid (in fact normal) key name but currently only supported by this JavaScript implementation.
+                  一个正确（而且其实普通）但是目前仅被本 JavaScript 实现支持的键名。
+                  """
 
-        __proto__   = """
-                      A valid (in fact normal) key name but currently only supported by this JavaScript implementation.
-                      一个正确（而且其实普通）但是目前仅被本 JavaScript 实现支持的键名。
-                      """
+    __proto__   = """
+                  A valid (in fact normal) key name but currently only supported by this JavaScript implementation.
+                  一个正确（而且其实普通）但是目前仅被本 JavaScript 实现支持的键名。
+                  """
 
 `, 0.5, '\n');
 ```
