@@ -59,7 +59,7 @@ TOML.parse(`
     *   type: `boolean`
     *   default: `true`
     +   desc:
-        *   When eval `integer`, you can custom whether you want or not to use `BigInt`.
+        *   Specify whether you want or not to use `BigInt` for `Integer` type value.
 
 ### `return`
 
