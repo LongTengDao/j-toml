@@ -1,4 +1,4 @@
-import { JSON, WeakSet, WeakMap, Error, TypeError, parseInt, Infinity, NaN, fromCodePoint } from './global.js';
+import { JSON, WeakSet, WeakMap, Error, TypeError, parseInt, Infinity, NaN, fromCodePoint, isArray } from './global.js';
 import { from, next, rest, done, mark, must, throwSyntaxError, throwTypeError, throwError, where } from './iterator.js';
 import { Integer, Float, Datetime, Table } from './types.js';
 
@@ -30,10 +30,14 @@ let useWhatToJoinMultiLineString;
 let useBigInt;
 let enableNull;
 let enableNil;
-let enableMix;
+let allowInlineTableMultiLineAndTrailingComma;
+let typify;
 let enableInterpolationString;
 
-const InlineArray = 0;
+const isTable = value => value instanceof Table;
+const StaticObjects = new WeakSet;
+const TypedArrays = new WeakMap;
+const ArrayOfNulls = -1;
 const ArrayOfStrings = 1;
 const ArrayOfInlineTables = 2;
 const ArrayOfInlineArrays = 3;
@@ -41,37 +45,15 @@ const ArrayOfBooleans = 4;
 const ArrayOfFloats = 5;
 const ArrayOfDatetimes = 6;
 const ArrayOfIntegers = 7;
-const ArrayOfNulls = 8;
-const ArraysOfTables = new WeakSet;
-const newArrayOfTables = () => {
-	const array = [];
-	ArraysOfTables.add(array);
+const reallyTypify = (array, type) => {
+	if ( TypedArrays.has(array) ) {
+		if ( TypedArrays.get(array)===type ) { return array; }
+		throwTypeError('Types in array must be same.');
+	}
+	TypedArrays.set(array, type);
 	return array;
 };
-const InlineArrays = new WeakMap;
-const newInlineArray = () => {
-	const array = [];
-	InlineArrays.set(array, InlineArray);
-	return array;
-};
-const typify = (array, type) => {
-	if ( enableMix || InlineArrays.get(array)===type ) { return array; }
-	InlineArrays.get(array)===InlineArray || throwTypeError('Types in array must be same.');
-	InlineArrays.set(array, type);
-	return array;
-};
-const Tables = new WeakSet;
-const InlineTables = new WeakSet;
-const newTable = () => {
-	const table = new Table;
-	Tables.add(table);
-	return table;
-};
-const newInlineTable = () => {
-	const table = new Table;
-	InlineTables.add(table);
-	return table;
-};
+const unlimitedType = array => array;
 
 export default function parse (toml_source, toml_version, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger = true, extensionOptions) {
 	if ( typeof toml_source!=='string' ) { throw new TypeError('TOML.parse(source)'); }
@@ -82,9 +64,10 @@ export default function parse (toml_source, toml_version, useWhatToJoinMultiLine
 	useBigInt = useBigInt_forInteger;
 	enableNull = !!( extensionOptions && extensionOptions.null );
 	enableNil = !!( extensionOptions && extensionOptions.nil );
-	enableMix = !!( extensionOptions && extensionOptions.mix );
+	allowInlineTableMultiLineAndTrailingComma = !!( extensionOptions && extensionOptions.multi );
+	typify = extensionOptions && extensionOptions.mix ? unlimitedType : reallyTypify;
 	enableInterpolationString = !!( extensionOptions && extensionOptions.ins );
-	const rootTable = newTable();
+	const rootTable = new Table;
 	try {
 		from(toml_source.replace(BOM, '').split(EOL));
 		let lastSectionTable = rootTable;
@@ -110,11 +93,11 @@ function appendTable (table, key_key, asArrayItem) {
 	const leadingKeys = parseKeys(key_key);
 	const finalKey = leadingKeys.pop();
 	table = prepareTable(table, leadingKeys);
-	const lastTable = newTable();
+	const lastTable = new Table;
 	if ( asArrayItem ) {
 		let arrayOfTables;
-		if ( finalKey in table ) { ArraysOfTables.has(arrayOfTables = table[finalKey]) || throwError('Trying to push Table to non-ArrayOfTables value at '+where()); }
-		else { arrayOfTables = table[finalKey] = newArrayOfTables(); }
+		if ( finalKey in table ) { StaticObjects.has(arrayOfTables = table[finalKey]) && throwError('Trying to push Table to non-ArrayOfTables value at '+where()); }
+		else { arrayOfTables = table[finalKey] = []; }
 		arrayOfTables.push(lastTable);
 	}
 	else {
@@ -122,6 +105,62 @@ function appendTable (table, key_key, asArrayItem) {
 		table[finalKey] = lastTable;
 	}
 	return lastTable;
+}
+
+function parseKeys (key_key) {
+	const keys = key_key.match(KEYS);
+	for ( let index = keys.length; index--; ) {
+		const key = keys[index];
+		if ( key.startsWith("'") ) { keys[index] = keys.slice(1, -1); }
+		else if ( key.startsWith('"') ) {
+			keys[index] = keys.slice(1, -1).replace(ESCAPED_IN_SINGLE_LINE, unEscapeSingleLine);
+		}
+	}
+	return keys;
+}
+
+function prepareTable (table, keys) {
+	const { length } = keys;
+	let index = 0;
+	while ( index<length ) {
+		const key = keys[index++];
+		if ( key in table ) {
+			table = table[key];
+			if ( isTable(table) ) {
+				StaticObjects.has(table) && throwError('Trying to define table through static Inline Object at '+where());
+			}
+			else if ( isArray(table) ) {
+				StaticObjects.has(table) && throwError('Trying to append value to static Inline Array at '+where());
+				table = table[table.length-1];
+			}
+			else { throwError('Trying to define table through non-Table value at '+where()); }
+		}
+		else {
+			table = table[key] = new Table;
+			while ( index<length ) { table = table[keys[index++]] = new Table; }
+			return table;
+		}
+	}
+	return table;
+}
+
+function prepareInlineTable (table, keys) {
+	const { length } = keys;
+	let index = 0;
+	while ( index<length ) {
+		const key = keys[index++];
+		if ( key in table ) {
+			table = table[key];
+			isTable(table) || throwError('Trying to assign property through non-Table value at '+where());
+			StaticObjects.has(table) && throwError('Trying to assign property through static Inline Object at '+where());
+		}
+		else {
+			table = table[key] = new Table;
+			while ( index<length ) { table = table[keys[index++]] = new Table; }
+			return table;
+		}
+	}
+	return table;
 }
 
 function assignInline (lastInlineTable, lineRest) {
@@ -153,54 +192,6 @@ function assignInline (lastInlineTable, lineRest) {
 							enableNull && literal==='null' || enableNil && literal==='nil' ? null :
 								Integer(literal, useBigInt);
 	return lineRest;
-}
-
-function parseKeys (key_key) {
-	const keys = key_key.match(KEYS);
-	for ( let index = keys.length; index--; ) {
-		const key = keys[index];
-		if ( key.startsWith("'") ) { keys[index] = keys.slice(1, -1); }
-		else if ( key.startsWith('"') ) {
-			keys[index] = keys.slice(1, -1).replace(ESCAPED_IN_SINGLE_LINE, unEscapeSingleLine);
-		}
-	}
-	return keys;
-}
-
-function prepareTable (table, keys) {
-	const { length } = keys;
-	let index = 0;
-	while ( index<length ) {
-		const key = keys[index++];
-		if ( key in table ) {
-			table = table[key];
-			if ( !Tables.has(table) ) {
-				ArraysOfTables.has(table) || throwError('Trying to define table through non-Table value at '+where());
-				table = table[table.length-1];
-			}
-		}
-		else {
-			table = table[key] = newTable();
-			while ( index<length ) { table = table[keys[index++]] = newTable(); }
-			return table;
-		}
-	}
-	return table;
-}
-
-function prepareInlineTable (table, keys) {
-	const { length } = keys;
-	let index = 0;
-	while ( index<length ) {
-		const key = keys[index++];
-		if ( key in table ) { InlineTables.has(table = table[key]) || throwError('Trying to assign property through non-InlineTable value at '+where()); }
-		else {
-			table = table[key] = newInlineTable();
-			while ( index<length ) { table = table[keys[index++]] = newInlineTable(); }
-			return table;
-		}
-	}
-	return table;
 }
 
 function assignLiteralString (table, finalKey, literal) {
@@ -275,23 +266,51 @@ function assignBasicString (table, finalKey, literal) {
 }
 
 function assignInlineTable (table, finalKey, lineRest) {
-	const inlineTable = table[finalKey] = newInlineTable();
+	const inlineTable = table[finalKey] = new Table;
+	StaticObjects.add(inlineTable);
 	lineRest = lineRest.replace(SYM_WHITESPACE, '');
-	if ( lineRest.startsWith('}') ) { return lineRest.replace(SYM_WHITESPACE, ''); }
-	( lineRest==='' || lineRest.startsWith('#') ) && throwSyntaxError('Inline Table is intended to appear on a single line, which broken at '+where());
-	for ( ; ; ) {
-		lineRest = assignInline(inlineTable, lineRest);
-		if ( lineRest.startsWith('}') ) { return lineRest.replace(SYM_WHITESPACE, ''); }
-		if ( lineRest.startsWith(',') ) {
-			lineRest = lineRest.replace(SYM_WHITESPACE, '');
-			lineRest.startsWith('}') && throwSyntaxError('The last property of an Inline Table can not have a trailing comma, which was found at '+where());
+	if ( allowInlineTableMultiLineAndTrailingComma ) {
+		const start = mark();
+		while ( lineRest==='' || lineRest.startsWith('#') ) {
+			lineRest = must('Inline Table', start).replace(PRE_WHITESPACE, '');
 		}
+		if ( lineRest.startsWith('}') ) { return lineRest.replace(SYM_WHITESPACE, ''); }
+		for ( ; ; ) {
+			lineRest = assignInline(inlineTable, lineRest);
+			while ( lineRest==='' || lineRest.startsWith('#') ) {
+				lineRest = must('Inline Table', start).replace(PRE_WHITESPACE, '');
+			}
+			if ( lineRest.startsWith(',') ) {
+				lineRest = lineRest.replace(SYM_WHITESPACE, '');
+				while ( lineRest==='' || lineRest.startsWith('#') ) {
+					lineRest = must('Inline Table', start).replace(PRE_WHITESPACE, '');
+				}
+				if ( lineRest.startsWith('}') ) { return lineRest.replace(SYM_WHITESPACE, ''); }
+			}
+			else {
+				if ( lineRest.startsWith('}') ) { return lineRest.replace(SYM_WHITESPACE, ''); }
+				throwSyntaxError(where());
+			}
+		}
+	}
+	else {
+		if ( lineRest.startsWith('}') ) { return lineRest.replace(SYM_WHITESPACE, ''); }
 		( lineRest==='' || lineRest.startsWith('#') ) && throwSyntaxError('Inline Table is intended to appear on a single line, which broken at '+where());
+		for ( ; ; ) {
+			lineRest = assignInline(inlineTable, lineRest);
+			if ( lineRest.startsWith('}') ) { return lineRest.replace(SYM_WHITESPACE, ''); }
+			if ( lineRest.startsWith(',') ) {
+				lineRest = lineRest.replace(SYM_WHITESPACE, '');
+				lineRest.startsWith('}') && throwSyntaxError('The last property of an Inline Table can not have a trailing comma, which was found at '+where());
+			}
+			( lineRest==='' || lineRest.startsWith('#') ) && throwSyntaxError('Inline Table is intended to appear on a single line, which broken at '+where());
+		}
 	}
 }
 
 function assignInlineArray (table, finalKey, lineRest) {
-	const inlineArray = table[finalKey] = newInlineArray();
+	const inlineArray = table[finalKey] = [];
+	StaticObjects.add(inlineArray);
 	const start = mark();
 	lineRest = lineRest.replace(SYM_WHITESPACE, '');
 	while ( lineRest==='' || lineRest.startsWith('#') ) {
@@ -345,8 +364,7 @@ function pushInline (array, right) {
 		typify(array, ArrayOfFloats).push(Float(literal));
 	}
 	else if ( enableNull && literal==='null' || enableNil && literal==='nil' ) {
-		typify(array, ArrayOfNulls).
-			push(null);
+		typify(array, ArrayOfNulls).push(null);
 	}
 	else { typify(array, ArrayOfIntegers).push(Integer(literal, useBigInt)); }
 	return lineRest;

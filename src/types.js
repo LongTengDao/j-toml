@@ -3,7 +3,6 @@ import {
 	TypeError,
 	BigInt,
 	Date,
-	Array,
 	Infinity,
 	NaN,
 	isFinite,
@@ -143,8 +142,6 @@ export class Datetime extends Date {
 	}
 	
 }
-
-export { Array };
 
 const Null = function () { };
 Null.prototype = create(null);
