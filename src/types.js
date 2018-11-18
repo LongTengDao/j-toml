@@ -71,7 +71,7 @@ const year = (date, utc) => {
 	const year = utc ? date.getUTCFullYear() : date.getFullYear();
 	if ( year>=1000 && year<=9999 ) { return ''+year; }
 	if ( year>=100 && year<=999 ) { return '0'+year; }
-	throw new RangeError('Datetime which year was set out of range 100 to 9999 can not be normalized toTOML any more.');
+	throw new RangeError('Datetime which year was set out of range 100 to 9999 can not be serialized toTOML.');
 };
 const month = (datetime, utc) => ( ( utc ? datetime.getUTCMonth() : datetime.getMonth() )+1+'' ).padStart(2, '0');
 const date = (datetime, utc) => ( ( utc ? datetime.getUTCDate() : datetime.getDate() )+'' ).padStart(2, '0');
@@ -120,7 +120,7 @@ export class Datetime extends Date {
 	}
 	
 	toTOML () {
-		if ( !isSafeInteger(this.getTime()) ) { throw new RangeError('Datetime which time was set unsafe integer can not be normalized toTOML.'); }
+		if ( !isSafeInteger(this.getTime()) ) { throw new RangeError('Datetime which time was set unsafe integer can not be serialized toTOML.'); }
 		switch ( this.type ) {
 			case 'Offset Date-Time':
 				let datetime;
