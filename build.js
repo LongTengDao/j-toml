@@ -15,6 +15,9 @@ require('./test').then(async() => {
 				fs.readFileSync(__dirname+'/src/semver.js', 'utf8').match(/\d+/g).join('.'),
 			NPM: {
 				name: '@ltd/toml',
+				'...': {
+					keywords: ['TOML'],
+				},
 			},
 		});
 	

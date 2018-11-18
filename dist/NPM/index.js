@@ -506,7 +506,7 @@ function pushInline (array, right) {
 	return lineRest;
 }
 
-var semver = [0, 5, 7];
+var semver = [0, 5, 8];
 
 const TOML = {
 	parse,
