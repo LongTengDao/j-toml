@@ -10,9 +10,8 @@ require('./test').then(() => {
 			name: 'TOML',
 			description: `
 				LongTengDao's obvious, minimal implementation of Tom's Obvious, Minimal Language.`,
-			semver: JSON.parse(
-				require('fs').readFileSync(__dirname+'/src/semver.json', 'utf8')
-			).join('.'),
+			semver:
+				require('fs').readFileSync(__dirname+'/src/semver.js', 'utf8').match(/\d+/g).join('.'),
 			NPM: {
 				name: '@ltd/toml',
 			},

@@ -1,6 +1,6 @@
 import { String, Integer, Float, Boolean, Datetime, Array, Table } from './types.js';
 import parse from './parser.js';
-import semver from './semver.json.js?';
+import semver from './semver.js';
 
 const TOML = {
 	parse,

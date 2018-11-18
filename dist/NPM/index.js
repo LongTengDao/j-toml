@@ -352,7 +352,7 @@ function prepareInlineTable (table, keys) {
 	let index = 0;
 	while ( index<length ) {
 		const key = keys[index++];
-		if ( key in table ) { InlineTables.has(table = table[key]) || throwError('Trying to assign property through non-Table at '+where()); }
+		if ( key in table ) { InlineTables.has(table = table[key]) || throwError('Trying to assign property through non-InlineTable at '+where()); }
 		else {
 			table = table[key] = newInlineTable();
 			while ( index<length ) { table = table[keys[index++]] = newInlineTable(); }
@@ -505,7 +505,7 @@ function pushInline (array, right) {
 	return lineRest;
 }
 
-var semver = [0, 5, 3];
+var semver = [0, 5, 4];
 
 const TOML = {
 	parse,
