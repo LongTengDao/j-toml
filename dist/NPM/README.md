@@ -1,4 +1,3 @@
-
 [node]: https://www.npmjs.com/package/@ltd/toml
 [spec-en]: https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md "Tom's Obvious, Minimal Language"
 [spec-cn]: https://github.com/toml-lang/toml/blob/master/versions/cn/toml-v0.5.0.md "汤姆的简明语言"
@@ -28,13 +27,13 @@ TOML.parse(`
 
     [Table]
 
-    # A normal key name that supported by any other JavaScript implementation.
-    # 为所有其它 JavaScript 实现所支持的一个普通键名。
+    # A normal key name that supported by any other JavaScript implementation:
+    # 为所有其它 JavaScript 实现所支持的一个普通键名：
 
     I_am_normal    = "none"
 
-    # Some valid (in fact normal) key names but currently only supported by this JavaScript implementation.
-    # 一些正确（而且其实普通）但是目前仅被本 JavaScript 实现支持的键名。
+    # Some valid (in fact normal) key names but currently only supported by this JavaScript implementation:
+    # 一些正确（而且其实普通）但是目前仅被本 JavaScript 实现支持的键名：
 
     hasOwnProperty = "none"
 
@@ -81,4 +80,4 @@ TOML.parse(`
 
 Return the root Table, which is an `Object` without any extended properties.
 
-返回根表，它是一个以没有任何继承属性的对象。
+返回根表，它是一个没有任何继承属性的对象。
