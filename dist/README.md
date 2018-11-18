@@ -11,6 +11,6 @@
 
 | Edition | Description                                                                                    |
 |:--------|:-----------------------------------------------------------------------------------------------|
-| `NPM/`  | The edition published on [`NPM`][NPM-en].※ Use `require("@ltd/toml")`, not `require("toml")`! |
+| `NPM/`  | The edition published on [`NPM`][NPM-en]. ※ Use `require("@ltd/toml")`, not `require("toml")`! |
 
 [NPM-en]: https://www.npmjs.com/package/@ltd/toml "Node Package Manager"
