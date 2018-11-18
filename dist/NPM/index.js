@@ -184,7 +184,7 @@ class Table extends Null {
 const BOM = /^\uFEFF/;
 const EOL = /\r?\n/;
 const PRE_WHITESPACE = /^[ \t]*/;
-const TABLE_DECLARE = /^\[(\[?)[ \t]*((?:[\w-]+|"(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*"|'[^'\x00-\x08\x0B-\x1F\x7F]*')(?:[ \t]*\.[ \t]*(?:[\w-]+|"(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*"|'[^'\x00-\x08\x0B-\x1F\x7F]*'))*)[ \t]*](]?)[ \t]*(?:$|#)/;
+const TABLE_DEFINITION = /^\[(\[?)[ \t]*((?:[\w-]+|"(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*"|'[^'\x00-\x08\x0B-\x1F\x7F]*')(?:[ \t]*\.[ \t]*(?:[\w-]+|"(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*"|'[^'\x00-\x08\x0B-\x1F\x7F]*'))*)[ \t]*](]?)[ \t]*(?:$|#)/;
 const KEY_VALUE_PAIR = /^((?:[\w-]+|"(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*"|'[^'\x00-\x08\x0B-\x1F\x7F]*')(?:[ \t]*\.[ \t]*(?:[\w-]+|"(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*"|'[^'\x00-\x08\x0B-\x1F\x7F]*'))*)[ \t]*=[ \t]*([^ \t#][^]*)$/;
 const KEYS = /[\w-]+|"(?:[^\\"]+|\\[^])*"|'[^']*'/g;
 const VALUE_REST = /^((?:\d\d\d\d-\d\d-\d\d \d)?[\w\-+.:]+)[ \t]*([^]*)$/;
@@ -257,8 +257,8 @@ function parse (toml_source, toml_version, useWhatToJoinMultiLineString_notUsing
 			const line = next().replace(PRE_WHITESPACE, '');
 			if ( line==='' || line.startsWith('#') ) ;
 			else if ( line.startsWith('[') ) {
-				const { 1: $_asArrayItem$$, 2: keys, 3: $$asArrayItem$_ } = TABLE_DECLARE.exec(line) || throwSyntaxError(where());
-				( $_asArrayItem$$==='[' )===( $$asArrayItem$_===']' ) || throwSyntaxError('Square brackets of table declare statement not match at '+where());
+				const { 1: $_asArrayItem$$, 2: keys, 3: $$asArrayItem$_ } = TABLE_DEFINITION.exec(line) || throwSyntaxError(where());
+				( $_asArrayItem$$==='[' )===( $$asArrayItem$_===']' ) || throwSyntaxError('Square brackets of table define statement not match at '+where());
 				lastSectionTable = appendTable(rootTable, keys, $_asArrayItem$$==='[');
 			}
 			else {
@@ -277,12 +277,12 @@ function appendTable (table, key_key, asArrayItem) {
 	const lastTable = newTable();
 	if ( asArrayItem ) {
 		let arrayOfTables;
-		if ( finalKey in table ) { ArraysOfTables.has(arrayOfTables = table[finalKey]) || throwError('Trying to push Table to non-ArrayOfTables at '+where()); }
+		if ( finalKey in table ) { ArraysOfTables.has(arrayOfTables = table[finalKey]) || throwError('Trying to push Table to non-ArrayOfTables value at '+where()); }
 		else { arrayOfTables = table[finalKey] = newArrayOfTables(); }
 		arrayOfTables.push(lastTable);
 	}
 	else {
-		finalKey in table && throwError('Duplicate Table declaring at '+where());
+		finalKey in table && throwError('Duplicate Table definition at '+where());
 		table[finalKey] = lastTable;
 	}
 	return lastTable;
@@ -334,7 +334,7 @@ function prepareTable (table, keys) {
 		if ( key in table ) {
 			table = table[key];
 			if ( !Tables.has(table) ) {
-				ArraysOfTables.has(table) || throwError('Trying to declare table through non-Table at '+where());
+				ArraysOfTables.has(table) || throwError('Trying to define table through non-Table value at '+where());
 				table = table[table.length-1];
 			}
 		}
@@ -352,7 +352,7 @@ function prepareInlineTable (table, keys) {
 	let index = 0;
 	while ( index<length ) {
 		const key = keys[index++];
-		if ( key in table ) { InlineTables.has(table = table[key]) || throwError('Trying to assign property through non-InlineTable at '+where()); }
+		if ( key in table ) { InlineTables.has(table = table[key]) || throwError('Trying to assign property through non-InlineTable value at '+where()); }
 		else {
 			table = table[key] = newInlineTable();
 			while ( index<length ) { table = table[keys[index++]] = newInlineTable(); }
@@ -505,7 +505,7 @@ function pushInline (array, right) {
 	return lineRest;
 }
 
-var semver = [0, 5, 4];
+var semver = [0, 5, 5];
 
 const TOML = {
 	parse,
