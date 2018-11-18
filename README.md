@@ -31,7 +31,7 @@ TOML.parse(`
     # A normal key name that supported by any other JavaScript implementation.
     # 为所有其它 JavaScript 实现所支持的一个普通键名。
 
-    aNormalKeyName = "none"
+    I_am_normal    = "none"
 
     # Some valid (in fact normal) key names but currently only supported by this JavaScript implementation.
     # 一些正确（而且其实普通）但是目前仅被本 JavaScript 实现支持的键名。
