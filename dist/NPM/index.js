@@ -293,6 +293,7 @@ function assignInline (lastInlineTable, lineRest) {
 	const leadingKeys = parseKeys(left);
 	const finalKey = leadingKeys.pop();
 	const table = prepareInlineTable(lastInlineTable, leadingKeys);
+	finalKey in table && throwError('Duplicate property definition at '+where());
 	switch ( right[0] ) {
 		case "'":
 			return assignLiteralString(table, finalKey, right);
@@ -505,7 +506,7 @@ function pushInline (array, right) {
 	return lineRest;
 }
 
-var semver = [0, 5, 5];
+var semver = [0, 5, 6];
 
 const TOML = {
 	parse,
