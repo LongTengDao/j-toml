@@ -34,8 +34,8 @@ TOML.parse(`
 `, 0.5, '\n');
 ```
 
-`TOML.parse`
-------------
+`TOML.parse(source, version, multiLineJoiner[, useBigInt=true])`
+----------------------------------------------------------------
 
 ### `arguments`
 
