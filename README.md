@@ -26,11 +26,10 @@ const TOML = require('@ltd/toml');
 
 TOML.parse(`
 
-    [section-1]
-    title = "Section 1"
-
-    [section-2]
-    title = "Section 2"
+    [Table]
+    property    = "Normal key supported by any other JavaScript implementation."
+    constructor = "Valid key but only supported by this JavaScript implementation."
+    __proto__   = "Valid key but only supported by this JavaScript implementation."
 
 `, 0.5, '\n');
 ```
