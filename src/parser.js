@@ -153,7 +153,13 @@ function prepareTable (table, keys) {
 	let index = 0;
 	while ( index<length ) {
 		const key = keys[index++];
-		if ( key in table ) { Tables.has(table = table[key]) || throwError('Trying to assign property through non-Table at '+where()); }
+		if ( key in table ) {
+			table = table[key];
+			if ( !Tables.has(table) ) {
+				ArraysOfTables.has(table) || throwError('Trying to declare table through non-Table at '+where());
+				table = table[table.length-1];
+			}
+		}
 		else {
 			table = table[key] = newTable();
 			while ( index<length ) { table = table[keys[index++]] = newTable(); }

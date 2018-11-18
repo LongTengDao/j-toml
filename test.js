@@ -51,6 +51,26 @@ module.exports = require('@ltd/j-dev').
 				[],
 			]
 			k = { l.m = 'l.m' }
+			
+			[[fruit]]
+			name = "apple"
+			
+			[fruit.physical]
+			color = "red"
+			shape = "round"
+			
+			[[fruit.variety]]
+			name = "red delicious"
+			
+			[[fruit.variety]]
+			name = "granny smith"
+			
+			[[fruit]]
+			name = "banana"
+			
+			[[fruit.variety]]
+			name = "plantain"
+			
 		`, 0.5, '\r?\n');
 		
 		if ( JSON.stringify(table)!==JSON.stringify({
@@ -73,6 +93,25 @@ module.exports = require('@ltd/j-dev').
 					],
 					k: { l: { m: 'l.m' } },
 				},
+			],
+			fruit: [
+				{
+					name: 'apple',
+					physical: {
+						color: 'red',
+						shape: 'round'
+					},
+					variety: [
+						{ name: 'red delicious' },
+						{ name: 'granny smith' },
+					],
+				},
+				{
+					name: 'banana',
+					variety: [
+						{ name: 'plantain' },
+					],
+				}
 			],
 		}) ) {
 			throw JSON.stringify(table, null, '\t');
