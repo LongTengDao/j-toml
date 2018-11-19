@@ -1,15 +1,15 @@
-[node]: https://www.npmjs.com/package/@ltd/toml
-[spec-en]: https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md "Tom's Obvious, Minimal Language"
-[spec-cn]: https://github.com/toml-lang/toml/blob/master/versions/cn/toml-v0.5.0.md "汤姆的简明语言"
+[@ltd/toml v0.5]: https://www.npmjs.com/package/@ltd/toml
+[TOML v0.5]: https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md
+[汤小明语 v0.5]: https://github.com/toml-lang/toml/blob/master/versions/cn/toml-v0.5.0.md
 
-[@ltd/toml v0.5][node]
-======================
+[@ltd/toml v0.5]
+================
 
-[@ltd/toml v0.5][node] is LongTengDao's obvious, minimal implementation of [TOML v0.5][spec-en],
-which is the best config format he had ever seen.
+[@ltd/toml v0.5] is an implementation of [TOML v0.5] ("Tom's Obvious, Minimal Language") written by LongTengDao,  
+which is the best config format he had ever seen.  
 (Obviously for exhausted people who tried to design that.)
 
-[@ltd/toml v0.5][node] 是龙腾道为 [TOML v0.5][spec-cn] 写的实现。  
+[@ltd/toml v0.5] 是龙腾道为 [汤小明语 v0.5] （“汤小明的小巧明晰语言”）写的实现。  
 ——这 TM 可能是“我”见过最好的配置文件书写格式了。  
 ——对于亲手折腾到爆炸的人而言。
 
@@ -64,9 +64,9 @@ TOML.parse(`
 2.  `multiLineJoiner` required
     *   type: `string`
     +   desc:
-        -   For the multi-line strings, use what to join the lines for result.
+        -   For the multi-line strings, use what to join the lines for result.  
             Note that TOML always use `"\n"` or `"\r\n"` split the source lines while parsing, which defined in TOML spec.
-        -   对于多行字符串，用什么来拼接各行。
+        -   对于多行字符串，用什么来拼接各行。  
             注意在解析 TOML 源时，按照 TOML 规范的要求，行分隔符总是 `"\n"` 或 `"\r\n"`。
 
 3.  `useBigInt`
@@ -79,11 +79,11 @@ TOML.parse(`
 4.  `xOptions`
     *   type: `[object Object]`
     +   desc:
-        *   The extensional features not in the spec.
-            Include `null` supporting, mixed-type array, multi-line inline table with trailing comma even no comma, and interpolation strings (see <https://github.com/toml-lang/toml/issues/577>), etc.
+        *   The extensional features not in the spec.  
+            Include `null` supporting, mixed-type array, multi-line inline table with trailing comma even no comma, and interpolation strings (see <https://github.com/toml-lang/toml/issues/577>), etc.  
             They are private experimental discouraged features.
-        *   标准中所没有的扩展功能。
-            包括对 `null` 值，跨行行内表及尾逗号甚至省略逗号，混合类型的数组，以及插值字符串（参见 <https://github.com/toml-lang/toml/issues/577>）等。
+        *   标准中所没有的扩展功能。  
+            包括对 `null` 值，跨行行内表及尾逗号甚至省略逗号，混合类型的数组，以及插值字符串（参见 <https://github.com/toml-lang/toml/issues/577>）等。  
             私有实验期功能，不建议随意使用。
 
 ### `return`
