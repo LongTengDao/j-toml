@@ -1,9 +1,8 @@
-[@ltd/toml v0.5]: https://www.npmjs.com/package/@ltd/toml
-[TOML v0.5]: https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md
-[汤小明语 v0.5]: https://github.com/toml-lang/toml/blob/master/versions/cn/toml-v0.5.0.md
+
 
 [@ltd/toml v0.5]
 ================
+
 
 [@ltd/toml v0.5] is an implementation of [TOML v0.5] ("Tom's Obvious, Minimal Language") written by LongTengDao,  
 which is the best config format he had ever seen.  
@@ -13,41 +12,54 @@ which is the best config format he had ever seen.
 ——这 TM 可能是“我”见过最好的配置文件书写格式了。  
 ——对于亲手折腾到爆炸的人而言。
 
+
 `Node.js`
 ---------
+
+### npm install
 
 ```sh
 npm install @ltd/toml
 ```
 
-```js
-const TOML = require('@ltd/toml');
+### sample.toml
 
-TOML.parse(`
+```toml
+[Table]
 
-    [Table]
+# A normal key name that supported by any other JavaScript implementation:
+# 为所有其它 JavaScript 实现所支持的一个普通键名：
 
-    # A normal key name that supported by any other JavaScript implementation:
-    # 为所有其它 JavaScript 实现所支持的一个普通键名：
+I_am_normal    = "none"
 
-    I_am_normal    = "none"
+# Some valid (in fact normal) key names but currently only supported by this JavaScript implementation:
+# 一些正确（而且其实普通）但是目前仅被本 JavaScript 实现支持的键名：
 
-    # Some valid (in fact normal) key names but currently only supported by this JavaScript implementation:
-    # 一些正确（而且其实普通）但是目前仅被本 JavaScript 实现支持的键名：
-
-    hasOwnProperty = "none"
-
-    constructor    = "none"
-
-    __proto__      = "none"
-
-`, 0.5, '\n');
+hasOwnProperty = "none"
+constructor    = "none"
+__proto__      = "none"
 ```
 
-`TOML.parse(source, version, multiLineJoiner[, useBigInt=true[, xOptions]])`
-----------------------------------------------------------------------------
+### sample.js
 
-### `arguments`
+```js
+const source = require('fs').readFileSync(__dirname+'/sample.toml', 'utf8');
+
+const table = require('@ltd/toml').parse(source, 0.5, '\n');
+
+table.I_am_normal    === "none" // true
+table.hasOwnProperty === "none" // true
+table.constructor    === "none" // true
+table.__proto__      === "none" // true
+```
+
+
+`TOML.parse`
+------------
+
+```
+TOML.parse(source, version, multiLineJoiner[, useBigInt=true[, xOptions]]);
+```
 
 0.  `source` required
     *   type: `string`
@@ -77,7 +89,7 @@ TOML.parse(`
         *   指定你是否要用 `BigInt` 来实现整数类型的值。
 
 4.  `xOptions`
-    *   type: `[object Object]`
+    *   type: `object`
     +   desc:
         *   The extensional features not in the spec.  
             Include `null` supporting, mixed-type array, multi-line inline table with trailing comma even no comma, and interpolation strings (see <https://github.com/toml-lang/toml/issues/577>), etc.  
@@ -86,8 +98,15 @@ TOML.parse(`
             包括对 `null` 值，跨行行内表及尾逗号甚至省略逗号，混合类型的数组，以及插值字符串（参见 <https://github.com/toml-lang/toml/issues/577>）等。  
             私有实验期功能，不建议随意使用。
 
-### `return`
+*   `return`
+    *   type: `object`
+    +   desc:
+        *   Return the root table (tables parsed by this implementation are objects without any extended properties).
+        *   返回根表（本实现解析出的表，是没有任何继承属性的对象）。
 
-Return the root table, which is an `Object` without any extended properties.
 
-返回根表，它是一个没有任何继承属性的对象。
+[TOML v0.5]: https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md
+
+[汤小明语 v0.5]: https://github.com/toml-lang/toml/blob/master/versions/cn/toml-v0.5.0.md
+
+[@ltd/toml v0.5]: https://www.npmjs.com/package/@ltd/toml
