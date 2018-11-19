@@ -48,6 +48,7 @@ const source = require('fs').readFileSync(__dirname+'/sample.toml', 'utf8');
 const table = require('@ltd/toml').parse(source, 0.5, '\n');
 
 table.I_am_normal    === "none" // true
+
 table.hasOwnProperty === "none" // true
 table.constructor    === "none" // true
 table.__proto__      === "none" // true
