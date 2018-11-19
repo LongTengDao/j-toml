@@ -596,7 +596,7 @@ function assignInterpolationString (table, finalKey, lineRest) {
 	return lineRest;
 }
 
-var semver = [0, 5, 16];
+var semver = [0, 5, 17];
 
 const TOML = {
 	parse,

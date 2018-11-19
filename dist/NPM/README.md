@@ -8,7 +8,7 @@
 which is the best config format he had ever seen.  
 (Obviously for exhausted people who tried to design that.)
 
-[@ltd/toml v0.5] 是龙腾道为 [汤小明语 v0.5] （“汤小明的小巧明晰语言”）写的实现。  
+[@ltd/toml v0.5] 是龙腾道为 [汤小明语 v0.5]（“汤小明的小巧明晰语言”）写的实现。  
 ——这 TM 可能是“我”见过最好的配置文件书写格式了。  
 ——对于亲手折腾到爆炸的人而言。
 
