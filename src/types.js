@@ -1,20 +1,11 @@
-import {
-	RangeError,
-	TypeError,
-	BigInt,
-	Date,
-	Infinity,
-	NaN,
-	isFinite,
-	isSafeInteger,
-	create,
-	toString
-} from './global.js';
+import { RangeError, TypeError, BigInt, Date, parseInt, Infinity, NaN, isFinite, isSafeInteger, fromCodePoint, create, toString } from './global.js';
 import { throwSyntaxError, throwRangeError, none, where } from './iterator.js';
 
-export const String = {
-	isString: value => typeof value==='string',
-};
+const ESCAPE_ALIAS = { b: '\b', t: '\t', n: '\n', f: '\f', r: '\r' };
+const ESCAPED_IN_SINGLE_LINE = /\\(?:([\\"])|([btnfr])|u(.{4})|U(.{4})(.{4}))/g;
+export const unEscapeSingleLine = ($0, $1, $2, $3, $4, $5) => $1 ? $1 : $2 ? ESCAPE_ALIAS[$2] : fromCodePoint(parseInt($3 || $4+$5, 16));
+export const String = literal => literal.replace(ESCAPED_IN_SINGLE_LINE, unEscapeSingleLine);
+String.isString = value => typeof value==='string';
 
 const UNDERSCORES = /_/g;
 

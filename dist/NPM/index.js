@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const { JSON, WeakSet, WeakMap, SyntaxError, RangeError, TypeError, Error, BigInt, Date, parseInt, Infinity, NaN, String: { fromCodePoint }, Number: { isFinite, isSafeInteger }, Object: { create, prototype: { toString } }, Array } = global;
+const { WeakSet, WeakMap, SyntaxError, RangeError, TypeError, Error, BigInt, Date, parseInt, Infinity, NaN, String: { fromCodePoint }, Number: { isFinite, isSafeInteger }, Object: { create, prototype: { toString } }, Array } = global;
 const { isArray } = Array;
 
 const NONE = [];
@@ -40,9 +40,11 @@ function throws (error) {
 	throw error;
 }
 
-const String = {
-	isString: value => typeof value==='string',
-};
+const ESCAPE_ALIAS = { b: '\b', t: '\t', n: '\n', f: '\f', r: '\r' };
+const ESCAPED_IN_SINGLE_LINE = /\\(?:([\\"])|([btnfr])|u(.{4})|U(.{4})(.{4}))/g;
+const unEscapeSingleLine = ($0, $1, $2, $3, $4, $5) => $1 ? $1 : $2 ? ESCAPE_ALIAS[$2] : fromCodePoint(parseInt($3 || $4+$5, 16));
+const String = literal => literal.replace(ESCAPED_IN_SINGLE_LINE, unEscapeSingleLine);
+String.isString = value => typeof value==='string';
 
 const UNDERSCORES = /_/g;
 
@@ -197,20 +199,17 @@ const BASIC_STRING = /^"((?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A
 const MULTI_LINE_BASIC_STRING_LONE = /^"""((?:[^\\]+|\\[^])*?)"""[ \t]*([^]*)/;
 const MULTI_LINE_BASIC_STRING_REST = /^((?:[^\\]+|\\[^])*?)"""[ \t]*([^]*)/;
 const ESCAPED_EXCLUDE_CONTROL_CHARACTER = /^(?:[^\\\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\ \n]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*$/;
-const ESCAPE_ALIAS = { b: '\b', t: '\t', n: '\n', f: '\f', r: '\r' };
-const ESCAPED_IN_SINGLE_LINE = /\\(?:([\\"])|([btnfr])|u(.{4})|U(.{4})(.{4}))/g;
 const ESCAPED_IN_MULTI_LINE = /\n|\\(?:([ \n]+)|([\\"])|([btnfr])|u(.{4})|U(.{4})(.{4}))/g;
-const unEscapeSingleLine = ($0, $1, $2, $3, $4, $5) => $1 ? $1 : $2 ? ESCAPE_ALIAS[$2] : fromCodePoint(parseInt($3 || $4+$5, 16));
 const SYM_WHITESPACE = /^[^][ \t]*/;
 const TAG_OPENING = /^<([\w-]+)((?:[ \t]+"(?:[^\\"]+|\\[^])+"[ \t]*=[ \t]*"(?:[^\\"]+|\\[^])*")*)[ \t]*/;
-const TAG_ATTRIBUTES = /^((?:[ \t]+"(?:[^\\"]+|\\[^])+"[ \t]*=[ \t]*"(?:[^\\"]+|\\[^])*")*)[ \t]*/;
-const TAB_ATTRIBUTE = /"(?:[^\\"]+|\\[^])*"/g;
+const TAG_ATTRIBUTES = /^((?:[ \t]+"(?:[^\\"]+|\\[^])+"[ \t]*=+[ \t]*"(?:[^\\"]+|\\[^])*")*)[ \t]*/;
+const TAB_ATTRIBUTE = /"(?:[^\\"]+|\\[^])*"|=+/g;
 
 let useWhatToJoinMultiLineString;
 let useBigInt;
 let enableNull;
 let enableNil;
-let allowInlineTableMultiLineAndTrailingComma;
+let allowInlineTableMultiLineAndTrailingCommaEvenNoComma;
 let typify;
 let enableInterpolationString;
 
@@ -244,7 +243,7 @@ function parse (toml_source, toml_version, useWhatToJoinMultiLineString_notUsing
 	useBigInt = useBigInt_forInteger;
 	enableNull = !!( extensionOptions && extensionOptions.null );
 	enableNil = !!( extensionOptions && extensionOptions.nil );
-	allowInlineTableMultiLineAndTrailingComma = !!( extensionOptions && extensionOptions.multi );
+	allowInlineTableMultiLineAndTrailingCommaEvenNoComma = !!( extensionOptions && extensionOptions.multi );
 	typify = extensionOptions && extensionOptions.mix ? unlimitedType : reallyTypify;
 	enableInterpolationString = !!( extensionOptions && extensionOptions.ins );
 	const rootTable = new Table;
@@ -292,7 +291,7 @@ function parseKeys (key_key) {
 		const key = keys[index];
 		if ( key.startsWith("'") ) { keys[index] = keys.slice(1, -1); }
 		else if ( key.startsWith('"') ) {
-			keys[index] = keys.slice(1, -1).replace(ESCAPED_IN_SINGLE_LINE, unEscapeSingleLine);
+			keys[index] = String(keys.slice(1, -1));
 		}
 	}
 	return keys;
@@ -408,13 +407,13 @@ function assignBasicString (table, finalKey, literal) {
 	let $;
 	if ( literal.charAt(1)!=='"' || literal.charAt(2)!=='"' ) {
 		$ = BASIC_STRING.exec(literal) || throwSyntaxError(where());
-		table[finalKey] = $[1].replace(ESCAPED_IN_SINGLE_LINE, unEscapeSingleLine);
+		table[finalKey] = String($[1]);
 		return $[2];
 	}
 	$ = MULTI_LINE_BASIC_STRING_LONE.exec(literal);
 	if ( $ ) {
 		ESCAPED_EXCLUDE_CONTROL_CHARACTER.test($[1]) || throwSyntaxError(where());
-		table[finalKey] = $[1].replace(ESCAPED_IN_SINGLE_LINE, unEscapeSingleLine);
+		table[finalKey] = String($[1]);
 		return $[2];
 	}
 	literal = literal.slice(3);
@@ -448,28 +447,18 @@ function assignInlineTable (table, finalKey, lineRest) {
 	const inlineTable = table[finalKey] = new Table;
 	StaticObjects.add(inlineTable);
 	lineRest = lineRest.replace(SYM_WHITESPACE, '');
-	if ( allowInlineTableMultiLineAndTrailingComma ) {
+	if ( allowInlineTableMultiLineAndTrailingCommaEvenNoComma ) {
 		const start = mark();
-		while ( lineRest==='' || lineRest.startsWith('#') ) {
-			lineRest = must('Inline Table', start).replace(PRE_WHITESPACE, '');
-		}
-		if ( lineRest.startsWith('}') ) { return lineRest.replace(SYM_WHITESPACE, ''); }
 		for ( ; ; ) {
+			while ( lineRest==='' || lineRest.startsWith('#') ) {
+				lineRest = must('Inline Table', start).replace(PRE_WHITESPACE, '');
+			}
+			if ( lineRest.startsWith('}') ) { return lineRest.replace(SYM_WHITESPACE, ''); }
 			lineRest = assignInline(inlineTable, lineRest);
 			while ( lineRest==='' || lineRest.startsWith('#') ) {
 				lineRest = must('Inline Table', start).replace(PRE_WHITESPACE, '');
 			}
-			if ( lineRest.startsWith(',') ) {
-				lineRest = lineRest.replace(SYM_WHITESPACE, '');
-				while ( lineRest==='' || lineRest.startsWith('#') ) {
-					lineRest = must('Inline Table', start).replace(PRE_WHITESPACE, '');
-				}
-				if ( lineRest.startsWith('}') ) { return lineRest.replace(SYM_WHITESPACE, ''); }
-			}
-			else {
-				if ( lineRest.startsWith('}') ) { return lineRest.replace(SYM_WHITESPACE, ''); }
-				throwSyntaxError(where());
-			}
+			if ( lineRest.startsWith(',') ) { lineRest = lineRest.replace(SYM_WHITESPACE, ''); }
 		}
 	}
 	else {
@@ -564,12 +553,19 @@ function assignInterpolationString (table, finalKey, lineRest) {
 	}
 	lineRest[0]==='>' || throwSyntaxError('Interpolation String opening tag did not close incorrectly at '+where());
 	lineRest = lineRest.slice(1);
-	const mapper = new Map;
+	const maps = [];
+	let lastLength = 0;
+	let map = null;
 	$ = attributes.match(TAB_ATTRIBUTE);
 	for ( let length = $.length, index = 0; index<length; ) {
-		const search = JSON.parse($[index++]);
-		mapper.has(search) && throwError('Duplicate attribute definition at '+where());
-		mapper.set(search, JSON.parse($[index++]));
+		const search = String($[index++].slice(1, -1));
+		const thisLength = $[index++].length;
+		if ( thisLength===lastLength ) { map.has(search) && throwError('Duplicate attribute definition at '+where()); }
+		else {
+			lastLength = thisLength;
+			maps.push(map = new Map);
+		}
+		map.set(search, String($[index++].slice(1, -1)));
 	}
 	let inner = '';
 	let index = lineRest.indexOf(closeTag);
@@ -581,23 +577,26 @@ function assignInterpolationString (table, finalKey, lineRest) {
 	inner += lineRest.slice(0, index);
 	lineRest = lineRest.slice(index+closeTag.length).replace(PRE_WHITESPACE, '');
 	if ( inner.charAt(0)==='\n' ) { inner = inner.slice(1); }
-	let value = '';
-	outer: for ( let length = inner.length, index = 0; index<length; ) {
-		for ( const { 0: search, 1: replacement } of mapper ) {
-			if ( inner.startsWith(search, index) ) {
-				value += replacement;
-				index += search.length;
-				continue outer;
+	for ( const map of maps ) {
+		let value = '';
+		outer: for ( let length = inner.length, index = 0; index<length; ) {
+			for ( const { 0: search, 1: replacement } of map ) {
+				if ( inner.startsWith(search, index) ) {
+					value += replacement;
+					index += search.length;
+					continue outer;
+				}
 			}
+			value += inner[index];
+			++index;
 		}
-		value += inner[index];
-		++index;
+		inner = value;
 	}
-	table[finalKey] = value;
+	table[finalKey] = inner;
 	return lineRest;
 }
 
-var semver = [0, 5, 13];
+var semver = [0, 5, 14];
 
 const TOML = {
 	parse,

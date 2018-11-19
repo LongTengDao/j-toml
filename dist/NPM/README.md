@@ -52,22 +52,22 @@ TOML.parse(`
 0.  `source` required
     *   type: `string`
     +   desc:
-        *   Auto trim start BOM (if exists) of the UTF text.
-        *   会自动剔除 UTF 文本开头的 BOM 标签（如果有的话）。
+        -   Auto trim start BOM (if exists) of the UTF text.
+        -   会自动剔除 UTF 文本开头的 BOM 标签（如果有的话）。
 
 1.  `version` required
     *   type: `0.5`
     +   desc:
-        *   You must specify it explicitly (though it can't be other value for the time being).
-        *   你必须显式地进行指定（尽管目前还不能使用别的值）。
+        -   You must specify it explicitly (though it can't be other value for the time being).
+        -   你必须显式地进行指定（尽管目前还不能使用别的值）。
 
 2.  `multiLineJoiner` required
     *   type: `string`
     +   desc:
-        *   For the multi-line strings, use what to join the lines for result.
-        *   Note that TOML always use `"\n"` or `"\r\n"` split the source lines while parsing, which defined in TOML spec.
-        *   对于多行字符串，用什么来拼接各行。
-        *   注意在解析 TOML 源时，按照 TOML 规范的要求，行分隔符总是 `"\n"` 或 `"\r\n"`。
+        -   For the multi-line strings, use what to join the lines for result.
+            Note that TOML always use `"\n"` or `"\r\n"` split the source lines while parsing, which defined in TOML spec.
+        -   对于多行字符串，用什么来拼接各行。
+            注意在解析 TOML 源时，按照 TOML 规范的要求，行分隔符总是 `"\n"` 或 `"\r\n"`。
 
 3.  `useBigInt`
     *   type: `boolean`
@@ -79,11 +79,15 @@ TOML.parse(`
 4.  `xOptions`
     *   type: `[object Object]`
     +   desc:
-        *   The extensional features not in the spec. Include `null` supporting, mixed array, and interpolation strings (see <https://github.com/toml-lang/toml/issues/577>), etc. They are private experimental discouraged features.
-        *   标准中所没有的扩展功能。包括对 `null` 值，跨行行内表及尾逗号，混合类型的数组，以及插值字符串（参见 <https://github.com/toml-lang/toml/issues/577>）等。私有实验期功能，不建议随意使用。
+        *   The extensional features not in the spec.
+            Include `null` supporting, mixed-type array, multi-line inline table with trailing comma even no comma, and interpolation strings (see <https://github.com/toml-lang/toml/issues/577>), etc.
+            They are private experimental discouraged features.
+        *   标准中所没有的扩展功能。
+            包括对 `null` 值，跨行行内表及尾逗号甚至省略逗号，混合类型的数组，以及插值字符串（参见 <https://github.com/toml-lang/toml/issues/577>）等。
+            私有实验期功能，不建议随意使用。
 
 ### `return`
 
-Return the root Table, which is an `Object` without any extended properties.
+Return the root table, which is an `Object` without any extended properties.
 
 返回根表，它是一个没有任何继承属性的对象。
