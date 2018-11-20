@@ -395,7 +395,6 @@ function assignInterpolationString (table, finalKey, lineRest) {
 	}
 	inner += lineRest.slice(0, index);
 	lineRest = lineRest.slice(index+closeTag.length).replace(PRE_WHITESPACE, '');
-	if ( inner.charAt(0)==='\n' ) { inner = inner.slice(1); }
 	for ( const map of maps ) {
 		let value = '';
 		outer: for ( let length = inner.length, index = 0; index<length; ) {

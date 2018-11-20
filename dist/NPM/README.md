@@ -105,6 +105,11 @@ TOML.parse(source, version, multiLineJoiner[, useBigInt=true[, xOptions]]);
         *   Return the root table (tables parsed by this implementation are objects without any extended properties).
         *   返回根表（本实现解析出的表，是没有任何继承属性的对象）。
 
+*   `throw`
+    +   desc:
+        *   If the arguments not meet the requirement, there will be an error; if there is any error with the source, the error object will has a number type property named `lineIndex` to help locating that.
+        *   如果参数不符合要求，会抛出错误；如果源文本有错误，错误对象会有一个名为 `lineIndex` 的数值类型的属性来帮助定位。
+
 
 [TOML v0.5]: https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md
 
