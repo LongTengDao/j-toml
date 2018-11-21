@@ -1,8 +1,8 @@
 ﻿'use strict';
 
-var semver = [0, 5, 20];
+var semver = [0, 5, 21];
 
-const { WeakSet, WeakMap, SyntaxError, RangeError, TypeError, Error, BigInt, Date, parseInt, Infinity, NaN, String: { fromCodePoint }, Number: { isFinite, isSafeInteger }, Object: { create, getOwnPropertyNames, prototype: { toString } }, Array, Symbol: { for: Symbol_for }, Map, RegExp } = global;
+const { WeakSet, WeakMap, SyntaxError, RangeError, TypeError, Error, BigInt, Date, parseInt, Infinity, NaN, String: { fromCodePoint }, Number: { isFinite, isSafeInteger }, Object: { create, getOwnPropertyNames, defineProperty, prototype: { toString } }, Array, Symbol: { for: Symbol_for }, Map, RegExp } = global;
 const { isArray } = Array;
 
 const NONE = [];
@@ -311,7 +311,14 @@ function appendTable (table, key_key, asArrayItem, hash) {
 		finalKey in table && throwError('Duplicate Table definition at '+where());
 		table[finalKey] = lastTable;
 	}
-	if ( keepComment && hash ) { table[Symbol_for(finalKey)] = hash; }
+	if ( keepComment && hash ) {
+		defineProperty(table, Symbol_for(finalKey), {
+			configurable: true,
+			enumerable: false,
+			writable: true,
+			value: hash,
+		});
+	}
 	return lastTable;
 }
 
@@ -417,7 +424,12 @@ function assignInline (lastInlineTable, lineRest) {
 	}
 	if ( custom ) { table[finalKey] = customConstructor(table[finalKey]); }
 	if ( keepComment && lineRest.startsWith('#') ) {
-		table[Symbol_for(finalKey)] = lineRest;
+		defineProperty(table, Symbol_for(finalKey), {
+			configurable: true,
+			enumerable: false,
+			writable: true,
+			value: lineRest,
+		});
 		return '';
 	}
 	return lineRest;
@@ -544,7 +556,12 @@ function assignInlineArray (table, finalKey, lineRest) {
 		if ( lineRest.startsWith(',') ) {
 			lineRest = lineRest.replace(SYM_WHITESPACE, '');
 			if ( keepComment && lineRest.startsWith('#') ) {
-				inlineArray[Symbol_for(inlineArray.length-1+'')] = lineRest;
+				defineProperty(inlineArray, Symbol_for(inlineArray.length-1+''), {
+					configurable: true,
+					enumerable: false,
+					writable: true,
+					value: lineRest,
+				});
 				lineRest = '';
 			}
 			while ( lineRest==='' || lineRest.startsWith('#') ) {

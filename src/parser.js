@@ -1,4 +1,4 @@
-import { WeakSet, WeakMap, Error, TypeError, Infinity, NaN, isArray, Symbol_for, Map, RegExp, getOwnPropertyNames, create } from './global.js';
+import { WeakSet, WeakMap, Error, TypeError, Infinity, NaN, isArray, Symbol_for, Map, RegExp, getOwnPropertyNames, create, defineProperty } from './global.js';
 import { from, next, rest, done, mark, must, throwSyntaxError, throwTypeError, throwError, where } from './iterator.js';
 import { unEscapeSingleLine, String, Integer, Float, Datetime, Table } from './types.js';
 
@@ -128,7 +128,14 @@ function appendTable (table, key_key, asArrayItem, hash) {
 		finalKey in table && throwError('Duplicate Table definition at '+where());
 		table[finalKey] = lastTable;
 	}
-	if ( keepComment && hash ) { table[Symbol_for(finalKey)] = hash; }
+	if ( keepComment && hash ) {
+		defineProperty(table, Symbol_for(finalKey), {
+			configurable: true,
+			enumerable: false,
+			writable: true,
+			value: hash,
+		});
+	}
 	return lastTable;
 }
 
@@ -234,7 +241,12 @@ function assignInline (lastInlineTable, lineRest) {
 	}
 	if ( custom ) { table[finalKey] = customConstructor(table[finalKey]); }
 	if ( keepComment && lineRest.startsWith('#') ) {
-		table[Symbol_for(finalKey)] = lineRest;
+		defineProperty(table, Symbol_for(finalKey), {
+			configurable: true,
+			enumerable: false,
+			writable: true,
+			value: lineRest,
+		});
 		return '';
 	}
 	return lineRest;
@@ -361,7 +373,12 @@ function assignInlineArray (table, finalKey, lineRest) {
 		if ( lineRest.startsWith(',') ) {
 			lineRest = lineRest.replace(SYM_WHITESPACE, '');
 			if ( keepComment && lineRest.startsWith('#') ) {
-				inlineArray[Symbol_for(inlineArray.length-1+'')] = lineRest;
+				defineProperty(inlineArray, Symbol_for(inlineArray.length-1+''), {
+					configurable: true,
+					enumerable: false,
+					writable: true,
+					value: lineRest,
+				});
 				lineRest = '';
 			}
 			while ( lineRest==='' || lineRest.startsWith('#') ) {
