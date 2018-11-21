@@ -1,7 +1,7 @@
 {
 	"name": "@ltd/toml",
 	"description": "龙腾道为汤小明语 v0.5（“汤小明的小巧明晰语言”）写的实现。",
-	"version": "0.5.19",
+	"version": "0.5.20",
 	"license": "LGPL-3.0",
 	"author": "龙腾道 <LongTengDao@LongTengDao.com> (www.LongTengDao.com)",
 	"bugs": "https://GitHub.com/LongTengDao/TOML/issues",

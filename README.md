@@ -93,10 +93,10 @@ TOML.parse(source, version, multiLineJoiner[, useBigInt=true[, xOptions]]);
     *   type: `object`
     +   desc:
         *   The extensional features not in the spec.  
-            Include `null` supporting, mixed-type array, multi-line inline table with trailing comma even no comma, and interpolation strings (see <https://github.com/toml-lang/toml/issues/577>), etc.  
+            Include supporting for comment information, `null` value, mixed-type array, multi-line inline table with trailing comma even no comma, interpolation string, custom constructor, etc.  
             They are private experimental discouraged features.
         *   标准中所没有的扩展功能。  
-            包括对 `null` 值，跨行行内表及尾逗号甚至省略逗号，混合类型的数组，以及插值字符串（参见 <https://github.com/toml-lang/toml/issues/577>）等。  
+            包括对保留注释信息、`null` 值、跨行行内表及尾逗号甚至省略逗号、混合类型的数组、插值字符串、自定义构造器等。  
             私有实验期功能，不建议随意使用。
 
 *   `return`

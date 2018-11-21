@@ -1,12 +1,12 @@
-import { WeakSet, WeakMap, Error, TypeError, Infinity, NaN, isArray } from './global.js';
+import { WeakSet, WeakMap, Error, TypeError, Infinity, NaN, isArray, Symbol_for, Map, RegExp, getOwnPropertyNames, create } from './global.js';
 import { from, next, rest, done, mark, must, throwSyntaxError, throwTypeError, throwError, where } from './iterator.js';
 import { unEscapeSingleLine, String, Integer, Float, Datetime, Table } from './types.js';
 
 const BOM = /^\uFEFF/;
 const EOL = /\r?\n/;
 const PRE_WHITESPACE = /^[ \t]*/;
-const TABLE_DEFINITION = /^\[(\[?)[ \t]*((?:[\w-]+|"(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*"|'[^'\x00-\x08\x0B-\x1F\x7F]*')(?:[ \t]*\.[ \t]*(?:[\w-]+|"(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*"|'[^'\x00-\x08\x0B-\x1F\x7F]*'))*)[ \t]*](]?)[ \t]*(?:$|#)/;
-const KEY_VALUE_PAIR = /^((?:[\w-]+|"(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*"|'[^'\x00-\x08\x0B-\x1F\x7F]*')(?:[ \t]*\.[ \t]*(?:[\w-]+|"(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*"|'[^'\x00-\x08\x0B-\x1F\x7F]*'))*)[ \t]*=[ \t]*([^ \t#][^]*)$/;
+const TABLE_DEFINITION = /^\[(\[?)[ \t]*((?:[\w-]+|"(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*"|'[^'\x00-\x08\x0B-\x1F\x7F]*')(?:[ \t]*\.[ \t]*(?:[\w-]+|"(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*"|'[^'\x00-\x08\x0B-\x1F\x7F]*'))*)[ \t]*](]?)[ \t]*(?:#[^]*)?$/;
+const KEY_VALUE_PAIR = /^((?:[\w-]+|"(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*"|'[^'\x00-\x08\x0B-\x1F\x7F]*')(?:[ \t]*\.[ \t]*(?:[\w-]+|"(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*"|'[^'\x00-\x08\x0B-\x1F\x7F]*'))*)[ \t]*=[ \t]*(!!([\w-]*)[ \t]+)?([^ \t#][^]*)$/;
 const KEYS = /[\w-]+|"(?:[^\\"]+|\\[^])*"|'[^']*'/g;
 const VALUE_REST = /^((?:\d\d\d\d-\d\d-\d\d \d)?[\w\-+.:]+)[ \t]*([^]*)$/;
 const LITERAL_STRING = /^'([^'\x00-\x08\x0B-\x1F\x7F]*)'[ \t]*([^]*)/;
@@ -19,17 +19,16 @@ const MULTI_LINE_BASIC_STRING_REST = /^((?:[^\\]+|\\[^])*?)"""[ \t]*([^]*)/;
 const ESCAPED_EXCLUDE_CONTROL_CHARACTER = /^(?:[^\\\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\ \n]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*$/;
 const ESCAPED_IN_MULTI_LINE = /\n|\\(?:([ \n]+)|([\\"])|([btnfr])|u(.{4})|U(.{4})(.{4}))/g;
 const SYM_WHITESPACE = /^[^][ \t]*/;
-const TAG_OPENING = /^<([\w-]+)((?:[ \t]+"(?:[^\\"]+|\\[^])+"[ \t]*=[ \t]*"(?:[^\\"]+|\\[^])*")*)[ \t]*/;
-const TAG_ATTRIBUTES = /^((?:[ \t]+"(?:[^\\"]+|\\[^])+"[ \t]*=+[ \t]*"(?:[^\\"]+|\\[^])*")*)[ \t]*/;
-const TAB_ATTRIBUTE = /"(?:[^\\"]+|\\[^])*"|=+/g;
 
-let useWhatToJoinMultiLineString;
-let useBigInt;
-let enableNull;
-let enableNil;
-let allowInlineTableMultiLineAndTrailingCommaEvenNoComma;
-let typify;
-let enableInterpolationString;
+const DELIMITER_CHECK = /[^`]/;
+const INTERPOLATIONS = /^(?:\([ \t]*(?:\/(?:[^\\[/]+|\[(?:[^\\\]]|\\[^])*]|\\[^])+\/[a-z]*[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*"|{[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*)*}|\[[ \t]+(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:{[ \t]*}|{[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*)*})[ \t]*)+])[ \t]*|(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*)*)\)[ \t]*)*[ \t]*([^]*)$/;
+const INTERPOLATION = /\([ \t]*(?:\/(?:[^\\[/]+|\[(?:[^\\\]]|\\[^])*]|\\[^])+\/[a-z]*[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*"|{[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*)*}|\[[ \t]+(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:{[ \t]*}|{[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*)*})[ \t]*)+])[ \t]*|(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*)*)\)/g;
+const INTERPOLATION_TOKEN = /'[^']*'|"(?:[^\\"]+|\\[^])*"/g;
+const REGEXP_MODE = /^\([ \t]*\//;
+const PATTERN_FLAGS_REPLACER = /\/((?:[^\\[/]+|\[(?:[^\\\]]|\\[^])*]|\\[^])+)\/([a-z]*)[ \t]*=[ \t]*('[^']*'|"(?:[^\\"]+|\\[^])*"|{[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*)*}|\[[ \t]+(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:{[ \t]*}|{[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*)*})[ \t]*)+])/;
+const WHOLE_AND_SUBS = /('[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*([^]*)/;
+const SUB = /{[ \t]*}|{[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*)*}/g;
+const DOLLAR = /\$(?:[1-9]\d?|\$)/g;
 
 const isTable = value => value instanceof Table;
 const StaticObjects = new WeakSet;
@@ -52,6 +51,16 @@ const reallyTypify = (array, type) => {
 };
 const unlimitedType = array => array;
 
+let useWhatToJoinMultiLineString = '';
+let useBigInt = true;
+let keepComment = false;
+let enableNull = false;
+let enableNil = false;
+let allowInlineTableMultiLineAndTrailingCommaEvenNoComma = false;
+let typify = reallyTypify;
+let enableInterpolationString = false;
+let customConstructors = null;
+
 export default function parse (toml_source, toml_version, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger = true, extensionOptions) {
 	if ( typeof toml_source!=='string' ) { throw new TypeError('TOML.parse(source)'); }
 	if ( toml_version!==0.5 ) { throw new Error('TOML.parse(,version)'); }
@@ -59,11 +68,26 @@ export default function parse (toml_source, toml_version, useWhatToJoinMultiLine
 	if ( typeof useBigInt_forInteger!=='boolean' ) { throw new TypeError('TOML.parse(,,,useBigInt)'); }
 	useWhatToJoinMultiLineString = useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines;
 	useBigInt = useBigInt_forInteger;
+	keepComment = !!( extensionOptions && extensionOptions.hash );
 	enableNull = !!( extensionOptions && extensionOptions.null );
 	enableNil = !!( extensionOptions && extensionOptions.nil );
 	allowInlineTableMultiLineAndTrailingCommaEvenNoComma = !!( extensionOptions && extensionOptions.multi );
 	typify = extensionOptions && extensionOptions.mix ? unlimitedType : reallyTypify;
 	enableInterpolationString = !!( extensionOptions && extensionOptions.ins );
+	customConstructors = extensionOptions && extensionOptions.new || null;
+	if ( customConstructors!==null && typeof customConstructors!=='function' ) {
+		if ( typeof customConstructors!=='object' ) { throw new TypeError; }
+		const origin = customConstructors;
+		customConstructors = create(null);
+		for ( const name of getOwnPropertyNames(origin) ) {
+			const customConstructor = origin[name];
+			if ( typeof customConstructor!=='function' ) {
+				customConstructors = null;
+				throw new TypeError;
+			}
+			customConstructors[name] = customConstructor;
+		}
+	}
 	const rootTable = new Table;
 	try {
 		from(toml_source.replace(BOM, '').split(EOL));
@@ -72,9 +96,9 @@ export default function parse (toml_source, toml_version, useWhatToJoinMultiLine
 			const line = next().replace(PRE_WHITESPACE, '');
 			if ( line==='' || line.startsWith('#') ) { }
 			else if ( line.startsWith('[') ) {
-				const { 1: $_asArrayItem$$, 2: keys, 3: $$asArrayItem$_ } = TABLE_DEFINITION.exec(line) || throwSyntaxError(where());
+				const { 1: $_asArrayItem$$, 2: keys, 3: $$asArrayItem$_, 4: hash = '' } = TABLE_DEFINITION.exec(line) || throwSyntaxError(where());
 				( $_asArrayItem$$==='[' )===( $$asArrayItem$_===']' ) || throwSyntaxError('Square brackets of table define statement not match at '+where());
-				lastSectionTable = appendTable(rootTable, keys, $_asArrayItem$$==='[');
+				lastSectionTable = appendTable(rootTable, keys, $_asArrayItem$$==='[', hash);
 			}
 			else {
 				const rest = assignInline(lastSectionTable, line);
@@ -82,11 +106,14 @@ export default function parse (toml_source, toml_version, useWhatToJoinMultiLine
 			}
 		}
 	}
-	finally { done(); }
+	finally {
+		customConstructors = null;
+		done();
+	}
 	return rootTable;
 };
 
-function appendTable (table, key_key, asArrayItem) {
+function appendTable (table, key_key, asArrayItem, hash) {
 	const leadingKeys = parseKeys(key_key);
 	const finalKey = leadingKeys.pop();
 	table = prepareTable(table, leadingKeys);
@@ -101,6 +128,7 @@ function appendTable (table, key_key, asArrayItem) {
 		finalKey in table && throwError('Duplicate Table definition at '+where());
 		table[finalKey] = lastTable;
 	}
+	if ( keepComment && hash ) { table[Symbol_for(finalKey)] = hash; }
 	return lastTable;
 }
 
@@ -161,33 +189,54 @@ function prepareInlineTable (table, keys) {
 }
 
 function assignInline (lastInlineTable, lineRest) {
-	const { 1: left, 2: right } = KEY_VALUE_PAIR.exec(lineRest) || throwSyntaxError(where());
+	const { 1: left, 2: custom, 3: name, 4: right } = KEY_VALUE_PAIR.exec(lineRest) || throwSyntaxError(where());
+	let customConstructor;
+	if ( custom ) {
+		customConstructors || throwSyntaxError(where());
+		if ( typeof customConstructors==='function' ) { customConstructor = value => customConstructors(name, value); }
+		else {
+			name in customConstructors || throwError(where());
+			customConstructor = customConstructors[name];
+		}
+	}
 	const leadingKeys = parseKeys(left);
 	const finalKey = leadingKeys.pop();
 	const table = prepareInlineTable(lastInlineTable, leadingKeys);
 	finalKey in table && throwError('Duplicate property definition at '+where());
 	switch ( right[0] ) {
 		case "'":
-			return assignLiteralString(table, finalKey, right);
+			lineRest = assignLiteralString(table, finalKey, right);
+			break;
 		case '"':
-			return assignBasicString(table, finalKey, right);
+			lineRest = assignBasicString(table, finalKey, right);
+			break;
 		case '{':
-			return assignInlineTable(table, finalKey, right);
+			lineRest = assignInlineTable(table, finalKey, right);
+			break;
 		case '[':
-			return assignInlineArray(table, finalKey, right);
-		case '<':
-			return assignInterpolationString(table, finalKey, right);
+			lineRest = assignInlineArray(table, finalKey, right);
+			break;
+		case '`':
+			lineRest = assignInterpolationString(table, finalKey, right);
+			break;
+		default:
+			let literal;
+			( { 1: literal, 2: lineRest } = VALUE_REST.exec(right) || throwSyntaxError(where()) );
+			table[finalKey] =
+				literal==='true' ? true : literal==='false' ? false :
+					literal==='inf' || literal==='+inf' ? Infinity : literal==='-inf' ? -Infinity :
+						literal==='nan' || literal==='+nan' || literal==='-nan' ? NaN :
+							literal.includes(':') || literal.indexOf('-')!==literal.lastIndexOf('-') ? new Datetime(literal) :
+								literal.includes('.') || literal.includes('e') || literal.includes('E') ? Float(literal) :
+									enableNull && literal==='null' || enableNil && literal==='nil' ? null :
+										Integer(literal, useBigInt);
+			break;
 	}
-	let literal;
-	( { 1: literal, 2: lineRest } = VALUE_REST.exec(right) || throwSyntaxError(where()) );
-	table[finalKey] =
-		literal==='true' ? true : literal==='false' ? false :
-			literal==='inf' || literal==='+inf' ? Infinity : literal==='-inf' ? -Infinity :
-				literal==='nan' || literal==='+nan' || literal==='-nan' ? NaN :
-					literal.includes(':') || literal.indexOf('-')!==literal.lastIndexOf('-') ? new Datetime(literal) :
-						literal.includes('.') || literal.includes('e') || literal.includes('E') ? Float(literal) :
-							enableNull && literal==='null' || enableNil && literal==='nil' ? null :
-								Integer(literal, useBigInt);
+	if ( custom ) { table[finalKey] = customConstructor(table[finalKey]); }
+	if ( keepComment && lineRest.startsWith('#') ) {
+		table[Symbol_for(finalKey)] = lineRest;
+		return '';
+	}
 	return lineRest;
 }
 
@@ -311,6 +360,10 @@ function assignInlineArray (table, finalKey, lineRest) {
 		}
 		if ( lineRest.startsWith(',') ) {
 			lineRest = lineRest.replace(SYM_WHITESPACE, '');
+			if ( keepComment && lineRest.startsWith('#') ) {
+				inlineArray[Symbol_for(inlineArray.length-1+'')] = lineRest;
+				lineRest = '';
+			}
 			while ( lineRest==='' || lineRest.startsWith('#') ) {
 				lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, '');
 			}
@@ -333,7 +386,7 @@ function pushInline (array, right) {
 			return assignInlineTable(typify(array, ArrayOfInlineTables), ''+array.length, right);
 		case '[':
 			return assignInlineArray(typify(array, ArrayOfInlineArrays), ''+array.length, right);
-		case '<':
+		case '`':
 			return assignInterpolationString(typify(array, ArrayOfStrings), ''+array.length, right);
 	}
 	const { 1: literal, 2: lineRest } = VALUE_REST.exec(right) || throwSyntaxError(where());
@@ -359,57 +412,89 @@ function pushInline (array, right) {
 
 function assignInterpolationString (table, finalKey, lineRest) {
 	enableInterpolationString || throwSyntaxError(where());
-	const start = mark();
-	let $ = TAG_OPENING.exec(lineRest) || throwSyntaxError('Interpolation String opening tag incorrect at '+where());
-	let attributes = $[2];
-	const closeTag = '</'+$[1]+'>';
-	lineRest = lineRest.slice($[0].length);
-	while ( lineRest==='' || lineRest[0]==='#' ) {
-		lineRest = must('The open tag of Interpolation String', start);
-		$ = TAG_ATTRIBUTES.exec(lineRest) || throwSyntaxError('Interpolation String attributes incorrect at '+where());
-		attributes += $[1];
-		lineRest = lineRest.slice($[0].length);
-	}
-	lineRest[0]==='>' || throwSyntaxError('Interpolation String opening tag did not close incorrectly at '+where());
-	lineRest = lineRest.slice(1);
-	const maps = [];
-	let lastLength = 0;
-	let map = null;
-	$ = attributes.match(TAB_ATTRIBUTE);
-	for ( let length = $.length, index = 0; index<length; ) {
-		const search = String($[index++].slice(1, -1));
-		const thisLength = $[index++].length;
-		if ( thisLength===lastLength ) { map.has(search) && throwError('Duplicate attribute definition at '+where()); }
-		else {
-			lastLength = thisLength;
-			maps.push(map = new Map);
+	DELIMITER_CHECK.test(lineRest) && throwSyntaxError('Interpolation String opening tag incorrect at '+where());
+	const literals = [];
+	for ( const start = mark(); ; ) {
+		const literal = must('Interpolation String', start);
+		if ( literal.startsWith(lineRest) ) {
+			lineRest = lineRest.slice(lineRest.length).replace(PRE_WHITESPACE, '');
+			break;
 		}
-		map.set(search, String($[index++].slice(1, -1)));
+		literals.push(literal);
 	}
-	let inner = '';
-	let index = lineRest.indexOf(closeTag);
-	while ( index=== -1 ) {
-		inner += lineRest+'\n';
-		lineRest = must('Interpolation String', start);
-		index = lineRest.indexOf(closeTag);
-	}
-	inner += lineRest.slice(0, index);
-	lineRest = lineRest.slice(index+closeTag.length).replace(PRE_WHITESPACE, '');
-	for ( const map of maps ) {
-		let value = '';
-		outer: for ( let length = inner.length, index = 0; index<length; ) {
-			for ( const { 0: search, 1: replacement } of map ) {
-				if ( inner.startsWith(search, index) ) {
-					value += replacement;
-					index += search.length;
-					continue outer;
+	let string = literals.join('\n');
+	if ( lineRest.startsWith('(') ) {
+		const interpolations_rest = INTERPOLATIONS.exec(lineRest) || throwSyntaxError(where());
+		lineRest = interpolations_rest[2];
+		for ( const interpolation of interpolations_rest[1].match(INTERPOLATION) ) {
+			if ( REGEXP_MODE.test(interpolation) ) {
+				const { 1: pattern, 2: flags, 3: Replacer } = PATTERN_FLAGS_REPLACER.exec(interpolation);
+				const search = newRegExp(pattern, flags) || throwSyntaxError('Invalid regExp at '+where());
+				let replacer;
+				switch ( Replacer[0] ) {
+					case "'":
+						replacer = Replacer.slice(1, -1);
+						break;
+					case '"':
+						replacer = String(Replacer.slice(1, -1));
+						break;
+					case '{':
+						const map = newMap(Replacer, true);
+						replacer = $0 => map.has($0) ? map.get($0) : $0;
+						break;
+					case '[':
+						const { 1: whole, 2: subs } = WHOLE_AND_SUBS.exec(Replacer);
+						const maps = [null];
+						for ( const sub of subs.match(SUB) ) { maps.push(newMap(sub, true)); }
+						replacer = (...args) => whole.replace(DOLLAR, $n => {
+							if ( $n==='$$' ) { return '$'; }
+							const n = $n.slice(1);
+							const map = maps[n];
+							const arg = args[n];
+							return map && map.has(arg) ? map.get(arg) : arg;
+						});
+						break;
 				}
+				string = string.replace(search, replacer);
 			}
-			value += inner[index];
-			++index;
+			else {
+				const map = newMap(interpolation, false);
+				let round = '';
+				outer: for ( let length = string.length, index = 0; index<length; ) {
+					for ( const { 0: search, 1: replacer } of map ) {
+						if ( string.startsWith(search, index) ) {
+							round += replacer;
+							index += search.length;
+							continue outer;
+						}
+					}
+					round += string[index];
+					++index;
+				}
+				string = round;
+			}
 		}
-		inner = value;
 	}
-	table[finalKey] = inner;
+	table[finalKey] = string;
 	return lineRest;
+}
+
+function newMap (interpolation, usedForRegExp) {
+	const map = new Map;
+	const tokens = interpolation.match(INTERPOLATION_TOKEN);
+	for ( let length = tokens.length, index = 0; index<length; ) {
+		let search = tokens[index++];
+		search = search[0]==="'" ? search.slice(1, -1) : String(search.slice(1, -1));
+		usedForRegExp || search || throwSyntaxError('Characters to replace can not be empty, which was found at '+where());
+		map.has(search) && throwSyntaxError('Duplicate '+( usedForRegExp ? 'replacer' : 'characters to replace' )+' at '+where());
+		let replacer = tokens[index++];
+		replacer = replacer[0]==="'" ? replacer.slice(1, -1) : String(replacer.slice(1, -1));
+		map.set(search, replacer);
+	}
+	return map;
+}
+
+function newRegExp (pattern, flags) {
+	try { return new RegExp(pattern, flags); }
+	catch (error) { return null; }
 }
