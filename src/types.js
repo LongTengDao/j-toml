@@ -1,4 +1,4 @@
-import { RangeError, TypeError, BigInt, Date, parseInt, Infinity, NaN, isFinite, isSafeInteger, fromCodePoint, create, toString } from './global.js';
+import { RangeError, TypeError, BigInt, Date, parseInt, Infinity, NaN, isFinite, isSafeInteger, fromCodePoint, create } from './global.js';
 import { throwSyntaxError, throwRangeError, none, where } from './iterator.js';
 
 const ESCAPE_ALIAS = { b: '\b', t: '\t', n: '\n', f: '\f', r: '\r' };
@@ -105,9 +105,7 @@ export class Datetime extends Date {
 		}
 	}
 	
-	static isDatetime (value) {
-		return value instanceof Datetime;
-	}
+	static isDatetime (value) { return value instanceof Datetime; }
 	
 	toTOML () {
 		if ( !isSafeInteger(this.getTime()) ) { throw new RangeError('Datetime which time was set unsafe integer can not be serialized toTOML.'); }
@@ -139,8 +137,6 @@ Null.prototype = create(null);
 
 export class Table extends Null {
 	
-	static isTable (value) {
-		return value instanceof Table || toString.call(value)==='[object Object]';
-	}
+	static isTable (value) { return value instanceof Table; }
 	
 }
