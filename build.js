@@ -14,7 +14,7 @@ require('./test').then(async() => {
 			NPM: {
 				name: '@ltd/toml',
 				'...': {
-					description: `An implementation of TOML v0.5 written by LongTengDao.／龙腾道为汤小明语 v0.5 写的实现。`,
+					description: 'An implementation of TOML v0.5 written by LongTengDao.／龙腾道为汤小明语 v0.5 写的实现。',
 					keywords: ['TOML'],
 				},
 			},
