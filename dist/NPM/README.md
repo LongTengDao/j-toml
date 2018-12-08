@@ -111,8 +111,8 @@ TOML.parse(source, version, multiLineJoiner[, useBigInt=true[, xOptions]]);
         *   如果参数不符合要求，会抛出错误；如果源文本有错误，错误对象会有一个名为 `lineIndex` 的数值类型的属性来帮助定位。
 
 
-[TOML v0.5]: https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md
-
-[汤小明语 v0.5]: https://github.com/toml-lang/toml/blob/master/versions/cn/toml-v0.5.0.md
-
 [@ltd/toml v0.5]: https://www.npmjs.com/package/@ltd/toml
+
+[TOML v0.5]: https://GitHub.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md
+
+[汤小明语 v0.5]: https://GitHub.com/LongTengDao/toml-lang/blob/龙腾道-译/versions/cn/toml-v0.5.0.md
