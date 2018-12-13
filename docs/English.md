@@ -157,8 +157,8 @@ In JavaScript land, that would give you the following structure:
 ({
     table: {
     	key: 'value',
-    	[Symbol.for('key')]: 'comment 2'
+    	[Symbol.for('key')]: ' comment 2'
     },
-    [Symbol.for('table')]: 'comment 1'
+    [Symbol.for('table')]: ' comment 1'
 })
 ```
