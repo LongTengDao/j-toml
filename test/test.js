@@ -2,7 +2,7 @@
 
 module.exports = require('@ltd/j-dev').
 	
-	import_default(__dirname+'/src/default.js').
+	import_default(__dirname+'/../src/default.js').
 	
 	then(TOML => {
 		

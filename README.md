@@ -18,13 +18,13 @@ which is the best config format he had ever seen.
 
 ### npm install
 
-```
+```sh
 npm install @ltd/toml
 ```
 
 ### sample.toml
 
-```
+```toml
 [Table]
 
 # A normal key name that supported by any other JavaScript implementation:
@@ -42,7 +42,7 @@ __proto__      = "none"
 
 ### sample.js
 
-```
+```js
 const source = require('fs').readFileSync(__dirname+'/sample.toml', 'utf8');
 
 const table = require('@ltd/toml').parse(source, 0.5, '\n');
