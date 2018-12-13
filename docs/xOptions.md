@@ -5,30 +5,34 @@
 `xOptions.mix`
 --------------
 
-*   类型：`boolean`
-*   默认值：`false`
+*   type: `boolean`
+*   default: `false`
 
+Mixed-type inline array support.  
 是否允许混合类型的行内数组。
 
 ```
 array = [
-    ['姓名', '年龄'],
-    ['老王', 40],
-    ['小王', 20],
+    ['Name', 'Age'],
+    ['Senior Wang', 40],
+    ['Junior Wang', 20],
 ]
 ```
 
 `xOptions.multi`
 ----------------
 
-*   类型：`boolean`
-*   默认值：`false`
+*   type: `boolean`
+*   default: `false`
 
+Multi-line inline table support.  
+Allow trailing comma, even no comma.  
 是否允许多行写法的行内表。  
 附带尾逗号支持和省略逗号支持。
 
 ```
 
+# Like inline array:
 # 类似行内数组：
 
 tableA = {
@@ -41,6 +45,7 @@ tableB = {
     y = 2,
 }
 
+# Like key/value pair:
 # 类似普通键值对：
 
 tableC = {
@@ -56,9 +61,10 @@ y = 2
 `xOptions.null`
 ---------------
 
-*   类型：`boolean`
-*   默认值：`false`
+*   type: `boolean`
+*   default: `false`
 
+`null` value support (by `null` literal).  
 是否允许 `null` 值类型（`null` 字面量）。
 
 ```
@@ -68,9 +74,10 @@ key = null
 `xOptions.nil`
 --------------
 
-*   类型：`boolean`
-*   默认值：`false`
+*   type: `boolean`
+*   default: `false`
 
+`null` value support (by `nil` literal).  
 是否允许 `null` 值类型（`nil` 字面量）。
 
 ```
@@ -80,9 +87,10 @@ key = nil
 `xOptions.ins`
 --------------
 
-*   类型：`boolean`
-*   默认值：`false`
+*   type: `boolean`
+*   default: `false`
 
+Interpolation string support.  
 是否开启插值字符串支持。
 
 ```
@@ -113,6 +121,7 @@ keyF = `
 ` ( /{{ *(.*?) *(?:\| *(.*?) *)?}}/g = ['$2$1',{ 'NAME'='Mr. C', 'SITE'='GitHub' }, { 'Mr'='Mr. ' }] )
 ```
 
+In JSON land, that would give you the following structure:  
 用 JSON 表示解析出的内容就是：
 
 ```json
@@ -126,12 +135,13 @@ keyF = `
 }
 ```
 
+The original parsed result of interpolation string always use `\n` as newline, not the value set by parameter `multiLineJoiner`.  
 插值字符串原始解析结果总是以 `\n` 换行，而不会理睬 `multiLineJoiner` 参数。
 
 `xOptions.new`
 --------------
 
-*   类型：`{ [type]: function (value) { } }` 或 `function (type, value) { }`
+*   type: `{ [type]: function (value) { } }` 或 `function (type, value) { }`
 
 ```
 key = !!type 'value'
@@ -140,9 +150,10 @@ key = !!type 'value'
 `xOptions.hash`
 ---------------
 
-*   类型：`boolean`
-*   默认值：`false`
+*   type: `boolean`
+*   default: `false`
 
+Comments information (as much as possible).  
 是否（尽可能）保留注释内容。
 
 ```toml
@@ -151,6 +162,7 @@ key = !!type 'value'
 key = 'value' # comment 2
 ```
 
+In JavaScript land, that would give you the following structure:  
 最终得到的表大抵相当于：
 
 ```js

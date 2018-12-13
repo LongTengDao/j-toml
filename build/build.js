@@ -20,7 +20,7 @@ require('../test/test.js').then(async() => {
 			},
 		});
 	
-	const README = Buffer.from(fs.readFileSync(__dirname+'/../README.md', 'utf8').replace(/(\n```+)[^`\r\n]+/g, '$1'), 'utf8');
+	const README = Buffer.from(fs.readFileSync(__dirname+'/../docs/README.md', 'utf8').replace(/(\n```+)[^`\r\n]+/g, '$1'), 'utf8');
 	const NPM_README = __dirname+'/../dist/NPM/README.md';
 	try { if ( fs.readFileSync(NPM_README).equals(README) ) { return; } }
 	catch (error) { if ( error.code!=='ENOENT' ) { throw error; } }
