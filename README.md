@@ -18,7 +18,7 @@ which is the best config format he had ever seen.
 
 ### npm install
 
-```sh
+```shell
 npm install @ltd/toml
 ```
 
