@@ -132,11 +132,6 @@ export class Datetime extends Date {
 	
 }
 
-const Null = function () { };
-Null.prototype = create(null);
-
-export class Table extends Null {
-	
-	static isTable (value) { return value instanceof Table; }
-	
-}
+export const Table = function () {};
+Table.prototype = create(null);
+Table.isTable = value => value instanceof Table;

@@ -61,6 +61,7 @@ let allowInlineTableMultiLineAndTrailingCommaEvenNoComma = false;
 let typify = reallyTypify;
 let enableInterpolationString = false;
 let customConstructors = null;
+const FUNCTION = new WeakSet;
 
 export default function parse (toml_source, toml_version, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger = true, extensionOptions) {
 	if ( typeof toml_source!=='string' ) { throw new TypeError('TOML.parse(source)'); }
@@ -77,29 +78,7 @@ export default function parse (toml_source, toml_version, useWhatToJoinMultiLine
 		typify = extensionOptions && extensionOptions.mix ? unlimitedType : reallyTypify;
 		enableInterpolationString = !!( extensionOptions && extensionOptions.ins );
 		customConstructors = extensionOptions && extensionOptions.new || null;
-		if ( customConstructors!==null && typeof customConstructors!=='function' ) {
-			if ( typeof customConstructors!=='object' ) { throw new TypeError('TOML.parse(,,,xOptions.new)'); }
-			if ( getPrototypeOf(customConstructors)===null ) {
-				for ( const name of getOwnPropertyNames(customConstructors) ) {
-					if ( typeof customConstructors[name]!=='function' ) {
-						customConstructors = null;
-						throw new TypeError('TOML.parse(,,,xOptions.new['+stringify(name)+'])');
-					}
-				}
-			}
-			else {
-				const origin = customConstructors;
-				customConstructors = create(null);
-				for ( const name of getOwnPropertyNames(origin) ) {
-					const customConstructor = origin[name];
-					if ( typeof customConstructor!=='function' ) {
-						customConstructors = null;
-						throw new TypeError('TOML.parse(,,,xOptions.new['+stringify(name)+'])');
-					}
-					customConstructors[name] = customConstructor;
-				}
-			}
-		}
+		customConstructors===null || prepareConstructors();
 	}
 	const rootTable = new Table;
 	try {
@@ -209,8 +188,8 @@ function prepareInlineTable (table, keys) {
 }
 
 function assignInline (lastInlineTable, lineRest) {
-	const { 1: left, 2: custom, 3: name, 4: right } = KEY_VALUE_PAIR.exec(lineRest) || throwSyntaxError(where());
-	custom && ensureConstructor(name);
+	const { 1: left, 2: custom, 3: type, 4: right } = KEY_VALUE_PAIR.exec(lineRest) || throwSyntaxError(where());
+	custom && ensureConstructor(type);
 	const leadingKeys = parseKeys(left);
 	const finalKey = leadingKeys.pop();
 	const table = prepareInlineTable(lastInlineTable, leadingKeys);
@@ -244,7 +223,7 @@ function assignInline (lastInlineTable, lineRest) {
 										Integer(literal, useBigInt);
 			break;
 	}
-	if ( custom ) { table[finalKey] = construct(name, table[finalKey]); }
+	if ( custom ) { table[finalKey] = construct(type, table[finalKey]); }
 	if ( keepComment && lineRest.startsWith('#') ) {
 		defineProperty(table, Symbol_for(finalKey), {
 			configurable: true,
@@ -400,11 +379,11 @@ function assignInlineArray (table, finalKey, lineRest) {
 
 function pushInline (array, lineRest) {
 	const custom = lineRest.startsWith('!!');
-	let name;
+	let type;
 	if ( custom ) {
 		typify===unlimitedType || throwSyntaxError('Only mixable arrays could contain custom type. Check '+where());
-		( { 1: name, 2: lineRest } = _VALUE_PAIR.exec(lineRest) || throwSyntaxError(where()) );
-		ensureConstructor(name);
+		( { 1: type, 2: lineRest } = _VALUE_PAIR.exec(lineRest) || throwSyntaxError(where()) );
+		ensureConstructor(type);
 	}
 	const lastIndex = ''+array.length;
 	switch ( lineRest[0] ) {
@@ -445,7 +424,7 @@ function pushInline (array, lineRest) {
 			else { typify(array, ArrayOfIntegers).push(Integer(literal, useBigInt)); }
 			break;
 	}
-	if ( custom ) { array[lastIndex] = construct(name, array[lastIndex]); }
+	if ( custom ) { array[lastIndex] = construct(type, array[lastIndex]); }
 	if ( keepComment && lineRest.startsWith('#') ) {
 		defineProperty(array, Symbol_for(lastIndex), {
 			configurable: true,
@@ -456,15 +435,6 @@ function pushInline (array, lineRest) {
 		return '';
 	}
 	return lineRest;
-}
-
-function ensureConstructor (name) {
-	customConstructors || throwSyntaxError(where());
-	typeof customConstructors==='function' || name in customConstructors || throwError(where());
-}
-
-function construct (name, value) {
-	return typeof customConstructors==='function' ? customConstructors(name, value) : customConstructors[name](value);
 }
 
 function assignInterpolationString (table, finalKey, lineRest) {
@@ -506,8 +476,8 @@ function assignInterpolationString (table, finalKey, lineRest) {
 						replacer = (...args) => whole.replace(DOLLAR, $n => {
 							if ( $n==='$$' ) { return '$'; }
 							const n = $n.slice(1);
+							const arg = args[n] || '';
 							const map = maps[n];
-							const arg = args[n];
 							return map && map.has(arg) ? map.get(arg) : arg;
 						});
 						break;
@@ -554,4 +524,51 @@ function newMap (interpolation, usedForRegExp) {
 function newRegExp (pattern, flags) {
 	try { return new RegExp(pattern, flags); }
 	catch (error) { return null; }
+}
+
+function prepareConstructors () {
+	if ( typeof customConstructors==='function' ) {
+		if ( customConstructors.length!==2 ) { throw new Error('TOML.parse(,,,xOptions.new.length)'); }
+		FUNCTION.add(customConstructors);
+	}
+	else if ( typeof customConstructors==='object' ) {
+		if ( getPrototypeOf(customConstructors)===null ) {
+			for ( const type of getOwnPropertyNames(customConstructors) ) {
+				if ( typeof customConstructors[type]!=='function' ) {
+					customConstructors = null;
+					throw new TypeError('TOML.parse(,,,xOptions.new['+stringify(type)+'])');
+				}
+				if ( customConstructors[type].length ) {
+					customConstructors = null;
+					throw new Error('TOML.parse(,,,xOptions.new['+stringify(type)+'].length)');
+				}
+			}
+		}
+		else {
+			const origin = customConstructors;
+			customConstructors = create(null);
+			for ( const type of getOwnPropertyNames(origin) ) {
+				const customConstructor = origin[type];
+				if ( typeof customConstructor!=='function' ) {
+					customConstructors = null;
+					throw new TypeError('TOML.parse(,,,xOptions.new['+stringify(type)+'])');
+				}
+				if ( customConstructors[type].length ) {
+					customConstructors = null;
+					throw new Error('TOML.parse(,,,xOptions.new['+stringify(type)+'].length)');
+				}
+				customConstructors[type] = customConstructor;
+			}
+		}
+	}
+	else { throw new TypeError('TOML.parse(,,,xOptions.new)'); }
+}
+
+function ensureConstructor (type) {
+	customConstructors || throwSyntaxError(where());
+	FUNCTION.has(customConstructors) || type in customConstructors || throwError(where());
+}
+
+function construct (type, value) {
+	return FUNCTION.has(customConstructors) ? customConstructors(type, value) : customConstructors[type](value);
 }
