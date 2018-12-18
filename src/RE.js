@@ -50,11 +50,11 @@ export const SYM_WHITESPACE = /^[^]Whitespace*/;
 
 export const _VALUE_PAIR = /^!!([\w-]*)Whitespace+([^ \t#][^]*)$/;
 
-const String = /'[^']*'|"(?:[^\\"]+|\\[^])*"/;
-const Keyvaluepairs = /(?:String)Whitespace*=Whitespace*(?:String)Whitespace*(?:,Whitespace*(?:String)Whitespace*=Whitespace*(?:String)Whitespace*)*/;
+const String_ = /'[^']*'|"(?:[^\\"]+|\\[^])*"/;
+const Keyvaluepairs = /(?:String_)Whitespace*=Whitespace*(?:String_)Whitespace*(?:,Whitespace*(?:String_)Whitespace*=Whitespace*(?:String_)Whitespace*)*/;
 const Nonemptyobject = /{Whitespace*Keyvaluepairs}/;
 const Object = /{Whitespace*}|Nonemptyobject/;
-const Stringorarray = /String|Nonemptyobject|\[Whitespace+(?:String)Whitespace*(?:,Whitespace*(?:Object)Whitespace*)+]/;
+const Stringorarray = /String_|Nonemptyobject|\[Whitespace+(?:String_)Whitespace*(?:,Whitespace*(?:Object)Whitespace*)+]/;
 const Regexpcontent = /(?:[^\\[/]+|\[(?:[^\\\]]+|\\[^])*]|\\[^])+/;
 const Rule = /\(Whitespace*(?:\/Regexpcontent\/[a-z]*Whitespace*=Whitespace*(?:Stringorarray)Whitespace*|Keyvaluepairs)\)/;
 
@@ -62,8 +62,8 @@ export const SUB = /Object/g;
 export const DELIMITER_CHECK = /[^`]/;
 export const INTERPOLATION = /Rule/g;
 export const INTERPOLATIONS = /^(?:RuleWhitespace*)*Whitespace*([^]*)$/;
-export const INTERPOLATION_TOKEN = /String/g;
+export const INTERPOLATION_TOKEN = /String_/g;
 export const REGEXP_MODE = /^\(Whitespace*\//;
 export const PATTERN_FLAGS_REPLACER = /\/(Regexpcontent)\/([a-z]*)Whitespace*=Whitespace*(Stringorarray)/;
-export const WHOLE_AND_SUBS = /(String)Whitespace*([^]*)/;
+export const WHOLE_AND_SUBS = /(String_)Whitespace*([^]*)/;
 export const DOLLAR = /\$(?:[1-9]\d?|\$)/g;

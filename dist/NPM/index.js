@@ -101,8 +101,8 @@ const DOLLAR = /\$(?:[1-9]\d?|\$)/g;
 
 const ESCAPE_ALIAS = { b: '\b', t: '\t', n: '\n', f: '\f', r: '\r' };
 const unEscapeSingleLine = ($0, $1, $2, $3, $4, $5) => $1 ? $1 : $2 ? ESCAPE_ALIAS[$2] : fromCodePoint(parseInt($3 || $4+$5, 16));
-const String$1 = literal => literal.replace(ESCAPED_IN_SINGLE_LINE, unEscapeSingleLine);
-String$1.isString = value => typeof value==='string';
+const String = literal => literal.replace(ESCAPED_IN_SINGLE_LINE, unEscapeSingleLine);
+String.isString = value => typeof value==='string';
 
 const MAX64 = BigInt(2**63-1);
 const MIN64 = ~MAX64;
@@ -327,7 +327,7 @@ function parseKeys (key_key) {
 		const key = keys[index];
 		if ( key.startsWith("'") ) { keys[index] = keys.slice(1, -1); }
 		else if ( key.startsWith('"') ) {
-			keys[index] = String$1(keys.slice(1, -1));
+			keys[index] = String(keys.slice(1, -1));
 		}
 	}
 	return keys;
@@ -461,13 +461,13 @@ function assignBasicString (table, finalKey, literal) {
 	let $;
 	if ( literal.charAt(1)!=='"' || literal.charAt(2)!=='"' ) {
 		$ = BASIC_STRING.exec(literal) || throwSyntaxError(where());
-		table[finalKey] = String$1($[1]);
+		table[finalKey] = String($[1]);
 		return $[2];
 	}
 	$ = MULTI_LINE_BASIC_STRING_LONE.exec(literal);
 	if ( $ ) {
 		ESCAPED_EXCLUDE_CONTROL_CHARACTER.test($[1]) || throwSyntaxError(where());
-		table[finalKey] = String$1($[1]);
+		table[finalKey] = String($[1]);
 		return $[2];
 	}
 	literal = literal.slice(3);
@@ -653,7 +653,7 @@ function assignInterpolationString (table, finalKey, lineRest) {
 						replacer = Replacer.slice(1, -1);
 						break;
 					case '"':
-						replacer = String$1(Replacer.slice(1, -1));
+						replacer = String(Replacer.slice(1, -1));
 						break;
 					case '{':
 						const map = newMap(Replacer, true);
@@ -701,11 +701,11 @@ function newMap (interpolation, usedForRegExp) {
 	const tokens = interpolation.match(INTERPOLATION_TOKEN);
 	for ( let length = tokens.length, index = 0; index<length; ) {
 		let search = tokens[index++];
-		search = search[0]==="'" ? search.slice(1, -1) : String$1(search.slice(1, -1));
+		search = search[0]==="'" ? search.slice(1, -1) : String(search.slice(1, -1));
 		usedForRegExp || search || throwSyntaxError('Characters to replace can not be empty, which was found at '+where());
 		map.has(search) && throwSyntaxError('Duplicate '+( usedForRegExp ? 'replacer' : 'characters to replace' )+' at '+where());
 		let replacer = tokens[index++];
-		replacer = replacer[0]==="'" ? replacer.slice(1, -1) : String$1(replacer.slice(1, -1));
+		replacer = replacer[0]==="'" ? replacer.slice(1, -1) : String(replacer.slice(1, -1));
 		map.set(search, replacer);
 	}
 	return map;
@@ -766,7 +766,7 @@ function construct (type, value) {
 const TOML = {
 	semver,
 	parse,
-	String: String$1,
+	String,
 	Integer,
 	Float,
 	Boolean,
