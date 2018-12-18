@@ -1,35 +1,7 @@
 import { WeakSet, WeakMap, Error, TypeError, Infinity, NaN, isArray, Symbol_for, Map, RegExp, getOwnPropertyNames, create, defineProperty, getPrototypeOf, stringify } from './global.js';
 import { from, next, rest, done, mark, must, throwSyntaxError, throwTypeError, throwError, where } from './iterator.js';
 import { unEscapeSingleLine, String, Integer, Float, Datetime, Table } from './types.js';
-
-const BOM = /^\uFEFF/;
-const EOL = /\r?\n/;
-const PRE_WHITESPACE = /^[ \t]*/;
-const TABLE_DEFINITION = /^\[(\[?)[ \t]*((?:[\w-]+|"(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*"|'[^'\x00-\x08\x0B-\x1F\x7F]*')(?:[ \t]*\.[ \t]*(?:[\w-]+|"(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*"|'[^'\x00-\x08\x0B-\x1F\x7F]*'))*)[ \t]*](]?)[ \t]*(?:#[^]*)?$/;
-const KEY_VALUE_PAIR = /^((?:[\w-]+|"(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*"|'[^'\x00-\x08\x0B-\x1F\x7F]*')(?:[ \t]*\.[ \t]*(?:[\w-]+|"(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*"|'[^'\x00-\x08\x0B-\x1F\x7F]*'))*)[ \t]*=[ \t]*(!!([\w-]*)[ \t]+)?([^ \t#][^]*)$/;
-const KEYS = /[\w-]+|"(?:[^\\"]+|\\[^])*"|'[^']*'/g;
-const VALUE_REST = /^((?:\d\d\d\d-\d\d-\d\d \d)?[\w\-+.:]+)[ \t]*([^]*)$/;
-const LITERAL_STRING = /^'([^'\x00-\x08\x0B-\x1F\x7F]*)'[ \t]*([^]*)/;
-const MULTI_LINE_LITERAL_STRING_LONE = /^'''([^]*?)'''[ \t]*([^]*)/;
-const MULTI_LINE_LITERAL_STRING_REST = /^([^]*?)'''[ \t]*([^]*)/;
-const CONTROL_CHARACTER_EXCLUDE_TAB = /[\x00-\x08\x0B-\x1F\x7F]/;
-const BASIC_STRING = /^"((?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*)"[ \t]*([^]*)/;
-const MULTI_LINE_BASIC_STRING_LONE = /^"""((?:[^\\]+|\\[^])*?)"""[ \t]*([^]*)/;
-const MULTI_LINE_BASIC_STRING_REST = /^((?:[^\\]+|\\[^])*?)"""[ \t]*([^]*)/;
-const ESCAPED_EXCLUDE_CONTROL_CHARACTER = /^(?:[^\\\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\ \n]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*$/;
-const ESCAPED_IN_MULTI_LINE = /\n|\\(?:([ \n]+)|([\\"])|([btnfr])|u(.{4})|U(.{4})(.{4}))/g;
-const SYM_WHITESPACE = /^[^][ \t]*/;
-
-const _VALUE_PAIR = /^!!([\w-]*)[ \t]+([^ \t#][^]*)$/;
-const DELIMITER_CHECK = /[^`]/;
-const INTERPOLATIONS = /^(?:\([ \t]*(?:\/(?:[^\\[/]+|\[(?:[^\\\]]|\\[^])*]|\\[^])+\/[a-z]*[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*"|{[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*)*}|\[[ \t]+(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:{[ \t]*}|{[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*)*})[ \t]*)+])[ \t]*|(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*)*)\)[ \t]*)*[ \t]*([^]*)$/;
-const INTERPOLATION = /\([ \t]*(?:\/(?:[^\\[/]+|\[(?:[^\\\]]|\\[^])*]|\\[^])+\/[a-z]*[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*"|{[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*)*}|\[[ \t]+(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:{[ \t]*}|{[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*)*})[ \t]*)+])[ \t]*|(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*)*)\)/g;
-const INTERPOLATION_TOKEN = /'[^']*'|"(?:[^\\"]+|\\[^])*"/g;
-const REGEXP_MODE = /^\([ \t]*\//;
-const PATTERN_FLAGS_REPLACER = /\/((?:[^\\[/]+|\[(?:[^\\\]]|\\[^])*]|\\[^])+)\/([a-z]*)[ \t]*=[ \t]*('[^']*'|"(?:[^\\"]+|\\[^])*"|{[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*)*}|\[[ \t]+(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:{[ \t]*}|{[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*)*})[ \t]*)+])/;
-const WHOLE_AND_SUBS = /('[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*([^]*)/;
-const SUB = /{[ \t]*}|{[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*)*}/g;
-const DOLLAR = /\$(?:[1-9]\d?|\$)/g;
+import * as RE from './RE.js?RegExp';
 
 const { isTable } = Table;
 const StaticObjects = new WeakSet;
@@ -82,13 +54,13 @@ export default function parse (toml_source, toml_version, useWhatToJoinMultiLine
 	}
 	const rootTable = new Table;
 	try {
-		from(toml_source.replace(BOM, '').split(EOL));
+		from(toml_source.replace(RE.BOM, '').split(RE.EOL));
 		let lastSectionTable = rootTable;
 		while ( rest() ) {
-			const line = next().replace(PRE_WHITESPACE, '');
+			const line = next().replace(RE.PRE_WHITESPACE, '');
 			if ( line==='' || line.startsWith('#') ) { }
 			else if ( line.startsWith('[') ) {
-				const { 1: $_asArrayItem$$, 2: keys, 3: $$asArrayItem$_, 4: hash = '' } = TABLE_DEFINITION.exec(line) || throwSyntaxError(where());
+				const { 1: $_asArrayItem$$, 2: keys, 3: $$asArrayItem$_, 4: hash = '' } = RE.TABLE_DEFINITION.exec(line) || throwSyntaxError(where());
 				( $_asArrayItem$$==='[' )===( $$asArrayItem$_===']' ) || throwSyntaxError('Square brackets of table define statement not match at '+where());
 				lastSectionTable = appendTable(rootTable, keys, $_asArrayItem$$==='[', hash);
 			}
@@ -132,7 +104,7 @@ function appendTable (table, key_key, asArrayItem, hash) {
 }
 
 function parseKeys (key_key) {
-	const keys = key_key.match(KEYS);
+	const keys = key_key.match(RE.KEYS);
 	for ( let index = keys.length; index--; ) {
 		const key = keys[index];
 		if ( key.startsWith("'") ) { keys[index] = keys.slice(1, -1); }
@@ -188,7 +160,7 @@ function prepareInlineTable (table, keys) {
 }
 
 function assignInline (lastInlineTable, lineRest) {
-	const { 1: left, 2: custom, 3: type, 4: right } = KEY_VALUE_PAIR.exec(lineRest) || throwSyntaxError(where());
+	const { 1: left, 2: custom, 3: type, 4: right } = RE.KEY_VALUE_PAIR.exec(lineRest) || throwSyntaxError(where());
 	custom && ensureConstructor(type);
 	const leadingKeys = parseKeys(left);
 	const finalKey = leadingKeys.pop();
@@ -212,7 +184,7 @@ function assignInline (lastInlineTable, lineRest) {
 			break;
 		default:
 			let literal;
-			( { 1: literal, 2: lineRest } = VALUE_REST.exec(right) || throwSyntaxError(where()) );
+			( { 1: literal, 2: lineRest } = RE.VALUE_REST.exec(right) || throwSyntaxError(where()) );
 			table[finalKey] =
 				literal==='true' ? true : literal==='false' ? false :
 					literal==='inf' || literal==='+inf' ? Infinity : literal==='-inf' ? -Infinity :
@@ -239,27 +211,27 @@ function assignInline (lastInlineTable, lineRest) {
 function assignLiteralString (table, finalKey, literal) {
 	let $;
 	if ( literal.charAt(1)!=="'" || literal.charAt(2)!=="'" ) {
-		$ = LITERAL_STRING.exec(literal) || throwSyntaxError(where());
+		$ = RE.LITERAL_STRING.exec(literal) || throwSyntaxError(where());
 		table[finalKey] = $[1];
 		return $[2];
 	}
-	$ = MULTI_LINE_LITERAL_STRING_LONE.exec(literal);
+	$ = RE.MULTI_LINE_LITERAL_STRING_LONE.exec(literal);
 	if ( $ ) {
-		CONTROL_CHARACTER_EXCLUDE_TAB.test($[1]) && throwSyntaxError('Control characters other than tab are not permitted in a Literal String, which was found at '+where());
+		RE.CONTROL_CHARACTER_EXCLUDE_TAB.test($[1]) && throwSyntaxError('Control characters other than tab are not permitted in a Literal String, which was found at '+where());
 		table[finalKey] = $[1];
 		return $[2];
 	}
 	literal = literal.slice(3);
 	if ( literal ) {
-		CONTROL_CHARACTER_EXCLUDE_TAB.test(literal) && throwSyntaxError('Control characters other than tab are not permitted in a Literal String, which was found at '+where());
+		RE.CONTROL_CHARACTER_EXCLUDE_TAB.test(literal) && throwSyntaxError('Control characters other than tab are not permitted in a Literal String, which was found at '+where());
 		literal += useWhatToJoinMultiLineString;
 	}
 	const start = mark();
 	for ( ; ; ) {
 		const line = must('Literal String', start);
-		$ = MULTI_LINE_LITERAL_STRING_REST.exec(line);
+		$ = RE.MULTI_LINE_LITERAL_STRING_REST.exec(line);
 		if ( $ ) {
-			CONTROL_CHARACTER_EXCLUDE_TAB.test($[1]) && throwSyntaxError('Control characters other than tab are not permitted in a Literal String, which was found at '+where());
+			RE.CONTROL_CHARACTER_EXCLUDE_TAB.test($[1]) && throwSyntaxError('Control characters other than tab are not permitted in a Literal String, which was found at '+where());
 			table[finalKey] = literal+$[1];
 			return $[2];
 		}
@@ -270,28 +242,28 @@ function assignLiteralString (table, finalKey, literal) {
 function assignBasicString (table, finalKey, literal) {
 	let $;
 	if ( literal.charAt(1)!=='"' || literal.charAt(2)!=='"' ) {
-		$ = BASIC_STRING.exec(literal) || throwSyntaxError(where());
+		$ = RE.BASIC_STRING.exec(literal) || throwSyntaxError(where());
 		table[finalKey] = String($[1]);
 		return $[2];
 	}
-	$ = MULTI_LINE_BASIC_STRING_LONE.exec(literal);
+	$ = RE.MULTI_LINE_BASIC_STRING_LONE.exec(literal);
 	if ( $ ) {
-		ESCAPED_EXCLUDE_CONTROL_CHARACTER.test($[1]) || throwSyntaxError(where());
+		RE.ESCAPED_EXCLUDE_CONTROL_CHARACTER.test($[1]) || throwSyntaxError(where());
 		table[finalKey] = String($[1]);
 		return $[2];
 	}
 	literal = literal.slice(3);
 	if ( literal ) {
 		literal += '\n';
-		ESCAPED_EXCLUDE_CONTROL_CHARACTER.test(literal) || throwSyntaxError(where());
+		RE.ESCAPED_EXCLUDE_CONTROL_CHARACTER.test(literal) || throwSyntaxError(where());
 	}
 	const start = mark();
 	for ( ; ; ) {
 		let line = must('Basic String', start);
-		$ = MULTI_LINE_BASIC_STRING_REST.exec(line);
+		$ = RE.MULTI_LINE_BASIC_STRING_REST.exec(line);
 		if ( $ ) {
-			ESCAPED_EXCLUDE_CONTROL_CHARACTER.test($[1]) || throwSyntaxError(where());
-			table[finalKey] = ( literal+$[1] ).replace(ESCAPED_IN_MULTI_LINE, ($0, $1, $2, $3, $4, $5, $6) => {
+			RE.ESCAPED_EXCLUDE_CONTROL_CHARACTER.test($[1]) || throwSyntaxError(where());
+			table[finalKey] = ( literal+$[1] ).replace(RE.ESCAPED_IN_MULTI_LINE, ($0, $1, $2, $3, $4, $5, $6) => {
 				if ( $0==='\n' ) { return useWhatToJoinMultiLineString; }
 				if ( $1 ) {
 					$1.includes('\n') || throwSyntaxError('Back slash leading whitespaces can only appear at the end of a line, but see '+where());
@@ -302,7 +274,7 @@ function assignBasicString (table, finalKey, literal) {
 			return $[2];
 		}
 		line += '\n';
-		ESCAPED_EXCLUDE_CONTROL_CHARACTER.test(line) || throwSyntaxError(where());
+		RE.ESCAPED_EXCLUDE_CONTROL_CHARACTER.test(line) || throwSyntaxError(where());
 		literal += line;
 	}
 }
@@ -310,29 +282,29 @@ function assignBasicString (table, finalKey, literal) {
 function assignInlineTable (table, finalKey, lineRest) {
 	const inlineTable = table[finalKey] = new Table;
 	StaticObjects.add(inlineTable);
-	lineRest = lineRest.replace(SYM_WHITESPACE, '');
+	lineRest = lineRest.replace(RE.SYM_WHITESPACE, '');
 	if ( allowInlineTableMultiLineAndTrailingCommaEvenNoComma ) {
 		const start = mark();
 		for ( ; ; ) {
 			while ( lineRest==='' || lineRest.startsWith('#') ) {
-				lineRest = must('Inline Table', start).replace(PRE_WHITESPACE, '');
+				lineRest = must('Inline Table', start).replace(RE.PRE_WHITESPACE, '');
 			}
-			if ( lineRest.startsWith('}') ) { return lineRest.replace(SYM_WHITESPACE, ''); }
+			if ( lineRest.startsWith('}') ) { return lineRest.replace(RE.SYM_WHITESPACE, ''); }
 			lineRest = assignInline(inlineTable, lineRest);
 			while ( lineRest==='' || lineRest.startsWith('#') ) {
-				lineRest = must('Inline Table', start).replace(PRE_WHITESPACE, '');
+				lineRest = must('Inline Table', start).replace(RE.PRE_WHITESPACE, '');
 			}
-			if ( lineRest.startsWith(',') ) { lineRest = lineRest.replace(SYM_WHITESPACE, ''); }
+			if ( lineRest.startsWith(',') ) { lineRest = lineRest.replace(RE.SYM_WHITESPACE, ''); }
 		}
 	}
 	else {
-		if ( lineRest.startsWith('}') ) { return lineRest.replace(SYM_WHITESPACE, ''); }
+		if ( lineRest.startsWith('}') ) { return lineRest.replace(RE.SYM_WHITESPACE, ''); }
 		( lineRest==='' || lineRest.startsWith('#') ) && throwSyntaxError('Inline Table is intended to appear on a single line, which broken at '+where());
 		for ( ; ; ) {
 			lineRest = assignInline(inlineTable, lineRest);
-			if ( lineRest.startsWith('}') ) { return lineRest.replace(SYM_WHITESPACE, ''); }
+			if ( lineRest.startsWith('}') ) { return lineRest.replace(RE.SYM_WHITESPACE, ''); }
 			if ( lineRest.startsWith(',') ) {
-				lineRest = lineRest.replace(SYM_WHITESPACE, '');
+				lineRest = lineRest.replace(RE.SYM_WHITESPACE, '');
 				lineRest.startsWith('}') && throwSyntaxError('The last property of an Inline Table can not have a trailing comma, which was found at '+where());
 			}
 			( lineRest==='' || lineRest.startsWith('#') ) && throwSyntaxError('Inline Table is intended to appear on a single line, which broken at '+where());
@@ -344,18 +316,18 @@ function assignInlineArray (table, finalKey, lineRest) {
 	const inlineArray = table[finalKey] = [];
 	StaticObjects.add(inlineArray);
 	const start = mark();
-	lineRest = lineRest.replace(SYM_WHITESPACE, '');
+	lineRest = lineRest.replace(RE.SYM_WHITESPACE, '');
 	while ( lineRest==='' || lineRest.startsWith('#') ) {
-		lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, '');
+		lineRest = must('Inline Array', start).replace(RE.PRE_WHITESPACE, '');
 	}
-	if ( lineRest.startsWith(']') ) { return lineRest.replace(SYM_WHITESPACE, ''); }
+	if ( lineRest.startsWith(']') ) { return lineRest.replace(RE.SYM_WHITESPACE, ''); }
 	for ( ; ; ) {
 		lineRest = pushInline(inlineArray, lineRest);
 		while ( lineRest==='' || lineRest.startsWith('#') ) {
-			lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, '');
+			lineRest = must('Inline Array', start).replace(RE.PRE_WHITESPACE, '');
 		}
 		if ( lineRest.startsWith(',') ) {
-			lineRest = lineRest.replace(SYM_WHITESPACE, '');
+			lineRest = lineRest.replace(RE.SYM_WHITESPACE, '');
 			if ( keepComment && lineRest.startsWith('#') ) {
 				defineProperty(inlineArray, Symbol_for(inlineArray.length-1+''), {
 					configurable: true,
@@ -366,12 +338,12 @@ function assignInlineArray (table, finalKey, lineRest) {
 				lineRest = '';
 			}
 			while ( lineRest==='' || lineRest.startsWith('#') ) {
-				lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, '');
+				lineRest = must('Inline Array', start).replace(RE.PRE_WHITESPACE, '');
 			}
-			if ( lineRest.startsWith(']') ) { return lineRest.replace(SYM_WHITESPACE, ''); }
+			if ( lineRest.startsWith(']') ) { return lineRest.replace(RE.SYM_WHITESPACE, ''); }
 		}
 		else {
-			if ( lineRest.startsWith(']') ) { return lineRest.replace(SYM_WHITESPACE, ''); }
+			if ( lineRest.startsWith(']') ) { return lineRest.replace(RE.SYM_WHITESPACE, ''); }
 			throwSyntaxError(where());
 		}
 	}
@@ -382,7 +354,7 @@ function pushInline (array, lineRest) {
 	let type;
 	if ( custom ) {
 		typify===unlimitedType || throwSyntaxError('Only mixable arrays could contain custom type. Check '+where());
-		( { 1: type, 2: lineRest } = _VALUE_PAIR.exec(lineRest) || throwSyntaxError(where()) );
+		( { 1: type, 2: lineRest } = RE._VALUE_PAIR.exec(lineRest) || throwSyntaxError(where()) );
 		ensureConstructor(type);
 	}
 	const lastIndex = ''+array.length;
@@ -404,7 +376,7 @@ function pushInline (array, lineRest) {
 			break;
 		default:
 			let literal;
-			( { 1: literal, 2: lineRest } = VALUE_REST.exec(lineRest) || throwSyntaxError(where()) );
+			( { 1: literal, 2: lineRest } = RE.VALUE_REST.exec(lineRest) || throwSyntaxError(where()) );
 			if ( literal==='true' ) { typify(array, ArrayOfBooleans).push(true); }
 			else if ( literal==='false' ) { typify(array, ArrayOfBooleans).push(false); }
 			else if ( literal==='inf' || literal==='+inf' ) { typify(array, ArrayOfFloats).push(Infinity); }
@@ -439,23 +411,23 @@ function pushInline (array, lineRest) {
 
 function assignInterpolationString (table, finalKey, lineRest) {
 	enableInterpolationString || throwSyntaxError(where());
-	DELIMITER_CHECK.test(lineRest) && throwSyntaxError('Interpolation String opening tag incorrect at '+where());
+	RE.DELIMITER_CHECK.test(lineRest) && throwSyntaxError('Interpolation String opening tag incorrect at '+where());
 	const literals = [];
 	for ( const start = mark(); ; ) {
 		const literal = must('Interpolation String', start);
 		if ( literal.startsWith(lineRest) ) {
-			lineRest = lineRest.slice(lineRest.length).replace(PRE_WHITESPACE, '');
+			lineRest = lineRest.slice(lineRest.length).replace(RE.PRE_WHITESPACE, '');
 			break;
 		}
 		literals.push(literal);
 	}
 	let string = literals.join('\n');
 	if ( lineRest.startsWith('(') ) {
-		const interpolations_rest = INTERPOLATIONS.exec(lineRest) || throwSyntaxError(where());
+		const interpolations_rest = RE.INTERPOLATIONS.exec(lineRest) || throwSyntaxError(where());
 		lineRest = interpolations_rest[2];
-		for ( const interpolation of interpolations_rest[1].match(INTERPOLATION) ) {
-			if ( REGEXP_MODE.test(interpolation) ) {
-				const { 1: pattern, 2: flags, 3: Replacer } = PATTERN_FLAGS_REPLACER.exec(interpolation);
+		for ( const interpolation of interpolations_rest[1].match(RE.INTERPOLATION) ) {
+			if ( RE.REGEXP_MODE.test(interpolation) ) {
+				const { 1: pattern, 2: flags, 3: Replacer } = RE.PATTERN_FLAGS_REPLACER.exec(interpolation);
 				const search = newRegExp(pattern, flags) || throwSyntaxError('Invalid regExp at '+where());
 				let replacer;
 				switch ( Replacer[0] ) {
@@ -470,10 +442,10 @@ function assignInterpolationString (table, finalKey, lineRest) {
 						replacer = $0 => map.has($0) ? map.get($0) : $0;
 						break;
 					case '[':
-						const { 1: whole, 2: subs } = WHOLE_AND_SUBS.exec(Replacer);
+						const { 1: whole, 2: subs } = RE.WHOLE_AND_SUBS.exec(Replacer);
 						const maps = [null];
-						for ( const sub of subs.match(SUB) ) { maps.push(newMap(sub, true)); }
-						replacer = (...args) => whole.replace(DOLLAR, $n => {
+						for ( const sub of subs.match(RE.SUB) ) { maps.push(newMap(sub, true)); }
+						replacer = (...args) => whole.replace(RE.DOLLAR, $n => {
 							if ( $n==='$$' ) { return '$'; }
 							const n = $n.slice(1);
 							const arg = args[n] || '';
@@ -508,7 +480,7 @@ function assignInterpolationString (table, finalKey, lineRest) {
 
 function newMap (interpolation, usedForRegExp) {
 	const map = new Map;
-	const tokens = interpolation.match(INTERPOLATION_TOKEN);
+	const tokens = interpolation.match(RE.INTERPOLATION_TOKEN);
 	for ( let length = tokens.length, index = 0; index<length; ) {
 		let search = tokens[index++];
 		search = search[0]==="'" ? search.slice(1, -1) : String(search.slice(1, -1));

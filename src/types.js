@@ -1,42 +1,36 @@
 import { RangeError, TypeError, BigInt, Date, parseInt, Infinity, NaN, isFinite, isSafeInteger, fromCodePoint, create } from './global.js';
 import { throwSyntaxError, throwRangeError, none, where } from './iterator.js';
+import * as RE from './RE.js?RegExp';
 
 const ESCAPE_ALIAS = { b: '\b', t: '\t', n: '\n', f: '\f', r: '\r' };
-const ESCAPED_IN_SINGLE_LINE = /\\(?:([\\"])|([btnfr])|u(.{4})|U(.{4})(.{4}))/g;
 export const unEscapeSingleLine = ($0, $1, $2, $3, $4, $5) => $1 ? $1 : $2 ? ESCAPE_ALIAS[$2] : fromCodePoint(parseInt($3 || $4+$5, 16));
-export const String = literal => literal.replace(ESCAPED_IN_SINGLE_LINE, unEscapeSingleLine);
+export const String = literal => literal.replace(RE.ESCAPED_IN_SINGLE_LINE, unEscapeSingleLine);
 String.isString = value => typeof value==='string';
 
-const UNDERSCORES = /_/g;
-
-const XOB_INTEGER = /^0x[0-9A-Fa-f]+(?:_[0-9A-Fa-f]+)*|o[0-7]+(?:_[0-7]+)*|b[01]+(?:_[01]+)*$/;
-const INTEGER = /^[-+]?[1-9]\d*(?:_\d+)*$/;
 const MAX64 = BigInt(2**63-1);
 const MIN64 = ~MAX64;
 const ZERO = BigInt(0);
 export const Integer = (literal, useBigInt = true) => {
 	if ( useBigInt ) {
 		if ( literal==='0' || literal==='+0' || literal==='-0' ) { return ZERO; }
-		( literal.charAt(0)==='0' ? XOB_INTEGER : INTEGER ).test(literal) || throwSyntaxError('Invalid Integer '+literal+( none() ? '' : ' at '+where() ));
-		const bitInt = BigInt(literal.replace(UNDERSCORES, ''));
+		( literal.charAt(0)==='0' ? RE.XOB_INTEGER : RE.INTEGER ).test(literal) || throwSyntaxError('Invalid Integer '+literal+( none() ? '' : ' at '+where() ));
+		const bitInt = BigInt(literal.replace(RE.UNDERSCORES, ''));
 		bitInt<=MAX64 && bitInt>=MIN64 || throwRangeError('Integer expect 64 bit range (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807), not includes '+literal+( none() ? '' : ' meet at '+where() ));
 		return bitInt;
 	}
 	else {
 		if ( literal==='0' || literal==='+0' || literal==='-0' ) { return 0; }
-		( literal.charAt(0)==='0' ? XOB_INTEGER : INTEGER ).test(literal) || throwSyntaxError('Invalid Integer '+literal+( none() ? '' : ' at '+where() ));
-		const number = +literal.replace(UNDERSCORES, '');
+		( literal.charAt(0)==='0' ? RE.XOB_INTEGER : RE.INTEGER ).test(literal) || throwSyntaxError('Invalid Integer '+literal+( none() ? '' : ' at '+where() ));
+		const number = +literal.replace(RE.UNDERSCORES, '');
 		isSafeInteger(number) || throwRangeError('Integer did not use BitInt must be Number.isSafeInteger, not includes '+literal+( none() ? '' : ' meet at '+where() ));
 		return number;
 	}
 };
 Integer.isInteger = value => typeof value==='bigint';
 
-const FLOAT = /^[-+]?(?:0|[1-9]\d*(?:_\d+)*)(?:\.\d+(?:_\d+)*)?(?:[eE][-+]?\d+(?:_\d+)*)?$/;
-const FLOAT_NOT_INTEGER = /[.eE]/;
 export const Float = literal => {
-	if ( FLOAT.test(literal) && FLOAT_NOT_INTEGER.test(literal) ) {
-		const number = +literal.replace(UNDERSCORES, '');
+	if ( RE.FLOAT.test(literal) && RE.FLOAT_NOT_INTEGER.test(literal) ) {
+		const number = +literal.replace(RE.UNDERSCORES, '');
 		isFinite(number) || throwRangeError('Float can not be as big as Infinity, like '+literal+( none() ? '' : ' at '+where() ));
 		return number;
 	}
@@ -51,11 +45,6 @@ export const Boolean = {
 	isBoolean: value => value===true || value===false,
 };
 
-const OFFSET_DATE_TIME = /^(?:0[1-9]|[1-9]\d)\d\d-(?:0[1-9]|1[012])-(?:0[1-9]|[12]\d|3[01])([T ])(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)$/;
-const LOCAL_DATE_TIME = /^(?:0[1-9]|[1-9]\d)\d\d-(?:0[1-9]|1[012])-(?:0[1-9]|[12]\d|3[01])([T ])(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?$/;
-const LOCAL_DATE = /^(?:0[1-9]|[1-9]\d)\d\d-(?:0[1-9]|1[012])-(?:0[1-9]|[12]\d|3[01])$/;
-const LOCAL_TIME = /^(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?$/;
-const TIMEZONE_OFFSET = /^([+-])([01]\d|2[0-3]):([0-5]\d)$/;
 const DATE = new Date;
 const year = (date, utc) => {
 	const year = utc ? date.getUTCFullYear() : date.getFullYear();
@@ -79,27 +68,27 @@ export class Datetime extends Date {
 		if ( literal.includes('-') ) {
 			if ( literal.includes('T') || literal.includes(' ') ) {
 				if ( literal.includes('Z') || literal.includes('+') || literal.split('-').length===4 ) {
-					const $ = OFFSET_DATE_TIME.exec(literal) || throwSyntaxError('Invalid Offset Date-Time '+literal+( none() ? '' : ' at '+where() ));
+					const $ = RE.OFFSET_DATE_TIME.exec(literal) || throwSyntaxError('Invalid Offset Date-Time '+literal+( none() ? '' : ' at '+where() ));
 					super(literal);
 					this.type = 'Offset Date-Time';
 					this.T = $[1];
 					this.Z = $[2];
 				}
 				else {
-					const $ = LOCAL_DATE_TIME.exec(literal) || throwSyntaxError('Invalid Local Date-Time '+literal+( none() ? '' : ' at '+where() ));
+					const $ = RE.LOCAL_DATE_TIME.exec(literal) || throwSyntaxError('Invalid Local Date-Time '+literal+( none() ? '' : ' at '+where() ));
 					super(literal);
 					this.type = 'Local Date-Time';
 					this.T = $[1];
 				}
 			}
 			else {
-				LOCAL_DATE.test(literal) || throwSyntaxError('Invalid Local Date '+literal+( none() ? '' : ' at '+where() ));
+				RE.LOCAL_DATE.test(literal) || throwSyntaxError('Invalid Local Date '+literal+( none() ? '' : ' at '+where() ));
 				super(literal);
 				this.type = 'Local Date';
 			}
 		}
 		else {
-			LOCAL_TIME.test(literal) || throwSyntaxError('Invalid Local Time '+literal+( none() ? '' : ' at '+where() ));
+			RE.LOCAL_TIME.test(literal) || throwSyntaxError('Invalid Local Time '+literal+( none() ? '' : ' at '+where() ));
 			super('1970-01-01 '+literal);
 			this.type = 'Local Time';
 		}
@@ -115,7 +104,7 @@ export class Datetime extends Date {
 				const { Z } = this;
 				if ( Z==='Z' || Z==='+00:00' || Z==='-00:00' ) { datetime = this; }
 				else {
-					const $ = TIMEZONE_OFFSET.exec(Z);
+					const $ = RE.TIMEZONE_OFFSET.exec(Z);
 					datetime = DATE;
 					datetime.setTime(this.getTime()+( $[1]+'60000' )*( +$[3]+60*$[2] ));
 				}
