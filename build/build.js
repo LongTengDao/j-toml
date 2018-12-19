@@ -10,7 +10,7 @@ require('../test/test.js').then(async() => {
 			ES: 6,
 			name: 'TOML',
 			semver:
-				fs.readFileSync(__dirname+'/../src/semver.js', 'utf8').match(/\d+/g).join('.'),
+				fs.readFileSync(__dirname+'/../version')+'',
 			NPM: {
 				name: '@ltd/toml',
 				'...': {

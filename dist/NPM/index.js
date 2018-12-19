@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-var semver = [0, 5, 25];
+var version = '0.5.25';
 
 const { WeakSet, WeakMap, SyntaxError, RangeError, TypeError, Error, BigInt, Date, parseInt, Infinity, NaN, Array, Map, RegExp,
 	String: { fromCodePoint },
@@ -764,7 +764,6 @@ function construct (type, value) {
 }
 
 const TOML = {
-	semver,
 	parse,
 	String,
 	Integer,
@@ -773,6 +772,7 @@ const TOML = {
 	Datetime,
 	Array,
 	Table,
+	version
 };
 
 module.exports = TOML;
