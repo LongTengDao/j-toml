@@ -10,20 +10,24 @@ String.isString = value => typeof value==='string';
 const MAX64 = BigInt(2**63-1);
 const MIN64 = ~MAX64;
 const ZERO = BigInt(0);
-export const Integer = (literal, useBigInt = true) => {
-	if ( useBigInt ) {
-		if ( literal==='0' || literal==='+0' || literal==='-0' ) { return ZERO; }
-		( literal.charAt(0)==='0' ? RE.XOB_INTEGER : RE.INTEGER ).test(literal) || throwSyntaxError('Invalid Integer '+literal+( none() ? '' : ' at '+where() ));
-		const bitInt = BigInt(literal.replace(RE.UNDERSCORES, ''));
-		bitInt<=MAX64 && bitInt>=MIN64 || throwRangeError('Integer expect 64 bit range (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807), not includes '+literal+( none() ? '' : ' meet at '+where() ));
-		return bitInt;
-	}
-	else {
+export const Integer = (literal, useBigInt = true, allowLonger = false) => {
+	if ( useBigInt===false ) {
 		if ( literal==='0' || literal==='+0' || literal==='-0' ) { return 0; }
 		( literal.charAt(0)==='0' ? RE.XOB_INTEGER : RE.INTEGER ).test(literal) || throwSyntaxError('Invalid Integer '+literal+( none() ? '' : ' at '+where() ));
 		const number = +literal.replace(RE.UNDERSCORES, '');
-		isSafeInteger(number) || throwRangeError('Integer did not use BitInt must be Number.isSafeInteger, not includes '+literal+( none() ? '' : ' meet at '+where() ));
+		allowLonger || isSafeInteger(number) || throwRangeError('Integer did not use BitInt must be Number.isSafeInteger, not includes '+literal+( none() ? '' : ' meet at '+where() ));
 		return number;
+	}
+	else {
+		let bitInt;
+		if ( literal==='0' || literal==='+0' || literal==='-0' ) { bitInt = ZERO; }
+		else {
+			( literal.charAt(0)==='0' ? RE.XOB_INTEGER : RE.INTEGER ).test(literal) || throwSyntaxError('Invalid Integer '+literal+( none() ? '' : ' at '+where() ));
+			bitInt = BigInt(literal.replace(RE.UNDERSCORES, ''));
+			allowLonger || bitInt<=MAX64 && bitInt>=MIN64 || throwRangeError('Integer expect 64 bit range (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807), not includes '+literal+( none() ? '' : ' meet at '+where() ));
+		}
+		if ( useBigInt===true || bitInt<=useBigInt && bitInt>= ~useBigInt ) { return bitInt; }
+		return +( bitInt+'' );
 	}
 };
 Integer.isInteger = value => typeof value==='bigint';

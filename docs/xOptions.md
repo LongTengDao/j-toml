@@ -2,6 +2,15 @@
 `xOptions`
 ==========
 
+`xOptions.longer`
+-----------------
+
+*   type: `boolean`
+*   default: `false`
+
+Allow the integer type value to exceed 64 bit range (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807).  
+是否允许整数类型值超出 64 位范围（-9,223,372,036,854,775,808 至 9,223,372,036,854,775,807）限制。
+
 `xOptions.mix`
 --------------
 
@@ -141,7 +150,7 @@ The original parsed result of interpolation string always use `\n` as newline, n
 `xOptions.new`
 --------------
 
-*   type: `{ [type]: function (value) { } }` 或 `function (type, value) { }`
+*   type: `{ [type]: function (value) { } }` / `function (type, value) { }`
 
 ```
 key = !!type 'value'

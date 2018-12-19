@@ -1,7 +1,7 @@
 {
 	"name": "@ltd/toml",
 	"description": "An implementation of TOML v0.5 written by LongTengDao.／龙腾道为汤小明语 v0.5 写的实现。",
-	"version": "0.5.25",
+	"version": "0.5.26",
 	"license": "LGPL-3.0",
 	"author": "龙腾道 <LongTengDao@LongTengDao.com> (www.LongTengDao.com)",
 	"bugs": "https://GitHub.com/LongTengDao/TOML/issues",

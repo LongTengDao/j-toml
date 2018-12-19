@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-var version = '0.5.25';
+var version = '0.5.26';
 
 const { WeakSet, WeakMap, SyntaxError, RangeError, TypeError, Error, BigInt, Date, parseInt, Infinity, NaN, Array, Map, RegExp,
 	String: { fromCodePoint },
@@ -107,20 +107,24 @@ String.isString = value => typeof value==='string';
 const MAX64 = BigInt(2**63-1);
 const MIN64 = ~MAX64;
 const ZERO = BigInt(0);
-const Integer = (literal, useBigInt = true) => {
-	if ( useBigInt ) {
-		if ( literal==='0' || literal==='+0' || literal==='-0' ) { return ZERO; }
-		( literal.charAt(0)==='0' ? XOB_INTEGER : INTEGER ).test(literal) || throwSyntaxError('Invalid Integer '+literal+( none() ? '' : ' at '+where() ));
-		const bitInt = BigInt(literal.replace(UNDERSCORES, ''));
-		bitInt<=MAX64 && bitInt>=MIN64 || throwRangeError('Integer expect 64 bit range (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807), not includes '+literal+( none() ? '' : ' meet at '+where() ));
-		return bitInt;
-	}
-	else {
+const Integer = (literal, useBigInt = true, allowLonger = false) => {
+	if ( useBigInt===false ) {
 		if ( literal==='0' || literal==='+0' || literal==='-0' ) { return 0; }
 		( literal.charAt(0)==='0' ? XOB_INTEGER : INTEGER ).test(literal) || throwSyntaxError('Invalid Integer '+literal+( none() ? '' : ' at '+where() ));
 		const number = +literal.replace(UNDERSCORES, '');
-		isSafeInteger(number) || throwRangeError('Integer did not use BitInt must be Number.isSafeInteger, not includes '+literal+( none() ? '' : ' meet at '+where() ));
+		allowLonger || isSafeInteger(number) || throwRangeError('Integer did not use BitInt must be Number.isSafeInteger, not includes '+literal+( none() ? '' : ' meet at '+where() ));
 		return number;
+	}
+	else {
+		let bitInt;
+		if ( literal==='0' || literal==='+0' || literal==='-0' ) { bitInt = ZERO; }
+		else {
+			( literal.charAt(0)==='0' ? XOB_INTEGER : INTEGER ).test(literal) || throwSyntaxError('Invalid Integer '+literal+( none() ? '' : ' at '+where() ));
+			bitInt = BigInt(literal.replace(UNDERSCORES, ''));
+			allowLonger || bitInt<=MAX64 && bitInt>=MIN64 || throwRangeError('Integer expect 64 bit range (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807), not includes '+literal+( none() ? '' : ' meet at '+where() ));
+		}
+		if ( useBigInt===true || bitInt<=useBigInt && bitInt>= ~useBigInt ) { return bitInt; }
+		return +( bitInt+'' );
 	}
 };
 Integer.isInteger = value => typeof value==='bigint';
@@ -245,6 +249,7 @@ const unlimitedType = array => array;
 
 let useWhatToJoinMultiLineString = '';
 let useBigInt = true;
+let allowLonger = false;
 let keepComment = false;
 let enableNull = false;
 let enableNil = false;
@@ -258,10 +263,11 @@ function parse (toml_source, toml_version, useWhatToJoinMultiLineString_notUsing
 	if ( typeof toml_source!=='string' ) { throw new TypeError('TOML.parse(source)'); }
 	if ( toml_version!==0.5 ) { throw new Error('TOML.parse(,version)'); }
 	if ( typeof useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines!=='string' ) { throw new TypeError('TOML.parse(,,multiLineJoiner)'); }
-	if ( typeof useBigInt_forInteger!=='boolean' ) { throw new TypeError('TOML.parse(,,,useBigInt)'); }
+	if ( typeof useBigInt_forInteger!=='boolean' && typeof useBigInt_forInteger!=='bigint' ) { throw new TypeError('TOML.parse(,,,useBigInt)'); }
 	useWhatToJoinMultiLineString = useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines;
 	useBigInt = useBigInt_forInteger;
 	xOptions:{
+		allowLonger = !!( extensionOptions && extensionOptions.longer );
 		keepComment = !!( extensionOptions && extensionOptions.hash );
 		enableNull = !!( extensionOptions && extensionOptions.null );
 		enableNil = !!( extensionOptions && extensionOptions.nil );
@@ -410,7 +416,7 @@ function assignInline (lastInlineTable, lineRest) {
 							literal.includes(':') || literal.indexOf('-')!==literal.lastIndexOf('-') ? new Datetime(literal) :
 								literal.includes('.') || literal.includes('e') || literal.includes('E') ? Float(literal) :
 									enableNull && literal==='null' || enableNil && literal==='nil' ? null :
-										Integer(literal, useBigInt);
+										Integer(literal, useBigInt, allowLonger);
 			break;
 	}
 	if ( custom ) { table[finalKey] = construct(type, table[finalKey]); }
@@ -611,7 +617,7 @@ function pushInline (array, lineRest) {
 			else if ( enableNull && literal==='null' || enableNil && literal==='nil' ) {
 				typify(array, ArrayOfNulls).push(null);
 			}
-			else { typify(array, ArrayOfIntegers).push(Integer(literal, useBigInt)); }
+			else { typify(array, ArrayOfIntegers).push(Integer(literal, useBigInt, allowLonger)); }
 			break;
 	}
 	if ( custom ) { array[lastIndex] = construct(type, array[lastIndex]); }
