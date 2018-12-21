@@ -93,11 +93,11 @@ TOML.parse(source, version, multiLineJoiner[, useBigInt=true[, xOptions]]);
     *   type: `object`
     *   desc:
         *   The extensional features not in the spec.  
-            Include comment information, `null` value, mixed-type array, multi-line inline table with trailing comma even no comma, interpolation string, custom constructor, etc.  
+            Include keeping the key/value pairs order of tables, integers larger than `long`, comment information, `null` value, mixed-type array, multi-line inline table with trailing comma even no comma, interpolation string, custom constructor, etc.  
             They are private experimental discouraged features.  
             See <https://GitHub.com/LongTengDao/TOML/blob/master/docs/xOptions.md>.
         *   标准中所没有的扩展功能。  
-            包括保留注释信息、`null` 值、跨行行内表及尾逗号甚至省略逗号、混合类型的数组、插值字符串、自定义构造器等。  
+            包括保持表中键值对的顺序、超出长整型的整数、保留注释信息、`null` 值、跨行行内表及尾逗号甚至省略逗号、混合类型的数组、插值字符串、自定义构造器等。  
             私有实验期功能，不建议随意使用。  
             详见 <https://GitHub.com/LongTengDao/TOML/blob/master/docs/xOptions.md>。
 

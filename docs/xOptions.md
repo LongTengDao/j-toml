@@ -2,6 +2,15 @@
 `xOptions`
 ==========
 
+`xOptions.order`
+----------------
+
+*   type: `boolean`
+*   default: `false`
+
+Keep the key/value pairs order of tables.  
+是否保持表中键值对的顺序。
+
 `xOptions.longer`
 -----------------
 

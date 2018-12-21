@@ -1,3 +1,4 @@
+import orderify from '../../orderify/dist/ESM/orderify.js';
 import { RangeError, TypeError, BigInt, Date, parseInt, Infinity, NaN, isFinite, isSafeInteger, fromCodePoint, create } from './global.js';
 import { throwSyntaxError, throwRangeError, none, where } from './iterator.js';
 import * as RE from './RE.js?RegExp';
@@ -125,6 +126,10 @@ export class Datetime extends Date {
 	
 }
 
-export const Table = function () {};
+export const Table = function (keepOrder) {
+	let undefined;
+	if ( new.target===undefined ) { throw new TypeError("Class constructor Table cannot be invoked without 'new'"); }
+	if ( keepOrder ) { return orderify(this); }
+};
 Table.prototype = create(null);
 Table.isTable = value => value instanceof Table;

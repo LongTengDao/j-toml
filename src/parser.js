@@ -26,6 +26,7 @@ const unlimitedType = array => array;
 
 let useWhatToJoinMultiLineString = '';
 let useBigInt = true;
+let keepOrder = false;
 let allowLonger = false;
 let keepComment = false;
 let enableNull = false;
@@ -44,6 +45,7 @@ export default function parse (toml_source, toml_version, useWhatToJoinMultiLine
 	useWhatToJoinMultiLineString = useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines;
 	useBigInt = useBigInt_forInteger;
 	xOptions:{
+		keepOrder = !!( extensionOptions && extensionOptions.order );
 		allowLonger = !!( extensionOptions && extensionOptions.longer );
 		keepComment = !!( extensionOptions && extensionOptions.hash );
 		enableNull = !!( extensionOptions && extensionOptions.null );
@@ -54,7 +56,7 @@ export default function parse (toml_source, toml_version, useWhatToJoinMultiLine
 		customConstructors = extensionOptions && extensionOptions.new || null;
 		customConstructors===null || prepareConstructors();
 	}
-	const rootTable = new Table;
+	const rootTable = new Table(keepOrder);
 	try {
 		from(toml_source.replace(RE.BOM, '').split(RE.EOL));
 		let lastSectionTable = rootTable;
@@ -83,7 +85,7 @@ function appendTable (table, key_key, asArrayItem, hash) {
 	const leadingKeys = parseKeys(key_key);
 	const finalKey = leadingKeys.pop();
 	table = prepareTable(table, leadingKeys);
-	const lastTable = new Table;
+	const lastTable = new Table(keepOrder);
 	if ( asArrayItem ) {
 		let arrayOfTables;
 		if ( finalKey in table ) { StaticObjects.has(arrayOfTables = table[finalKey]) && throwError('Trying to push Table to non-ArrayOfTables value at '+where()); }
@@ -134,8 +136,8 @@ function prepareTable (table, keys) {
 			else { throwError('Trying to define table through non-Table value at '+where()); }
 		}
 		else {
-			table = table[key] = new Table;
-			while ( index<length ) { table = table[keys[index++]] = new Table; }
+			table = table[key] = new Table(keepOrder);
+			while ( index<length ) { table = table[keys[index++]] = new Table(keepOrder); }
 			return table;
 		}
 	}
@@ -153,8 +155,8 @@ function prepareInlineTable (table, keys) {
 			StaticObjects.has(table) && throwError('Trying to assign property through static Inline Object at '+where());
 		}
 		else {
-			table = table[key] = new Table;
-			while ( index<length ) { table = table[keys[index++]] = new Table; }
+			table = table[key] = new Table(keepOrder);
+			while ( index<length ) { table = table[keys[index++]] = new Table(keepOrder); }
 			return table;
 		}
 	}
@@ -282,7 +284,7 @@ function assignBasicString (table, finalKey, literal) {
 }
 
 function assignInlineTable (table, finalKey, lineRest) {
-	const inlineTable = table[finalKey] = new Table;
+	const inlineTable = table[finalKey] = new Table(keepOrder);
 	StaticObjects.add(inlineTable);
 	lineRest = lineRest.replace(RE.SYM_WHITESPACE, '');
 	if ( allowInlineTableMultiLineAndTrailingCommaEvenNoComma ) {

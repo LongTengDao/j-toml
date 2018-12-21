@@ -1,8 +1,8 @@
 ﻿'use strict';
 
-const version = '0.5.27';
+const version = '0.5.28';
 
-const { WeakSet, WeakMap, SyntaxError, RangeError, TypeError, Error, BigInt, Date, parseInt, Infinity, NaN, Array, Map, RegExp,
+const { WeakSet, WeakMap: WeakMap$1, SyntaxError, RangeError, TypeError, Error, BigInt, Date, parseInt, Infinity, NaN, Array, Map, RegExp,
 	String: { fromCodePoint },
 	Number: { isFinite, isSafeInteger },
 	Object: { create, getOwnPropertyNames, defineProperty },
@@ -12,6 +12,38 @@ const { WeakSet, WeakMap, SyntaxError, RangeError, TypeError, Error, BigInt, Dat
 } = global;
 
 const { isArray } = Array;
+
+// Reflect, WeakMap, Object, Set, Proxy
+
+const { defineProperty: defineProperty$1, deleteProperty, ownKeys } = Reflect;
+
+const ownKeysKeepers = new WeakMap;
+
+const handlers = Object.assign(Object.create(null), {
+	defineProperty (target, key, descriptor) {
+		console.log('defineProperty');
+		if ( defineProperty$1(target, key, descriptor) ) {
+			ownKeysKeepers.get(target).add(key);
+			return true;
+		}
+		return false;
+	},
+	deleteProperty (target, key) {
+		if ( deleteProperty(target, key) ) {
+			ownKeysKeepers.get(target).delete(key);
+			return true;
+		}
+		return false;
+	},
+	ownKeys (target) {
+		return [...ownKeysKeepers.get(target)];
+	},
+});
+
+const orderify = object => {
+	ownKeysKeepers.set(object, new Set(ownKeys(object)));
+	return new Proxy(object, handlers);
+};
 
 const NONE = [];
 let sourceLines = NONE;
@@ -222,13 +254,17 @@ class Datetime extends Date {
 	
 }
 
-const Table = function () {};
+const Table = function (keepOrder) {
+	let undefined;
+	if ( new.target===undefined ) { throw new TypeError("Class constructor Table cannot be invoked without 'new'"); }
+	if ( keepOrder ) { return orderify(this); }
+};
 Table.prototype = create(null);
 Table.isTable = value => value instanceof Table;
 
 const { isTable } = Table;
 const StaticObjects = new WeakSet;
-const TypedArrays = new WeakMap;
+const TypedArrays = new WeakMap$1;
 const ArrayOfNulls = -1;
 const ArrayOfStrings = 1;
 const ArrayOfInlineTables = 2;
@@ -249,6 +285,7 @@ const unlimitedType = array => array;
 
 let useWhatToJoinMultiLineString = '';
 let useBigInt = true;
+let keepOrder = false;
 let allowLonger = false;
 let keepComment = false;
 let enableNull = false;
@@ -267,6 +304,7 @@ function parse (toml_source, toml_version, useWhatToJoinMultiLineString_notUsing
 	useWhatToJoinMultiLineString = useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines;
 	useBigInt = useBigInt_forInteger;
 	xOptions:{
+		keepOrder = !!( extensionOptions && extensionOptions.order );
 		allowLonger = !!( extensionOptions && extensionOptions.longer );
 		keepComment = !!( extensionOptions && extensionOptions.hash );
 		enableNull = !!( extensionOptions && extensionOptions.null );
@@ -277,7 +315,7 @@ function parse (toml_source, toml_version, useWhatToJoinMultiLineString_notUsing
 		customConstructors = extensionOptions && extensionOptions.new || null;
 		customConstructors===null || prepareConstructors();
 	}
-	const rootTable = new Table;
+	const rootTable = new Table(keepOrder);
 	try {
 		from(toml_source.replace(BOM, '').split(EOL));
 		let lastSectionTable = rootTable;
@@ -305,7 +343,7 @@ function appendTable (table, key_key, asArrayItem, hash) {
 	const leadingKeys = parseKeys(key_key);
 	const finalKey = leadingKeys.pop();
 	table = prepareTable(table, leadingKeys);
-	const lastTable = new Table;
+	const lastTable = new Table(keepOrder);
 	if ( asArrayItem ) {
 		let arrayOfTables;
 		if ( finalKey in table ) { StaticObjects.has(arrayOfTables = table[finalKey]) && throwError('Trying to push Table to non-ArrayOfTables value at '+where()); }
@@ -356,8 +394,8 @@ function prepareTable (table, keys) {
 			else { throwError('Trying to define table through non-Table value at '+where()); }
 		}
 		else {
-			table = table[key] = new Table;
-			while ( index<length ) { table = table[keys[index++]] = new Table; }
+			table = table[key] = new Table(keepOrder);
+			while ( index<length ) { table = table[keys[index++]] = new Table(keepOrder); }
 			return table;
 		}
 	}
@@ -375,8 +413,8 @@ function prepareInlineTable (table, keys) {
 			StaticObjects.has(table) && throwError('Trying to assign property through static Inline Object at '+where());
 		}
 		else {
-			table = table[key] = new Table;
-			while ( index<length ) { table = table[keys[index++]] = new Table; }
+			table = table[key] = new Table(keepOrder);
+			while ( index<length ) { table = table[keys[index++]] = new Table(keepOrder); }
 			return table;
 		}
 	}
@@ -504,7 +542,7 @@ function assignBasicString (table, finalKey, literal) {
 }
 
 function assignInlineTable (table, finalKey, lineRest) {
-	const inlineTable = table[finalKey] = new Table;
+	const inlineTable = table[finalKey] = new Table(keepOrder);
 	StaticObjects.add(inlineTable);
 	lineRest = lineRest.replace(SYM_WHITESPACE, '');
 	if ( allowInlineTableMultiLineAndTrailingCommaEvenNoComma ) {
