@@ -291,8 +291,8 @@ let keepComment = false;
 let enableNull = false;
 let enableNil = false;
 let allowInlineTableMultiLineAndTrailingCommaEvenNoComma = false;
-let typify = reallyTypify;
 let enableInterpolationString = false;
+let typify = reallyTypify;
 let customConstructors = null;
 const FUNCTION = new WeakSet;
 
@@ -303,17 +303,22 @@ function parse (toml_source, toml_version, useWhatToJoinMultiLineString_notUsing
 	if ( typeof useBigInt_forInteger!=='boolean' && typeof useBigInt_forInteger!=='bigint' ) { throw new TypeError('TOML.parse(,,,useBigInt)'); }
 	useWhatToJoinMultiLineString = useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines;
 	useBigInt = useBigInt_forInteger;
-	xOptions:{
-		keepOrder = !!( extensionOptions && extensionOptions.order );
-		allowLonger = !!( extensionOptions && extensionOptions.longer );
-		keepComment = !!( extensionOptions && extensionOptions.hash );
-		enableNull = !!( extensionOptions && extensionOptions.null );
-		enableNil = !!( extensionOptions && extensionOptions.nil );
-		allowInlineTableMultiLineAndTrailingCommaEvenNoComma = !!( extensionOptions && extensionOptions.multi );
-		typify = extensionOptions && extensionOptions.mix ? unlimitedType : reallyTypify;
-		enableInterpolationString = !!( extensionOptions && extensionOptions.ins );
-		customConstructors = extensionOptions && extensionOptions.new || null;
+	if ( extensionOptions ) {
+		keepOrder = !!extensionOptions.order;
+		allowLonger = !!extensionOptions.longer;
+		keepComment = !!extensionOptions.hash;
+		enableNull = !!extensionOptions.null;
+		enableNil = !!extensionOptions.nil;
+		allowInlineTableMultiLineAndTrailingCommaEvenNoComma = !!extensionOptions.multi;
+		enableInterpolationString = !!extensionOptions.ins;
+		typify = extensionOptions.mix ? unlimitedType : reallyTypify;
+		customConstructors = extensionOptions.new || null;
 		customConstructors===null || prepareConstructors();
+	}
+	else {
+		keepOrder = allowLonger = keepComment = enableNull = enableNil = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = enableInterpolationString = false;
+		typify = reallyTypify;
+		customConstructors = null;
 	}
 	const rootTable = new Table(keepOrder);
 	try {
