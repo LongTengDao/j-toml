@@ -13,6 +13,17 @@ const { WeakSet, WeakMap: WeakMap$1, SyntaxError, RangeError, TypeError, Error, 
 
 const { isArray } = Array;
 
+/*!
+ * 模块名称：j-orderify
+ * 模块功能：返回一个可以保证给定对象的自有属性按照此后添加的顺序排列的 proxy，即便键名是 symbol，或整数式 string。
+   　　　　　Return a proxy for the given object, which can guarantee the own keys are in setting order, even if the key name is a symbol or an integer-form string.
+ * 模块版本：1.0.0
+ * 许可条款：LGPL-3.0
+ * 所属作者：龙腾道 <LongTengDao@LongTengDao.com> (www.LongTengDao.com)
+ * 问题反馈：https://GitHub.com/LongTengDao/j-orderify/issues
+ * 项目主页：https://GitHub.com/LongTengDao/j-orderify/
+ */
+
 // Reflect, WeakMap, Object, Set, Proxy
 
 const { defineProperty: defineProperty$1, deleteProperty, ownKeys } = Reflect;
@@ -21,7 +32,6 @@ const ownKeysKeepers = new WeakMap;
 
 const handlers = Object.assign(Object.create(null), {
 	defineProperty (target, key, descriptor) {
-		console.log('defineProperty');
 		if ( defineProperty$1(target, key, descriptor) ) {
 			ownKeysKeepers.get(target).add(key);
 			return true;
@@ -44,6 +54,8 @@ const orderify = object => {
 	ownKeysKeepers.set(object, new Set(ownKeys(object)));
 	return new Proxy(object, handlers);
 };
+
+/*¡ j-orderify */
 
 const NONE = [];
 let sourceLines = NONE;
