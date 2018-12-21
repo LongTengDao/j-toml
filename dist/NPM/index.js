@@ -14,7 +14,7 @@ const { WeakSet, WeakMap: WeakMap$1, SyntaxError, RangeError, TypeError, Error, 
 const { isArray } = Array;
 
 /*!
- * 模块名称：j-orderify
+ * 模块名称：@ltd/j-orderify
  * 模块功能：返回一个可以保证给定对象的自有属性按照此后添加的顺序排列的 proxy，即便键名是 symbol，或整数式 string。
    　　　　　Return a proxy for the given object, which can guarantee the own keys are in setting order, even if the key name is a symbol or an integer-form string.
  * 模块版本：1.0.0
@@ -55,7 +55,7 @@ const orderify = object => {
 	return new Proxy(object, handlers);
 };
 
-/*¡ j-orderify */
+/*¡ @ltd/j-orderify */
 
 const NONE = [];
 let sourceLines = NONE;

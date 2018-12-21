@@ -1,4 +1,4 @@
-import orderify from '../../orderify/dist/ESM/j-orderify.js';
+import orderify from '@ltd/j-orderify';
 import { RangeError, TypeError, BigInt, Date, parseInt, Infinity, NaN, isFinite, isSafeInteger, fromCodePoint, create } from './global.js';
 import { throwSyntaxError, throwRangeError, none, where } from './iterator.js';
 import * as RE from './RE.js?RegExp';

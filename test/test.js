@@ -2,7 +2,10 @@
 
 module.exports = require('@ltd/j-dev').
 	
-	import_default(__dirname+'/../src/default.js').
+	import_default(__dirname+'/../src/default.js', (moduleName) => {
+		if( moduleName==='@ltd/j-orderify' ) { return require(__dirname+'/../../j-orderify/dist/NPM/index.js'); }
+		throw moduleName;
+	}).
 	
 	then(TOML => {
 		

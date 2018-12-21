@@ -18,6 +18,9 @@ require('../test/test.js').then(async() => {
 					keywords: ['TOML'],
 				},
 			},
+			locate: {
+				'@ltd/j-orderify': __dirname+'/../../j-orderify/dist/ESM/j-orderify.js',
+			},
 		});
 	
 	const README = Buffer.from(fs.readFileSync(__dirname+'/../docs/README.md', 'utf8').replace(/(\n```+)[^`\r\n]+/g, '$1'), 'utf8');
