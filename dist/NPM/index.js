@@ -55,6 +55,8 @@ const orderify = object => {
 	return new Proxy(object, handlers);
 };
 
+orderify.default = orderify;
+
 /*¡ @ltd/j-orderify */
 
 const NONE = [];
