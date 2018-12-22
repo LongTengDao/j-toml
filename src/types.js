@@ -1,5 +1,5 @@
-import orderify from '@ltd/j-orderify';
 import { RangeError, TypeError, BigInt, Date, parseInt, Infinity, NaN, isFinite, isSafeInteger, fromCodePoint, create } from './global.js';
+import { orderify } from './import.js';
 import { throwSyntaxError, throwRangeError, none, where } from './iterator.js';
 import * as RE from './RE.js?RegExp';
 

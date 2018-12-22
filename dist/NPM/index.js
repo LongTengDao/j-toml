@@ -24,7 +24,7 @@ const { isArray } = Array;
  * 项目主页：https://GitHub.com/LongTengDao/j-orderify/
  */
 
-// Reflect, WeakMap, Object, Set, Proxy
+const version$1 = '1.0.0';
 
 const { defineProperty: defineProperty$1, deleteProperty, ownKeys } = Reflect;
 
@@ -54,6 +54,8 @@ const orderify = object => {
 	ownKeysKeepers.set(object, new Set(ownKeys(object)));
 	return new Proxy(object, handlers);
 };
+
+orderify.version = version$1;
 
 orderify.default = orderify;
 

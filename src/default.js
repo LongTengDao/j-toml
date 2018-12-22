@@ -1,4 +1,4 @@
-import version from '../version?text';
+import version from './version?text';
 import { Array } from './global.js';
 import { String, Integer, Float, Boolean, Datetime, Table } from './types.js';
 import parse from './parser.js';
