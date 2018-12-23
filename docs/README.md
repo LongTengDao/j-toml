@@ -1,14 +1,14 @@
 
 
-[@ltd/toml v0.5]
-================
+[@ltd/j-toml v0.5]
+==================
 
 
-[@ltd/toml v0.5] is an implementation of [TOML v0.5] ("Tom's Obvious, Minimal Language") written by LongTengDao,  
+[@ltd/j-toml v0.5] is an implementation of [TOML v0.5] ("Tom's Obvious, Minimal Language") written by LongTengDao,  
 which is the best config format he had ever seen.  
 (Obviously for exhausted people who tried to design that.)
 
-[@ltd/toml v0.5] 是龙腾道为 [汤小明语 v0.5]（“汤小明的小巧明晰语言”）写的实现。  
+[@ltd/j-toml v0.5] 是龙腾道为 [汤小明语 v0.5]（“汤小明的小巧明晰语言”）写的实现。  
 ——这 TM 可能是“我”见过最好的配置文件书写格式了。  
 ——对于亲手折腾到爆炸的人而言。
 
@@ -19,7 +19,7 @@ which is the best config format he had ever seen.
 ### npm install
 
 ```shell
-npm install @ltd/toml
+npm install @ltd/j-toml
 ```
 
 ### sample.toml
@@ -45,7 +45,7 @@ __proto__      = "none"
 ```js
 const source = require('fs').readFileSync(__dirname+'/sample.toml', 'utf8');
 
-const table = require('@ltd/toml').parse(source, 0.5, '\n');
+const table = require('@ltd/j-toml').parse(source, 0.5, '\n');
 
 table.I_am_normal    === "none" // true
 
@@ -95,11 +95,11 @@ TOML.parse(source, version, multiLineJoiner[, useBigInt=true[, xOptions]]);
         *   The extensional features not in the spec.  
             Include keeping the key/value pairs order of tables, integers larger than `long`, comment information, `null` value, mixed-type array, multi-line inline table with trailing comma even no comma, interpolation string, custom constructor, etc.  
             They are private experimental discouraged features.  
-            See <https://GitHub.com/LongTengDao/TOML/blob/master/docs/xOptions.md>.
+            See <https://GitHub.com/LongTengDao/j-toml/blob/master/docs/xOptions.md>.
         *   标准中所没有的扩展功能。  
             包括保持表中键值对的顺序、超出长整型的整数、保留注释信息、`null` 值、跨行行内表及尾逗号甚至省略逗号、混合类型的数组、插值字符串、自定义构造器等。  
             私有实验期功能，不建议随意使用。  
-            详见 <https://GitHub.com/LongTengDao/TOML/blob/master/docs/xOptions.md>。
+            详见 <https://GitHub.com/LongTengDao/j-toml/blob/master/docs/xOptions.md>。
 
 *   `return`
     *   type: `object`
@@ -113,7 +113,7 @@ TOML.parse(source, version, multiLineJoiner[, useBigInt=true[, xOptions]]);
         *   如果参数不符合要求，会抛出错误；如果源文本有错误，错误对象会有一个名为 `lineIndex` 的数值类型的属性来帮助定位。
 
 
-[@ltd/toml v0.5]: https://www.npmjs.com/package/@ltd/toml
+[@ltd/j-toml v0.5]: https://www.npmjs.com/package/@ltd/j-toml
 
 [TOML v0.5]: https://GitHub.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md
 

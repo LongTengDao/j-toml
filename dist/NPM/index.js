@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.29';
+const version = '0.5.30';
 
 const { WeakSet, WeakMap: WeakMap$1, SyntaxError, RangeError, TypeError, Error, BigInt, Date, parseInt, Infinity, NaN, Array, Map, RegExp,
 	String: { fromCodePoint },
