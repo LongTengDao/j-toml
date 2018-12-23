@@ -16,42 +16,28 @@ which is the best config format he had ever seen.
 `Node.js`
 ---------
 
-### npm install
-
 ```
 npm install @ltd/j-toml
 ```
 
-### sample.toml
-
 ```
-[Table]
+[SubTable]
 
-# A normal key name that supported by any other JavaScript implementation:
-# 为所有其它 JavaScript 实现所支持的一个普通键名：
-
-I_am_normal    = "none"
-
-# Some valid (in fact normal) key names but currently only supported by this JavaScript implementation:
-# 一些正确（而且其实普通）但是目前仅被本 JavaScript 实现支持的键名：
-
-hasOwnProperty = "none"
-constructor    = "none"
-__proto__      = "none"
+I_am_normal    = "..."
+hasOwnProperty = "..."
+constructor    = "..."
+__proto__      = "..."
 ```
 
-### sample.js
-
 ```
-const source = require('fs').readFileSync(__dirname+'/sample.toml', 'utf8');
+const TOML = require('@ltd/j-toml');
 
-const table = require('@ltd/j-toml').parse(source, 0.5, '\n');
+const rootTable = TOML.parse(src, 0.5, '\n');
 
-table.I_am_normal    === "none" // true
-
-table.hasOwnProperty === "none" // true
-table.constructor    === "none" // true
-table.__proto__      === "none" // true
+rootTable.SubTable.I_am_normal    === "..." // true
+rootTable.SubTable.hasOwnProperty === "..." // true
+rootTable.SubTable.constructor    === "..." // true
+rootTable.SubTable.__proto__      === "..." // true
 ```
 
 
