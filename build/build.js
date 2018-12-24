@@ -1,6 +1,6 @@
 'use strict';
 
-require('../test/test.js')(async ({ build, read, copy }) => {
+require('../test/test.js')(async ({ build, read, copy, path }) => {
 	
 	await build({
 		name: 'j-toml',
@@ -13,7 +13,7 @@ require('../test/test.js')(async ({ build, read, copy }) => {
 			},
 		},
 		locate: {
-			'@ltd/j-orderify': __dirname+'/../../j-orderify/dist/ESM/j-orderify.js',
+			'@ltd/j-orderify': path('../j-orderify/dist/ESM/j-orderify.js'),
 		},
 	});
 	
