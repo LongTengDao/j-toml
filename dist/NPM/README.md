@@ -69,11 +69,11 @@ TOML.parse(source, version, multiLineJoiner[, useBigInt=true[, xOptions]]);
             注意在解析 TOML 源时，按照 TOML 规范的要求，行分隔符总是 `"\n"` 或 `"\r\n"`。
 
 3.  `useBigInt`
-    *   type: `boolean` / `bigint`
+    *   type: `boolean` / `number`
     *   default: `true`
     *   desc:
-        *   Specify whether you want or not to use `BigInt` for integer type value. `bigint` type value allows you to control it by a max limit (and the negative limit from `~useBigInt`).
-        *   指定你是否要用 `BigInt` 来实现整数类型的值。`bigint` 类型的值允许你精确控制超过多少才使用 `BigInt`（自动通过 `~useBigInt` 获取负向界限）。
+        *   Specify whether you want or not to use `BigInt` for integer type value. `number` type value allows you to control it by a max limit (and the negative limit from `-useBigInt`, if `useBigInt>=0`; otherwise as a min limit, and the positive limit is `~useBigInt`).
+        *   指定你是否要用 `BigInt` 来实现整数类型的值。`number` 类型的值允许你精确控制超过多少才使用 `BigInt`（自动通过 `-useBigInt` 获取负向界限，如果 `useBigInt>=0`；否则通过 `~useBigInt` 获取正向界限）。
 
 4.  `xOptions`
     *   type: `object`

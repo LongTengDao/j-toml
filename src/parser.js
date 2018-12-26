@@ -1,4 +1,4 @@
-import { WeakSet, WeakMap, Error, TypeError, Infinity, NaN, isArray, Symbol_for, Map, RegExp, getOwnPropertyNames, create, defineProperty, getPrototypeOf, stringify } from './global.js';
+import { WeakSet, WeakMap, Error, TypeError, RangeError, Infinity, NaN, isSafeInteger, isArray, Symbol_for, Map, RegExp, getOwnPropertyNames, create, defineProperty, getPrototypeOf, stringify } from './global.js';
 import { from, next, rest, done, mark, must, throwSyntaxError, throwTypeError, throwError, where } from './iterator.js';
 import { unEscapeSingleLine, String, Integer, Float, Datetime, Table } from './types.js';
 import * as RE from './RE.js?RegExp';
@@ -41,7 +41,10 @@ export default function parse (toml_source, toml_version, useWhatToJoinMultiLine
 	if ( typeof toml_source!=='string' ) { throw new TypeError('TOML.parse(source)'); }
 	if ( toml_version!==0.5 ) { throw new Error('TOML.parse(,version)'); }
 	if ( typeof useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines!=='string' ) { throw new TypeError('TOML.parse(,,multiLineJoiner)'); }
-	if ( typeof useBigInt_forInteger!=='boolean' && typeof useBigInt_forInteger!=='bigint' ) { throw new TypeError('TOML.parse(,,,useBigInt)'); }
+	if ( typeof useBigInt_forInteger!=='boolean' ) {
+		if ( typeof useBigInt_forInteger!=='number' ) { throw new TypeError('TOML.parse(,,,useBigInt)'); }
+		if ( !isSafeInteger(useBigInt_forInteger) ) { throw new RangeError('TOML.parse(...useBigInt)'); }
+	}
 	useWhatToJoinMultiLineString = useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines;
 	useBigInt = useBigInt_forInteger;
 	if ( extensionOptions ) {

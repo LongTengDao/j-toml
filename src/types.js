@@ -8,7 +8,7 @@ export const unEscapeSingleLine = ($0, $1, $2, $3, $4, $5) => $1 ? $1 : $2 ? ESC
 export const String = literal => literal.replace(RE.ESCAPED_IN_SINGLE_LINE, unEscapeSingleLine);
 String.isString = value => typeof value==='string';
 
-const MAX64 = BigInt(2**63-1);
+const MAX64 = BigInt(2)**BigInt(64-1)-BigInt(1);
 const MIN64 = ~MAX64;
 const ZERO = BigInt(0);
 export const Integer = (literal, useBigInt = true, allowLonger = false) => {
@@ -20,15 +20,17 @@ export const Integer = (literal, useBigInt = true, allowLonger = false) => {
 		return number;
 	}
 	else {
-		let bitInt;
-		if ( literal==='0' || literal==='+0' || literal==='-0' ) { bitInt = ZERO; }
+		let bigInt;
+		if ( literal==='0' || literal==='+0' || literal==='-0' ) { bigInt = ZERO; }
 		else {
 			( literal.charAt(0)==='0' ? RE.XOB_INTEGER : RE.INTEGER ).test(literal) || throwSyntaxError('Invalid Integer '+literal+( none() ? '' : ' at '+where() ));
-			bitInt = BigInt(literal.replace(RE.UNDERSCORES, ''));
-			allowLonger || bitInt<=MAX64 && bitInt>=MIN64 || throwRangeError('Integer expect 64 bit range (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807), not includes '+literal+( none() ? '' : ' meet at '+where() ));
+			bigInt = BigInt(literal.replace(RE.UNDERSCORES, ''));
+			allowLonger || MIN64<=bigInt && bigInt<=MAX64 || throwRangeError('Integer expect 64 bit range (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807), not includes '+literal+( none() ? '' : ' meet at '+where() ));
 		}
-		if ( useBigInt===true || bitInt<=useBigInt && bitInt>= ~useBigInt ) { return bitInt; }
-		return +( bitInt+'' );
+		if ( useBigInt===true ) { return bigInt; }
+		isSafeInteger(useBigInt) || throwRangeError('TOML.Integer(,useBigInt) argument muse be safe integer.');
+		if ( useBigInt<0 ? useBigInt<=bigInt && bigInt<= ~useBigInt : -useBigInt<=bigInt && bigInt<=useBigInt ) { return +( bigInt+'' ); }
+		return bigInt;
 	}
 };
 Integer.isInteger = value => typeof value==='bigint';
@@ -53,8 +55,8 @@ export const Boolean = {
 const DATE = new Date;
 const year = (date, utc) => {
 	const year = utc ? date.getUTCFullYear() : date.getFullYear();
-	if ( year>=1000 && year<=9999 ) { return ''+year; }
-	if ( year>=100 && year<=999 ) { return '0'+year; }
+	if ( 1000<=year && year<=9999 ) { return ''+year; }
+	if ( 100<=year && year<=999 ) { return '0'+year; }
 	throw new RangeError('Datetime which year was set out of range 100 to 9999 can not be serialized toTOML.');
 };
 const month = (datetime, utc) => ( ( utc ? datetime.getUTCMonth() : datetime.getMonth() )+1+'' ).padStart(2, '0');
