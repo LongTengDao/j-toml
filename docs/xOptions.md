@@ -71,6 +71,7 @@ tableC = {
     y = 2
 }
 
+[tableD]
 x = 1
 y = 2
 
