@@ -8,9 +8,6 @@ export const unEscapeSingleLine = ($0, $1, $2, $3, $4, $5) => $1 ? $1 : $2 ? ESC
 export const String = literal => literal.replace(RE.ESCAPED_IN_SINGLE_LINE, unEscapeSingleLine);
 String.isString = value => typeof value==='string';
 
-const MAX64 = BigInt(2)**BigInt(64-1)-BigInt(1);
-const MIN64 = ~MAX64;
-const ZERO = BigInt(0);
 export const Integer = (literal, useBigInt = true, allowLonger = false) => {
 	if ( useBigInt===false ) {
 		if ( literal==='0' || literal==='+0' || literal==='-0' ) { return 0; }
@@ -21,11 +18,13 @@ export const Integer = (literal, useBigInt = true, allowLonger = false) => {
 	}
 	else {
 		let bigInt;
-		if ( literal==='0' || literal==='+0' || literal==='-0' ) { bigInt = ZERO; }
+		if ( literal==='0' || literal==='+0' || literal==='-0' ) { bigInt = 0n; }
 		else {
 			( literal.charAt(0)==='0' ? RE.XOB_INTEGER : RE.INTEGER ).test(literal) || throwSyntaxError('Invalid Integer '+literal+( none() ? '' : ' at '+where() ));
 			bigInt = BigInt(literal.replace(RE.UNDERSCORES, ''));
-			allowLonger || MIN64<=bigInt && bigInt<=MAX64 || throwRangeError('Integer expect 64 bit range (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807), not includes '+literal+( none() ? '' : ' meet at '+where() ));
+			allowLonger ||
+			-9223372036854775808n<=bigInt && bigInt<=9223372036854775807n ||// ~( 2**(64-1)-1 )
+			throwRangeError('Integer expect 64 bit range (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807), not includes '+literal+( none() ? '' : ' meet at '+where() ));
 		}
 		if ( useBigInt===true ) { return bigInt; }
 		isSafeInteger(useBigInt) || throwRangeError('TOML.Integer(,useBigInt) argument muse be safe integer.');
