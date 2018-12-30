@@ -1,7 +1,7 @@
 import { RangeError, TypeError, BigInt, Date, parseInt, Infinity, NaN, isFinite, isSafeInteger, fromCodePoint, create } from './global.js';
 import { orderify } from './import.js';
 import { throwSyntaxError, throwRangeError, none, where } from './iterator.js';
-import * as RE from './RE.js?RegExp';
+import * as RE from './RE.js?<RegExp>';
 
 const ESCAPE_ALIAS = { b: '\b', t: '\t', n: '\n', f: '\f', r: '\r' };
 export const unEscapeSingleLine = ($0, $1, $2, $3, $4, $5) => $1 ? $1 : $2 ? ESCAPE_ALIAS[$2] : fromCodePoint(parseInt($3 || $4+$5, 16));

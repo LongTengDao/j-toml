@@ -1,7 +1,7 @@
 import { WeakSet, WeakMap, Error, TypeError, RangeError, Infinity, NaN, isSafeInteger, isArray, Symbol_for, Map, RegExp, getOwnPropertyNames, create, defineProperty, getPrototypeOf, stringify } from './global.js';
 import { from, next, rest, done, mark, must, throwSyntaxError, throwTypeError, throwError, where } from './iterator.js';
 import { unEscapeSingleLine, String, Integer, Float, Datetime, Table } from './types.js';
-import * as RE from './RE.js?RegExp';
+import * as RE from './RE.js?<RegExp>';
 
 const { isTable } = Table;
 const StaticObjects = new WeakSet;
