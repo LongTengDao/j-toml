@@ -1,1 +1,1 @@
-export { default as orderify } from '@ltd/j-orderify';
+export { orderify } from '@ltd/j-orderify';
