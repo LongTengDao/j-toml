@@ -28,23 +28,29 @@ const { defineProperty: defineProperty$1, deleteProperty, ownKeys } = Reflect;
 
 const ownKeysKeepers = new WeakMap;
 
-const handlers = Object.assign(Object.create(null), {
-	defineProperty (target, key, descriptor) {
-		if ( defineProperty$1(target, key, descriptor) ) {
-			ownKeysKeepers.get(target).add(key);
-			return true;
+const handlers = Object.create(null, {
+	defineProperty: {
+		value (target, key, descriptor) {
+			if ( defineProperty$1(target, key, descriptor) ) {
+				ownKeysKeepers.get(target).add(key);
+				return true;
+			}
+			return false;
 		}
-		return false;
 	},
-	deleteProperty (target, key) {
-		if ( deleteProperty(target, key) ) {
-			ownKeysKeepers.get(target).delete(key);
-			return true;
+	deleteProperty: {
+		value (target, key) {
+			if ( deleteProperty(target, key) ) {
+				ownKeysKeepers.get(target).delete(key);
+				return true;
+			}
+			return false;
 		}
-		return false;
 	},
-	ownKeys (target) {
-		return [...ownKeysKeepers.get(target)];
+	ownKeys: {
+		value (target) {
+			return [...ownKeysKeepers.get(target)];
+		}
 	},
 });
 
