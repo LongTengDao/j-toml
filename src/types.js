@@ -23,7 +23,7 @@ export const Integer = (literal, useBigInt = true, allowLonger = false) => {
 			( literal.charAt(0)==='0' ? RE.XOB_INTEGER : RE.INTEGER ).test(literal) || throwSyntaxError('Invalid Integer '+literal+( none() ? '' : ' at '+where() ));
 			bigInt = BigInt(literal.replace(RE.UNDERSCORES, ''));
 			allowLonger ||
-			-9223372036854775808n<=bigInt && bigInt<=9223372036854775807n ||// ~( 2**(64-1)-1 )
+			-9223372036854775808n<=bigInt && bigInt<=9223372036854775807n ||// ( min = -(2n**(64n-1n)) || ~max ) <= long <= ( max = 2n**(64n-1n)-1n || ~min )
 			throwRangeError('Integer expect 64 bit range (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807), not includes '+literal+( none() ? '' : ' meet at '+where() ));
 		}
 		if ( useBigInt===true ) { return bigInt; }
