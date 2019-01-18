@@ -50,7 +50,7 @@ TOML.parse(source, version, multiLineJoiner[, useBigInt=true[, xOptions]]);
 
 ### `arguments`
 
-0.  `source`
+0.  #### `source`
     *   required
     *   type: `string`
     
@@ -58,7 +58,7 @@ TOML.parse(source, version, multiLineJoiner[, useBigInt=true[, xOptions]]);
     
     会自动剔除 UTF 文本开头的 BOM 标签（如果有的话）。
     
-1.  `version`
+1.  #### `version`
     *   required
     *   type: `0.5`
     
@@ -66,7 +66,7 @@ TOML.parse(source, version, multiLineJoiner[, useBigInt=true[, xOptions]]);
     
     你必须显式地进行指定（尽管目前还不能使用别的值）。
     
-2.  `multiLineJoiner`
+2.  #### `multiLineJoiner`
     *   required
     *   type: `string`
     
@@ -76,7 +76,7 @@ TOML.parse(source, version, multiLineJoiner[, useBigInt=true[, xOptions]]);
     对于多行字符串，用什么来拼接各行。  
     注意在解析 TOML 源时，按照 TOML 规范的要求，行分隔符总是 `"\n"` 或 `"\r\n"`。
     
-3.  `useBigInt`
+3.  #### `useBigInt`
     *   default: `true`
     *   type: `boolean` / `number`
     
@@ -84,7 +84,7 @@ TOML.parse(source, version, multiLineJoiner[, useBigInt=true[, xOptions]]);
     
     指定你是否要用 `BigInt` 来实现整数类型的值。`number` 类型的值允许你精确控制超过多少才使用 `BigInt`（自动通过 `-useBigInt` 获取负向界限，如果 `useBigInt>=0`；否则通过 `~useBigInt` 获取正向界限）。
     
-4.  `xOptions`
+4.  #### `xOptions`
     *   type: `Object`
     
     The extensional features not in the spec.  
