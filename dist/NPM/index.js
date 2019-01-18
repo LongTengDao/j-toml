@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.35';
+const version = '0.5.36';
 
 const { WeakSet, WeakMap: WeakMap$1, SyntaxError, RangeError, TypeError, Error, BigInt, Date, parseInt, Infinity, NaN, Array, Map, RegExp,
 	String: { fromCodePoint },
@@ -209,7 +209,10 @@ const minutes = (datetime, utc) => ( ( utc ? datetime.getUTCMinutes() : datetime
 const seconds = datetime => ( datetime.getSeconds()+'' ).padStart(2, '0');
 const milliseconds = datetime => {
 	const milliseconds = datetime.getMilliseconds();
-	return milliseconds===0 ? '' : '.'+( milliseconds+'' ).padStart(3, '0');
+	if ( milliseconds===0 ) { return ''; }
+	let _milliseconds = '.'+( milliseconds+'' ).padStart(3, '0');
+	while ( _milliseconds.endsWith('0') ) { _milliseconds = _milliseconds.slice(0, -1); }
+	return _milliseconds;
 };
 
 class Datetime extends Date {
