@@ -1,140 +1,71 @@
 'use strict';
 
-module.exports = require('@ltd/j-dev')(__dirname+'/..')(async ({ import_default }) => {
+module.exports = require('@ltd/j-dev')(__dirname+'/..')(async ({ import_default, read }) => {
 	
 	const TOML = await import_default('src/default.js', moduleName => {
 		if ( moduleName==='@ltd/j-orderify' ) { return require(__dirname+'/../../j-orderify/dist/NPM/index.js'); }
 		throw moduleName;
 	});
 	
-	for ( const literal of SampleDatetime() ) {
-		const toml = new TOML.Datetime(literal).toTOML();
-		if ( toml!==literal ) {
-			console.log('literal: '+literal);
-			console.log('to_toml: '+toml);
-			throw new Error('to_toml !== literal')
-		}
+	const toml = TOML.parse(await read('./test/sample.toml'), 0.5, '\n', true);
+	
+	compare('integer', {
+		'1': 1n,
+		'0': 0n,
+		'-1': -1n,
+		'+1': 1n,
+		'+0': 0n,
+		'1_2': 12n,
+		'0xdead_beef': 0xdeadbeefn,
+		'0o755': 0o755n,
+		'0b11010110': 0b11010110n,
+	});
+	
+	compare('float', {
+		'+1.0': 1,
+		'3.14': 3.14,
+		'-0.01': -0.01,
+		'5e+22': 5e+22,
+		'1e6': 1e6,
+		'-2E-2': -2E-2,
+		'6.626e-34': 6.626e-34,
+		'224_617.445_991_228': 224617.445991228,
+		'inf': Infinity,
+		'+inf': Infinity,
+		'-inf': -Infinity,
+		'nan': NaN,
+		'+nan': NaN,
+		'-nan': NaN,
+	});
+	
+	compare('date-time', {
+		'offset_date-time_Z': '1970-01-01 00:00:00.999Z',
+		'offset_date-time_0': '1970-01-01 00:00:00.999+00:00',
+		'offset_date-time_2': '1970-01-01 00:00:00.999-02:00',
+		'offset_date-time_8': '1970-01-01 00:00:00.999+08:00',
+		'local_date-time': '1970-01-01 00:00:00.999',
+		'local_date': '1970-01-01',
+		'local_time': '00:00:00.999',
+	});
+	
+	if ( JSON.stringify(toml)!==JSON.stringify(JSON.parse(await read('./test/expect.json'))) ) {
+		throw new Error(JSON.stringify(toml, null, '\t'));
 	}
 	
-	let table = TOML.parse(SampleFloat(), 0.5, '\r?\n');
-	
-	if ( table.inf!==Infinity ) { throw table.inf; }
-	if ( table['-inf']!== -Infinity ) { throw table['-inf']; }
-	if ( table.nan===table.nan ) { throw table.nan; }
-	if ( table[0]!==0n ) { throw table[0]; }
-	
-	table = TOML.parse(SampleWhole(), 0.5, '\r?\n');
-	if ( JSON.stringify(table)!==JSON.stringify(ExpectWhole()) ) {
-		throw JSON.stringify(table, null, '\t');
+	function compare (which, expect) {
+		const sample = toml[which];
+		const expect_keys = Object.getOwnPropertyNames(expect).sort();
+		const sample_keys = Object.getOwnPropertyNames(sample).sort();
+		if ( JSON.stringify(sample_keys)!==JSON.stringify(expect_keys) ) {
+			throw new Error(which+' has '+JSON.stringify(sample_keys)+', but expect '+JSON.stringify(expect_keys)+'.');
+		}
+		for ( const key of expect_keys ) {
+			if ( typeof sample[key]==='object' ) { sample[key] = sample[key].toTOML(); }
+			if ( expect[key]!==expect[key] ? sample[key]===sample[key] : sample[key]!==expect[key] ) {
+				throw new Error(which+'['+key+'] is '+sample[key]+', but expect '+expect[key]+'.');
+			}
+		}
+		toml[which] = null;
 	}
 	
 });
-
-function SampleDatetime () {
-	return [
-		'1970-01-01 00:00:00Z',
-		'1970-01-01 00:00:00+00:00',
-		'1970-01-01 00:00:00+02:00',
-		'1970-01-01 00:00:00+08:00',
-		'1970-01-01 00:00:00',
-		'1970-01-01',
-		'00:00:00',
-	];
-}
-
-function SampleFloat () {
-	return `
-		inf = inf
-		-inf = -inf
-		nan = nan
-		0 = 0
-	`;
-}
-
-function SampleWhole () {
-	return `
-	
-		a = 'a'
-		b = "b"
-		
-		[c]
-		d = """d"""
-		e = '''e'''
-		
-		[[f]]
-		g = 0.0
-		
-		[[f]]
-		h = true
-		i = false
-		j = [
-			[],
-			[],
-		]
-		k = { l.m = 'l.m' }
-		
-		[[fruit]]
-		name = "apple"
-		
-		[fruit.physical]
-		color = "red"
-		shape = "round"
-		
-		[[fruit.variety]]
-		name = "red delicious"
-		
-		[[fruit.variety]]
-		name = "granny smith"
-		
-		[[fruit]]
-		name = "banana"
-		
-		[[fruit.variety]]
-		name = "plantain"
-		
-	`;
-}
-
-function ExpectWhole () {
-	return {
-		a: 'a',
-		b: 'b',
-		c: {
-			d: 'd',
-			e: 'e',
-		},
-		f: [
-			{
-				g: 0,
-			},
-			{
-				h: true,
-				i: false,
-				j: [
-					[],
-					[],
-				],
-				k: { l: { m: 'l.m' } },
-			},
-		],
-		fruit: [
-			{
-				name: 'apple',
-				physical: {
-					color: 'red',
-					shape: 'round'
-				},
-				variety: [
-					{ name: 'red delicious' },
-					{ name: 'granny smith' },
-				],
-			},
-			{
-				name: 'banana',
-				variety: [
-					{ name: 'plantain' },
-				],
-			}
-		],
-	};
-}

@@ -1,0 +1,74 @@
+
+array = [[],
+[{}],
+[{},{}],
+]
+
+inline_table = { 1.1 = 1.1, 1.2 = 1.2, 2.1 = 2.1 }
+
+# comment
+
+[string]
+basic = "\b\t\n\f\r\"\\\u0000\U00000000"
+literal = '\b\t\n\f\r\"\\\u0000\U00000000'
+multi-lines_basic.1 = """
+那只 敏捷的 棕 \
+
+
+  狐狸 跳 过了 \
+    那只 懒 狗。"""
+multi-lines_basic.2 = """\
+       那只 敏捷的 棕 \
+       狐狸 跳 过了 \
+       那只 懒 狗。\
+       """
+multi-lines_literal = '''
+原始字符串中的
+第一个换行被剔除了。
+   所有其它空白
+   都保留了。
+'''
+
+[integer]
+1 = 1
+0 = 0
+-1 = -1
+"+1" = +1
+"+0" = +0
+1_2 = 1_2
+0xdead_beef = 0xdead_beef
+0o755 = 0o755
+0b11010110 = 0b11010110
+
+[float]
+"+1.0" = +1.0
+"3.14" = 3.14
+"-0.01" = -0.01
+"5e+22" = 5e+22
+1e6 = 1e6
+-2E-2 = -2E-2
+"6.626e-34" = 6.626e-34
+"224_617.445_991_228" = 224_617.445_991_228
+inf = inf
+"+inf" = +inf
+-inf = -inf
+nan = nan
+"+nan" = +nan
+-nan = -nan
+
+[boolean]
+true = true
+false = false
+
+[date-time]
+offset_date-time_Z = 1970-01-01 00:00:00.9999Z
+offset_date-time_0 = 1970-01-01 00:00:00.9999+00:00
+offset_date-time_2 = 1970-01-01 00:00:00.9999-02:00
+offset_date-time_8 = 1970-01-01 00:00:00.9999+08:00
+local_date-time = 1970-01-01 00:00:00.9999
+local_date = 1970-01-01
+local_time = 00:00:00.9999
+
+[[array_of_table]]
+
+[[array_of_table]]

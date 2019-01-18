@@ -12,7 +12,7 @@ const rest = () => lineIndex!==lastLineIndex;
 const mark = () => lineIndex;
 const must = (message, startIndex) => {
 	if ( lineIndex===lastLineIndex ) {
-		const error = new SyntaxError(message+' is not close until the end of the file, which started from lines['+startIndex+']: '+sourceLines[startIndex]);
+		const error = new SyntaxError(message+' is not close until the end of the file, which started from line '+( startIndex+1 )+': '+sourceLines[startIndex]);
 		error.lineIndex = lineIndex;
 		done();
 		throw error;
@@ -30,7 +30,7 @@ export const throwSyntaxError = message => throws(new SyntaxError(message));
 export const throwRangeError = message => throws(new RangeError(message));
 export const throwTypeError = message => throws(new TypeError(message));
 export const throwError = message => throws(new Error(message));
-export const where = () => 'lines['+lineIndex+']: '+sourceLines[lineIndex];
+export const where = () => 'line '+( lineIndex+1 )+': '+sourceLines[lineIndex];
 
 function throws (error) {
 	if ( sourceLines===NONE ) { throw error; }

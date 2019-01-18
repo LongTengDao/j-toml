@@ -119,9 +119,9 @@ function parseKeys (key_key) {
 	const keys = key_key.match(RE.KEYS);
 	for ( let index = keys.length; index--; ) {
 		const key = keys[index];
-		if ( key.startsWith("'") ) { keys[index] = keys.slice(1, -1); }
+		if ( key.startsWith("'") ) { keys[index] = key.slice(1, -1); }
 		else if ( key.startsWith('"') ) {
-			keys[index] = String(keys.slice(1, -1));
+			keys[index] = String(key.slice(1, -1));
 		}
 	}
 	return keys;
@@ -201,8 +201,8 @@ function assignInline (lastInlineTable, lineRest) {
 				literal==='true' ? true : literal==='false' ? false :
 					literal==='inf' || literal==='+inf' ? Infinity : literal==='-inf' ? -Infinity :
 						literal==='nan' || literal==='+nan' || literal==='-nan' ? NaN :
-							literal.includes(':') || literal.indexOf('-')!==literal.lastIndexOf('-') ? new Datetime(literal) :
-								literal.includes('.') || literal.includes('e') || literal.includes('E') ? Float(literal) :
+							literal.includes(':') || literal.indexOf('-')!==literal.lastIndexOf('-') && literal[0]!=='-' ? new Datetime(literal) :
+								literal.includes('.') || ( literal.includes('e') || literal.includes('E') ) && ( literal[0]!=='0' || literal[1]!=='x' && literal[1]!=='o' && literal[1]!=='b' ) ? Float(literal) :
 									enableNull && literal==='null' || enableNil && literal==='nil' ? null :
 										Integer(literal, useBigInt, allowLonger);
 			break;
@@ -396,10 +396,10 @@ function pushInline (array, lineRest) {
 			else if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) {
 				typify(array, ArrayOfFloats).push(NaN);
 			}
-			else if ( literal.includes(':') || literal.indexOf('-')!==literal.lastIndexOf('-') ) {
+			else if ( literal.includes(':') || literal.indexOf('-')!==literal.lastIndexOf('-') && literal[0]!=='-' ) {
 				typify(array, ArrayOfDatetimes).push(new Datetime(literal));
 			}
-			else if ( literal.includes('.') || literal.includes('e') || literal.includes('E') ) {
+			else if ( literal.includes('.') || ( literal.includes('e') || literal.includes('E') ) && ( literal[0]!=='0' || literal[1]!=='x' && literal[1]!=='o' && literal[1]!=='b' ) ) {
 				typify(array, ArrayOfFloats).push(Float(literal));
 			}
 			else if ( enableNull && literal==='null' || enableNil && literal==='nil' ) {
