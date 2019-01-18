@@ -5,6 +5,7 @@ export const { WeakSet, WeakMap, SyntaxError, RangeError, TypeError, Error, BigI
 	Reflect: { getPrototypeOf },
 	Symbol: { for: Symbol_for },
 	JSON: { stringify },
+	Buffer: { isBuffer },
 } = global;
 
 export const { isArray } = Array;

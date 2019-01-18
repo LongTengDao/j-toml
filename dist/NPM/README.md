@@ -52,7 +52,7 @@ TOML.parse(source, version, multiLineJoiner[, useBigInt=true[, xOptions]]);
 
 0.  #### `source`
     *   required
-    *   type: `string`
+    *   type: `string` / `Buffer(utf8)`
     
     Auto trim start BOM (if exists) of the UTF text.
     

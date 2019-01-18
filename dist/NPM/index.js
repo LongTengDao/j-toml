@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.36';
+const version = '0.5.37';
 
 const { WeakSet, WeakMap: WeakMap$1, SyntaxError, RangeError, TypeError, Error, BigInt, Date, parseInt, Infinity, NaN, Array, Map, RegExp,
 	String: { fromCodePoint },
@@ -9,6 +9,7 @@ const { WeakSet, WeakMap: WeakMap$1, SyntaxError, RangeError, TypeError, Error, 
 	Reflect: { getPrototypeOf },
 	Symbol: { for: Symbol_for },
 	JSON: { stringify },
+	Buffer: { isBuffer },
 } = global;
 
 const { isArray } = Array;
@@ -317,6 +318,7 @@ let customConstructors = null;
 const FUNCTION = new WeakSet;
 
 function parse (toml_source, toml_version, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger = true, extensionOptions) {
+	if ( isBuffer(toml_source) ) { toml_source = toml_source.toString(); }
 	if ( typeof toml_source!=='string' ) { throw new TypeError('TOML.parse(source)'); }
 	if ( toml_version!==0.5 ) { throw new Error('TOML.parse(,version)'); }
 	if ( typeof useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines!=='string' ) { throw new TypeError('TOML.parse(,,multiLineJoiner)'); }
