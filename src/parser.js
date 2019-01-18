@@ -201,8 +201,8 @@ function assignInline (lastInlineTable, lineRest) {
 				literal==='true' ? true : literal==='false' ? false :
 					literal==='inf' || literal==='+inf' ? Infinity : literal==='-inf' ? -Infinity :
 						literal==='nan' || literal==='+nan' || literal==='-nan' ? NaN :
-							literal.includes(':') || literal.indexOf('-')!==literal.lastIndexOf('-') && literal[0]!=='-' ? new Datetime(literal) :
-								literal.includes('.') || ( literal.includes('e') || literal.includes('E') ) && ( literal[0]!=='0' || literal[1]!=='x' && literal[1]!=='o' && literal[1]!=='b' ) ? Float(literal) :
+							literal.includes(':') || literal.indexOf('-')!==literal.lastIndexOf('-') && !literal.startsWith('-') ? new Datetime(literal) :
+								literal.includes('.') || ( literal.includes('e') || literal.includes('E') ) && !literal.startsWith('0x') ? Float(literal) :
 									enableNull && literal==='null' || enableNil && literal==='nil' ? null :
 										Integer(literal, useBigInt, allowLonger);
 			break;
@@ -396,10 +396,10 @@ function pushInline (array, lineRest) {
 			else if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) {
 				typify(array, ArrayOfFloats).push(NaN);
 			}
-			else if ( literal.includes(':') || literal.indexOf('-')!==literal.lastIndexOf('-') && literal[0]!=='-' ) {
+			else if ( literal.includes(':') || literal.indexOf('-')!==literal.lastIndexOf('-') && !literal.startsWith('-') ) {
 				typify(array, ArrayOfDatetimes).push(new Datetime(literal));
 			}
-			else if ( literal.includes('.') || ( literal.includes('e') || literal.includes('E') ) && ( literal[0]!=='0' || literal[1]!=='x' && literal[1]!=='o' && literal[1]!=='b' ) ) {
+			else if ( literal.includes('.') || ( literal.includes('e') || literal.includes('E') ) && !literal.startsWith('0x') ) {
 				typify(array, ArrayOfFloats).push(Float(literal));
 			}
 			else if ( enableNull && literal==='null' || enableNil && literal==='nil' ) {
