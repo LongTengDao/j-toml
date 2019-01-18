@@ -48,19 +48,22 @@ rootTable.SubTable.__proto__      === "..." // true
 TOML.parse(source, version, multiLineJoiner[, useBigInt=true[, xOptions]]);
 ```
 
-0.  `source` required
+0.  `source`
+    *   required
     *   type: `string`
     *   desc:
         *   Auto trim start BOM (if exists) of the UTF text.
         *   会自动剔除 UTF 文本开头的 BOM 标签（如果有的话）。
 
-1.  `version` required
+1.  `version`
+    *   required
     *   type: `0.5`
     *   desc:
         *   You must specify it explicitly (though it can't be other value for the time being).
         *   你必须显式地进行指定（尽管目前还不能使用别的值）。
 
-2.  `multiLineJoiner` required
+2.  `multiLineJoiner`
+    *   required
     *   type: `string`
     *   desc:
         *   For the multi-line strings, use what to join the lines for result.  
@@ -69,14 +72,14 @@ TOML.parse(source, version, multiLineJoiner[, useBigInt=true[, xOptions]]);
             注意在解析 TOML 源时，按照 TOML 规范的要求，行分隔符总是 `"\n"` 或 `"\r\n"`。
 
 3.  `useBigInt`
-    *   type: `boolean` / `number`
     *   default: `true`
+    *   type: `boolean` / `number`
     *   desc:
         *   Specify whether you want or not to use `BigInt` for integer type value. `number` type value allows you to control it by a max limit (and the negative limit from `-useBigInt`, if `useBigInt>=0`; otherwise as a min limit, and the positive limit is `~useBigInt`).
         *   指定你是否要用 `BigInt` 来实现整数类型的值。`number` 类型的值允许你精确控制超过多少才使用 `BigInt`（自动通过 `-useBigInt` 获取负向界限，如果 `useBigInt>=0`；否则通过 `~useBigInt` 获取正向界限）。
 
 4.  `xOptions`
-    *   type: `object`
+    *   type: `Object`
     *   desc:
         *   The extensional features not in the spec.  
             Include keeping the key/value pairs order of tables, integers larger than `long`, comment information, `null` value, mixed-type array, multi-line inline table with trailing comma even no comma, interpolation string, custom constructor, etc.  
@@ -88,12 +91,13 @@ TOML.parse(source, version, multiLineJoiner[, useBigInt=true[, xOptions]]);
             详见 <https://GitHub.com/LongTengDao/j-toml/blob/master/docs/xOptions.md>。
 
 *   `return`
-    *   type: `object`
+    *   type: `Table`
     *   desc:
         *   Return the root table (tables parsed by this implementation are objects without any extended properties).
         *   返回根表（本实现解析出的表，是没有任何继承属性的对象）。
 
 *   `throw`
+    *   type: `Error`
     *   desc:
         *   If the arguments not meet the requirement, there will be an error; if there is any error with the source, the error object will has a number type property named `lineIndex` to help locating that.
         *   如果参数不符合要求，会抛出错误；如果源文本有错误，错误对象会有一个名为 `lineIndex` 的数值类型的属性来帮助定位。
