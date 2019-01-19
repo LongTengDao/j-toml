@@ -1,10 +1,13 @@
 'use strict';
 
-module.exports = require('@ltd/j-dev')(__dirname+'/..')(async ({ import_default, read }) => {
+module.exports = require('@ltd/j-dev')(__dirname+'/..')(async ({ import_default, read, clear }) => {
 	
-	const TOML = await import_default('src/default.js', moduleName => {
-		if ( moduleName==='@ltd/j-orderify' ) { return require(__dirname+'/../../j-orderify/dist/NPM/index.js'); }
-		throw moduleName;
+	const TOML = await import_default('src/default.js', {
+		require: moduleName => {
+			if ( moduleName==='@ltd/j-orderify' ) { return require(__dirname+'/../../j-orderify/dist/NPM/index.js'); }
+			throw moduleName;
+		},
+		__filename: 'test/built.js',
 	});
 	
 	const toml = TOML.parse(await read('./test/sample.toml'), 0.5, '\n', true);

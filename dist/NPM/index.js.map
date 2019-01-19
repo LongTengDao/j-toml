@@ -4,7 +4,7 @@
 	"file":
 		"index.js",
 	"sources":
-		["version?text","global.js","../../j-orderify/dist/ESM/j-orderify.js","iterator.js","RE.js?<RegExp>","types.js","parser.js","default.js"],
+		["../../src/version?text","../../src/global.js","../../../j-orderify/dist/ESM/j-orderify.js","../../src/iterator.js","../../src/RE.js?<RegExp>","../../src/types.js","../../src/parser.js","../../src/default.js"],
 	"names":
 		["WeakMap","defineProperty","RE.ESCAPED_IN_SINGLE_LINE","RE.XOB_INTEGER","RE.INTEGER","RE.UNDERSCORES","RE.FLOAT","RE.FLOAT_NOT_INTEGER","RE.OFFSET_DATE_TIME","RE.LOCAL_DATE_TIME","RE.LOCAL_DATE","RE.LOCAL_TIME","RE.TIMEZONE_OFFSET","RE.BOM","RE.EOL","RE.PRE_WHITESPACE","RE.TABLE_DEFINITION","rest","RE.KEYS","RE.KEY_VALUE_PAIR","RE.VALUE_REST","RE.LITERAL_STRING","RE.MULTI_LINE_LITERAL_STRING_LONE","RE.CONTROL_CHARACTER_EXCLUDE_TAB","RE.MULTI_LINE_LITERAL_STRING_REST","RE.BASIC_STRING","RE.MULTI_LINE_BASIC_STRING_LONE","RE.ESCAPED_EXCLUDE_CONTROL_CHARACTER","RE.MULTI_LINE_BASIC_STRING_REST","RE.ESCAPED_IN_MULTI_LINE","RE.SYM_WHITESPACE","RE._VALUE_PAIR","RE.DELIMITER_CHECK","RE.INTERPOLATIONS","RE.INTERPOLATION","RE.REGEXP_MODE","RE.PATTERN_FLAGS_REPLACER","RE.WHOLE_AND_SUBS","RE.SUB","RE.DOLLAR","RE.INTERPOLATION_TOKEN"],
 	"mappings":
