@@ -19,7 +19,7 @@ require('../test/test.js')(async ({ build, read, copy, path }) => {
 	
 	await copy(
 		'docs/README.md',
-		string => string.replace(/(\n```+)[^`\r\n]+/g, '$1'),
+		string => string.replace(/(\n```+)[^`\r\n]+/g, '$1').replace(/(\n\d\. {2})#+ +([^\r\n]*)/g, '$1**$2**'),
 		'dist/NPM/README.md',
 	);
 	
