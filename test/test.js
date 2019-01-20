@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = require('@ltd/j-dev')(__dirname+'/..')(async ({ import_default, read, clear }) => {
+module.exports = require('@ltd/j-dev')(__dirname+'/..')(async ({ import_default, read }) => {
 	
 	const TOML = await import_default('src/default.js', {
 		require: moduleName => {
