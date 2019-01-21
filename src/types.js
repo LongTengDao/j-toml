@@ -1,12 +1,7 @@
-import { RangeError, TypeError, BigInt, Date, parseInt, Infinity, NaN, isFinite, isSafeInteger, fromCodePoint, create } from './global.js';
+import { RangeError, TypeError, BigInt, Date, Infinity, NaN, isFinite, isSafeInteger, create } from './global.js';
 import { orderify } from './import.js';
 import { throwSyntaxError, throwRangeError, none, where } from './iterator.js';
 import * as RE from './RE.js?<RegExp>';
-
-const ESCAPE_ALIAS = { b: '\b', t: '\t', n: '\n', f: '\f', r: '\r' };
-export const unEscapeSingleLine = ($0, $1, $2, $3, $4, $5) => $1 ? $1 : $2 ? ESCAPE_ALIAS[$2] : fromCodePoint(parseInt($3 || $4+$5, 16));
-export const String = literal => literal.replace(RE.ESCAPED_IN_SINGLE_LINE, unEscapeSingleLine);
-String.isString = value => typeof value==='string';
 
 export const Integer = (literal, useBigInt = true, allowLonger = false) => {
 	if ( useBigInt===false ) {
@@ -32,7 +27,6 @@ export const Integer = (literal, useBigInt = true, allowLonger = false) => {
 		return bigInt;
 	}
 };
-Integer.isInteger = value => typeof value==='bigint';
 
 export const Float = literal => {
 	if ( RE.FLOAT.test(literal) && RE.FLOAT_NOT_INTEGER.test(literal) ) {
@@ -44,11 +38,6 @@ export const Float = literal => {
 	if ( literal==='-inf' ) { return -Infinity; }
 	if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) { return NaN; }
 	throwSyntaxError('Invalid Float '+literal+( none() ? '' : ' at '+where() ));
-};
-Float.isFloat = value => typeof value==='number';
-
-export const Boolean = {
-	isBoolean: value => value===true || value===false,
 };
 
 const DATE = new Date;

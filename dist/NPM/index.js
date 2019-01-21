@@ -1,8 +1,9 @@
 ﻿'use strict';
 
-const version = '0.5.39';
+const version = '0.5.40';
 
-const { WeakSet, WeakMap: WeakMap$1, SyntaxError, RangeError, TypeError, Error, BigInt, Date, parseInt, Infinity, NaN, Array, Map, RegExp,
+const { WeakSet, WeakMap: WeakMap$1, SyntaxError, RangeError, TypeError, Error, BigInt, Date, parseInt, Infinity, NaN, Map, RegExp,
+	Array: { isArray },
 	String: { fromCodePoint },
 	Number: { isFinite, isSafeInteger },
 	Object: { create, getOwnPropertyNames, defineProperty },
@@ -11,8 +12,6 @@ const { WeakSet, WeakMap: WeakMap$1, SyntaxError, RangeError, TypeError, Error, 
 	JSON: { stringify },
 	Buffer: { isBuffer },
 } = global;
-
-const { isArray } = Array;
 
 /*!
  * 模块名称：@ltd/j-orderify
@@ -126,12 +125,10 @@ const KEY_VALUE_PAIR = /^((?:[\w-]+|"(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnf
 const KEYS = /[\w-]+|"(?:[^\\"]+|\\[^])*"|'[^']*'/g;
 const VALUE_REST = /^((?:\d\d\d\d-\d\d-\d\d \d)?[\w\-+.:]+)[ \t]*([^]*)$/;
 const LITERAL_STRING = /^'([^'\x00-\x08\x0B-\x1F\x7F]*)'[ \t]*([^]*)/;
-const MULTI_LINE_LITERAL_STRING_LONE = /^'''([^]*?)'''[ \t]*([^]*)/;
-const MULTI_LINE_LITERAL_STRING_REST = /^([^]*?)'''[ \t]*([^]*)/;
+const MULTI_LINE_LITERAL_STRING = /^([^]*?)'''[ \t]*([^]*)/;
 const CONTROL_CHARACTER_EXCLUDE_TAB = /[\x00-\x08\x0B-\x1F\x7F]/;
 const BASIC_STRING = /^"((?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*)"[ \t]*([^]*)/;
-const MULTI_LINE_BASIC_STRING_LONE = /^"""((?:[^\\]|\\[^])*?)"""[ \t]*([^]*)/;
-const MULTI_LINE_BASIC_STRING_REST = /^((?:[^\\]|\\[^])*?)"""[ \t]*([^]*)/;
+const MULTI_LINE_BASIC_STRING = /^(?:[^\\"]+|\\[^]|""?(?!"))*/;
 const ESCAPED_EXCLUDE_CONTROL_CHARACTER = /^(?:[^\\\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\ \n]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*$/;
 const ESCAPED_IN_MULTI_LINE = /\n|\\(?:([ \n]+)|([\\"])|([btnfr])|u(.{4})|U(.{4})(.{4}))/g;
 const SYM_WHITESPACE = /^[^][ \t]*/;
@@ -147,11 +144,6 @@ const REGEXP_MODE = /^\([ \t]*\//;
 const PATTERN_FLAGS_REPLACER = /\/((?:[^\\[/]+|\[(?:[^\\\]]+|\\[^])*]|\\[^])+)\/([a-z]*)[ \t]*=[ \t]*('[^']*'|"(?:[^\\"]+|\\[^])*"|{[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*)*}|\[[ \t]+(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:{[ \t]*}|{[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*)*})[ \t]*)+])/;
 const WHOLE_AND_SUBS = /('[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*([^]*)/;
 const DOLLAR = /\$(?:[1-9]\d?|\$)/g;
-
-const ESCAPE_ALIAS = { b: '\b', t: '\t', n: '\n', f: '\f', r: '\r' };
-const unEscapeSingleLine = ($0, $1, $2, $3, $4, $5) => $1 ? $1 : $2 ? ESCAPE_ALIAS[$2] : fromCodePoint(parseInt($3 || $4+$5, 16));
-const String = literal => literal.replace(ESCAPED_IN_SINGLE_LINE, unEscapeSingleLine);
-String.isString = value => typeof value==='string';
 
 const Integer = (literal, useBigInt = true, allowLonger = false) => {
 	if ( useBigInt===false ) {
@@ -177,7 +169,6 @@ const Integer = (literal, useBigInt = true, allowLonger = false) => {
 		return bigInt;
 	}
 };
-Integer.isInteger = value => typeof value==='bigint';
 
 const Float = literal => {
 	if ( FLOAT.test(literal) && FLOAT_NOT_INTEGER.test(literal) ) {
@@ -189,11 +180,6 @@ const Float = literal => {
 	if ( literal==='-inf' ) { return -Infinity; }
 	if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) { return NaN; }
 	throwSyntaxError('Invalid Float '+literal+( none() ? '' : ' at '+where() ));
-};
-Float.isFloat = value => typeof value==='number';
-
-const Boolean = {
-	isBoolean: value => value===true || value===false,
 };
 
 const DATE = new Date;
@@ -317,6 +303,19 @@ let typify = reallyTypify;
 let customConstructors = null;
 const FUNCTION = new WeakSet;
 
+const ESCAPE_ALIAS = { b: '\b', t: '\t', n: '\n', f: '\f', r: '\r' };
+const unEscapeSingleLine = ($0, $1, $2, $3, $4, $5) => $1 ? $1 : $2 ? ESCAPE_ALIAS[$2] : fromCodePoint(parseInt($3 || $4+$5, 16));
+const unEscapeMultiLine = ($0, $1, $2, $3, $4, $5, $6) => {
+	if ( $0==='\n' ) { return useWhatToJoinMultiLineString; }
+	if ( $1 ) {
+		$1.includes('\n') || throwSyntaxError('Back slash leading whitespaces can only appear at the end of a line, but see '+where());
+		return '';
+	}
+	return unEscapeSingleLine('', $2, $3, $4, $5, $6);
+};
+const SingleLine = literal => literal.replace(ESCAPED_IN_SINGLE_LINE, unEscapeSingleLine);
+const MultiLine = literal => literal.replace(ESCAPED_IN_MULTI_LINE, unEscapeMultiLine);
+
 function parse (toml_source, toml_version, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger = true, extensionOptions) {
 	if ( isBuffer(toml_source) ) { toml_source = toml_source.toString(); }
 	if ( typeof toml_source!=='string' ) { throw new TypeError('TOML.parse(source)'); }
@@ -401,7 +400,7 @@ function parseKeys (key_key) {
 		const key = keys[index];
 		if ( key.startsWith("'") ) { keys[index] = key.slice(1, -1); }
 		else if ( key.startsWith('"') ) {
-			keys[index] = String(key.slice(1, -1));
+			keys[index] = SingleLine(key.slice(1, -1));
 		}
 	}
 	return keys;
@@ -507,13 +506,13 @@ function assignLiteralString (table, finalKey, literal) {
 		table[finalKey] = $[1];
 		return $[2];
 	}
-	$ = MULTI_LINE_LITERAL_STRING_LONE.exec(literal);
+	literal = literal.slice(3);
+	$ = MULTI_LINE_LITERAL_STRING.exec(literal);
 	if ( $ ) {
 		CONTROL_CHARACTER_EXCLUDE_TAB.test($[1]) && throwSyntaxError('Control characters other than tab are not permitted in a Literal String, which was found at '+where());
 		table[finalKey] = $[1];
 		return $[2];
 	}
-	literal = literal.slice(3);
 	if ( literal ) {
 		CONTROL_CHARACTER_EXCLUDE_TAB.test(literal) && throwSyntaxError('Control characters other than tab are not permitted in a Literal String, which was found at '+where());
 		literal += useWhatToJoinMultiLineString;
@@ -521,7 +520,7 @@ function assignLiteralString (table, finalKey, literal) {
 	const start = mark();
 	for ( ; ; ) {
 		const line = must('Literal String', start);
-		$ = MULTI_LINE_LITERAL_STRING_REST.exec(line);
+		$ = MULTI_LINE_LITERAL_STRING.exec(line);
 		if ( $ ) {
 			CONTROL_CHARACTER_EXCLUDE_TAB.test($[1]) && throwSyntaxError('Control characters other than tab are not permitted in a Literal String, which was found at '+where());
 			table[finalKey] = literal+$[1];
@@ -532,19 +531,18 @@ function assignLiteralString (table, finalKey, literal) {
 }
 
 function assignBasicString (table, finalKey, literal) {
-	let $;
 	if ( literal.charAt(1)!=='"' || literal.charAt(2)!=='"' ) {
-		$ = BASIC_STRING.exec(literal) || throwSyntaxError(where());
-		table[finalKey] = String($[1]);
-		return $[2];
-	}
-	$ = MULTI_LINE_BASIC_STRING_LONE.exec(literal);
-	if ( $ ) {
-		ESCAPED_EXCLUDE_CONTROL_CHARACTER.test($[1]) || throwSyntaxError(where());
-		table[finalKey] = String($[1]);
+		const $ = BASIC_STRING.exec(literal) || throwSyntaxError(where());
+		table[finalKey] = SingleLine($[1]);
 		return $[2];
 	}
 	literal = literal.slice(3);
+	const $ = MULTI_LINE_BASIC_STRING.exec(literal)[0];
+	if ( literal.startsWith('"""', $.length) ) {
+		ESCAPED_EXCLUDE_CONTROL_CHARACTER.test($) || throwSyntaxError(where());
+		table[finalKey] = SingleLine($);
+		return literal.slice($.length+3).replace(PRE_WHITESPACE, '');
+	}
 	if ( literal ) {
 		literal += '\n';
 		ESCAPED_EXCLUDE_CONTROL_CHARACTER.test(literal) || throwSyntaxError(where());
@@ -552,18 +550,11 @@ function assignBasicString (table, finalKey, literal) {
 	const start = mark();
 	for ( ; ; ) {
 		let line = must('Basic String', start);
-		$ = MULTI_LINE_BASIC_STRING_REST.exec(line);
-		if ( $ ) {
-			ESCAPED_EXCLUDE_CONTROL_CHARACTER.test($[1]) || throwSyntaxError(where());
-			table[finalKey] = ( literal+$[1] ).replace(ESCAPED_IN_MULTI_LINE, ($0, $1, $2, $3, $4, $5, $6) => {
-				if ( $0==='\n' ) { return useWhatToJoinMultiLineString; }
-				if ( $1 ) {
-					$1.includes('\n') || throwSyntaxError('Back slash leading whitespaces can only appear at the end of a line, but see '+where());
-					return '';
-				}
-				return unEscapeSingleLine('', $2, $3, $4, $5, $6);
-			});
-			return $[2];
+		const $ = MULTI_LINE_BASIC_STRING.exec(line)[0];
+		if ( line.startsWith('"""', $.length) ) {
+			ESCAPED_EXCLUDE_CONTROL_CHARACTER.test($) || throwSyntaxError(where());
+			table[finalKey] = MultiLine(literal+$);
+			return line.slice($.length+3).replace(PRE_WHITESPACE, '');
 		}
 		line += '\n';
 		ESCAPED_EXCLUDE_CONTROL_CHARACTER.test(line) || throwSyntaxError(where());
@@ -727,7 +718,7 @@ function assignInterpolationString (table, finalKey, lineRest) {
 						replacer = Replacer.slice(1, -1);
 						break;
 					case '"':
-						replacer = String(Replacer.slice(1, -1));
+						replacer = SingleLine(Replacer.slice(1, -1));
 						break;
 					case '{':
 						const map = newMap(Replacer, true);
@@ -775,11 +766,11 @@ function newMap (interpolation, usedForRegExp) {
 	const tokens = interpolation.match(INTERPOLATION_TOKEN);
 	for ( let length = tokens.length, index = 0; index<length; ) {
 		let search = tokens[index++];
-		search = search[0]==="'" ? search.slice(1, -1) : String(search.slice(1, -1));
+		search = search[0]==="'" ? search.slice(1, -1) : SingleLine(search.slice(1, -1));
 		usedForRegExp || search || throwSyntaxError('Characters to replace can not be empty, which was found at '+where());
 		map.has(search) && throwSyntaxError('Duplicate '+( usedForRegExp ? 'replacer' : 'characters to replace' )+' at '+where());
 		let replacer = tokens[index++];
-		replacer = replacer[0]==="'" ? replacer.slice(1, -1) : String(replacer.slice(1, -1));
+		replacer = replacer[0]==="'" ? replacer.slice(1, -1) : SingleLine(replacer.slice(1, -1));
 		map.set(search, replacer);
 	}
 	return map;
@@ -839,12 +830,7 @@ function construct (type, value) {
 
 const TOML = {
 	parse,
-	String,
-	Integer,
-	Float,
-	Boolean,
 	Datetime,
-	Array,
 	Table,
 	version
 };

@@ -1,6 +1,7 @@
 import { WeakSet, WeakMap, Error, TypeError, RangeError, Infinity, NaN, isSafeInteger, isArray, Symbol_for, Map, RegExp, getOwnPropertyNames, create, defineProperty, getPrototypeOf, stringify, isBuffer } from './global.js';
+import { fromCodePoint, parseInt } from './global.js';
 import { from, next, rest, done, mark, must, throwSyntaxError, throwTypeError, throwError, where } from './iterator.js';
-import { unEscapeSingleLine, String, Integer, Float, Datetime, Table } from './types.js';
+import { Integer, Float, Datetime, Table } from './types.js';
 import * as RE from './RE.js?<RegExp>';
 
 const { isTable } = Table;
@@ -36,6 +37,19 @@ let enableInterpolationString = false;
 let typify = reallyTypify;
 let customConstructors = null;
 const FUNCTION = new WeakSet;
+
+const ESCAPE_ALIAS = { b: '\b', t: '\t', n: '\n', f: '\f', r: '\r' };
+const unEscapeSingleLine = ($0, $1, $2, $3, $4, $5) => $1 ? $1 : $2 ? ESCAPE_ALIAS[$2] : fromCodePoint(parseInt($3 || $4+$5, 16));
+const unEscapeMultiLine = ($0, $1, $2, $3, $4, $5, $6) => {
+	if ( $0==='\n' ) { return useWhatToJoinMultiLineString; }
+	if ( $1 ) {
+		$1.includes('\n') || throwSyntaxError('Back slash leading whitespaces can only appear at the end of a line, but see '+where());
+		return '';
+	}
+	return unEscapeSingleLine('', $2, $3, $4, $5, $6);
+};
+const SingleLine = literal => literal.replace(RE.ESCAPED_IN_SINGLE_LINE, unEscapeSingleLine);
+const MultiLine = literal => literal.replace(RE.ESCAPED_IN_MULTI_LINE, unEscapeMultiLine);
 
 export default function parse (toml_source, toml_version, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger = true, extensionOptions) {
 	if ( isBuffer(toml_source) ) { toml_source = toml_source.toString(); }
@@ -122,7 +136,7 @@ function parseKeys (key_key) {
 		const key = keys[index];
 		if ( key.startsWith("'") ) { keys[index] = key.slice(1, -1); }
 		else if ( key.startsWith('"') ) {
-			keys[index] = String(key.slice(1, -1));
+			keys[index] = SingleLine(key.slice(1, -1));
 		}
 	}
 	return keys;
@@ -228,13 +242,13 @@ function assignLiteralString (table, finalKey, literal) {
 		table[finalKey] = $[1];
 		return $[2];
 	}
-	$ = RE.MULTI_LINE_LITERAL_STRING_LONE.exec(literal);
+	literal = literal.slice(3);
+	$ = RE.MULTI_LINE_LITERAL_STRING.exec(literal);
 	if ( $ ) {
 		RE.CONTROL_CHARACTER_EXCLUDE_TAB.test($[1]) && throwSyntaxError('Control characters other than tab are not permitted in a Literal String, which was found at '+where());
 		table[finalKey] = $[1];
 		return $[2];
 	}
-	literal = literal.slice(3);
 	if ( literal ) {
 		RE.CONTROL_CHARACTER_EXCLUDE_TAB.test(literal) && throwSyntaxError('Control characters other than tab are not permitted in a Literal String, which was found at '+where());
 		literal += useWhatToJoinMultiLineString;
@@ -242,7 +256,7 @@ function assignLiteralString (table, finalKey, literal) {
 	const start = mark();
 	for ( ; ; ) {
 		const line = must('Literal String', start);
-		$ = RE.MULTI_LINE_LITERAL_STRING_REST.exec(line);
+		$ = RE.MULTI_LINE_LITERAL_STRING.exec(line);
 		if ( $ ) {
 			RE.CONTROL_CHARACTER_EXCLUDE_TAB.test($[1]) && throwSyntaxError('Control characters other than tab are not permitted in a Literal String, which was found at '+where());
 			table[finalKey] = literal+$[1];
@@ -253,19 +267,18 @@ function assignLiteralString (table, finalKey, literal) {
 }
 
 function assignBasicString (table, finalKey, literal) {
-	let $;
 	if ( literal.charAt(1)!=='"' || literal.charAt(2)!=='"' ) {
-		$ = RE.BASIC_STRING.exec(literal) || throwSyntaxError(where());
-		table[finalKey] = String($[1]);
-		return $[2];
-	}
-	$ = RE.MULTI_LINE_BASIC_STRING_LONE.exec(literal);
-	if ( $ ) {
-		RE.ESCAPED_EXCLUDE_CONTROL_CHARACTER.test($[1]) || throwSyntaxError(where());
-		table[finalKey] = String($[1]);
+		const $ = RE.BASIC_STRING.exec(literal) || throwSyntaxError(where());
+		table[finalKey] = SingleLine($[1]);
 		return $[2];
 	}
 	literal = literal.slice(3);
+	const $ = RE.MULTI_LINE_BASIC_STRING.exec(literal)[0];
+	if ( literal.startsWith('"""', $.length) ) {
+		RE.ESCAPED_EXCLUDE_CONTROL_CHARACTER.test($) || throwSyntaxError(where());
+		table[finalKey] = SingleLine($);
+		return literal.slice($.length+3).replace(RE.PRE_WHITESPACE, '');
+	}
 	if ( literal ) {
 		literal += '\n';
 		RE.ESCAPED_EXCLUDE_CONTROL_CHARACTER.test(literal) || throwSyntaxError(where());
@@ -273,18 +286,11 @@ function assignBasicString (table, finalKey, literal) {
 	const start = mark();
 	for ( ; ; ) {
 		let line = must('Basic String', start);
-		$ = RE.MULTI_LINE_BASIC_STRING_REST.exec(line);
-		if ( $ ) {
-			RE.ESCAPED_EXCLUDE_CONTROL_CHARACTER.test($[1]) || throwSyntaxError(where());
-			table[finalKey] = ( literal+$[1] ).replace(RE.ESCAPED_IN_MULTI_LINE, ($0, $1, $2, $3, $4, $5, $6) => {
-				if ( $0==='\n' ) { return useWhatToJoinMultiLineString; }
-				if ( $1 ) {
-					$1.includes('\n') || throwSyntaxError('Back slash leading whitespaces can only appear at the end of a line, but see '+where());
-					return '';
-				}
-				return unEscapeSingleLine('', $2, $3, $4, $5, $6);
-			});
-			return $[2];
+		const $ = RE.MULTI_LINE_BASIC_STRING.exec(line)[0];
+		if ( line.startsWith('"""', $.length) ) {
+			RE.ESCAPED_EXCLUDE_CONTROL_CHARACTER.test($) || throwSyntaxError(where());
+			table[finalKey] = MultiLine(literal+$);
+			return line.slice($.length+3).replace(RE.PRE_WHITESPACE, '');
 		}
 		line += '\n';
 		RE.ESCAPED_EXCLUDE_CONTROL_CHARACTER.test(line) || throwSyntaxError(where());
@@ -448,7 +454,7 @@ function assignInterpolationString (table, finalKey, lineRest) {
 						replacer = Replacer.slice(1, -1);
 						break;
 					case '"':
-						replacer = String(Replacer.slice(1, -1));
+						replacer = SingleLine(Replacer.slice(1, -1));
 						break;
 					case '{':
 						const map = newMap(Replacer, true);
@@ -496,11 +502,11 @@ function newMap (interpolation, usedForRegExp) {
 	const tokens = interpolation.match(RE.INTERPOLATION_TOKEN);
 	for ( let length = tokens.length, index = 0; index<length; ) {
 		let search = tokens[index++];
-		search = search[0]==="'" ? search.slice(1, -1) : String(search.slice(1, -1));
+		search = search[0]==="'" ? search.slice(1, -1) : SingleLine(search.slice(1, -1));
 		usedForRegExp || search || throwSyntaxError('Characters to replace can not be empty, which was found at '+where());
 		map.has(search) && throwSyntaxError('Duplicate '+( usedForRegExp ? 'replacer' : 'characters to replace' )+' at '+where());
 		let replacer = tokens[index++];
-		replacer = replacer[0]==="'" ? replacer.slice(1, -1) : String(replacer.slice(1, -1));
+		replacer = replacer[0]==="'" ? replacer.slice(1, -1) : SingleLine(replacer.slice(1, -1));
 		map.set(search, replacer);
 	}
 	return map;

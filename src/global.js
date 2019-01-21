@@ -1,4 +1,5 @@
-export const { WeakSet, WeakMap, SyntaxError, RangeError, TypeError, Error, BigInt, Date, parseInt, Infinity, NaN, Array, Map, RegExp,
+export const { WeakSet, WeakMap, SyntaxError, RangeError, TypeError, Error, BigInt, Date, parseInt, Infinity, NaN, Map, RegExp,
+	Array: { isArray },
 	String: { fromCodePoint },
 	Number: { isFinite, isSafeInteger },
 	Object: { create, getOwnPropertyNames, defineProperty },
@@ -7,5 +8,3 @@ export const { WeakSet, WeakMap, SyntaxError, RangeError, TypeError, Error, BigI
 	JSON: { stringify },
 	Buffer: { isBuffer },
 } = global;
-
-export const { isArray } = Array;
