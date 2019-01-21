@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.40';
+const version = '0.5.41';
 
 const { WeakSet, WeakMap: WeakMap$1, SyntaxError, RangeError, TypeError, Error, BigInt, Date, parseInt, Infinity, NaN, Map, RegExp,
 	Array: { isArray },
@@ -692,19 +692,23 @@ function pushInline (array, lineRest) {
 	return lineRest;
 }
 
-function assignInterpolationString (table, finalKey, lineRest) {
+function assignInterpolationString (table, finalKey, delimiter) {
 	enableInterpolationString || throwSyntaxError(where());
-	DELIMITER_CHECK.test(lineRest) && throwSyntaxError('Interpolation String opening tag incorrect at '+where());
-	const literals = [];
-	for ( const start = mark(); ; ) {
-		const literal = must('Interpolation String', start);
-		if ( literal.startsWith(lineRest) ) {
-			lineRest = lineRest.slice(lineRest.length).replace(PRE_WHITESPACE, '');
-			break;
+	DELIMITER_CHECK.test(delimiter) && throwSyntaxError('Interpolation String opening tag incorrect at '+where());
+	let string;
+	let lineRest;
+	{
+		const literals = [];
+		for ( const start = mark(); ; ) {
+			const literal = must('Interpolation String', start);
+			if ( literal.startsWith(delimiter) ) {
+				lineRest = literal.slice(delimiter.length).replace(PRE_WHITESPACE, '');
+				break;
+			}
+			literals.push(literal);
 		}
-		literals.push(literal);
+		string = literals.join('\n');
 	}
-	let string = literals.join('\n');
 	if ( lineRest.startsWith('(') ) {
 		const interpolations_rest = INTERPOLATIONS.exec(lineRest) || throwSyntaxError(where());
 		lineRest = interpolations_rest[2];

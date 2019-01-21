@@ -427,19 +427,23 @@ function pushInline (array, lineRest) {
 	return lineRest;
 }
 
-function assignInterpolationString (table, finalKey, lineRest) {
+function assignInterpolationString (table, finalKey, delimiter) {
 	enableInterpolationString || throwSyntaxError(where());
-	RE.DELIMITER_CHECK.test(lineRest) && throwSyntaxError('Interpolation String opening tag incorrect at '+where());
-	const literals = [];
-	for ( const start = mark(); ; ) {
-		const literal = must('Interpolation String', start);
-		if ( literal.startsWith(lineRest) ) {
-			lineRest = lineRest.slice(lineRest.length).replace(RE.PRE_WHITESPACE, '');
-			break;
+	RE.DELIMITER_CHECK.test(delimiter) && throwSyntaxError('Interpolation String opening tag incorrect at '+where());
+	let string;
+	let lineRest;
+	{
+		const literals = [];
+		for ( const start = mark(); ; ) {
+			const literal = must('Interpolation String', start);
+			if ( literal.startsWith(delimiter) ) {
+				lineRest = literal.slice(delimiter.length).replace(RE.PRE_WHITESPACE, '');
+				break;
+			}
+			literals.push(literal);
 		}
-		literals.push(literal);
+		string = literals.join('\n');
 	}
-	let string = literals.join('\n');
 	if ( lineRest.startsWith('(') ) {
 		const interpolations_rest = RE.INTERPOLATIONS.exec(lineRest) || throwSyntaxError(where());
 		lineRest = interpolations_rest[2];
