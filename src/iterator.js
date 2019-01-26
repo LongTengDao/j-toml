@@ -35,6 +35,7 @@ export const where = () => 'line '+( lineIndex+1 )+': '+sourceLines[lineIndex];
 function throws (error) {
 	if ( sourceLines===NONE ) { throw error; }
 	error.lineIndex = lineIndex;
+	error.lineNumber = lineIndex+1;
 	done();
 	throw error;
 }

@@ -109,9 +109,11 @@ Return the root table (tables parsed by this implementation are objects without 
 
 *   type: `Error`
 
-If the arguments not meet the requirement, there will be an error; if there is any error with the source, the error object will has a number type property named `lineIndex` to help locating that.
+If the arguments not meet the requirement, there will be an error; if there is any error with the source, the error object will has two number properties `lineIndex` and `lineNumber` to help locating that.  
+There are two cases will cause the recursion parser stack overflow: `k={ k={ k=[ [ [ ...thousands of layers... ] ] ] } }` and `k="\t\t\t...thousands of escapes...\t\t\t"`. The latter is because the problematical implementation of RegExp `/"(?:[^\\"]+|\\[^])*"/`. If there is an issue manifesting the necessity, I will rewrite them to loop.
 
-如果参数不符合要求，会抛出错误；如果源文本有错误，错误对象会有一个名为 `lineIndex` 的数值类型的属性来帮助定位。
+如果参数不符合要求，会抛出错误；如果源文本有错误，错误对象会有 `lineIndex` 和 `lineNumber` 两个数值属性来帮助定位。  
+两种情况会导致递归解析器栈溢出：`k={ k={ k=[ [ [ ……成千上万层…… ] ] ] } }` 和 `k="\t\t\t……成千上万个转义……\t\t\t"`。其中后者是因为正则表达式 `/"(?:[^\\"]+|\\[^])*"/` 的实现存在缺陷。如果有 issue 表明必要性，我会把它们改写成循环实现。
 
 
 [@ltd/j-toml v0.5]: https://www.npmjs.com/package/@ltd/j-toml

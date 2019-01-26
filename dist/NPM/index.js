@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.41';
+const version = '0.5.42';
 
 const { WeakSet, WeakMap: WeakMap$1, SyntaxError, RangeError, TypeError, Error, BigInt, Date, parseInt, Infinity, NaN, Map, RegExp,
 	Array: { isArray },
@@ -94,6 +94,7 @@ const where = () => 'line '+( lineIndex+1 )+': '+sourceLines[lineIndex];
 function throws (error) {
 	if ( sourceLines===NONE ) { throw error; }
 	error.lineIndex = lineIndex;
+	error.lineNumber = lineIndex+1;
 	done();
 	throw error;
 }
