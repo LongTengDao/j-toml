@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = require('@ltd/j-dev')(__dirname+'/..')(async ({ import_default, read }) => {
+module.exports = require('@ltd/j-dev')(__dirname+'/..')(async ({ import_default, get }) => {
 	
 	const TOML = await import_default('src/default.js', {
 		require: moduleName => {
@@ -10,7 +10,7 @@ module.exports = require('@ltd/j-dev')(__dirname+'/..')(async ({ import_default,
 		__filename: 'test/built.js',
 	});
 	
-	const toml = TOML.parse(await read('./test/sample.toml'), 0.5, '\n', true);
+	const toml = TOML.parse(await get('./test/sample.toml'), 0.5, '\n', true);
 	
 	compare('integer', {
 		'1': 1n,
@@ -51,7 +51,7 @@ module.exports = require('@ltd/j-dev')(__dirname+'/..')(async ({ import_default,
 		'local_time': '00:00:00.999',
 	});
 	
-	if ( JSON.stringify(toml)!==JSON.stringify(JSON.parse(await read('./test/expect.json'))) ) {
+	if ( JSON.stringify(toml)!==JSON.stringify(JSON.parse(await get('./test/expect.json'))) ) {
 		throw new Error(JSON.stringify(toml, null, '\t'));
 	}
 	

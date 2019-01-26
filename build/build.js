@@ -1,10 +1,10 @@
 'use strict';
 
-require('../test/test.js')(async ({ build, read, copy, path }) => {
+require('../test/test.js')(async ({ build, get, map, ful }) => {
 	
 	await build({
 		name: 'j-toml',
-		semver: await read('src/version'),
+		semver: await get('src/version'),
 		ES: 6,
 		NPM: {
 			meta_: {
@@ -13,11 +13,11 @@ require('../test/test.js')(async ({ build, read, copy, path }) => {
 			},
 		},
 		locate: {
-			'@ltd/j-orderify': path('../j-orderify/dist/ESM/j-orderify.js'),
+			'@ltd/j-orderify': ful('../j-orderify/dist/ESM/j-orderify.js'),
 		},
 	});
 	
-	await copy(
+	await map(
 		'docs/README.md',
 		string => string.replace(/(\n```+)[^`\r\n]+/g, '$1').replace(/(\n\d\. {2})#+ +([^\r\n]*)/g, '$1**$2**'),
 		'dist/NPM/README.md',
