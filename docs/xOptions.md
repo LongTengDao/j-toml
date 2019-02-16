@@ -1,8 +1,7 @@
 
 [English](#user-content-english) | [简体中文](#user-content-简体中文)
 
-
-
+_________________________________________________
 `xOptions`<a id="user-content-english">&nbsp;</a>
 ==========
 
@@ -177,12 +176,11 @@ In JavaScript land, that would give you the following structure:
 })
 ```
 
-
-
-`xOptions`<a id="user-content-简体中文">&nbsp;</a>
+___________________________________________________
+`超级选项`<a id="user-content-简体中文">&nbsp;</a>
 ==========
 
-`xOptions.order`
+`超级选项.order`
 ----------------
 
 *   type: `boolean`
@@ -190,7 +188,7 @@ In JavaScript land, that would give you the following structure:
 
 是否保持表中键值对的顺序。
 
-`xOptions.longer`
+`超级选项.longer`
 -----------------
 
 *   type: `boolean`
@@ -198,7 +196,7 @@ In JavaScript land, that would give you the following structure:
 
 是否允许整数类型值超出 64 位范围（-9,223,372,036,854,775,808 至 9,223,372,036,854,775,807）限制。
 
-`xOptions.mix`
+`超级选项.mix`
 --------------
 
 *   type: `boolean`
@@ -214,7 +212,7 @@ array = [
 ]
 ```
 
-`xOptions.multi`
+`超级选项.multi`
 ----------------
 
 *   type: `boolean`
@@ -243,7 +241,7 @@ x = 1
 y = 2
 ```
 
-`xOptions.null`
+`超级选项.null`
 ---------------
 
 *   type: `boolean`
@@ -255,7 +253,7 @@ y = 2
 key = null
 ```
 
-`xOptions.nil`
+`超级选项.nil`
 --------------
 
 *   type: `boolean`
@@ -267,7 +265,7 @@ key = null
 key = nil
 ```
 
-`xOptions.ins`
+`超级选项.ins`
 --------------
 
 *   type: `boolean`
@@ -318,7 +316,7 @@ keyF = `
 
 插值字符串原始解析结果总是以 `\n` 换行，而不会理睬 `multiLineJoiner` 参数。
 
-`xOptions.new`
+`超级选项.new`
 --------------
 
 *   type: `{ [type]: function (value) { } }` / `function (type, value) { }`
@@ -327,7 +325,7 @@ keyF = `
 key = !!type 'value'
 ```
 
-`xOptions.hash`
+`超级选项.hash`
 ---------------
 
 *   type: `boolean`

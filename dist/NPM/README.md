@@ -1,8 +1,7 @@
 
 [English](#user-content-english) | [简体中文](#user-content-简体中文)
 
-
-
+_________________________________________________________
 [@ltd/j-toml v0.5]<a id="user-content-english">&nbsp;</a>
 ==================
 
@@ -43,6 +42,7 @@ TOML.parse(sourceContent, version, multiLineJoiner[, useBigInt=true[, xOptions]]
 ### `arguments`
 
 0.  **`sourceContent`**
+    
     *   required
     *   type: `string` / `Buffer(utf8)`
     
@@ -50,12 +50,14 @@ TOML.parse(sourceContent, version, multiLineJoiner[, useBigInt=true[, xOptions]]
     You can also pass in a `Buffer`. But it must be UTF 8 encoding, that's not a technology problem, but a requirement in the specification.
     
 1.  **`version`**
+    
     *   required
     *   type: `0.5`
     
     You must specify it explicitly (though it can't be other value for the time being).
     
 2.  **`multiLineJoiner`**
+    
     *   required
     *   type: `string`
     
@@ -63,12 +65,14 @@ TOML.parse(sourceContent, version, multiLineJoiner[, useBigInt=true[, xOptions]]
     Note that TOML always use `"\n"` or `"\r\n"` split the source lines while parsing, which defined in TOML spec.
     
 3.  **`useBigInt`**
+    
     *   default: `true`
     *   type: `boolean` / `number`
     
     Specify whether you want or not to use `BigInt` for integer type value. `number` type value allows you to control it by a max limit (and the negative limit from `-useBigInt`, if `useBigInt>=0`; otherwise as a min limit, and the positive limit is `~useBigInt`).
     
 4.  **`xOptions`**
+    
     *   type: `Object`
     
     The extensional features not in the spec.  
@@ -89,8 +93,7 @@ Return the root table (tables parsed by this implementation are objects without 
 If the arguments not meet the requirement, there will be an error; if there is any error with the source, the error object will has two number properties `lineIndex` and `lineNumber` to help locating that.  
 There are two cases will cause the recursion parser stack overflow: `k=[{ k=[{ k=[{ ...thousands of layers... }] }] }]` and `k="\t\t\t...thousands of escapes...\t\t\t"`. The latter is because the problematical implementation of RegExp `/"(?:[^\\"]+|\\[^])*"/`. If there is an issue manifesting the necessity, I will rewrite them to loop.
 
-
-
+__________________________________________________________
 [@ltd/j-toml v0.5]<a id="user-content-简体中文">&nbsp;</a>
 ==================
 
@@ -125,38 +128,43 @@ rootTable.__proto__      === "..." // true
 ------------
 
 ```
-TOML.parse(sourceContent, version, multiLineJoiner[, useBigInt=true[, xOptions]]);
+TOML.parse(源内容, 遵循规范版本, 多行拼接字符[, 使用BigInt=true[, 超级选项]]);
 ```
 
 ### `arguments`
 
-0.  **`sourceContent`**
+0.  **`源内容`**
+    
     *   required
     *   type: `string` / `Buffer(utf8)`
     
     传入的 `string` 如果以 UTF BOM 开头，不会造成错误。  
     你也可以传入 `Buffer`。但它必须是 UTF 8 编码的，这不是技术问题，而是规范的要求。
     
-1.  **`version`**
+1.  **`遵循规范版本`**
+    
     *   required
     *   type: `0.5`
     
     你必须显式地进行指定（尽管目前还不能使用别的值）。
     
-2.  **`multiLineJoiner`**
+2.  **`多行拼接字符`**
+    
     *   required
     *   type: `string`
     
     对于多行字符串，用什么来拼接各行。  
     注意在解析 TOML 源时，按照 TOML 规范的要求，行分隔符总是 `"\n"` 或 `"\r\n"`。
     
-3.  **`useBigInt`**
+3.  **`使用BigInt`**
+    
     *   default: `true`
     *   type: `boolean` / `number`
     
     指定你是否要用 `BigInt` 来实现整数类型的值。`number` 类型的值允许你精确控制超过多少才使用 `BigInt`（自动通过 `-useBigInt` 获取负向界限，如果 `useBigInt>=0`；否则通过 `~useBigInt` 获取正向界限）。
     
-4.  **`xOptions`**
+4.  **`超级选项`**
+    
     *   type: `Object`
     
     标准中所没有的扩展功能。  
@@ -177,10 +185,7 @@ TOML.parse(sourceContent, version, multiLineJoiner[, useBigInt=true[, xOptions]]
 如果参数不符合要求，会抛出错误；如果源文本有错误，错误对象会有 `lineIndex` 和 `lineNumber` 两个数值属性来帮助定位。  
 两种情况会导致递归解析器栈溢出：`k=[{ k=[{ k=[{ ……成千上万层…… }] }] }]` 和 `k="\t\t\t……成千上万个转义……\t\t\t"`。其中后者是因为正则表达式 `/"(?:[^\\"]+|\\[^])*"/` 的实现存在缺陷。如果有 issue 表明必要性，我会把它们改写成循环实现。
 
-
-
+____________________
 [@ltd/j-toml v0.5]: https://www.npmjs.com/package/@ltd/j-toml
-
-[TOML v0.5]: https://GitHub.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md
-
-[汤小明语 v0.5]: https://GitHub.com/LongTengDao/toml-lang/blob/龙腾道-译/versions/cn/toml-v0.5.0.md
+[TOML v0.5]:        https://GitHub.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md
+[汤小明语 v0.5]:    https://GitHub.com/LongTengDao/toml-lang/blob/龙腾道-译/versions/cn/toml-v0.5.0.md
