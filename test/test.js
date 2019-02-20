@@ -63,7 +63,7 @@ module.exports = require('@ltd/j-dev')(__dirname+'/..')(async ({ import_default,
 			throw new Error(which+' has '+JSON.stringify(sample_keys)+', but expect '+JSON.stringify(expect_keys)+'.');
 		}
 		for ( const key of expect_keys ) {
-			if ( typeof sample[key]==='object' ) { sample[key] = sample[key].toTOML(); }
+			if ( typeof sample[key]==='object' ) { sample[key] = sample[key].toISOString(); }
 			if ( expect[key]!==expect[key] ? sample[key]===sample[key] : sample[key]!==expect[key] ) {
 				throw new Error(which+'['+key+'] is '+sample[key]+', but expect '+expect[key]+'.');
 			}

@@ -1,11 +1,11 @@
 ﻿'use strict';
 
-const version = '0.5.45';
+const version = '0.5.46';
 
-const { WeakSet, WeakMap: WeakMap$1, SyntaxError, RangeError, TypeError, Error, BigInt, Date, parseInt, Infinity, NaN, Map, RegExp,
+const { WeakSet, WeakMap: WeakMap$1, SyntaxError, RangeError, TypeError, Error: Error$1, BigInt, Date, parseInt, Infinity, NaN, Map, RegExp,
 	Array: { isArray },
 	String: { fromCodePoint },
-	Number: { isFinite, isSafeInteger },
+	Number: { isSafeInteger },
 	Object: { create, getOwnPropertyNames, defineProperty },
 	Reflect: { getPrototypeOf },
 	Symbol: { for: Symbol_for },
@@ -88,7 +88,7 @@ const from = array => {
 const throwSyntaxError = message => throws(new SyntaxError(message));
 const throwRangeError = message => throws(new RangeError(message));
 const throwTypeError = message => throws(new TypeError(message));
-const throwError = message => throws(new Error(message));
+const throwError = message => throws(new Error$1(message));
 const where = () => 'line '+( lineIndex+1 )+': '+sourceLines[lineIndex];
 
 function throws (error) {
@@ -110,12 +110,8 @@ const INTEGER = /^[-+]?[1-9]\d*(?:_\d+)*$/;
 
 const FLOAT = /^[-+]?(?:0|[1-9]\d*(?:_\d+)*)(?:\.\d+(?:_\d+)*)?(?:[eE][-+]?\d+(?:_\d+)*)?$/;
 const FLOAT_NOT_INTEGER = /[.eE]/;
-
-const OFFSET_DATE_TIME = /^(?:0[1-9]|[1-9]\d)\d\d-(?:0[1-9]|1[012])-(?:0[1-9]|[12]\d|3[01])([T ])(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)$/;
-const LOCAL_DATE_TIME = /^(?:0[1-9]|[1-9]\d)\d\d-(?:0[1-9]|1[012])-(?:0[1-9]|[12]\d|3[01])([T ])(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?$/;
-const LOCAL_DATE = /^(?:0[1-9]|[1-9]\d)\d\d-(?:0[1-9]|1[012])-(?:0[1-9]|[12]\d|3[01])$/;
-const LOCAL_TIME = /^(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?$/;
-const TIMEZONE_OFFSET = /^([+-])([01]\d|2[0-3]):([0-5]\d)$/;
+const DATETIME = /^(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?|(\d\d\d\d-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|02-(?:0[1-9]|1\d|2[0-9])))(?:([T ])((?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?)(Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)?)?)$/;
+const BLEED = /(?<=\.\d\d\d)\d+/;
 
 const BOM = /^\uFEFF/;
 const EOL = /\r?\n/;
@@ -166,16 +162,17 @@ const Integer = (literal, useBigInt = true, allowLonger = false) => {
 		}
 		if ( useBigInt===true ) { return bigInt; }
 		isSafeInteger(useBigInt) || throwRangeError('TOML.Integer(,useBigInt) argument muse be safe integer.');
-		if ( useBigInt<0 ? useBigInt<=bigInt && bigInt<= ~useBigInt : -useBigInt<=bigInt && bigInt<=useBigInt ) { return +( bigInt+'' ); }
+		if ( useBigInt<0 ? useBigInt<=bigInt && bigInt<= -useBigInt-1 : -useBigInt<=bigInt && bigInt<=useBigInt ) { return +( bigInt+'' ); }
 		return bigInt;
 	}
 };
 
 const Float = literal => {
 	if ( FLOAT.test(literal) && FLOAT_NOT_INTEGER.test(literal) ) {
-		const number = +literal.replace(UNDERSCORES, '');
-		isFinite(number) || throwRangeError('Float can not be as big as Infinity, like '+literal+( none() ? '' : ' at '+where() ));
-		return number;
+		return +literal.replace(UNDERSCORES, '');
+		//const number = +literal.replace(RE.UNDERSCORES, '');
+		//isFinite(number) || throwRangeError('Float can not be as big as Infinity, like '+literal+( none() ? '' : ' at '+where() ));
+		//return number;
 	}
 	if ( literal==='inf' || literal==='+inf' ) { return Infinity; }
 	if ( literal==='-inf' ) { return -Infinity; }
@@ -183,81 +180,33 @@ const Float = literal => {
 	throwSyntaxError('Invalid Float '+literal+( none() ? '' : ' at '+where() ));
 };
 
-const DATE = new Date;
-const year = (date, utc) => {
-	const year = utc ? date.getUTCFullYear() : date.getFullYear();
-	if ( 1000<=year && year<=9999 ) { return ''+year; }
-	if ( 100<=year && year<=999 ) { return '0'+year; }
-	throw new RangeError('Datetime which year was set out of range 100 to 9999 can not be serialized toTOML.');
-};
-const month = (datetime, utc) => ( ( utc ? datetime.getUTCMonth() : datetime.getMonth() )+1+'' ).padStart(2, '0');
-const date = (datetime, utc) => ( ( utc ? datetime.getUTCDate() : datetime.getDate() )+'' ).padStart(2, '0');
-const hours = (datetime, utc) => ( ( utc ? datetime.getUTCHours() : datetime.getHours() )+'' ).padStart(2, '0');
-const minutes = (datetime, utc) => ( ( utc ? datetime.getUTCMinutes() : datetime.getMinutes() )+'' ).padStart(2, '0');
-const seconds = datetime => ( datetime.getSeconds()+'' ).padStart(2, '0');
-const milliseconds = datetime => {
-	const milliseconds = datetime.getMilliseconds();
-	if ( milliseconds===0 ) { return ''; }
-	let _milliseconds = '.'+( milliseconds+'' ).padStart(3, '0');
-	while ( _milliseconds.endsWith('0') ) { _milliseconds = _milliseconds.slice(0, -1); }
-	return _milliseconds;
-};
-
+const literal_cache = Symbol('literal_cache');
+const value_cache = Symbol('value_cache');
 class Datetime extends Date {
 	
 	constructor (literal) {
-		if ( literal.includes('-') ) {
-			if ( literal.includes('T') || literal.includes(' ') ) {
-				if ( literal.includes('Z') || literal.includes('+') || literal.split('-').length===4 ) {
-					const $ = OFFSET_DATE_TIME.exec(literal) || throwSyntaxError('Invalid Offset Date-Time '+literal+( none() ? '' : ' at '+where() ));
-					super(literal);
-					this.type = 'Offset Date-Time';
-					this.T = $[1];
-					this.Z = $[2];
-				}
-				else {
-					const $ = LOCAL_DATE_TIME.exec(literal) || throwSyntaxError('Invalid Local Date-Time '+literal+( none() ? '' : ' at '+where() ));
-					super(literal);
-					this.type = 'Local Date-Time';
-					this.T = $[1];
-				}
-			}
-			else {
-				LOCAL_DATE.test(literal) || throwSyntaxError('Invalid Local Date '+literal+( none() ? '' : ' at '+where() ));
-				super(literal);
-				this.type = 'Local Date';
-			}
-		}
-		else {
-			LOCAL_TIME.test(literal) || throwSyntaxError('Invalid Local Time '+literal+( none() ? '' : ' at '+where() ));
-			super('1970-01-01 '+literal);
-			this.type = 'Local Time';
-		}
+		const [hms_ms = '', YMD = '', T = '', HMS_MS = hms_ms, Z = ''] = DATETIME.exec(literal) || throwSyntaxError('Invalid Datetime '+literal+( none() ? '' : ' at '+where() ));
+		super(
+			Z ? YMD+'T'+HMS_MS+Z :
+				T ? YMD+'T'+HMS_MS :
+					YMD ? YMD+'T00:00:00.000'
+						: '1970-01-01T'+HMS_MS
+		);
+		this.type =
+			Z ? 'Offset Date-Time' :
+				T ? 'Local Date-Time' :
+					YMD ? 'Local Date'
+						: 'Local Time';
+		this[literal_cache] = literal.replace(BLEED, '');
+		this[value_cache] = this.getTime();
 	}
 	
 	static isDatetime (value) { return value instanceof Datetime; }
 	
-	toTOML () {
-		if ( !isSafeInteger(this.getTime()) ) { throw new RangeError('Datetime which time was set unsafe integer can not be serialized toTOML.'); }
-		switch ( this.type ) {
-			case 'Offset Date-Time':
-				let datetime;
-				const { Z } = this;
-				if ( Z==='Z' || Z==='+00:00' || Z==='-00:00' ) { datetime = this; }
-				else {
-					const $ = TIMEZONE_OFFSET.exec(Z);
-					datetime = DATE;
-					datetime.setTime(this.getTime()+( $[1]+'60000' )*( +$[3]+60*$[2] ));
-				}
-				return year(datetime, true)+'-'+month(datetime, true)+'-'+date(datetime, true)+this.T+hours(datetime, true)+':'+minutes(datetime, true)+':'+seconds(datetime)+milliseconds(this)+Z;
-			case 'Local Date-Time':
-				return year(this)+'-'+month(this)+'-'+date(this)+this.T+hours(this)+':'+minutes(this)+':'+seconds(this)+milliseconds(this);
-			case 'Local Date':
-				return year(this)+'-'+month(this)+'-'+date(this);
-			case 'Local Time':
-				return hours(this)+':'+minutes(this)+':'+seconds(this)+milliseconds(this);
-		}
-		throw new TypeError('Unknown type Datetime.');
+	//toJSON () { return this.toISOString(); }
+	toISOString () {
+		if ( this.getTime()===this[value_cache] ) { return this[literal_cache]; }
+		throw new Error('Datetime value has been modified.');
 	}
 	
 }
@@ -320,7 +269,7 @@ const MultiLine = literal => literal.replace(ESCAPED_IN_MULTI_LINE, unEscapeMult
 function parse (toml_source, toml_version, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger = true, extensionOptions) {
 	if ( isBuffer(toml_source) ) { toml_source = toml_source.toString(); }
 	if ( typeof toml_source!=='string' ) { throw new TypeError('TOML.parse(source)'); }
-	if ( toml_version!==0.5 ) { throw new Error('TOML.parse(,version)'); }
+	if ( toml_version!==0.5 ) { throw new Error$1('TOML.parse(,version)'); }
 	if ( typeof useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines!=='string' ) { throw new TypeError('TOML.parse(,,multiLineJoiner)'); }
 	if ( typeof useBigInt_forInteger!=='boolean' ) {
 		if ( typeof useBigInt_forInteger!=='number' ) { throw new TypeError('TOML.parse(,,,useBigInt)'); }
@@ -788,7 +737,7 @@ function newRegExp (pattern, flags) {
 
 function prepareConstructors () {
 	if ( typeof customConstructors==='function' ) {
-		if ( customConstructors.length!==2 ) { throw new Error('TOML.parse(,,,xOptions.new.length)'); }
+		if ( customConstructors.length!==2 ) { throw new Error$1('TOML.parse(,,,xOptions.new.length)'); }
 		FUNCTION.add(customConstructors);
 	}
 	else if ( typeof customConstructors==='object' ) {
@@ -800,7 +749,7 @@ function prepareConstructors () {
 				}
 				if ( customConstructors[type].length ) {
 					customConstructors = null;
-					throw new Error('TOML.parse(,,,xOptions.new['+stringify(type)+'].length)');
+					throw new Error$1('TOML.parse(,,,xOptions.new['+stringify(type)+'].length)');
 				}
 			}
 		}
@@ -815,7 +764,7 @@ function prepareConstructors () {
 				}
 				if ( customConstructors[type].length ) {
 					customConstructors = null;
-					throw new Error('TOML.parse(,,,xOptions.new['+stringify(type)+'].length)');
+					throw new Error$1('TOML.parse(,,,xOptions.new['+stringify(type)+'].length)');
 				}
 				customConstructors[type] = customConstructor;
 			}

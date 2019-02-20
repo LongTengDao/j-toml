@@ -1,7 +1,7 @@
 export const { WeakSet, WeakMap, SyntaxError, RangeError, TypeError, Error, BigInt, Date, parseInt, Infinity, NaN, Map, RegExp,
 	Array: { isArray },
 	String: { fromCodePoint },
-	Number: { isFinite, isSafeInteger },
+	Number: { isSafeInteger },
 	Object: { create, getOwnPropertyNames, defineProperty },
 	Reflect: { getPrototypeOf },
 	Symbol: { for: Symbol_for },

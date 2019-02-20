@@ -69,7 +69,7 @@ TOML.parse(sourceContent, version, multiLineJoiner[, useBigInt=true[, xOptions]]
     *   default: `true`
     *   type: `boolean` / `number`
     
-    Specify whether you want or not to use `BigInt` for integer type value. `number` type value allows you to control it by a max limit (and the negative limit from `-useBigInt`, if `useBigInt>=0`; otherwise as a min limit, and the positive limit is `~useBigInt`).
+    Specify whether you want or not to use `BigInt` for integer type value. `number` type value allows you to control it by a max limit, like `Number.MAX_SAFE_INTEGER` (and the min limit from `-useBigInt`, if `useBigInt>=0`; otherwise as the min limit, and the max limit is `-useBigInt-1`).
     
 4.  #### `xOptions`
     
@@ -161,7 +161,7 @@ TOML.parse(源内容, 遵循规范版本, 多行拼接字符[, 使用BigInt=true
     *   default: `true`
     *   type: `boolean` / `number`
     
-    指定你是否要用 `BigInt` 来实现整数类型的值。`number` 类型的值允许你精确控制超过多少才使用 `BigInt`（自动通过 `-useBigInt` 获取负向界限，如果 `useBigInt>=0`；否则通过 `~useBigInt` 获取正向界限）。
+    指定你是否要用 `BigInt` 来实现整数类型的值。`number` 类型的值允许你精确控制超过多少才使用 `BigInt`，例如 `Number.MAX_SAFE_INTEGER`（自动通过 `-useBigInt` 获取负向界限，如果 `useBigInt>=0`；否则通过 `-useBigInt-1` 获取正向界限）。
     
 4.  #### `超级选项`
     

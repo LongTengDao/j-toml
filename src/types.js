@@ -1,4 +1,4 @@
-import { RangeError, TypeError, BigInt, Date, Infinity, NaN, isFinite, isSafeInteger, create } from './global.js';
+import { TypeError, BigInt, Date, Infinity, NaN, isSafeInteger, create } from './global.js';
 import { orderify } from './import.js';
 import { throwSyntaxError, throwRangeError, none, where } from './iterator.js';
 import * as RE from './RE.js?<RegExp>';
@@ -23,16 +23,17 @@ export const Integer = (literal, useBigInt = true, allowLonger = false) => {
 		}
 		if ( useBigInt===true ) { return bigInt; }
 		isSafeInteger(useBigInt) || throwRangeError('TOML.Integer(,useBigInt) argument muse be safe integer.');
-		if ( useBigInt<0 ? useBigInt<=bigInt && bigInt<= ~useBigInt : -useBigInt<=bigInt && bigInt<=useBigInt ) { return +( bigInt+'' ); }
+		if ( useBigInt<0 ? useBigInt<=bigInt && bigInt<= -useBigInt-1 : -useBigInt<=bigInt && bigInt<=useBigInt ) { return +( bigInt+'' ); }
 		return bigInt;
 	}
 };
 
 export const Float = literal => {
 	if ( RE.FLOAT.test(literal) && RE.FLOAT_NOT_INTEGER.test(literal) ) {
-		const number = +literal.replace(RE.UNDERSCORES, '');
-		isFinite(number) || throwRangeError('Float can not be as big as Infinity, like '+literal+( none() ? '' : ' at '+where() ));
-		return number;
+		return +literal.replace(RE.UNDERSCORES, '');
+		//const number = +literal.replace(RE.UNDERSCORES, '');
+		//isFinite(number) || throwRangeError('Float can not be as big as Infinity, like '+literal+( none() ? '' : ' at '+where() ));
+		//return number;
 	}
 	if ( literal==='inf' || literal==='+inf' ) { return Infinity; }
 	if ( literal==='-inf' ) { return -Infinity; }
@@ -40,81 +41,33 @@ export const Float = literal => {
 	throwSyntaxError('Invalid Float '+literal+( none() ? '' : ' at '+where() ));
 };
 
-const DATE = new Date;
-const year = (date, utc) => {
-	const year = utc ? date.getUTCFullYear() : date.getFullYear();
-	if ( 1000<=year && year<=9999 ) { return ''+year; }
-	if ( 100<=year && year<=999 ) { return '0'+year; }
-	throw new RangeError('Datetime which year was set out of range 100 to 9999 can not be serialized toTOML.');
-};
-const month = (datetime, utc) => ( ( utc ? datetime.getUTCMonth() : datetime.getMonth() )+1+'' ).padStart(2, '0');
-const date = (datetime, utc) => ( ( utc ? datetime.getUTCDate() : datetime.getDate() )+'' ).padStart(2, '0');
-const hours = (datetime, utc) => ( ( utc ? datetime.getUTCHours() : datetime.getHours() )+'' ).padStart(2, '0');
-const minutes = (datetime, utc) => ( ( utc ? datetime.getUTCMinutes() : datetime.getMinutes() )+'' ).padStart(2, '0');
-const seconds = datetime => ( datetime.getSeconds()+'' ).padStart(2, '0');
-const milliseconds = datetime => {
-	const milliseconds = datetime.getMilliseconds();
-	if ( milliseconds===0 ) { return ''; }
-	let _milliseconds = '.'+( milliseconds+'' ).padStart(3, '0');
-	while ( _milliseconds.endsWith('0') ) { _milliseconds = _milliseconds.slice(0, -1); }
-	return _milliseconds;
-};
-
+const literal_cache = Symbol('literal_cache');
+const value_cache = Symbol('value_cache');
 export class Datetime extends Date {
 	
 	constructor (literal) {
-		if ( literal.includes('-') ) {
-			if ( literal.includes('T') || literal.includes(' ') ) {
-				if ( literal.includes('Z') || literal.includes('+') || literal.split('-').length===4 ) {
-					const $ = RE.OFFSET_DATE_TIME.exec(literal) || throwSyntaxError('Invalid Offset Date-Time '+literal+( none() ? '' : ' at '+where() ));
-					super(literal);
-					this.type = 'Offset Date-Time';
-					this.T = $[1];
-					this.Z = $[2];
-				}
-				else {
-					const $ = RE.LOCAL_DATE_TIME.exec(literal) || throwSyntaxError('Invalid Local Date-Time '+literal+( none() ? '' : ' at '+where() ));
-					super(literal);
-					this.type = 'Local Date-Time';
-					this.T = $[1];
-				}
-			}
-			else {
-				RE.LOCAL_DATE.test(literal) || throwSyntaxError('Invalid Local Date '+literal+( none() ? '' : ' at '+where() ));
-				super(literal);
-				this.type = 'Local Date';
-			}
-		}
-		else {
-			RE.LOCAL_TIME.test(literal) || throwSyntaxError('Invalid Local Time '+literal+( none() ? '' : ' at '+where() ));
-			super('1970-01-01 '+literal);
-			this.type = 'Local Time';
-		}
+		const [hms_ms = '', YMD = '', T = '', HMS_MS = hms_ms, Z = ''] = RE.DATETIME.exec(literal) || throwSyntaxError('Invalid Datetime '+literal+( none() ? '' : ' at '+where() ));
+		super(
+			Z ? YMD+'T'+HMS_MS+Z :
+				T ? YMD+'T'+HMS_MS :
+					YMD ? YMD+'T00:00:00.000'
+						: '1970-01-01T'+HMS_MS
+		);
+		this.type =
+			Z ? 'Offset Date-Time' :
+				T ? 'Local Date-Time' :
+					YMD ? 'Local Date'
+						: 'Local Time';
+		this[literal_cache] = literal.replace(RE.BLEED, '');
+		this[value_cache] = this.getTime();
 	}
 	
 	static isDatetime (value) { return value instanceof Datetime; }
 	
-	toTOML () {
-		if ( !isSafeInteger(this.getTime()) ) { throw new RangeError('Datetime which time was set unsafe integer can not be serialized toTOML.'); }
-		switch ( this.type ) {
-			case 'Offset Date-Time':
-				let datetime;
-				const { Z } = this;
-				if ( Z==='Z' || Z==='+00:00' || Z==='-00:00' ) { datetime = this; }
-				else {
-					const $ = RE.TIMEZONE_OFFSET.exec(Z);
-					datetime = DATE;
-					datetime.setTime(this.getTime()+( $[1]+'60000' )*( +$[3]+60*$[2] ));
-				}
-				return year(datetime, true)+'-'+month(datetime, true)+'-'+date(datetime, true)+this.T+hours(datetime, true)+':'+minutes(datetime, true)+':'+seconds(datetime)+milliseconds(this)+Z;
-			case 'Local Date-Time':
-				return year(this)+'-'+month(this)+'-'+date(this)+this.T+hours(this)+':'+minutes(this)+':'+seconds(this)+milliseconds(this);
-			case 'Local Date':
-				return year(this)+'-'+month(this)+'-'+date(this);
-			case 'Local Time':
-				return hours(this)+':'+minutes(this)+':'+seconds(this)+milliseconds(this);
-		}
-		throw new TypeError('Unknown type Datetime.');
+	//toJSON () { return this.toISOString(); }
+	toISOString () {
+		if ( this.getTime()===this[value_cache] ) { return this[literal_cache]; }
+		throw new Error('Datetime value has been modified.');
 	}
 	
 }

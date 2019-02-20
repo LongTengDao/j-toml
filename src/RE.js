@@ -11,16 +11,17 @@ export const INTEGER = /^[-+]?[1-9]\d*(?:_\d+)*$/;
 export const FLOAT = /^[-+]?(?:0|[1-9]\d*(?:_\d+)*)(?:\.\d+(?:_\d+)*)?(?:[eE][-+]?\d+(?:_\d+)*)?$/;
 export const FLOAT_NOT_INTEGER = /[.eE]/;
 
-const Date = /(?:0[1-9]|[1-9]\d)\d\d-(?:0[1-9]|1[012])-(?:0[1-9]|[12]\d|3[01])/;
-const Hour = /[01]\d|2[0-3]/;
-const MinuteOrSecond = /[0-5]\d/;
-const Time = /(?:<Hour>):<MinuteOrSecond>:<MinuteOrSecond>(?:\.\d+)?/;
-
-export const OFFSET_DATE_TIME = /^<Date>([T ])<Time>(Z|[+-](?:<Hour>):<MinuteOrSecond>)$/;
-export const LOCAL_DATE_TIME = /^<Date>([T ])<Time>$/;
-export const LOCAL_DATE = /^<Date>$/;
-export const LOCAL_TIME = /^<Time>$/;
-export const TIMEZONE_OFFSET = /^([+-])(<Hour>):(<MinuteOrSecond>)$/;
+const _29_ = /(?:0[1-9]|1\d|2[0-9])/;
+const _30_ = /(?:0[1-9]|[12]\d|30)/;
+const _31_ = /(?:0[1-9]|[12]\d|3[01])/;
+const _23_ = /(?:[01]\d|2[0-3])/;
+const _59_ = /[0-5]\d/;
+const YMD = /\d\d\d\d-(?:(?:0[13578]|1[02])-<_31_>|(?:0[469]|11)-<_30_>|02-<_29_>)/;
+const T = /[T ]/;
+const HMS = /<_23_>:<_59_>:<_59_>(?:\.\d+)?/;
+const Z = /Z|[+-]<_23_>:<_59_>/;
+export const DATETIME = /^(?:<HMS>|(<YMD>)(?:(<T>)(<HMS>)(<Z>)?)?)$/;
+export const BLEED = /(?<=\.\d\d\d)\d+/;
 
 /* parser */
 
