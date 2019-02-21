@@ -21,7 +21,6 @@ const T = /[T ]/;
 const HMS = /<_23_>:<_59_>:<_59_>(?:\.\d+)?/;
 const Z = /Z|[+-]<_23_>:<_59_>/;
 export const DATETIME = /^(?:<HMS>|(<YMD>)(?:(<T>)(<HMS>)(<Z>)?)?)$/;
-export const BLEED = /(?<=\.\d\d\d)\d+/;
 
 /* parser */
 
@@ -30,7 +29,9 @@ const Whitespace = /[ \t]/;
 export const BOM = /^\uFEFF/;
 export const EOL = /\r?\n/;
 
-const BasicStringContent = /(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*/;
+const Hex = /[0-9A-Fa-f]/;
+const UnicodeScalar = /u[0-9ABCEFabcef]<Hex>{3}|u[Dd][0-7]<Hex>{2}|U000<Hex>{5}|U0010<Hex>{4}/;// [0,D7FF] [E000,10FFFF]
+const BasicStringContent = /(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|<UnicodeScalar>))*/;
 const LiteralStringContent = /[^'\x00-\x08\x0B-\x1F\x7F]*/;
 
 export const PRE_WHITESPACE = /^<Whitespace>*/;
@@ -43,8 +44,8 @@ export const MULTI_LINE_LITERAL_STRING = /^([^]*?)'''<Whitespace>*([^]*)/;
 export const CONTROL_CHARACTER_EXCLUDE_TAB = /[\x00-\x08\x0B-\x1F\x7F]/;
 export const BASIC_STRING = /^"(<BasicStringContent>)"<Whitespace>*([^]*)/;
 export const MULTI_LINE_BASIC_STRING = /^(?:[^\\"]+|\\[^]|""?(?!"))*/;
-export const ESCAPED_EXCLUDE_CONTROL_CHARACTER = /^(?:[^\\\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\ \n]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*$/;
-export const ESCAPED_IN_MULTI_LINE = /\n|\\(?:([ \n]+)|([\\"])|([btnfr])|u(.{4})|U(.{8}))/g;
+export const ESCAPED_EXCLUDE_CONTROL_CHARACTER = /^(?:[^\\\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\ \n]|<UnicodeScalar>))*$/;
+export const ESCAPED_IN_MULTI_LINE = /\n|\\(?:([ \n]+)|([\\"])|([btnfr])|u([^]{4})|U([^]{8}))/g;
 export const SYM_WHITESPACE = /^[^]<Whitespace>*/;
 
 export const _VALUE_PAIR = /^!!([\w-]*)<Whitespace>+([^ \t#][^]*)$/;

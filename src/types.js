@@ -58,7 +58,7 @@ export class Datetime extends Date {
 				T ? 'Local Date-Time' :
 					YMD ? 'Local Date'
 						: 'Local Time';
-		this[literal_cache] = literal.replace(RE.BLEED, '');
+		this[literal_cache] = literal;
 		this[value_cache] = this.getTime();
 	}
 	

@@ -42,13 +42,13 @@ module.exports = require('@ltd/j-dev')(__dirname+'/..')(async ({ import_default,
 	});
 	
 	compare('date-time', {
-		'offset_date-time_Z': '1970-01-01 00:00:00.999Z',
-		'offset_date-time_0': '1970-01-01 00:00:00.999+00:00',
-		'offset_date-time_2': '1970-01-01 00:00:00.999-02:00',
-		'offset_date-time_8': '1970-01-01 00:00:00.999+08:00',
-		'local_date-time': '1970-01-01 00:00:00.999',
+		'offset_date-time_Z': '1970-01-01 00:00:00.9999Z',
+		'offset_date-time_0': '1970-01-01 00:00:00.9999+00:00',
+		'offset_date-time_2': '1970-01-01 00:00:00.9999-02:00',
+		'offset_date-time_8': '1970-01-01 00:00:00.9999+08:00',
+		'local_date-time': '1970-01-01 00:00:00.9999',
 		'local_date': '1970-01-01',
-		'local_time': '00:00:00.999',
+		'local_time': '00:00:00.9999',
 	});
 	
 	if ( JSON.stringify(toml)!==JSON.stringify(JSON.parse(await get('./test/expect.json'))) ) {
