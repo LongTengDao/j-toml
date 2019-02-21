@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.50';
+const version = '0.5.51';
 
 const { WeakSet, WeakMap: WeakMap$1, SyntaxError, RangeError, TypeError, Error: Error$1, BigInt, Date, parseInt, Infinity, NaN, Map, RegExp,
 	Array: { isArray },
@@ -226,6 +226,7 @@ let useWhatToJoinMultiLineString = '';
 let useBigInt = true;
 
 let TableDepends = TableDefault;
+let open = false;
 let allowLonger = false;
 let keepComment = false;
 let enableNull = false;
@@ -245,12 +246,13 @@ function use (useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBi
 	useBigInt = useBigInt_forInteger;
 	if ( extensionOptions===null ) {
 		TableDepends = TableDefault;
-		allowLonger = keepComment = enableNull = enableNil = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = enableInterpolationString = false;
+		open = allowLonger = keepComment = enableNull = enableNil = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = enableInterpolationString = false;
 		typify = reallyTypify;
 		customConstructors = null;
 	}
 	else {
 		TableDepends = extensionOptions.order ? TableKeepOrder : TableDefault;
+		open = !!extensionOptions.open;
 		allowLonger = !!extensionOptions.longer;
 		keepComment = !!extensionOptions.hash;
 		enableNull = !!extensionOptions.null;
@@ -412,7 +414,8 @@ function getKeys (_) {
 	}
 }
 
-const StaticObjects = new WeakSet;
+const closeTables = new WeakSet;
+const openTables = new WeakSet;
 
 const ArrayOfNulls = -1;
 const ArrayOfStrings = 1;
@@ -456,16 +459,19 @@ function appendTable (table, key_key, asArrayItem, hash) {
 	const leadingKeys = parseKeys(key_key);
 	const finalKey = leadingKeys.pop();
 	table = prepareTable(table, leadingKeys);
-	let lastTable = new TableDepends;
+	let lastTable;
 	if ( asArrayItem ) {
 		let arrayOfTables;
-		if ( finalKey in table ) { StaticObjects.has(arrayOfTables = table[finalKey]) && throwError('Trying to push Table to non-ArrayOfTables value at '+where()); }
+		if ( finalKey in table ) { closeTables.has(arrayOfTables = table[finalKey]) && throwError('Trying to push Table to non-ArrayOfTables value at '+where()); }
 		else { arrayOfTables = table[finalKey] = []; }
-		arrayOfTables.push(lastTable);
+		arrayOfTables.push(lastTable = new TableDepends);
 	}
 	else {
-		finalKey in table && throwError('Duplicate Table definition at '+where());
-		table[finalKey] = lastTable;
+		if ( finalKey in table ) {
+			open && openTables.has(lastTable = table[finalKey]) || throwError('Duplicate Table definition at '+where());
+			openTables.delete(lastTable);
+		}
+		else { table[finalKey] = lastTable = new TableDepends; }
 	}
 	if ( keepComment && hash ) {
 		defineProperty(table, Symbol_for(finalKey), {
@@ -498,17 +504,17 @@ function prepareTable (table, keys) {
 		if ( key in table ) {
 			table = table[key];
 			if ( isTable(table) ) {
-				StaticObjects.has(table) && throwError('Trying to define table through static Inline Object at '+where());
+				closeTables.has(table) && throwError('Trying to define table through static Inline Object at '+where());
 			}
 			else if ( isArray(table) ) {
-				StaticObjects.has(table) && throwError('Trying to append value to static Inline Array at '+where());
+				closeTables.has(table) && throwError('Trying to append value to static Inline Array at '+where());
 				table = table[table.length-1];
 			}
 			else { throwError('Trying to define table through non-Table value at '+where()); }
 		}
 		else {
-			table = table[key] = new TableDepends;
-			while ( index<length ) { table = table[keys[index++]] = new TableDepends; }
+			openTables.add(table = table[key] = new TableDepends);
+			while ( index<length ) { openTables.add(table = table[keys[index++]] = new TableDepends); }
 			return table;
 		}
 	}
@@ -523,7 +529,7 @@ function prepareInlineTable (table, keys) {
 		if ( key in table ) {
 			table = table[key];
 			isTable(table) || throwError('Trying to assign property through non-Table value at '+where());
-			StaticObjects.has(table) && throwError('Trying to assign property through static Inline Object at '+where());
+			closeTables.has(table) && throwError('Trying to assign property through static Inline Object at '+where());
 		}
 		else {
 			table = table[key] = new TableDepends;
@@ -648,7 +654,7 @@ function assignBasicString (table, finalKey, literal) {
 
 function assignInlineTable (table, finalKey, lineRest) {
 	const inlineTable = table[finalKey] = new TableDepends;
-	StaticObjects.add(inlineTable);
+	closeTables.add(inlineTable);
 	lineRest = lineRest.replace(SYM_WHITESPACE, '');
 	if ( allowInlineTableMultiLineAndTrailingCommaEvenNoComma ) {
 		const start = mark();
@@ -681,7 +687,7 @@ function assignInlineTable (table, finalKey, lineRest) {
 
 function assignInlineArray (table, finalKey, lineRest) {
 	const inlineArray = table[finalKey] = [];
-	StaticObjects.add(inlineArray);
+	closeTables.add(inlineArray);
 	const start = mark();
 	lineRest = lineRest.replace(SYM_WHITESPACE, '');
 	while ( lineRest==='' || lineRest.startsWith('#') ) {
@@ -760,7 +766,10 @@ function pushInline (array, lineRest) {
 			else if ( enableNull && literal==='null' || enableNil && literal==='nil' ) {
 				typify(array, ArrayOfNulls).push(null);
 			}
-			else { typify(array, ArrayOfIntegers).push(Integer(literal, useBigInt, allowLonger)); }
+			else {
+				typify(array, ArrayOfIntegers).
+						push(Integer(literal, useBigInt, allowLonger));
+			}
 			break;
 	}
 	if ( custom ) { array[lastIndex] = construct(type, array[lastIndex]); }

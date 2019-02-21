@@ -18,6 +18,7 @@ export let useWhatToJoinMultiLineString = '';
 export let useBigInt = true;
 
 export let TableDepends = TableDefault;
+export let open = false;
 export let allowLonger = false;
 export let keepComment = false;
 export let enableNull = false;
@@ -37,12 +38,13 @@ export function use (useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines
 	useBigInt = useBigInt_forInteger;
 	if ( extensionOptions===null ) {
 		TableDepends = TableDefault;
-		allowLonger = keepComment = enableNull = enableNil = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = enableInterpolationString = false;
+		open = allowLonger = keepComment = enableNull = enableNil = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = enableInterpolationString = false;
 		typify = reallyTypify;
 		customConstructors = null;
 	}
 	else {
 		TableDepends = extensionOptions.order ? TableKeepOrder : TableDefault;
+		open = !!extensionOptions.open;
 		allowLonger = !!extensionOptions.longer;
 		keepComment = !!extensionOptions.hash;
 		enableNull = !!extensionOptions.null;

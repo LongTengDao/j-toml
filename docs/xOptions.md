@@ -176,6 +176,19 @@ In JavaScript land, that would give you the following structure:
 })
 ```
 
+`xOptions.open`
+--------------
+
+*   type: `boolean`
+*   default: `false`
+
+Allow to define a table which is not directly defined (it's valid in spec version 0.4):
+
+```
+[a.b]
+[a]
+```
+
 ___________________________________________________
 `超级选项`<a id="user-content-简体中文">&nbsp;</a>
 ==========
@@ -349,4 +362,17 @@ key = 'value' # comment 2
     },
     [Symbol.for('table')]: ' comment 1'
 })
+```
+
+`超级选项.open`
+--------------
+
+*   type: `boolean`
+*   default: `false`
+
+允许定义一个没有被直接定义过的表（这未被 0.4 版本的规范禁止）：
+
+```
+[a.b]
+[a]
 ```

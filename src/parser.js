@@ -6,7 +6,8 @@ import { SingleLine, MultiLine } from './types-options.js';
 import * as RE from './RE.js?<RegExp>';
 import * as RE_good from './RE-never-slow-nor-overflow.js';
 
-const StaticObjects = new WeakSet;
+const closeTables = new WeakSet;
+const openTables = new WeakSet;
 
 const ArrayOfNulls = -1;
 const ArrayOfStrings = 1;
@@ -51,16 +52,19 @@ function appendTable (table, key_key, asArrayItem, hash) {
 	const leadingKeys = parseKeys(key_key);
 	const finalKey = leadingKeys.pop();
 	table = prepareTable(table, leadingKeys);
-	let lastTable = new options.TableDepends;
+	let lastTable;
 	if ( asArrayItem ) {
 		let arrayOfTables;
-		if ( finalKey in table ) { StaticObjects.has(arrayOfTables = table[finalKey]) && throwError('Trying to push Table to non-ArrayOfTables value at '+where()); }
+		if ( finalKey in table ) { closeTables.has(arrayOfTables = table[finalKey]) && throwError('Trying to push Table to non-ArrayOfTables value at '+where()); }
 		else { arrayOfTables = table[finalKey] = []; }
-		arrayOfTables.push(lastTable);
+		arrayOfTables.push(lastTable = new options.TableDepends);
 	}
 	else {
-		finalKey in table && throwError('Duplicate Table definition at '+where());
-		table[finalKey] = lastTable;
+		if ( finalKey in table ) {
+			options.open && openTables.has(lastTable = table[finalKey]) || throwError('Duplicate Table definition at '+where());
+			openTables.delete(lastTable);
+		}
+		else { table[finalKey] = lastTable = new options.TableDepends; }
 	}
 	if ( options.keepComment && hash ) {
 		defineProperty(table, Symbol_for(finalKey), {
@@ -93,17 +97,17 @@ function prepareTable (table, keys) {
 		if ( key in table ) {
 			table = table[key];
 			if ( isTable(table) ) {
-				StaticObjects.has(table) && throwError('Trying to define table through static Inline Object at '+where());
+				closeTables.has(table) && throwError('Trying to define table through static Inline Object at '+where());
 			}
 			else if ( isArray(table) ) {
-				StaticObjects.has(table) && throwError('Trying to append value to static Inline Array at '+where());
+				closeTables.has(table) && throwError('Trying to append value to static Inline Array at '+where());
 				table = table[table.length-1];
 			}
 			else { throwError('Trying to define table through non-Table value at '+where()); }
 		}
 		else {
-			table = table[key] = new options.TableDepends;
-			while ( index<length ) { table = table[keys[index++]] = new options.TableDepends; }
+			openTables.add(table = table[key] = new options.TableDepends);
+			while ( index<length ) { openTables.add(table = table[keys[index++]] = new options.TableDepends); }
 			return table;
 		}
 	}
@@ -118,7 +122,7 @@ function prepareInlineTable (table, keys) {
 		if ( key in table ) {
 			table = table[key];
 			isTable(table) || throwError('Trying to assign property through non-Table value at '+where());
-			StaticObjects.has(table) && throwError('Trying to assign property through static Inline Object at '+where());
+			closeTables.has(table) && throwError('Trying to assign property through static Inline Object at '+where());
 		}
 		else {
 			table = table[key] = new options.TableDepends;
@@ -243,7 +247,7 @@ function assignBasicString (table, finalKey, literal) {
 
 function assignInlineTable (table, finalKey, lineRest) {
 	const inlineTable = table[finalKey] = new options.TableDepends;
-	StaticObjects.add(inlineTable);
+	closeTables.add(inlineTable);
 	lineRest = lineRest.replace(RE.SYM_WHITESPACE, '');
 	if ( options.allowInlineTableMultiLineAndTrailingCommaEvenNoComma ) {
 		const start = mark();
@@ -276,7 +280,7 @@ function assignInlineTable (table, finalKey, lineRest) {
 
 function assignInlineArray (table, finalKey, lineRest) {
 	const inlineArray = table[finalKey] = [];
-	StaticObjects.add(inlineArray);
+	closeTables.add(inlineArray);
 	const start = mark();
 	lineRest = lineRest.replace(RE.SYM_WHITESPACE, '');
 	while ( lineRest==='' || lineRest.startsWith('#') ) {
@@ -355,7 +359,10 @@ function pushInline (array, lineRest) {
 			else if ( options.enableNull && literal==='null' || options.enableNil && literal==='nil' ) {
 				options.typify(array, ArrayOfNulls).push(null);
 			}
-			else { options.typify(array, ArrayOfIntegers).push(Integer(literal, options.useBigInt, options.allowLonger)); }
+			else {
+				options.typify(array, ArrayOfIntegers).
+						push(Integer(literal, options.useBigInt, options.allowLonger));
+			}
 			break;
 	}
 	if ( custom ) { array[lastIndex] = construct(type, array[lastIndex]); }
