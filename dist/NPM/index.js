@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.49';
+const version = '0.5.50';
 
 const { WeakSet, WeakMap: WeakMap$1, SyntaxError, RangeError, TypeError, Error: Error$1, BigInt, Date, parseInt, Infinity, NaN, Map, RegExp,
 	Array: { isArray },
@@ -99,10 +99,6 @@ function throws (error) {
 	throw error;
 }
 
-/* types */
-
-const ESCAPED_IN_SINGLE_LINE = /\\(?:([\\"])|([btnfr])|u(.{4})|U(.{8}))/g;
-
 const UNDERSCORES = /_/g;
 
 const XOB_INTEGER = /^0x[0-9A-Fa-f]+(?:_[0-9A-Fa-f]+)*|o[0-7]+(?:_[0-7]+)*|b[01]+(?:_[01]+)*$/;
@@ -115,18 +111,12 @@ const DATETIME = /^(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?|(\d\d\d\d-(?:(
 const BOM = /^\uFEFF/;
 const EOL = /\r?\n/;
 
-const PRE_WHITESPACE = /^[ \t]*/;
-const TABLE_DEFINITION = /^\[(\[?)[ \t]*((?:[\w-]+|"(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*"|'[^'\x00-\x08\x0B-\x1F\x7F]*')(?:[ \t]*\.[ \t]*(?:[\w-]+|"(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*"|'[^'\x00-\x08\x0B-\x1F\x7F]*'))*)[ \t]*](]?)[ \t]*(?:#[^]*)?$/;
-const KEY_VALUE_PAIR = /^((?:[\w-]+|"(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*"|'[^'\x00-\x08\x0B-\x1F\x7F]*')(?:[ \t]*\.[ \t]*(?:[\w-]+|"(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*"|'[^'\x00-\x08\x0B-\x1F\x7F]*'))*)[ \t]*=[ \t]*(!!([\w-]*)[ \t]+)?([^ \t#][^]*)$/;
+const PRE_WHITESPACE = /^[ \t]+/;
 const KEYS = /[\w-]+|"(?:[^\\"]+|\\[^])*"|'[^']*'/g;
 const VALUE_REST = /^((?:\d\d\d\d-\d\d-\d\d \d)?[\w\-+.:]+)[ \t]*([^]*)$/;
 const LITERAL_STRING = /^'([^'\x00-\x08\x0B-\x1F\x7F]*)'[ \t]*([^]*)/;
 const MULTI_LINE_LITERAL_STRING = /^([^]*?)'''[ \t]*([^]*)/;
 const CONTROL_CHARACTER_EXCLUDE_TAB = /[\x00-\x08\x0B-\x1F\x7F]/;
-const BASIC_STRING = /^"((?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*)"[ \t]*([^]*)/;
-const MULTI_LINE_BASIC_STRING = /^(?:[^\\"]+|\\[^]|""?(?!"))*/;
-const ESCAPED_EXCLUDE_CONTROL_CHARACTER = /^(?:[^\\\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\ \n]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*$/;
-const ESCAPED_IN_MULTI_LINE = /\n|\\(?:([ \n]+)|([\\"])|([btnfr])|u([^]{4})|U([^]{8}))/g;
 const SYM_WHITESPACE = /^[^][ \t]*/;
 
 const _VALUE_PAIR = /^!!([\w-]*)[ \t]+([^ \t#][^]*)$/;
@@ -218,19 +208,9 @@ const Table = function Table (keepOrder) {
 const TableDefault = function Table () { };
 const TableKeepOrder = function Table () { return orderify(this); };
 Table.prototype = TableDefault.prototype = TableKeepOrder.prototype = create(null);
-Table.isTable = value => value instanceof Table;
+const isTable = Table.isTable = value => value instanceof Table;
 
-const { isTable } = Table;
-const StaticObjects = new WeakSet;
 const TypedArrays = new WeakMap$1;
-const ArrayOfNulls = -1;
-const ArrayOfStrings = 1;
-const ArrayOfInlineTables = 2;
-const ArrayOfInlineArrays = 3;
-const ArrayOfBooleans = 4;
-const ArrayOfFloats = 5;
-const ArrayOfDatetimes = 6;
-const ArrayOfIntegers = 7;
 const reallyTypify = (array, type) => {
 	if ( TypedArrays.has(array) ) {
 		if ( TypedArrays.get(array)===type ) { return array; }
@@ -240,9 +220,11 @@ const reallyTypify = (array, type) => {
 	return array;
 };
 const unlimitedType = array => array;
+const FUNCTION = new WeakSet;
 
 let useWhatToJoinMultiLineString = '';
 let useBigInt = true;
+
 let TableDepends = TableDefault;
 let allowLonger = false;
 let keepComment = false;
@@ -252,31 +234,8 @@ let allowInlineTableMultiLineAndTrailingCommaEvenNoComma = false;
 let enableInterpolationString = false;
 let typify = reallyTypify;
 let customConstructors = null;
-const FUNCTION = new WeakSet;
 
-const ESCAPE_ALIAS = { b: '\b', t: '\t', n: '\n', f: '\f', r: '\r' };
-const unEscapeSingleLine = ($0, $1, $2, $3, $4) => {
-	if ( $1 ) { return $1; }
-	if ( $2 ) { return ESCAPE_ALIAS[$2]; }
-	const codePoint = parseInt($3 || $4, 16);
-	( 0xD7FF<codePoint && codePoint<0xE000 || 0x10FFFF<codePoint ) && throwRangeError('Invalid Unicode Scalar '+( $3 ? '\\u'+$3 : '\\U'+$4 )+' at '+where());
-	return fromCodePoint(codePoint);
-};
-const unEscapeMultiLine = ($0, $1, $2, $3, $4, $5) => {
-	if ( $0==='\n' ) { return useWhatToJoinMultiLineString; }
-	if ( $1 ) {
-		$1.includes('\n') || throwSyntaxError('Back slash leading whitespaces can only appear at the end of a line, but see '+where());
-		return '';
-	}
-	return unEscapeSingleLine('', $2, $3, $4, $5);
-};
-const SingleLine = literal => literal.replace(ESCAPED_IN_SINGLE_LINE, unEscapeSingleLine);
-const MultiLine = literal => literal.replace(ESCAPED_IN_MULTI_LINE, unEscapeMultiLine);
-
-function parse (toml_source, toml_version, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger = true, extensionOptions = null) {
-	if ( isBuffer(toml_source) ) { toml_source = toml_source.toString(); }
-	if ( typeof toml_source!=='string' ) { throw new TypeError('TOML.parse(source)'); }
-	if ( toml_version!==0.5 ) { throw new Error$1('TOML.parse(,version)'); }
+function use (useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger, extensionOptions) {
 	if ( typeof useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines!=='string' ) { throw new TypeError('TOML.parse(,,multiLineJoiner)'); }
 	if ( typeof useBigInt_forInteger!=='boolean' ) {
 		if ( typeof useBigInt_forInteger!=='number' ) { throw new TypeError('TOML.parse(,,,useBigInt)'); }
@@ -300,8 +259,175 @@ function parse (toml_source, toml_version, useWhatToJoinMultiLineString_notUsing
 		enableInterpolationString = !!extensionOptions.ins;
 		typify = extensionOptions.mix ? unlimitedType : reallyTypify;
 		customConstructors = extensionOptions.new || null;
-		customConstructors===null || prepareConstructors();
+		if ( customConstructors!==null ) {
+			if ( typeof customConstructors==='function' ) {
+				if ( customConstructors.length!==2 ) { throw new Error$1('TOML.parse(,,,xOptions.new.length)'); }
+				FUNCTION.add(customConstructors);
+			}
+			else if ( typeof customConstructors==='object' ) {
+				if ( getPrototypeOf(customConstructors)===null ) {
+					for ( const type of getOwnPropertyNames(customConstructors) ) {
+						if ( typeof customConstructors[type]!=='function' ) {
+							customConstructors = null;
+							throw new TypeError('TOML.parse(,,,xOptions.new['+stringify(type)+'])');
+						}
+						if ( customConstructors[type].length ) {
+							customConstructors = null;
+							throw new Error$1('TOML.parse(,,,xOptions.new['+stringify(type)+'].length)');
+						}
+					}
+				}
+				else {
+					const origin = customConstructors;
+					customConstructors = create(null);
+					for ( const type of getOwnPropertyNames(origin) ) {
+						const customConstructor = origin[type];
+						if ( typeof customConstructor!=='function' ) {
+							customConstructors = null;
+							throw new TypeError('TOML.parse(,,,xOptions.new['+stringify(type)+'])');
+						}
+						if ( customConstructors[type].length ) {
+							customConstructors = null;
+							throw new Error$1('TOML.parse(,,,xOptions.new['+stringify(type)+'].length)');
+						}
+						customConstructors[type] = customConstructor;
+					}
+				}
+			}
+			else { throw new TypeError('TOML.parse(,,,xOptions.new)'); }
+		}
 	}
+}
+
+function clear () {
+	customConstructors = null;
+}
+
+/* types */
+
+const ESCAPED_IN_SINGLE_LINE$1 = /\\(?:([\\"])|([btnfr])|u(.{4})|U(.{8}))/g;
+const ESCAPED_IN_MULTI_LINE$1 = /\n|\\(?:([ \n]+)|([\\"])|([btnfr])|u([^]{4})|U([^]{8}))/g;
+
+const ESCAPE_ALIAS = { b: '\b', t: '\t', n: '\n', f: '\f', r: '\r' };
+
+const unEscapeSingleLine = ($0, $1, $2, $3, $4) => {
+	if ( $1 ) { return $1; }
+	if ( $2 ) { return ESCAPE_ALIAS[$2]; }
+	const codePoint = parseInt($3 || $4, 16);
+	( 0xD7FF<codePoint && codePoint<0xE000 || 0x10FFFF<codePoint ) && throwRangeError('Invalid Unicode Scalar '+( $3 ? '\\u'+$3 : '\\U'+$4 )+' at '+where());
+	return fromCodePoint(codePoint);
+};
+
+const unEscapeMultiLine = ($0, $1, $2, $3, $4, $5) => {
+	if ( $0==='\n' ) { return useWhatToJoinMultiLineString; }
+	if ( $1 ) {
+		$1.includes('\n') || throwSyntaxError('Back slash leading whitespaces can only appear at the end of a line, but see '+where());
+		return '';
+	}
+	return unEscapeSingleLine('', $2, $3, $4, $5);
+};
+
+const SingleLine = literal => literal.replace(ESCAPED_IN_SINGLE_LINE$1, unEscapeSingleLine);
+
+const MultiLine = literal => literal.replace(ESCAPED_IN_MULTI_LINE$1, unEscapeMultiLine);
+
+const MULTI_LINE_BASIC_STRING = /^(?:[^\\"]+|\\[^]|""?(?!"))/;
+function MULTI_LINE_BASIC_STRING_exec_0 (_) {
+	for ( let _0 = ''; ; ) {
+		if ( _==='' ) { return _0; }
+		const $ = MULTI_LINE_BASIC_STRING.exec(_);
+		if ( $===null ) { return _0; }
+		_0 += $[0];
+		_ = _.slice($[0].length);
+	}
+}
+
+const ESCAPED_EXCLUDE_CONTROL_CHARACTER = /[^\\\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\ \n]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
+function ESCAPED_EXCLUDE_CONTROL_CHARACTER_test (_) {
+	return _.replace(ESCAPED_EXCLUDE_CONTROL_CHARACTER, '')==='';
+}
+
+const BASIC_STRING = /^(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/;
+function BASIC_STRING_exec (_2) {
+	_2 = _2.slice(1);
+	for ( let _1 = ''; ; ) {
+		const $ = BASIC_STRING.exec(_2);
+		if ( $===null ) {
+			_2.startsWith('"') || throwSyntaxError(where());
+			return { 1: _1, 2: _2.replace(SYM_WHITESPACE, '') };
+		}
+		_1 += $[0];
+		_2 = _2.slice($[0].length);
+	}
+}
+
+const BARE_KEY = /^[\w-]+/;
+const LITERAL_KEY = /^'[^'\x00-\x08\x0B-\x1F\x7F]*'/;
+const DOT_KEY = /^[ \t]*\.[ \t]*/;
+
+function TABLE_DEFINITION_exec (_) {
+	const _1 = _.charAt(1)==='[';
+	_ = _.slice(_1 ? 2 : 1).replace(PRE_WHITESPACE, '');
+	const _2 = getKeys(_);
+	_ = _.slice(_2.length).replace(PRE_WHITESPACE, '');
+	_.startsWith(']') || throwSyntaxError(where());
+	const _3 = _.charAt(1)===']';
+	_ = _.slice(_3 ? 2 : 1).replace(PRE_WHITESPACE, '');
+	_==='' || _.startsWith('#') || throwSyntaxError(where());
+	return { 1: _1, 2: _2, 3: _3, 4: _ };
+}
+
+const KEY_VALUE_PAIR = /^[ \t]*=[ \t]*(!!([\w-]*)[ \t]+)?([^ \t#][^]*)$/;
+function KEY_VALUE_PAIR_exec (_) {
+	const _1 = getKeys(_);
+	const $ = KEY_VALUE_PAIR.exec(_.slice(_1.length)) || throwSyntaxError(where());
+	return { 1: _1, 2: $[1], 3: $[2], 4: $[3] };
+}
+
+function getKeys (_) {
+	for ( let keys = ''; ; ) {
+		if ( _.startsWith('"') ) {
+			_ = _.slice(1);
+			for ( let key = '"'; ; ) {
+				const $ = BASIC_STRING.exec(_);
+				if ( $===null ) {
+					_.startsWith('"') || throwSyntaxError(where());
+					_ = _.slice(1);
+					keys += key+'"';
+					break;
+				}
+				_ = _.slice($[0].length);
+				key += $[0];
+			}
+		}
+		else {
+			const key = ( ( _.startsWith("'") ? LITERAL_KEY : BARE_KEY ).exec(_) || throwSyntaxError(where()) )[0];
+			_ = _.slice(key.length);
+			keys += key;
+		}
+		const $ = DOT_KEY.exec(_);
+		if ( $===null ) { return keys; }
+		_ = _.slice($[0].length);
+		keys += $[0];
+	}
+}
+
+const StaticObjects = new WeakSet;
+
+const ArrayOfNulls = -1;
+const ArrayOfStrings = 1;
+const ArrayOfInlineTables = 2;
+const ArrayOfInlineArrays = 3;
+const ArrayOfBooleans = 4;
+const ArrayOfFloats = 5;
+const ArrayOfDatetimes = 6;
+const ArrayOfIntegers = 7;
+
+function parse (toml_source, toml_version, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger = true, extensionOptions = null) {
+	if ( isBuffer(toml_source) ) { toml_source = toml_source.toString(); }
+	if ( typeof toml_source!=='string' ) { throw new TypeError('TOML.parse(source)'); }
+	if ( toml_version!==0.5 ) { throw new Error$1('TOML.parse(,version)'); }
+	use(useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger, extensionOptions);
 	const rootTable = new TableDepends;
 	try {
 		from(toml_source.replace(BOM, '').split(EOL));
@@ -310,9 +436,9 @@ function parse (toml_source, toml_version, useWhatToJoinMultiLineString_notUsing
 			const line = next().replace(PRE_WHITESPACE, '');
 			if ( line==='' || line.startsWith('#') ) ;
 			else if ( line.startsWith('[') ) {
-				const { 1: $_asArrayItem$$, 2: keys, 3: $$asArrayItem$_, 4: hash = '' } = TABLE_DEFINITION.exec(line) || throwSyntaxError(where());
-				( $_asArrayItem$$==='[' )===( $$asArrayItem$_===']' ) || throwSyntaxError('Square brackets of table define statement not match at '+where());
-				lastSectionTable = appendTable(rootTable, keys, $_asArrayItem$$==='[', hash);
+				const { 1: $_asArrayItem$$, 2: keys, 3: $$asArrayItem$_, 4: hash } = TABLE_DEFINITION_exec(line);
+				$_asArrayItem$$===$$asArrayItem$_ || throwSyntaxError('Square brackets of table define statement not match at '+where());
+				lastSectionTable = appendTable(rootTable, keys, $_asArrayItem$$, hash);
 			}
 			else {
 				const rest$$1 = assignInline(lastSectionTable, line);
@@ -321,7 +447,7 @@ function parse (toml_source, toml_version, useWhatToJoinMultiLineString_notUsing
 		}
 	}
 	finally {
-		customConstructors = null;
+		clear();
 		done();
 	}
 	return rootTable;
@@ -409,7 +535,7 @@ function prepareInlineTable (table, keys) {
 }
 
 function assignInline (lastInlineTable, lineRest) {
-	const { 1: left, 2: custom, 3: type, 4: right } = KEY_VALUE_PAIR.exec(lineRest) || throwSyntaxError(where());
+	const { 1: left, 2: custom, 3: type, 4: right } = KEY_VALUE_PAIR_exec(lineRest);
 	custom && ensureConstructor(type);
 	const leadingKeys = parseKeys(left);
 	const finalKey = leadingKeys.pop();
@@ -490,32 +616,32 @@ function assignLiteralString (table, finalKey, literal) {
 
 function assignBasicString (table, finalKey, literal) {
 	if ( literal.charAt(1)!=='"' || literal.charAt(2)!=='"' ) {
-		const $ = BASIC_STRING.exec(literal) || throwSyntaxError(where());
+		const $ = BASIC_STRING_exec(literal);
 		table[finalKey] = SingleLine($[1]);
 		return $[2];
 	}
 	literal = literal.slice(3);
-	const $ = MULTI_LINE_BASIC_STRING.exec(literal)[0];
+	const $ = MULTI_LINE_BASIC_STRING_exec_0(literal);
 	if ( literal.startsWith('"""', $.length) ) {
-		ESCAPED_EXCLUDE_CONTROL_CHARACTER.test($) || throwSyntaxError(where());
+		ESCAPED_EXCLUDE_CONTROL_CHARACTER_test($) || throwSyntaxError(where());
 		table[finalKey] = SingleLine($);
 		return literal.slice($.length+3).replace(PRE_WHITESPACE, '');
 	}
 	if ( literal ) {
 		literal += '\n';
-		ESCAPED_EXCLUDE_CONTROL_CHARACTER.test(literal) || throwSyntaxError(where());
+		ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(literal) || throwSyntaxError(where());
 	}
 	const start = mark();
 	for ( ; ; ) {
 		let line = must('Basic String', start);
-		const $ = MULTI_LINE_BASIC_STRING.exec(line)[0];
+		const $ = MULTI_LINE_BASIC_STRING_exec_0(line);
 		if ( line.startsWith('"""', $.length) ) {
-			ESCAPED_EXCLUDE_CONTROL_CHARACTER.test($) || throwSyntaxError(where());
+			ESCAPED_EXCLUDE_CONTROL_CHARACTER_test($) || throwSyntaxError(where());
 			table[finalKey] = MultiLine(literal+$);
 			return line.slice($.length+3).replace(PRE_WHITESPACE, '');
 		}
 		line += '\n';
-		ESCAPED_EXCLUDE_CONTROL_CHARACTER.test(line) || throwSyntaxError(where());
+		ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(line) || throwSyntaxError(where());
 		literal += line;
 	}
 }
@@ -741,44 +867,6 @@ function newMap (interpolation, usedForRegExp) {
 function newRegExp (pattern, flags) {
 	try { return new RegExp(pattern, flags); }
 	catch (error) { return null; }
-}
-
-function prepareConstructors () {
-	if ( typeof customConstructors==='function' ) {
-		if ( customConstructors.length!==2 ) { throw new Error$1('TOML.parse(,,,xOptions.new.length)'); }
-		FUNCTION.add(customConstructors);
-	}
-	else if ( typeof customConstructors==='object' ) {
-		if ( getPrototypeOf(customConstructors)===null ) {
-			for ( const type of getOwnPropertyNames(customConstructors) ) {
-				if ( typeof customConstructors[type]!=='function' ) {
-					customConstructors = null;
-					throw new TypeError('TOML.parse(,,,xOptions.new['+stringify(type)+'])');
-				}
-				if ( customConstructors[type].length ) {
-					customConstructors = null;
-					throw new Error$1('TOML.parse(,,,xOptions.new['+stringify(type)+'].length)');
-				}
-			}
-		}
-		else {
-			const origin = customConstructors;
-			customConstructors = create(null);
-			for ( const type of getOwnPropertyNames(origin) ) {
-				const customConstructor = origin[type];
-				if ( typeof customConstructor!=='function' ) {
-					customConstructors = null;
-					throw new TypeError('TOML.parse(,,,xOptions.new['+stringify(type)+'])');
-				}
-				if ( customConstructors[type].length ) {
-					customConstructors = null;
-					throw new Error$1('TOML.parse(,,,xOptions.new['+stringify(type)+'].length)');
-				}
-				customConstructors[type] = customConstructor;
-			}
-		}
-	}
-	else { throw new TypeError('TOML.parse(,,,xOptions.new)'); }
 }
 
 function ensureConstructor (type) {

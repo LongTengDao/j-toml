@@ -80,4 +80,4 @@ export const Table = function Table (keepOrder) {
 export const TableDefault = function Table () { };
 export const TableKeepOrder = function Table () { return orderify(this); };
 Table.prototype = TableDefault.prototype = TableKeepOrder.prototype = create(null);
-Table.isTable = value => value instanceof Table;
+export const isTable = Table.isTable = value => value instanceof Table;
