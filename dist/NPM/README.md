@@ -69,7 +69,7 @@ TOML.parse(sourceContent, version, multiLineJoiner[, useBigInt=true[, xOptions]]
     *   default: `true`
     *   type: `boolean` / `number`
     
-    Specify whether you want or not to use `BigInt` for integer type value. `number` type value allows you to control it by a max limit, like `Number.MAX_SAFE_INTEGER` (and the min limit from `-useBigInt`, if `useBigInt>=0`; otherwise as the min limit, and the max limit is `-useBigInt-1`).
+    Specify whether you want or not to use `BigInt` for integer type value. A `number` type argument allows you to control it by a max limit, like `Number.MAX_SAFE_INTEGER` (and the min limit from `-useBigInt`, if `useBigInt>=0`; otherwise as the min limit, and the max limit is `-useBigInt-1`).
     
 4.  **`xOptions`**
     
@@ -91,7 +91,7 @@ Return the root table (tables parsed by this implementation are objects without 
 *   type: `Error`
 
 If the arguments not meet the requirement, there will be an error; if there is any error with the source, the error object will has two number properties `lineIndex` and `lineNumber` to help locating that.  
-There are two cases will cause the recursion parser stack overflow: `k=[{ k=[{ k=[{ ...thousands of layers... }] }] }]` and `k="\t\t\t...thousands of escapes...\t\t\t"`. The latter is because the problematical implementation of RegExp `/"(?:[^\\"]+|\\[^])*"/`. If there is an issue manifesting the necessity, I will rewrite them to loop.
+Only one kind of case will cause the recursion parser stack overflow: `k=[{ k=[{ k=[{ ...thousands of layers... }] }] }]`. If there is an issue manifesting the necessity, I will rewrite using loop.
 
 __________________________________________________________
 [@ltd/j-toml v0.5]<a id="user-content-简体中文">&nbsp;</a>
@@ -161,7 +161,7 @@ TOML.parse(源内容, 遵循规范版本, 多行拼接字符[, 使用BigInt=true
     *   default: `true`
     *   type: `boolean` / `number`
     
-    指定你是否要用 `BigInt` 来实现整数类型的值。`number` 类型的值允许你精确控制超过多少才使用 `BigInt`，例如 `Number.MAX_SAFE_INTEGER`（自动通过 `-useBigInt` 获取负向界限，如果 `useBigInt>=0`；否则通过 `-useBigInt-1` 获取正向界限）。
+    指定你是否要用 `BigInt` 来实现整数类型的值。`number` 类型的参数允许你精确控制超过多少才使用 `BigInt`，例如 `Number.MAX_SAFE_INTEGER`（自动通过 `-useBigInt` 获取负向界限，如果 `useBigInt>=0`；否则通过 `-useBigInt-1` 获取正向界限）。
     
 4.  **`超级选项`**
     
@@ -183,7 +183,7 @@ TOML.parse(源内容, 遵循规范版本, 多行拼接字符[, 使用BigInt=true
 *   type: `Error`
 
 如果参数不符合要求，会抛出错误；如果源文本有错误，错误对象会有 `lineIndex` 和 `lineNumber` 两个数值属性来帮助定位。  
-两种情况会导致递归解析器栈溢出：`k=[{ k=[{ k=[{ ……成千上万层…… }] }] }]` 和 `k="\t\t\t……成千上万个转义……\t\t\t"`。其中后者是因为正则表达式 `/"(?:[^\\"]+|\\[^])*"/` 的实现存在缺陷。如果有 issue 表明必要性，我会把它们改写成循环实现。
+只有一类情况会导致递归解析器栈溢出：`k=[{ k=[{ k=[{ ……成千上万层…… }] }] }]`。如果有 issue 表明实际使用中的必要性，我会改写成循环实现。
 
 ____________________
 [@ltd/j-toml v0.5]: https://www.npmjs.com/package/@ltd/j-toml
