@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.48';
+const version = '0.5.49';
 
 const { WeakSet, WeakMap: WeakMap$1, SyntaxError, RangeError, TypeError, Error: Error$1, BigInt, Date, parseInt, Infinity, NaN, Map, RegExp,
 	Array: { isArray },
@@ -116,16 +116,16 @@ const BOM = /^\uFEFF/;
 const EOL = /\r?\n/;
 
 const PRE_WHITESPACE = /^[ \t]*/;
-const TABLE_DEFINITION = /^\[(\[?)[ \t]*((?:[\w-]+|"(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9ABCEFabcef][0-9A-Fa-f]{3}|u[Dd][0-7][0-9A-Fa-f]{2}|U000[0-9A-Fa-f]{5}|U0010[0-9A-Fa-f]{4}))*"|'[^'\x00-\x08\x0B-\x1F\x7F]*')(?:[ \t]*\.[ \t]*(?:[\w-]+|"(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9ABCEFabcef][0-9A-Fa-f]{3}|u[Dd][0-7][0-9A-Fa-f]{2}|U000[0-9A-Fa-f]{5}|U0010[0-9A-Fa-f]{4}))*"|'[^'\x00-\x08\x0B-\x1F\x7F]*'))*)[ \t]*](]?)[ \t]*(?:#[^]*)?$/;
-const KEY_VALUE_PAIR = /^((?:[\w-]+|"(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9ABCEFabcef][0-9A-Fa-f]{3}|u[Dd][0-7][0-9A-Fa-f]{2}|U000[0-9A-Fa-f]{5}|U0010[0-9A-Fa-f]{4}))*"|'[^'\x00-\x08\x0B-\x1F\x7F]*')(?:[ \t]*\.[ \t]*(?:[\w-]+|"(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9ABCEFabcef][0-9A-Fa-f]{3}|u[Dd][0-7][0-9A-Fa-f]{2}|U000[0-9A-Fa-f]{5}|U0010[0-9A-Fa-f]{4}))*"|'[^'\x00-\x08\x0B-\x1F\x7F]*'))*)[ \t]*=[ \t]*(!!([\w-]*)[ \t]+)?([^ \t#][^]*)$/;
+const TABLE_DEFINITION = /^\[(\[?)[ \t]*((?:[\w-]+|"(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*"|'[^'\x00-\x08\x0B-\x1F\x7F]*')(?:[ \t]*\.[ \t]*(?:[\w-]+|"(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*"|'[^'\x00-\x08\x0B-\x1F\x7F]*'))*)[ \t]*](]?)[ \t]*(?:#[^]*)?$/;
+const KEY_VALUE_PAIR = /^((?:[\w-]+|"(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*"|'[^'\x00-\x08\x0B-\x1F\x7F]*')(?:[ \t]*\.[ \t]*(?:[\w-]+|"(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*"|'[^'\x00-\x08\x0B-\x1F\x7F]*'))*)[ \t]*=[ \t]*(!!([\w-]*)[ \t]+)?([^ \t#][^]*)$/;
 const KEYS = /[\w-]+|"(?:[^\\"]+|\\[^])*"|'[^']*'/g;
 const VALUE_REST = /^((?:\d\d\d\d-\d\d-\d\d \d)?[\w\-+.:]+)[ \t]*([^]*)$/;
 const LITERAL_STRING = /^'([^'\x00-\x08\x0B-\x1F\x7F]*)'[ \t]*([^]*)/;
 const MULTI_LINE_LITERAL_STRING = /^([^]*?)'''[ \t]*([^]*)/;
 const CONTROL_CHARACTER_EXCLUDE_TAB = /[\x00-\x08\x0B-\x1F\x7F]/;
-const BASIC_STRING = /^"((?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9ABCEFabcef][0-9A-Fa-f]{3}|u[Dd][0-7][0-9A-Fa-f]{2}|U000[0-9A-Fa-f]{5}|U0010[0-9A-Fa-f]{4}))*)"[ \t]*([^]*)/;
+const BASIC_STRING = /^"((?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*)"[ \t]*([^]*)/;
 const MULTI_LINE_BASIC_STRING = /^(?:[^\\"]+|\\[^]|""?(?!"))*/;
-const ESCAPED_EXCLUDE_CONTROL_CHARACTER = /^(?:[^\\\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\ \n]|u[0-9ABCEFabcef][0-9A-Fa-f]{3}|u[Dd][0-7][0-9A-Fa-f]{2}|U000[0-9A-Fa-f]{5}|U0010[0-9A-Fa-f]{4}))*$/;
+const ESCAPED_EXCLUDE_CONTROL_CHARACTER = /^(?:[^\\\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\ \n]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*$/;
 const ESCAPED_IN_MULTI_LINE = /\n|\\(?:([ \n]+)|([\\"])|([btnfr])|u([^]{4})|U([^]{8}))/g;
 const SYM_WHITESPACE = /^[^][ \t]*/;
 
@@ -210,12 +210,14 @@ class Datetime extends Date {
 	
 }
 
-const Table = function (keepOrder) {
+const Table = function Table (keepOrder) {
 	let undefined;
 	if ( new.target===undefined ) { throw new TypeError("Class constructor Table cannot be invoked without 'new'"); }
 	if ( keepOrder ) { return orderify(this); }
 };
-Table.prototype = create(null);
+const TableDefault = function Table () { };
+const TableKeepOrder = function Table () { return orderify(this); };
+Table.prototype = TableDefault.prototype = TableKeepOrder.prototype = create(null);
 Table.isTable = value => value instanceof Table;
 
 const { isTable } = Table;
@@ -241,7 +243,7 @@ const unlimitedType = array => array;
 
 let useWhatToJoinMultiLineString = '';
 let useBigInt = true;
-let keepOrder = false;
+let TableDepends = TableDefault;
 let allowLonger = false;
 let keepComment = false;
 let enableNull = false;
@@ -253,7 +255,13 @@ let customConstructors = null;
 const FUNCTION = new WeakSet;
 
 const ESCAPE_ALIAS = { b: '\b', t: '\t', n: '\n', f: '\f', r: '\r' };
-const unEscapeSingleLine = ($0, $1, $2, $3, $4) => $1 ? $1 : $2 ? ESCAPE_ALIAS[$2] : fromCodePoint(parseInt($3 || $4, 16));
+const unEscapeSingleLine = ($0, $1, $2, $3, $4) => {
+	if ( $1 ) { return $1; }
+	if ( $2 ) { return ESCAPE_ALIAS[$2]; }
+	const codePoint = parseInt($3 || $4, 16);
+	( 0xD7FF<codePoint && codePoint<0xE000 || 0x10FFFF<codePoint ) && throwRangeError('Invalid Unicode Scalar '+( $3 ? '\\u'+$3 : '\\U'+$4 )+' at '+where());
+	return fromCodePoint(codePoint);
+};
 const unEscapeMultiLine = ($0, $1, $2, $3, $4, $5) => {
 	if ( $0==='\n' ) { return useWhatToJoinMultiLineString; }
 	if ( $1 ) {
@@ -265,7 +273,7 @@ const unEscapeMultiLine = ($0, $1, $2, $3, $4, $5) => {
 const SingleLine = literal => literal.replace(ESCAPED_IN_SINGLE_LINE, unEscapeSingleLine);
 const MultiLine = literal => literal.replace(ESCAPED_IN_MULTI_LINE, unEscapeMultiLine);
 
-function parse (toml_source, toml_version, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger = true, extensionOptions) {
+function parse (toml_source, toml_version, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger = true, extensionOptions = null) {
 	if ( isBuffer(toml_source) ) { toml_source = toml_source.toString(); }
 	if ( typeof toml_source!=='string' ) { throw new TypeError('TOML.parse(source)'); }
 	if ( toml_version!==0.5 ) { throw new Error$1('TOML.parse(,version)'); }
@@ -276,8 +284,14 @@ function parse (toml_source, toml_version, useWhatToJoinMultiLineString_notUsing
 	}
 	useWhatToJoinMultiLineString = useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines;
 	useBigInt = useBigInt_forInteger;
-	if ( extensionOptions ) {
-		keepOrder = !!extensionOptions.order;
+	if ( extensionOptions===null ) {
+		TableDepends = TableDefault;
+		allowLonger = keepComment = enableNull = enableNil = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = enableInterpolationString = false;
+		typify = reallyTypify;
+		customConstructors = null;
+	}
+	else {
+		TableDepends = extensionOptions.order ? TableKeepOrder : TableDefault;
 		allowLonger = !!extensionOptions.longer;
 		keepComment = !!extensionOptions.hash;
 		enableNull = !!extensionOptions.null;
@@ -288,12 +302,7 @@ function parse (toml_source, toml_version, useWhatToJoinMultiLineString_notUsing
 		customConstructors = extensionOptions.new || null;
 		customConstructors===null || prepareConstructors();
 	}
-	else {
-		keepOrder = allowLonger = keepComment = enableNull = enableNil = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = enableInterpolationString = false;
-		typify = reallyTypify;
-		customConstructors = null;
-	}
-	const rootTable = new Table(keepOrder);
+	const rootTable = new TableDepends;
 	try {
 		from(toml_source.replace(BOM, '').split(EOL));
 		let lastSectionTable = rootTable;
@@ -321,7 +330,7 @@ function appendTable (table, key_key, asArrayItem, hash) {
 	const leadingKeys = parseKeys(key_key);
 	const finalKey = leadingKeys.pop();
 	table = prepareTable(table, leadingKeys);
-	const lastTable = new Table(keepOrder);
+	let lastTable = new TableDepends;
 	if ( asArrayItem ) {
 		let arrayOfTables;
 		if ( finalKey in table ) { StaticObjects.has(arrayOfTables = table[finalKey]) && throwError('Trying to push Table to non-ArrayOfTables value at '+where()); }
@@ -372,8 +381,8 @@ function prepareTable (table, keys) {
 			else { throwError('Trying to define table through non-Table value at '+where()); }
 		}
 		else {
-			table = table[key] = new Table(keepOrder);
-			while ( index<length ) { table = table[keys[index++]] = new Table(keepOrder); }
+			table = table[key] = new TableDepends;
+			while ( index<length ) { table = table[keys[index++]] = new TableDepends; }
 			return table;
 		}
 	}
@@ -391,8 +400,8 @@ function prepareInlineTable (table, keys) {
 			StaticObjects.has(table) && throwError('Trying to assign property through static Inline Object at '+where());
 		}
 		else {
-			table = table[key] = new Table(keepOrder);
-			while ( index<length ) { table = table[keys[index++]] = new Table(keepOrder); }
+			table = table[key] = new TableDepends;
+			while ( index<length ) { table = table[keys[index++]] = new TableDepends; }
 			return table;
 		}
 	}
@@ -512,7 +521,7 @@ function assignBasicString (table, finalKey, literal) {
 }
 
 function assignInlineTable (table, finalKey, lineRest) {
-	const inlineTable = table[finalKey] = new Table(keepOrder);
+	const inlineTable = table[finalKey] = new TableDepends;
 	StaticObjects.add(inlineTable);
 	lineRest = lineRest.replace(SYM_WHITESPACE, '');
 	if ( allowInlineTableMultiLineAndTrailingCommaEvenNoComma ) {

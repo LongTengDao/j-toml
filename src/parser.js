@@ -1,6 +1,6 @@
 import { WeakSet, WeakMap, Error, TypeError, RangeError, Infinity, NaN, isSafeInteger, isArray, Symbol_for, Map, RegExp, getOwnPropertyNames, create, defineProperty, getPrototypeOf, stringify, isBuffer, fromCodePoint, parseInt } from './global.js';
-import { from, next, rest, done, mark, must, throwSyntaxError, throwTypeError, throwError, where } from './iterator.js';
-import { Integer, Float, Datetime, Table } from './types.js';
+import { from, next, rest, done, mark, must, throwSyntaxError, throwTypeError, throwRangeError, throwError, where } from './iterator.js';
+import { Integer, Float, Datetime, Table, TableDefault, TableKeepOrder } from './types.js';
 import * as RE from './RE.js?<RegExp>';
 
 const { isTable } = Table;
@@ -26,7 +26,7 @@ const unlimitedType = array => array;
 
 let useWhatToJoinMultiLineString = '';
 let useBigInt = true;
-let keepOrder = false;
+let TableDepends = TableDefault;
 let allowLonger = false;
 let keepComment = false;
 let enableNull = false;
@@ -38,7 +38,13 @@ let customConstructors = null;
 const FUNCTION = new WeakSet;
 
 const ESCAPE_ALIAS = { b: '\b', t: '\t', n: '\n', f: '\f', r: '\r' };
-const unEscapeSingleLine = ($0, $1, $2, $3, $4) => $1 ? $1 : $2 ? ESCAPE_ALIAS[$2] : fromCodePoint(parseInt($3 || $4, 16));
+const unEscapeSingleLine = ($0, $1, $2, $3, $4) => {
+	if ( $1 ) { return $1; }
+	if ( $2 ) { return ESCAPE_ALIAS[$2]; }
+	const codePoint = parseInt($3 || $4, 16);
+	( 0xD7FF<codePoint && codePoint<0xE000 || 0x10FFFF<codePoint ) && throwRangeError('Invalid Unicode Scalar '+( $3 ? '\\u'+$3 : '\\U'+$4 )+' at '+where());
+	return fromCodePoint(codePoint);
+};
 const unEscapeMultiLine = ($0, $1, $2, $3, $4, $5) => {
 	if ( $0==='\n' ) { return useWhatToJoinMultiLineString; }
 	if ( $1 ) {
@@ -50,7 +56,7 @@ const unEscapeMultiLine = ($0, $1, $2, $3, $4, $5) => {
 const SingleLine = literal => literal.replace(RE.ESCAPED_IN_SINGLE_LINE, unEscapeSingleLine);
 const MultiLine = literal => literal.replace(RE.ESCAPED_IN_MULTI_LINE, unEscapeMultiLine);
 
-export default function parse (toml_source, toml_version, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger = true, extensionOptions) {
+export default function parse (toml_source, toml_version, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger = true, extensionOptions = null) {
 	if ( isBuffer(toml_source) ) { toml_source = toml_source.toString(); }
 	if ( typeof toml_source!=='string' ) { throw new TypeError('TOML.parse(source)'); }
 	if ( toml_version!==0.5 ) { throw new Error('TOML.parse(,version)'); }
@@ -61,8 +67,14 @@ export default function parse (toml_source, toml_version, useWhatToJoinMultiLine
 	}
 	useWhatToJoinMultiLineString = useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines;
 	useBigInt = useBigInt_forInteger;
-	if ( extensionOptions ) {
-		keepOrder = !!extensionOptions.order;
+	if ( extensionOptions===null ) {
+		TableDepends = TableDefault;
+		allowLonger = keepComment = enableNull = enableNil = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = enableInterpolationString = false;
+		typify = reallyTypify;
+		customConstructors = null;
+	}
+	else {
+		TableDepends = extensionOptions.order ? TableKeepOrder : TableDefault;
 		allowLonger = !!extensionOptions.longer;
 		keepComment = !!extensionOptions.hash;
 		enableNull = !!extensionOptions.null;
@@ -73,12 +85,7 @@ export default function parse (toml_source, toml_version, useWhatToJoinMultiLine
 		customConstructors = extensionOptions.new || null;
 		customConstructors===null || prepareConstructors();
 	}
-	else {
-		keepOrder = allowLonger = keepComment = enableNull = enableNil = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = enableInterpolationString = false;
-		typify = reallyTypify;
-		customConstructors = null;
-	}
-	const rootTable = new Table(keepOrder);
+	const rootTable = new TableDepends;
 	try {
 		from(toml_source.replace(RE.BOM, '').split(RE.EOL));
 		let lastSectionTable = rootTable;
@@ -107,7 +114,7 @@ function appendTable (table, key_key, asArrayItem, hash) {
 	const leadingKeys = parseKeys(key_key);
 	const finalKey = leadingKeys.pop();
 	table = prepareTable(table, leadingKeys);
-	const lastTable = new Table(keepOrder);
+	let lastTable = new TableDepends;
 	if ( asArrayItem ) {
 		let arrayOfTables;
 		if ( finalKey in table ) { StaticObjects.has(arrayOfTables = table[finalKey]) && throwError('Trying to push Table to non-ArrayOfTables value at '+where()); }
@@ -158,8 +165,8 @@ function prepareTable (table, keys) {
 			else { throwError('Trying to define table through non-Table value at '+where()); }
 		}
 		else {
-			table = table[key] = new Table(keepOrder);
-			while ( index<length ) { table = table[keys[index++]] = new Table(keepOrder); }
+			table = table[key] = new TableDepends;
+			while ( index<length ) { table = table[keys[index++]] = new TableDepends; }
 			return table;
 		}
 	}
@@ -177,8 +184,8 @@ function prepareInlineTable (table, keys) {
 			StaticObjects.has(table) && throwError('Trying to assign property through static Inline Object at '+where());
 		}
 		else {
-			table = table[key] = new Table(keepOrder);
-			while ( index<length ) { table = table[keys[index++]] = new Table(keepOrder); }
+			table = table[key] = new TableDepends;
+			while ( index<length ) { table = table[keys[index++]] = new TableDepends; }
 			return table;
 		}
 	}
@@ -298,7 +305,7 @@ function assignBasicString (table, finalKey, literal) {
 }
 
 function assignInlineTable (table, finalKey, lineRest) {
-	const inlineTable = table[finalKey] = new Table(keepOrder);
+	const inlineTable = table[finalKey] = new TableDepends;
 	StaticObjects.add(inlineTable);
 	lineRest = lineRest.replace(RE.SYM_WHITESPACE, '');
 	if ( allowInlineTableMultiLineAndTrailingCommaEvenNoComma ) {

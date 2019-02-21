@@ -72,10 +72,12 @@ export class Datetime extends Date {
 	
 }
 
-export const Table = function (keepOrder) {
+export const Table = function Table (keepOrder) {
 	let undefined;
 	if ( new.target===undefined ) { throw new TypeError("Class constructor Table cannot be invoked without 'new'"); }
 	if ( keepOrder ) { return orderify(this); }
 };
-Table.prototype = create(null);
+export const TableDefault = function Table () { };
+export const TableKeepOrder = function Table () { return orderify(this); };
+Table.prototype = TableDefault.prototype = TableKeepOrder.prototype = create(null);
 Table.isTable = value => value instanceof Table;
