@@ -156,7 +156,7 @@ key = !!type 'value'
 *   type: `boolean`
 *   default: `false`
 
-Comments information (as much as possible).
+Comments information.
 
 ```toml
 # comment 0
@@ -168,6 +168,7 @@ In JavaScript land, that would give you the following structure:
 
 ```js
 ({
+    [Symbol('#')]: ' comment 0',
     table: {
     	key: 'value',
     	[Symbol.for('key')]: ' comment 2'
@@ -344,7 +345,7 @@ key = !!type 'value'
 *   type: `boolean`
 *   default: `false`
 
-是否（尽可能）保留注释内容。
+是否保留注释内容。
 
 ```toml
 # comment 0
@@ -356,6 +357,7 @@ key = 'value' # comment 2
 
 ```js
 ({
+    [Symbol('#')]: ' comment 0',
     table: {
     	key: 'value',
     	[Symbol.for('key')]: ' comment 2'

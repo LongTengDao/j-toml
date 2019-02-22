@@ -33,7 +33,7 @@ export default function parse (toml_source, toml_version, useWhatToJoinMultiLine
 			const line = next().replace(RE.PRE_WHITESPACE, '');
 			if ( line==='' ) { }
 			else if ( line.startsWith('#') ) {
-				if ( options.keepComment ) { lastSectionTable[Symbol('#')] = line; }
+				if ( options.keepComment ) { lastSectionTable[Symbol('#')] = line.slice(1); }
 			}
 			else if ( line.startsWith('[') ) {
 				const { 1: $_asArrayItem$$, 2: keys, 3: $$asArrayItem$_, 4: hash } = RE_good.TABLE_DEFINITION_exec(line);
@@ -44,7 +44,7 @@ export default function parse (toml_source, toml_version, useWhatToJoinMultiLine
 				const rest = assignInline(lastSectionTable, line);
 				if ( rest==='' ) { }
 				else if ( rest.startsWith('#') ) {
-					if ( options.keepComment ) { lastSectionTable[Symbol('#')] = rest; }
+					if ( options.keepComment ) { lastSectionTable[Symbol('#')] = rest.slice(1); }
 				}
 				else { throwSyntaxError(where()); }
 			}
@@ -75,7 +75,7 @@ function appendTable (table, key_key, asArrayItem, hash) {
 		}
 		else { table[finalKey] = lastTable = new options.TableDepends; }
 	}
-	if ( options.keepComment && hash ) { table[Symbol_for(finalKey)] = hash; }
+	if ( options.keepComment && hash ) { table[Symbol_for(finalKey)] = hash.slice(1); }
 	return lastTable;
 }
 
@@ -173,7 +173,7 @@ function assignInline (lastInlineTable, lineRest) {
 	}
 	if ( custom ) { table[finalKey] = construct(type, table[finalKey]); }
 	if ( options.keepComment && lineRest.startsWith('#') ) {
-		table[Symbol_for(finalKey)] = lineRest;
+		table[Symbol_for(finalKey)] = lineRest.slice(1);
 		return '';
 	}
 	return lineRest;
@@ -252,7 +252,7 @@ function assignInlineTable (table, finalKey, lineRest) {
 			for ( ; ; ) {
 				if ( lineRest==='' ) { }
 				else if ( lineRest.startsWith('#') ) {
-					if ( options.keepComment ) { table[Symbol('#')] = lineRest; }
+					if ( options.keepComment ) { table[Symbol('#')] = lineRest.slice(1); }
 				}
 				else { break; }
 				lineRest = must('Inline Table', start).replace(RE.PRE_WHITESPACE, '');
@@ -262,7 +262,7 @@ function assignInlineTable (table, finalKey, lineRest) {
 			for ( ; ; ) {
 				if ( lineRest==='' ) { }
 				else if ( lineRest.startsWith('#') ) {
-					if ( options.keepComment ) { table[Symbol('#')] = lineRest; }
+					if ( options.keepComment ) { table[Symbol('#')] = lineRest.slice(1); }
 				}
 				else { break; }
 				lineRest = must('Inline Table', start).replace(RE.PRE_WHITESPACE, '');
@@ -293,7 +293,7 @@ function assignInlineArray (table, finalKey, lineRest) {
 	for ( ; ; ) {
 		if ( lineRest==='' ) { }
 		else if ( lineRest.startsWith('#') ) {
-			if ( options.keepComment ) { table[Symbol('#')] = lineRest; }
+			if ( options.keepComment ) { table[Symbol('#')] = lineRest.slice(1); }
 		}
 		else { break; }
 		lineRest = must('Inline Array', start).replace(RE.PRE_WHITESPACE, '');
@@ -304,7 +304,7 @@ function assignInlineArray (table, finalKey, lineRest) {
 		for ( ; ; ) {
 			if ( lineRest==='' ) { }
 			else if ( lineRest.startsWith('#') ) {
-				if ( options.keepComment ) { table[Symbol('#')] = lineRest; }
+				if ( options.keepComment ) { table[Symbol('#')] = lineRest.slice(1); }
 			}
 			else { break; }
 			lineRest = must('Inline Array', start).replace(RE.PRE_WHITESPACE, '');
@@ -312,13 +312,13 @@ function assignInlineArray (table, finalKey, lineRest) {
 		if ( lineRest.startsWith(',') ) {
 			lineRest = lineRest.replace(RE.SYM_WHITESPACE, '');
 			if ( options.keepComment && lineRest.startsWith('#') ) {
-				inlineArray[Symbol_for(inlineArray.length-1+'')] = lineRest;
+				inlineArray[Symbol_for(inlineArray.length-1+'')] = lineRest.slice(1);
 				lineRest = '';
 			}
 			for ( ; ; ) {
 				if ( lineRest==='' ) { }
 				else if ( lineRest.startsWith('#') ) {
-					if ( options.keepComment ) { table[Symbol('#')] = lineRest; }
+					if ( options.keepComment ) { table[Symbol('#')] = lineRest.slice(1); }
 				}
 				else { break; }
 				lineRest = must('Inline Array', start).replace(RE.PRE_WHITESPACE, '');
@@ -384,7 +384,7 @@ function pushInline (array, lineRest) {
 	}
 	if ( custom ) { array[lastIndex] = construct(type, array[lastIndex]); }
 	if ( options.keepComment && lineRest.startsWith('#') ) {
-		array[Symbol_for(lastIndex)] = lineRest;
+		array[Symbol_for(lastIndex)] = lineRest.slice(1);
 		return '';
 	}
 	return lineRest;

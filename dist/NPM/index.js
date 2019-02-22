@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.52';
+const version = '0.5.53';
 
 const { WeakSet, WeakMap: WeakMap$1, SyntaxError, RangeError, TypeError, Error: Error$1, BigInt, Date, parseInt, Infinity, NaN, Map, RegExp,
 	Array: { isArray },
@@ -543,7 +543,7 @@ function parse (toml_source, toml_version, useWhatToJoinMultiLineString_notUsing
 			const line = next().replace(PRE_WHITESPACE, '');
 			if ( line==='' ) ;
 			else if ( line.startsWith('#') ) {
-				if ( keepComment ) { lastSectionTable[Symbol('#')] = line; }
+				if ( keepComment ) { lastSectionTable[Symbol('#')] = line.slice(1); }
 			}
 			else if ( line.startsWith('[') ) {
 				const { 1: $_asArrayItem$$, 2: keys, 3: $$asArrayItem$_, 4: hash } = TABLE_DEFINITION_exec(line);
@@ -554,7 +554,7 @@ function parse (toml_source, toml_version, useWhatToJoinMultiLineString_notUsing
 				const rest$$1 = assignInline(lastSectionTable, line);
 				if ( rest$$1==='' ) ;
 				else if ( rest$$1.startsWith('#') ) {
-					if ( keepComment ) { lastSectionTable[Symbol('#')] = rest$$1; }
+					if ( keepComment ) { lastSectionTable[Symbol('#')] = rest$$1.slice(1); }
 				}
 				else { throwSyntaxError(where()); }
 			}
@@ -584,7 +584,7 @@ function appendTable (table, key_key, asArrayItem, hash) {
 		}
 		else { table[finalKey] = lastTable = new TableDepends; }
 	}
-	if ( keepComment && hash ) { table[Symbol_for(finalKey)] = hash; }
+	if ( keepComment && hash ) { table[Symbol_for(finalKey)] = hash.slice(1); }
 	return lastTable;
 }
 
@@ -682,7 +682,7 @@ function assignInline (lastInlineTable, lineRest) {
 	}
 	if ( custom ) { table[finalKey] = construct(type, table[finalKey]); }
 	if ( keepComment && lineRest.startsWith('#') ) {
-		table[Symbol_for(finalKey)] = lineRest;
+		table[Symbol_for(finalKey)] = lineRest.slice(1);
 		return '';
 	}
 	return lineRest;
@@ -761,7 +761,7 @@ function assignInlineTable (table, finalKey, lineRest) {
 			for ( ; ; ) {
 				if ( lineRest==='' ) ;
 				else if ( lineRest.startsWith('#') ) {
-					if ( keepComment ) { table[Symbol('#')] = lineRest; }
+					if ( keepComment ) { table[Symbol('#')] = lineRest.slice(1); }
 				}
 				else { break; }
 				lineRest = must('Inline Table', start).replace(PRE_WHITESPACE, '');
@@ -771,7 +771,7 @@ function assignInlineTable (table, finalKey, lineRest) {
 			for ( ; ; ) {
 				if ( lineRest==='' ) ;
 				else if ( lineRest.startsWith('#') ) {
-					if ( keepComment ) { table[Symbol('#')] = lineRest; }
+					if ( keepComment ) { table[Symbol('#')] = lineRest.slice(1); }
 				}
 				else { break; }
 				lineRest = must('Inline Table', start).replace(PRE_WHITESPACE, '');
@@ -802,7 +802,7 @@ function assignInlineArray (table, finalKey, lineRest) {
 	for ( ; ; ) {
 		if ( lineRest==='' ) ;
 		else if ( lineRest.startsWith('#') ) {
-			if ( keepComment ) { table[Symbol('#')] = lineRest; }
+			if ( keepComment ) { table[Symbol('#')] = lineRest.slice(1); }
 		}
 		else { break; }
 		lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, '');
@@ -813,7 +813,7 @@ function assignInlineArray (table, finalKey, lineRest) {
 		for ( ; ; ) {
 			if ( lineRest==='' ) ;
 			else if ( lineRest.startsWith('#') ) {
-				if ( keepComment ) { table[Symbol('#')] = lineRest; }
+				if ( keepComment ) { table[Symbol('#')] = lineRest.slice(1); }
 			}
 			else { break; }
 			lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, '');
@@ -821,13 +821,13 @@ function assignInlineArray (table, finalKey, lineRest) {
 		if ( lineRest.startsWith(',') ) {
 			lineRest = lineRest.replace(SYM_WHITESPACE, '');
 			if ( keepComment && lineRest.startsWith('#') ) {
-				inlineArray[Symbol_for(inlineArray.length-1+'')] = lineRest;
+				inlineArray[Symbol_for(inlineArray.length-1+'')] = lineRest.slice(1);
 				lineRest = '';
 			}
 			for ( ; ; ) {
 				if ( lineRest==='' ) ;
 				else if ( lineRest.startsWith('#') ) {
-					if ( keepComment ) { table[Symbol('#')] = lineRest; }
+					if ( keepComment ) { table[Symbol('#')] = lineRest.slice(1); }
 				}
 				else { break; }
 				lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, '');
@@ -893,7 +893,7 @@ function pushInline (array, lineRest) {
 	}
 	if ( custom ) { array[lastIndex] = construct(type, array[lastIndex]); }
 	if ( keepComment && lineRest.startsWith('#') ) {
-		array[Symbol_for(lastIndex)] = lineRest;
+		array[Symbol_for(lastIndex)] = lineRest.slice(1);
 		return '';
 	}
 	return lineRest;
