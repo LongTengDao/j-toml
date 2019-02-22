@@ -1,10 +1,12 @@
-import { WeakSet, Error, TypeError, Infinity, NaN, isArray, Symbol_for, Map, RegExp, defineProperty, isBuffer } from './global.js';
+import { WeakSet, Error, TypeError, Infinity, NaN, isArray, Symbol_for, isBuffer, Symbol } from './global.js';
 import { from, next, rest, done, mark, must, throwSyntaxError, throwError, where } from './iterator.js';
 import { Integer, Float, Datetime, isTable } from './types.js';
 import * as options from './options.js';
 import { SingleLine, MultiLine } from './types-options.js';
 import * as RE from './RE.js?<RegExp>';
 import * as RE_good from './RE-never-slow-nor-overflow.js';
+
+import { assignInterpolationString, ensureConstructor, construct } from './parser-extension.js';
 
 const closeTables = new WeakSet;
 const openTables = new WeakSet;
@@ -29,7 +31,10 @@ export default function parse (toml_source, toml_version, useWhatToJoinMultiLine
 		let lastSectionTable = rootTable;
 		while ( rest() ) {
 			const line = next().replace(RE.PRE_WHITESPACE, '');
-			if ( line==='' || line.startsWith('#') ) { }
+			if ( line==='' ) { }
+			else if ( line.startsWith('#') ) {
+				if ( options.keepComment ) { lastSectionTable[Symbol('#')] = line; }
+			}
 			else if ( line.startsWith('[') ) {
 				const { 1: $_asArrayItem$$, 2: keys, 3: $$asArrayItem$_, 4: hash } = RE_good.TABLE_DEFINITION_exec(line);
 				$_asArrayItem$$===$$asArrayItem$_ || throwSyntaxError('Square brackets of table define statement not match at '+where());
@@ -37,13 +42,17 @@ export default function parse (toml_source, toml_version, useWhatToJoinMultiLine
 			}
 			else {
 				const rest = assignInline(lastSectionTable, line);
-				rest==='' || rest.startsWith('#') || throwSyntaxError(where());
+				if ( rest==='' ) { }
+				else if ( rest.startsWith('#') ) {
+					if ( options.keepComment ) { lastSectionTable[Symbol('#')] = rest; }
+				}
+				else { throwSyntaxError(where()); }
 			}
 		}
 	}
 	finally {
-		options.clear();
 		done();
+		options.clear();
 	}
 	return rootTable;
 };
@@ -66,14 +75,7 @@ function appendTable (table, key_key, asArrayItem, hash) {
 		}
 		else { table[finalKey] = lastTable = new options.TableDepends; }
 	}
-	if ( options.keepComment && hash ) {
-		defineProperty(table, Symbol_for(finalKey), {
-			configurable: true,
-			enumerable: false,
-			writable: true,
-			value: hash,
-		});
-	}
+	if ( options.keepComment && hash ) { table[Symbol_for(finalKey)] = hash; }
 	return lastTable;
 }
 
@@ -171,12 +173,7 @@ function assignInline (lastInlineTable, lineRest) {
 	}
 	if ( custom ) { table[finalKey] = construct(type, table[finalKey]); }
 	if ( options.keepComment && lineRest.startsWith('#') ) {
-		defineProperty(table, Symbol_for(finalKey), {
-			configurable: true,
-			enumerable: false,
-			writable: true,
-			value: lineRest,
-		});
+		table[Symbol_for(finalKey)] = lineRest;
 		return '';
 	}
 	return lineRest;
@@ -252,12 +249,22 @@ function assignInlineTable (table, finalKey, lineRest) {
 	if ( options.allowInlineTableMultiLineAndTrailingCommaEvenNoComma ) {
 		const start = mark();
 		for ( ; ; ) {
-			while ( lineRest==='' || lineRest.startsWith('#') ) {
+			for ( ; ; ) {
+				if ( lineRest==='' ) { }
+				else if ( lineRest.startsWith('#') ) {
+					if ( options.keepComment ) { table[Symbol('#')] = lineRest; }
+				}
+				else { break; }
 				lineRest = must('Inline Table', start).replace(RE.PRE_WHITESPACE, '');
 			}
 			if ( lineRest.startsWith('}') ) { return lineRest.replace(RE.SYM_WHITESPACE, ''); }
 			lineRest = assignInline(inlineTable, lineRest);
-			while ( lineRest==='' || lineRest.startsWith('#') ) {
+			for ( ; ; ) {
+				if ( lineRest==='' ) { }
+				else if ( lineRest.startsWith('#') ) {
+					if ( options.keepComment ) { table[Symbol('#')] = lineRest; }
+				}
+				else { break; }
 				lineRest = must('Inline Table', start).replace(RE.PRE_WHITESPACE, '');
 			}
 			if ( lineRest.startsWith(',') ) { lineRest = lineRest.replace(RE.SYM_WHITESPACE, ''); }
@@ -283,27 +290,37 @@ function assignInlineArray (table, finalKey, lineRest) {
 	closeTables.add(inlineArray);
 	const start = mark();
 	lineRest = lineRest.replace(RE.SYM_WHITESPACE, '');
-	while ( lineRest==='' || lineRest.startsWith('#') ) {
+	for ( ; ; ) {
+		if ( lineRest==='' ) { }
+		else if ( lineRest.startsWith('#') ) {
+			if ( options.keepComment ) { table[Symbol('#')] = lineRest; }
+		}
+		else { break; }
 		lineRest = must('Inline Array', start).replace(RE.PRE_WHITESPACE, '');
 	}
 	if ( lineRest.startsWith(']') ) { return lineRest.replace(RE.SYM_WHITESPACE, ''); }
 	for ( ; ; ) {
 		lineRest = pushInline(inlineArray, lineRest);
-		while ( lineRest==='' || lineRest.startsWith('#') ) {
+		for ( ; ; ) {
+			if ( lineRest==='' ) { }
+			else if ( lineRest.startsWith('#') ) {
+				if ( options.keepComment ) { table[Symbol('#')] = lineRest; }
+			}
+			else { break; }
 			lineRest = must('Inline Array', start).replace(RE.PRE_WHITESPACE, '');
 		}
 		if ( lineRest.startsWith(',') ) {
 			lineRest = lineRest.replace(RE.SYM_WHITESPACE, '');
 			if ( options.keepComment && lineRest.startsWith('#') ) {
-				defineProperty(inlineArray, Symbol_for(inlineArray.length-1+''), {
-					configurable: true,
-					enumerable: false,
-					writable: true,
-					value: lineRest,
-				});
+				inlineArray[Symbol_for(inlineArray.length-1+'')] = lineRest;
 				lineRest = '';
 			}
-			while ( lineRest==='' || lineRest.startsWith('#') ) {
+			for ( ; ; ) {
+				if ( lineRest==='' ) { }
+				else if ( lineRest.startsWith('#') ) {
+					if ( options.keepComment ) { table[Symbol('#')] = lineRest; }
+				}
+				else { break; }
 				lineRest = must('Inline Array', start).replace(RE.PRE_WHITESPACE, '');
 			}
 			if ( lineRest.startsWith(']') ) { return lineRest.replace(RE.SYM_WHITESPACE, ''); }
@@ -367,115 +384,8 @@ function pushInline (array, lineRest) {
 	}
 	if ( custom ) { array[lastIndex] = construct(type, array[lastIndex]); }
 	if ( options.keepComment && lineRest.startsWith('#') ) {
-		defineProperty(array, Symbol_for(lastIndex), {
-			configurable: true,
-			enumerable: false,
-			writable: true,
-			value: lineRest,
-		});
+		array[Symbol_for(lastIndex)] = lineRest;
 		return '';
 	}
 	return lineRest;
-}
-
-function assignInterpolationString (table, finalKey, delimiter) {
-	options.enableInterpolationString || throwSyntaxError(where());
-	RE.DELIMITER_CHECK.test(delimiter) && throwSyntaxError('Interpolation String opening tag incorrect at '+where());
-	let string;
-	let lineRest;
-	{
-		const literals = [];
-		for ( const start = mark(); ; ) {
-			const literal = must('Interpolation String', start);
-			if ( literal.startsWith(delimiter) ) {
-				lineRest = literal.slice(delimiter.length).replace(RE.PRE_WHITESPACE, '');
-				break;
-			}
-			literals.push(literal);
-		}
-		string = literals.join('\n');
-	}
-	if ( lineRest.startsWith('(') ) {
-		const interpolations_rest = RE.INTERPOLATIONS.exec(lineRest) || throwSyntaxError(where());
-		lineRest = interpolations_rest[2];
-		for ( const interpolation of interpolations_rest[1].match(RE.INTERPOLATION) ) {
-			if ( RE.REGEXP_MODE.test(interpolation) ) {
-				const { 1: pattern, 2: flags, 3: Replacer } = RE.PATTERN_FLAGS_REPLACER.exec(interpolation);
-				const search = newRegExp(pattern, flags) || throwSyntaxError('Invalid regExp at '+where());
-				let replacer;
-				switch ( Replacer[0] ) {
-					case "'":
-						replacer = Replacer.slice(1, -1);
-						break;
-					case '"':
-						replacer = SingleLine(Replacer.slice(1, -1));
-						break;
-					case '{':
-						const map = newMap(Replacer, true);
-						replacer = $0 => map.has($0) ? map.get($0) : $0;
-						break;
-					case '[':
-						const { 1: whole, 2: subs } = RE.WHOLE_AND_SUBS.exec(Replacer);
-						const maps = [null];
-						for ( const sub of subs.match(RE.SUB) ) { maps.push(newMap(sub, true)); }
-						replacer = (...args) => whole.replace(RE.DOLLAR, $n => {
-							if ( $n==='$$' ) { return '$'; }
-							const n = $n.slice(1);
-							const arg = args[n] || '';
-							const map = maps[n];
-							return map && map.has(arg) ? map.get(arg) : arg;
-						});
-						break;
-				}
-				string = string.replace(search, replacer);
-			}
-			else {
-				const map = newMap(interpolation, false);
-				let round = '';
-				outer: for ( let length = string.length, index = 0; index<length; ) {
-					for ( const { 0: search, 1: replacer } of map ) {
-						if ( string.startsWith(search, index) ) {
-							round += replacer;
-							index += search.length;
-							continue outer;
-						}
-					}
-					round += string[index];
-					++index;
-				}
-				string = round;
-			}
-		}
-	}
-	table[finalKey] = string;
-	return lineRest;
-}
-
-function newMap (interpolation, usedForRegExp) {
-	const map = new Map;
-	const tokens = interpolation.match(RE.INTERPOLATION_TOKEN);
-	for ( let length = tokens.length, index = 0; index<length; ) {
-		let search = tokens[index++];
-		search = search[0]==="'" ? search.slice(1, -1) : SingleLine(search.slice(1, -1));
-		usedForRegExp || search || throwSyntaxError('Characters to replace can not be empty, which was found at '+where());
-		map.has(search) && throwSyntaxError('Duplicate '+( usedForRegExp ? 'replacer' : 'characters to replace' )+' at '+where());
-		let replacer = tokens[index++];
-		replacer = replacer[0]==="'" ? replacer.slice(1, -1) : SingleLine(replacer.slice(1, -1));
-		map.set(search, replacer);
-	}
-	return map;
-}
-
-function newRegExp (pattern, flags) {
-	try { return new RegExp(pattern, flags); }
-	catch (error) { return null; }
-}
-
-function ensureConstructor (type) {
-	options.customConstructors || throwSyntaxError(where());
-	options.FUNCTION.has(options.customConstructors) || type in options.customConstructors || throwError(where());
-}
-
-function construct (type, value) {
-	return options.FUNCTION.has(options.customConstructors) ? options.customConstructors(type, value) : options.customConstructors[type](value);
 }

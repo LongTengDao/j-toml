@@ -1,5 +1,5 @@
-import { TypeError, BigInt, Date, Infinity, NaN, isSafeInteger, create } from './global.js';
-import { orderify } from './import.js';
+import { TypeError, BigInt, Date, Infinity, NaN, isSafeInteger, create, Symbol } from './global.js';
+import { orderify } from '@ltd/j-orderify';
 import { throwSyntaxError, throwRangeError, none, where } from './iterator.js';
 import * as RE from './RE.js?<RegExp>';
 

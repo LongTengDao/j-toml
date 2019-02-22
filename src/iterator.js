@@ -14,7 +14,7 @@ const must = (message, startIndex) => {
 	if ( lineIndex===lastLineIndex ) {
 		const error = new SyntaxError(message+' is not close until the end of the file, which started from line '+( startIndex+1 )+': '+sourceLines[startIndex]);
 		error.lineIndex = lineIndex;
-		done();
+		//done();
 		throw error;
 	}
 	return sourceLines[++lineIndex];
@@ -33,9 +33,10 @@ export const throwError = message => throws(new Error(message));
 export const where = () => 'line '+( lineIndex+1 )+': '+sourceLines[lineIndex];
 
 function throws (error) {
-	if ( sourceLines===NONE ) { throw error; }
-	error.lineIndex = lineIndex;
-	error.lineNumber = lineIndex+1;
-	done();
+	if ( sourceLines!==NONE ) {
+		error.lineIndex = lineIndex;
+		error.lineNumber = lineIndex+1;
+		//done();
+	}
 	throw error;
 }
