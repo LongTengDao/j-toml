@@ -1,18 +1,18 @@
 import { Map, RegExp } from './global.js';
-import { mark, must, throwError, throwSyntaxError, where } from './iterator.js';
-import * as options from './options.js';
-import { SingleLine } from './types-options.js';
-import * as RE from './RE.js?<RegExp>';
+import * as iterator from './share/iterator.js';
+import * as options from './share/options.js';
+import { BasicString } from './types/String.js';
+import * as RE from './share/RE.js';
 
 export function assignInterpolationString (table, finalKey, delimiter) {
-	options.enableInterpolationString || throwSyntaxError(where());
-	RE.DELIMITER_CHECK.test(delimiter) && throwSyntaxError('Interpolation String opening tag incorrect at '+where());
+	options.enableInterpolationString || iterator.throwSyntaxError(iterator.where());
+	RE.DELIMITER_CHECK.test(delimiter) && iterator.throwSyntaxError('Interpolation String opening tag incorrect at '+iterator.where());
 	let string;
 	let lineRest;
 	{
 		const literals = [];
-		for ( const start = mark(); ; ) {
-			const literal = must('Interpolation String', start);
+		for ( const start = iterator.mark(); ; ) {
+			const literal = iterator.must('Interpolation String', start);
 			if ( literal.startsWith(delimiter) ) {
 				lineRest = literal.slice(delimiter.length).replace(RE.PRE_WHITESPACE, '');
 				break;
@@ -22,19 +22,19 @@ export function assignInterpolationString (table, finalKey, delimiter) {
 		string = literals.join('\n');
 	}
 	if ( lineRest.startsWith('(') ) {
-		const interpolations_rest = RE.INTERPOLATIONS.exec(lineRest) || throwSyntaxError(where());
+		const interpolations_rest = RE.INTERPOLATIONS.exec(lineRest) || iterator.throwSyntaxError(iterator.where());
 		lineRest = interpolations_rest[2];
 		for ( const interpolation of interpolations_rest[1].match(RE.INTERPOLATION) ) {
 			if ( RE.REGEXP_MODE.test(interpolation) ) {
 				const { 1: pattern, 2: flags, 3: Replacer } = RE.PATTERN_FLAGS_REPLACER.exec(interpolation);
-				const search = newRegExp(pattern, flags) || throwSyntaxError('Invalid regExp at '+where());
+				const search = newRegExp(pattern, flags) || iterator.throwSyntaxError('Invalid regExp at '+iterator.where());
 				let replacer;
 				switch ( Replacer[0] ) {
 					case "'":
 						replacer = Replacer.slice(1, -1);
 						break;
 					case '"':
-						replacer = SingleLine(Replacer.slice(1, -1));
+						replacer = BasicString(Replacer.slice(1, -1));
 						break;
 					case '{':
 						const map = newMap(Replacer, true);
@@ -82,11 +82,14 @@ function newMap (interpolation, usedForRegExp) {
 	const tokens = interpolation.match(RE.INTERPOLATION_TOKEN);
 	for ( let length = tokens.length, index = 0; index<length; ) {
 		let search = tokens[index++];
-		search = search[0]==="'" ? search.slice(1, -1) : SingleLine(search.slice(1, -1));
-		usedForRegExp || search || throwSyntaxError('Characters to replace can not be empty, which was found at '+where());
-		map.has(search) && throwSyntaxError('Duplicate '+( usedForRegExp ? 'replacer' : 'characters to replace' )+' at '+where());
+		search = search[0]==="'" ? search.slice(1, -1) : BasicString(search.slice(1, -1));
+		usedForRegExp
+		|| search
+		|| iterator.throwSyntaxError('Characters to replace can not be empty, which was found at '+iterator.where());
+		map.has(search)
+		&& iterator.throwSyntaxError('Duplicate '+( usedForRegExp ? 'replacer' : 'characters to replace' )+' at '+iterator.where());
 		let replacer = tokens[index++];
-		replacer = replacer[0]==="'" ? replacer.slice(1, -1) : SingleLine(replacer.slice(1, -1));
+		replacer = replacer[0]==="'" ? replacer.slice(1, -1) : BasicString(replacer.slice(1, -1));
 		map.set(search, replacer);
 	}
 	return map;
@@ -98,8 +101,11 @@ function newRegExp (pattern, flags) {
 }
 
 export function ensureConstructor (type) {
-	options.customConstructors || throwSyntaxError(where());
-	options.FUNCTION.has(options.customConstructors) || type in options.customConstructors || throwError(where());
+	options.customConstructors
+	|| iterator.throwSyntaxError(iterator.where());
+	options.FUNCTION.has(options.customConstructors)
+	|| type in options.customConstructors
+	|| iterator.throwError(iterator.where());
 }
 
 export function construct (type, value) {

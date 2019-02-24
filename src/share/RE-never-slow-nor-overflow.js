@@ -1,5 +1,7 @@
-import { throwSyntaxError, where } from './iterator.js';
-import * as RE from './RE.js?<RegExp>';
+import * as iterator from './iterator.js';
+import * as RE from './RE-higher.js?<RegExp>';
+
+/* parser */
 
 const MULTI_LINE_BASIC_STRING = /^(?:[^\\"]+|\\[^]|""?(?!"))/;
 export function MULTI_LINE_BASIC_STRING_exec_0 (_) {
@@ -23,7 +25,7 @@ export function BASIC_STRING_exec (_2) {
 	for ( let _1 = ''; ; ) {
 		const $ = BASIC_STRING.exec(_2);
 		if ( $===null ) {
-			_2.startsWith('"') || throwSyntaxError(where());
+			_2.startsWith('"') || iterator.throwSyntaxError(iterator.where());
 			return { 1: _1, 2: _2.replace(RE.SYM_WHITESPACE, '') };
 		}
 		_1 += $[0];
@@ -40,17 +42,17 @@ export function TABLE_DEFINITION_exec (_) {
 	_ = _.slice(_1 ? 2 : 1).replace(RE.PRE_WHITESPACE, '');
 	const _2 = getKeys(_);
 	_ = _.slice(_2.length).replace(RE.PRE_WHITESPACE, '');
-	_.startsWith(']') || throwSyntaxError(where());
+	_.startsWith(']') || iterator.throwSyntaxError(iterator.where());
 	const _3 = _.charAt(1)===']';
 	_ = _.slice(_3 ? 2 : 1).replace(RE.PRE_WHITESPACE, '');
-	_==='' || _.startsWith('#') || throwSyntaxError(where());
+	_==='' || _.startsWith('#') || iterator.throwSyntaxError(iterator.where());
 	return { 1: _1, 2: _2, 3: _3, 4: _ };
 }
 
 const KEY_VALUE_PAIR = /^[ \t]*=[ \t]*(!!([\w-]*)[ \t]+)?([^ \t#][^]*)$/;
 export function KEY_VALUE_PAIR_exec (_) {
 	const _1 = getKeys(_);
-	const $ = KEY_VALUE_PAIR.exec(_.slice(_1.length)) || throwSyntaxError(where());
+	const $ = KEY_VALUE_PAIR.exec(_.slice(_1.length)) || iterator.throwSyntaxError(iterator.where());
 	return { 1: _1, 2: $[1], 3: $[2], 4: $[3] };
 }
 
@@ -61,7 +63,7 @@ function getKeys (_) {
 			for ( let key = '"'; ; ) {
 				const $ = BASIC_STRING.exec(_);
 				if ( $===null ) {
-					_.startsWith('"') || throwSyntaxError(where());
+					_.startsWith('"') || iterator.throwSyntaxError(iterator.where());
 					_ = _.slice(1);
 					keys += key+'"';
 					break;
@@ -71,7 +73,7 @@ function getKeys (_) {
 			}
 		}
 		else {
-			const key = ( ( _.startsWith("'") ? LITERAL_KEY : BARE_KEY ).exec(_) || throwSyntaxError(where()) )[0];
+			const key = ( ( _.startsWith("'") ? LITERAL_KEY : BARE_KEY ).exec(_) || iterator.throwSyntaxError(iterator.where()) )[0];
 			_ = _.slice(key.length);
 			keys += key;
 		}

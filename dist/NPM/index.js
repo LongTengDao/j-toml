@@ -1,77 +1,38 @@
 ﻿'use strict';
 
-const version = '0.5.53';
+const version = '0.5.54';
 
-const { WeakSet, WeakMap: WeakMap$1, SyntaxError, RangeError, TypeError, Error: Error$1, BigInt, Date, parseInt, Infinity, NaN, Map, RegExp,
+const {
+	WeakSet, WeakMap, SyntaxError, RangeError, TypeError, Error: Error$1, BigInt, Date, parseInt, Infinity, NaN, Map, RegExp, Proxy, Symbol,
+	Symbol: { for: Symbol_for },
 	Array: { isArray },
 	String: { fromCodePoint },
 	Number: { isSafeInteger },
 	Object: { create, getOwnPropertyNames },
 	Reflect: { getPrototypeOf },
-	Symbol,
-	Symbol: { for: Symbol_for },
 	JSON: { stringify },
 	Buffer: { isBuffer },
 } = global;
-
-/*!
- * 模块名称：@ltd/j-orderify
- * 模块功能：返回一个能保证给定对象的属性按此后添加顺序排列的 proxy，即使键名是 symbol，或整数 string。
-   　　　　　Return a proxy for given object, which can guarantee own keys are in setting order, even if the key name is symbol or int string.
- * 模块版本：1.0.0
- * 许可条款：LGPL-3.0
- * 所属作者：龙腾道 <LongTengDao@LongTengDao.com> (www.LongTengDao.com)
- * 问题反馈：https://GitHub.com/LongTengDao/j-orderify/issues
- * 项目主页：https://GitHub.com/LongTengDao/j-orderify/
- */
-
-const { defineProperty, deleteProperty, ownKeys } = Reflect;
-
-const ownKeysKeepers = new WeakMap;
-
-const handlers = Object.create(null, {
-	defineProperty: {
-		value (target, key, descriptor) {
-			if ( defineProperty(target, key, descriptor) ) {
-				ownKeysKeepers.get(target).add(key);
-				return true;
-			}
-			return false;
-		}
-	},
-	deleteProperty: {
-		value (target, key) {
-			if ( deleteProperty(target, key) ) {
-				ownKeysKeepers.get(target).delete(key);
-				return true;
-			}
-			return false;
-		}
-	},
-	ownKeys: {
-		value (target) {
-			return [...ownKeysKeepers.get(target)];
-		}
-	},
-});
-
-const orderify = object => {
-	ownKeysKeepers.set(object, new Set(ownKeys(object)));
-	return new Proxy(object, handlers);
-};
-
-/*¡ @ltd/j-orderify */
 
 const NONE = [];
 let sourceLines = NONE;
 let lastLineIndex = -1;
 let lineIndex = -1;
 
-const none = () => sourceLines===NONE;
+const from = array => {
+	sourceLines = array;
+	lastLineIndex = sourceLines.length-1;
+	lineIndex = -1;
+};
+
 const done = () => { sourceLines = NONE; };
+
 const next = () => sourceLines[++lineIndex];
+
 const rest = () => lineIndex!==lastLineIndex;
+
 const mark = () => lineIndex;
+
 const must = (message, startIndex) => {
 	if ( lineIndex===lastLineIndex ) {
 		const error = new SyntaxError(message+' is not close until the end of the file, which started from line '+( startIndex+1 )+': '+sourceLines[startIndex]);
@@ -81,16 +42,16 @@ const must = (message, startIndex) => {
 	}
 	return sourceLines[++lineIndex];
 };
-const from = array => {
-	sourceLines = array;
-	lastLineIndex = sourceLines.length-1;
-	lineIndex = -1;
-};
-const throwSyntaxError = message => throws(new SyntaxError(message));
-const throwRangeError = message => throws(new RangeError(message));
-const throwTypeError = message => throws(new TypeError(message));
-const throwError = message => throws(new Error$1(message));
+
 const where = () => 'line '+( lineIndex+1 )+': '+sourceLines[lineIndex];
+
+const throwSyntaxError = message => throws(new SyntaxError(message));
+
+const throwRangeError = message => throws(new RangeError(message));
+
+const throwTypeError = message => throws(new TypeError(message));
+
+const throwError = message => throws(new Error$1(message));
 
 function throws (error) {
 	if ( sourceLines!==NONE ) {
@@ -101,24 +62,25 @@ function throws (error) {
 	throw error;
 }
 
-const UNDERSCORES = /_/g;
+function Table () { }
+const OrderedTable = function Table () { return orderify(this); };
 
-const XOB_INTEGER = /^0x[0-9A-Fa-f]+(?:_[0-9A-Fa-f]+)*|o[0-7]+(?:_[0-7]+)*|b[01]+(?:_[01]+)*$/;
-const INTEGER = /^[-+]?[1-9]\d*(?:_\d+)*$/;
+OrderedTable.prototype = Table.prototype = create(null);
 
-const FLOAT = /^[-+]?(?:0|[1-9]\d*(?:_\d+)*)(?:\.\d+(?:_\d+)*)?(?:[eE][-+]?\d+(?:_\d+)*)?$/;
-const FLOAT_NOT_INTEGER = /[.eE]/;
+const isTable = value => value instanceof Table;
+
+const closeTables = new WeakSet;
+const openTables = new WeakSet;
+
 const DATETIME = /^(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?|(\d\d\d\d-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|02-(?:0[1-9]|1\d|2[0-9])))(?:([T ])((?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?)(Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)?)?)$/;
-
-const BOM = /^\uFEFF/;
-const EOL = /\r?\n/;
 
 const PRE_WHITESPACE = /^[ \t]+/;
 const KEYS = /[\w-]+|"(?:[^\\"]+|\\[^])*"|'[^']*'/g;
 const VALUE_REST = /^((?:\d\d\d\d-\d\d-\d\d \d)?[\w\-+.:]+)[ \t]*([^]*)$/;
 const LITERAL_STRING = /^'([^'\x00-\x08\x0B-\x1F\x7F]*)'[ \t]*([^]*)/;
-const MULTI_LINE_LITERAL_STRING = /^([^]*?)'''[ \t]*([^]*)/;
+const MULTI_LINE_LITERAL_STRING = /^([^]*?)'''(?!')[ \t]*([^]*)/;
 const CONTROL_CHARACTER_EXCLUDE_TAB = /[\x00-\x08\x0B-\x1F\x7F]/;
+const ESCAPED_IN_MULTI_LINE = /\n|\\(?:([ \n]+)|([\\"])|([btnfr])|u([^]{4})|U([^]{8}))/g;
 const SYM_WHITESPACE = /^[^][ \t]*/;
 
 const _VALUE_PAIR = /^!!([\w-]*)[ \t]+([^ \t#][^]*)$/;
@@ -133,207 +95,7 @@ const PATTERN_FLAGS_REPLACER = /\/((?:[^\\[/]+|\[(?:[^\\\]]+|\\[^])*]|\\[^])+)\/
 const WHOLE_AND_SUBS = /('[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*([^]*)/;
 const DOLLAR = /\$(?:[1-9]\d?|\$)/g;
 
-const Integer = (literal, useBigInt = true, allowLonger = false) => {
-	if ( useBigInt===false ) {
-		if ( literal==='0' || literal==='+0' || literal==='-0' ) { return 0; }
-		( literal.charAt(0)==='0' ? XOB_INTEGER : INTEGER ).test(literal) || throwSyntaxError('Invalid Integer '+literal+( none() ? '' : ' at '+where() ));
-		const number = +literal.replace(UNDERSCORES, '');
-		allowLonger || isSafeInteger(number) || throwRangeError('Integer did not use BitInt must be Number.isSafeInteger, not includes '+literal+( none() ? '' : ' meet at '+where() ));
-		return number;
-	}
-	else {
-		let bigInt;
-		if ( literal==='0' || literal==='+0' || literal==='-0' ) { bigInt = 0n; }
-		else {
-			( literal.charAt(0)==='0' ? XOB_INTEGER : INTEGER ).test(literal) || throwSyntaxError('Invalid Integer '+literal+( none() ? '' : ' at '+where() ));
-			bigInt = BigInt(literal.replace(UNDERSCORES, ''));
-			allowLonger ||
-			-9223372036854775808n<=bigInt && bigInt<=9223372036854775807n ||// ( min = -(2n**(64n-1n)) || ~max ) <= long <= ( max = 2n**(64n-1n)-1n || ~min )
-			throwRangeError('Integer expect 64 bit range (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807), not includes '+literal+( none() ? '' : ' meet at '+where() ));
-		}
-		if ( useBigInt===true ) { return bigInt; }
-		isSafeInteger(useBigInt) || throwRangeError('TOML.Integer(,useBigInt) argument muse be safe integer.');
-		if ( useBigInt<0 ? useBigInt<=bigInt && bigInt<= -useBigInt-1 : -useBigInt<=bigInt && bigInt<=useBigInt ) { return +( bigInt+'' ); }
-		return bigInt;
-	}
-};
-
-const Float = literal => {
-	if ( FLOAT.test(literal) && FLOAT_NOT_INTEGER.test(literal) ) {
-		return +literal.replace(UNDERSCORES, '');
-		//const number = +literal.replace(RE.UNDERSCORES, '');
-		//isFinite(number) || throwRangeError('Float can not be as big as Infinity, like '+literal+( none() ? '' : ' at '+where() ));
-		//return number;
-	}
-	if ( literal==='inf' || literal==='+inf' ) { return Infinity; }
-	if ( literal==='-inf' ) { return -Infinity; }
-	if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) { return NaN; }
-	throwSyntaxError('Invalid Float '+literal+( none() ? '' : ' at '+where() ));
-};
-
-const literal_cache = Symbol('literal_cache');
-const value_cache = Symbol('value_cache');
-class Datetime extends Date {
-	
-	constructor (literal) {
-		const [hms_ms = '', YMD = '', T = '', HMS_MS = hms_ms, Z = ''] = DATETIME.exec(literal) || throwSyntaxError('Invalid Datetime '+literal+( none() ? '' : ' at '+where() ));
-		super(
-			Z ? YMD+'T'+HMS_MS+Z :
-				T ? YMD+'T'+HMS_MS :
-					YMD ? YMD+'T00:00:00.000'
-						: '1970-01-01T'+HMS_MS
-		);
-		this.type =
-			Z ? 'Offset Date-Time' :
-				T ? 'Local Date-Time' :
-					YMD ? 'Local Date'
-						: 'Local Time';
-		this[literal_cache] = literal;
-		this[value_cache] = this.getTime();
-	}
-	
-	static isDatetime (value) { return value instanceof Datetime; }
-	
-	//toJSON () { return this.toISOString(); }
-	toISOString () {
-		if ( this.getTime()===this[value_cache] ) { return this[literal_cache]; }
-		throw new Error('Datetime value has been modified.');
-	}
-	
-}
-
-const Table = function Table (keepOrder) {
-	let undefined;
-	if ( new.target===undefined ) { throw new TypeError("Class constructor Table cannot be invoked without 'new'"); }
-	if ( keepOrder ) { return orderify(this); }
-};
-const TableDefault = function Table () { };
-const TableKeepOrder = function Table () { return orderify(this); };
-Table.prototype = TableDefault.prototype = TableKeepOrder.prototype = create(null);
-const isTable = Table.isTable = value => value instanceof Table;
-
-const TypedArrays = new WeakMap$1;
-const reallyTypify = (array, type) => {
-	if ( TypedArrays.has(array) ) {
-		if ( TypedArrays.get(array)===type ) { return array; }
-		throwTypeError('Types in array must be same. Check '+where());
-	}
-	TypedArrays.set(array, type);
-	return array;
-};
-const unlimitedType = array => array;
-const FUNCTION = new WeakSet;
-
-let useWhatToJoinMultiLineString = '';
-let useBigInt = true;
-
-let TableDepends = TableDefault;
-let open = false;
-let allowLonger = false;
-let keepComment = false;
-let enableNull = false;
-let enableNil = false;
-let allowInlineTableMultiLineAndTrailingCommaEvenNoComma = false;
-let enableInterpolationString = false;
-let typify = reallyTypify;
-let customConstructors = null;
-
-function use (useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger, extensionOptions) {
-	if ( typeof useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines!=='string' ) { throw new TypeError('TOML.parse(,,multiLineJoiner)'); }
-	if ( typeof useBigInt_forInteger!=='boolean' ) {
-		if ( typeof useBigInt_forInteger!=='number' ) { throw new TypeError('TOML.parse(,,,useBigInt)'); }
-		if ( !isSafeInteger(useBigInt_forInteger) ) { throw new RangeError('TOML.parse(...useBigInt)'); }
-	}
-	useWhatToJoinMultiLineString = useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines;
-	useBigInt = useBigInt_forInteger;
-	if ( extensionOptions===null ) {
-		TableDepends = TableDefault;
-		open = allowLonger = keepComment = enableNull = enableNil = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = enableInterpolationString = false;
-		typify = reallyTypify;
-		customConstructors = null;
-	}
-	else {
-		TableDepends = extensionOptions.order ? TableKeepOrder : TableDefault;
-		open = !!extensionOptions.open;
-		allowLonger = !!extensionOptions.longer;
-		keepComment = !!extensionOptions.hash;
-		enableNull = !!extensionOptions.null;
-		enableNil = !!extensionOptions.nil;
-		allowInlineTableMultiLineAndTrailingCommaEvenNoComma = !!extensionOptions.multi;
-		enableInterpolationString = !!extensionOptions.ins;
-		typify = extensionOptions.mix ? unlimitedType : reallyTypify;
-		customConstructors = extensionOptions.new || null;
-		if ( customConstructors!==null ) {
-			if ( typeof customConstructors==='function' ) {
-				if ( customConstructors.length!==2 ) { throw new Error$1('TOML.parse(,,,xOptions.new.length)'); }
-				FUNCTION.add(customConstructors);
-			}
-			else if ( typeof customConstructors==='object' ) {
-				if ( getPrototypeOf(customConstructors)===null ) {
-					for ( const type of getOwnPropertyNames(customConstructors) ) {
-						if ( typeof customConstructors[type]!=='function' ) {
-							customConstructors = null;
-							throw new TypeError('TOML.parse(,,,xOptions.new['+stringify(type)+'])');
-						}
-						if ( customConstructors[type].length ) {
-							customConstructors = null;
-							throw new Error$1('TOML.parse(,,,xOptions.new['+stringify(type)+'].length)');
-						}
-					}
-				}
-				else {
-					const origin = customConstructors;
-					customConstructors = create(null);
-					for ( const type of getOwnPropertyNames(origin) ) {
-						const customConstructor = origin[type];
-						if ( typeof customConstructor!=='function' ) {
-							customConstructors = null;
-							throw new TypeError('TOML.parse(,,,xOptions.new['+stringify(type)+'])');
-						}
-						if ( customConstructors[type].length ) {
-							customConstructors = null;
-							throw new Error$1('TOML.parse(,,,xOptions.new['+stringify(type)+'].length)');
-						}
-						customConstructors[type] = customConstructor;
-					}
-				}
-			}
-			else { throw new TypeError('TOML.parse(,,,xOptions.new)'); }
-		}
-	}
-}
-
-function clear () {
-	customConstructors = null;
-}
-
-/* types */
-
-const ESCAPED_IN_SINGLE_LINE$1 = /\\(?:([\\"])|([btnfr])|u(.{4})|U(.{8}))/g;
-const ESCAPED_IN_MULTI_LINE$1 = /\n|\\(?:([ \n]+)|([\\"])|([btnfr])|u([^]{4})|U([^]{8}))/g;
-
-const ESCAPE_ALIAS = { b: '\b', t: '\t', n: '\n', f: '\f', r: '\r' };
-
-const unEscapeSingleLine = ($0, $1, $2, $3, $4) => {
-	if ( $1 ) { return $1; }
-	if ( $2 ) { return ESCAPE_ALIAS[$2]; }
-	const codePoint = parseInt($3 || $4, 16);
-	( 0xD7FF<codePoint && codePoint<0xE000 || 0x10FFFF<codePoint ) && throwRangeError('Invalid Unicode Scalar '+( $3 ? '\\u'+$3 : '\\U'+$4 )+' at '+where());
-	return fromCodePoint(codePoint);
-};
-
-const unEscapeMultiLine = ($0, $1, $2, $3, $4, $5) => {
-	if ( $0==='\n' ) { return useWhatToJoinMultiLineString; }
-	if ( $1 ) {
-		$1.includes('\n') || throwSyntaxError('Back slash leading whitespaces can only appear at the end of a line, but see '+where());
-		return '';
-	}
-	return unEscapeSingleLine('', $2, $3, $4, $5);
-};
-
-const SingleLine = literal => literal.replace(ESCAPED_IN_SINGLE_LINE$1, unEscapeSingleLine);
-
-const MultiLine = literal => literal.replace(ESCAPED_IN_MULTI_LINE$1, unEscapeMultiLine);
+/* parser */
 
 const MULTI_LINE_BASIC_STRING = /^(?:[^\\"]+|\\[^]|""?(?!"))/;
 function MULTI_LINE_BASIC_STRING_exec_0 (_) {
@@ -416,6 +178,249 @@ function getKeys (_) {
 	}
 }
 
+/* types */
+
+const ESCAPED_IN_SINGLE_LINE = /\\(?:([\\"])|([btnfr])|u(.{4})|U(.{8}))/g;
+
+const UNDERSCORES = /_/g;
+
+const XOB_INTEGER = /^0x[0-9A-Fa-f]+(?:_[0-9A-Fa-f]+)*|o[0-7]+(?:_[0-7]+)*|b[01]+(?:_[01]+)*$/;
+const INTEGER = /^[-+]?[1-9]\d*(?:_\d+)*$/;
+
+const FLOAT = /^[-+]?(?:0|[1-9]\d*(?:_\d+)*)(?:\.\d+(?:_\d+)*)?(?:[eE][-+]?\d+(?:_\d+)*)?$/;
+const FLOAT_NOT_INTEGER = /[.eE]/;
+
+/* parser */
+
+const BOM = /^\uFEFF/;
+const EOL = /\r?\n/;
+
+const literal_cache = Symbol('literal_cache');
+const value_cache = Symbol('value_cache');
+
+class Datetime extends Date {
+	
+	constructor (literal) {
+		const [hms_ms = '', YMD = '', T = '', HMS_MS = hms_ms, Z = ''] = DATETIME.exec(literal) || throwSyntaxError('Invalid Datetime '+literal+' at '+where());
+		super(
+			Z ? YMD+'T'+HMS_MS+Z :
+				T ? YMD+'T'+HMS_MS :
+					YMD ? YMD+'T00:00:00.000'
+						: '1970-01-01T'+HMS_MS
+		);
+		this.type =
+			Z ? 'Offset Date-Time' :
+				T ? 'Local Date-Time' :
+					YMD ? 'Local Date'
+						: 'Local Time';
+		this[literal_cache] = literal;
+		this[value_cache] = this.getTime();
+	}
+	
+	//static isDatetime (value) { return value instanceof Datetime; }
+	
+	//toJSON () { return this.toISOString(); }
+	toISOString () {
+		if ( this.getTime()===this[value_cache] ) { return this[literal_cache]; }
+		throw new Error('Datetime value has been modified.');
+	}
+	
+}
+
+const Float = literal => {
+	if ( FLOAT.test(literal) && FLOAT_NOT_INTEGER.test(literal) ) {
+		return +literal.replace(UNDERSCORES, '');
+		//const number = +literal.replace(RE.UNDERSCORES, '');
+		//isFinite(number) || iterator.throwRangeError('Float can not be as big as Infinity, like '+literal+' at '+where());
+		//return number;
+	}
+	//if ( literal==='inf' || literal==='+inf' ) { return Infinity; }
+	//if ( literal==='-inf' ) { return -Infinity; }
+	//if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) { return NaN; }
+	throwSyntaxError('Invalid Float '+literal+' at '+where());
+};
+
+const NumberInteger = (literal) => {
+	if ( literal==='0' || literal==='+0' || literal==='-0' ) { return 0; }
+	( literal.charAt(0)==='0' ? XOB_INTEGER : INTEGER ).test(literal)
+	|| throwSyntaxError('Invalid Integer '+literal+' at '+where());
+	const number = +literal.replace(UNDERSCORES, '');
+	allowLonger
+	|| isSafeInteger(number)
+	|| throwRangeError('Integer did not use BitInt must be Number.isSafeInteger, not includes '+literal+' meet at '+where());
+	return number;
+};
+
+const BigIntInteger = (literal) => {
+	if ( literal==='0' || literal==='+0' || literal==='-0' ) { return 0n; }
+	( literal.charAt(0)==='0' ? XOB_INTEGER : INTEGER ).test(literal) || throwSyntaxError('Invalid Integer '+literal+' at '+where());
+	const bigInt = BigInt(literal.replace(UNDERSCORES, ''));
+	allowLonger
+	|| -9223372036854775808n<=bigInt && bigInt<=9223372036854775807n// ( min = -(2n**(64n-1n)) || ~max ) <= long <= ( max = 2n**(64n-1n)-1n || ~min )
+	|| throwRangeError('Integer expect 64 bit range (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807), not includes '+literal+' meet at '+where());
+	return bigInt;
+};
+
+const DependInteger = (literal) => {
+	const bigInt = BigIntInteger(literal);
+	return IntegerMin<=bigInt && bigInt<=IntegerMax ? +( bigInt+'' ) : bigInt;
+};
+
+const FUNCTION = new WeakSet;
+const unType = array => array;
+const { asInlineArrayOfNulls, asInlineArrayOfStrings, asInlineArrayOfTables, asInlineArrayOfArrays, asInlineArrayOfBooleans, asInlineArrayOfFloats, asInlineArrayOfDatetimes, asInlineArrayOfIntegers } = new Proxy(new WeakMap, {
+	get: arrayTypes => function typify (array) {
+		if ( arrayTypes.has(array) ) {
+			arrayTypes.get(array)===typify
+			|| throwTypeError('Types in array must be same. Check '+where());
+		}
+		else { arrayTypes.set(array, typify); }
+		return array;
+	}
+});
+
+let useWhatToJoinMultiLineString;
+let IntegerDepends, IntegerMin, IntegerMax;
+let TableDepends;
+let open;
+let allowLonger;
+let keepComment;
+let enableNull;
+let enableNil;
+let allowInlineTableMultiLineAndTrailingCommaEvenNoComma;
+let enableInterpolationString;
+let asNulls, asStrings, asTables, asArrays, asBooleans, asFloats, asDatetimes, asIntegers;
+let customConstructors;
+
+function use (useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger, extensionOptions) {
+	if ( typeof useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines!=='string' ) { throw new TypeError('TOML.parse(,,multiLineJoiner)'); }
+	if ( useBigInt_forInteger===true ) { IntegerDepends = BigIntInteger; }
+	else if ( useBigInt_forInteger===false ) { IntegerDepends = NumberInteger; }
+	else {
+		if ( typeof useBigInt_forInteger!=='number' ) { throw new TypeError('TOML.parse(,,,useBigInt)'); }
+		if ( !isSafeInteger(useBigInt_forInteger) ) { throw new RangeError('TOML.parse(...useBigInt)'); }
+		IntegerDepends = DependInteger;
+		if ( useBigInt_forInteger>=0 ) {
+			IntegerMax = useBigInt_forInteger;
+			IntegerMin = -useBigInt_forInteger;
+		}
+		else {
+			IntegerMin = useBigInt_forInteger;
+			IntegerMax = -useBigInt_forInteger-1;
+		}
+	}
+	useWhatToJoinMultiLineString = useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines;
+	let typify;
+	if ( extensionOptions===null ) {
+		TableDepends = Table;
+		open = allowLonger = keepComment = enableNull = enableNil = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = enableInterpolationString = false;
+		customConstructors = null;
+		typify = true;
+	}
+	else {
+		TableDepends = extensionOptions.order ? OrderedTable : Table;
+		open = !!extensionOptions.open;
+		allowLonger = !!extensionOptions.longer;
+		keepComment = !!extensionOptions.hash;
+		enableNull = !!extensionOptions.null;
+		enableNil = !!extensionOptions.nil;
+		allowInlineTableMultiLineAndTrailingCommaEvenNoComma = !!extensionOptions.multi;
+		enableInterpolationString = !!extensionOptions.ins;
+		typify = !extensionOptions.mix;
+		customConstructors = extensionOptions.new || null;
+		if ( customConstructors!==null ) {
+			if ( typeof customConstructors==='function' ) {
+				if ( typify ) {
+					customConstructors = null;
+					throw new Error$1('TOML.parse(,,,,{ mix:false, new(){} })');
+				}
+				if ( customConstructors.length!==2 ) { throw new Error$1('TOML.parse(,,,,xOptions.new.length)'); }
+				FUNCTION.add(customConstructors);
+			}
+			else if ( typeof customConstructors==='object' ) {
+				if ( typify ) {
+					customConstructors = null;
+					throw new Error$1('TOML.parse(,,,,{ mix:false, new:{} })');
+				}
+				if ( getPrototypeOf(customConstructors)===null ) {
+					for ( const type of getOwnPropertyNames(customConstructors) ) {
+						if ( typeof customConstructors[type]!=='function' ) {
+							customConstructors = null;
+							throw new TypeError('TOML.parse(,,,,xOptions.new['+stringify(type)+'])');
+						}
+						if ( customConstructors[type].length ) {
+							customConstructors = null;
+							throw new Error$1('TOML.parse(,,,,xOptions.new['+stringify(type)+'].length)');
+						}
+					}
+				}
+				else {
+					const origin = customConstructors;
+					customConstructors = create(null);
+					for ( const type of getOwnPropertyNames(origin) ) {
+						const customConstructor = origin[type];
+						if ( typeof customConstructor!=='function' ) {
+							customConstructors = null;
+							throw new TypeError('TOML.parse(,,,,xOptions.new['+stringify(type)+'])');
+						}
+						if ( customConstructors[type].length ) {
+							customConstructors = null;
+							throw new Error$1('TOML.parse(,,,,xOptions.new['+stringify(type)+'].length)');
+						}
+						customConstructors[type] = customConstructor;
+					}
+				}
+			}
+			else { throw new TypeError('TOML.parse(,,,,xOptions.new)'); }
+		}
+	}
+	if ( typify ) {
+		asNulls = asInlineArrayOfNulls;
+		asStrings = asInlineArrayOfStrings;
+		asTables = asInlineArrayOfTables;
+		asArrays = asInlineArrayOfArrays;
+		asBooleans = asInlineArrayOfBooleans;
+		asFloats = asInlineArrayOfFloats;
+		asDatetimes = asInlineArrayOfDatetimes;
+		asIntegers = asInlineArrayOfIntegers;
+	}
+	else { asNulls = asStrings = asTables = asArrays = asBooleans = asFloats = asDatetimes = asIntegers = unType; }
+}
+
+function clear () {
+	customConstructors = null;
+}
+
+const ESCAPE_ALIAS = { b: '\b', t: '\t', n: '\n', f: '\f', r: '\r' };
+
+const unEscapeSingleLine = ($0, $1, $2, $3, $4) => {
+	if ( $1 ) { return $1; }
+	if ( $2 ) { return ESCAPE_ALIAS[$2]; }
+	const codePoint = parseInt($3 || $4, 16);
+	( 0xD7FF<codePoint && codePoint<0xE000 || 0x10FFFF<codePoint )
+	&& throwRangeError('Invalid Unicode Scalar '+( $3 ? '\\u'+$3 : '\\U'+$4 )+' at '+where());
+	return fromCodePoint(codePoint);
+};
+
+const unEscapeMultiLine = ($0, $1, $2, $3, $4, $5) => {
+	if ( $0==='\n' ) { return useWhatToJoinMultiLineString; }
+	if ( $1 ) {
+		$1.includes('\n')
+		|| throwSyntaxError('Back slash leading whitespaces can only appear at the end of a line, but see '+where());
+		return '';
+	}
+	if ( $2 ) { return $2; }
+	if ( $3 ) { return ESCAPE_ALIAS[$3]; }
+	const codePoint = parseInt($4 || $5, 16);
+	( 0xD7FF<codePoint && codePoint<0xE000 || 0x10FFFF<codePoint )
+	&& throwRangeError('Invalid Unicode Scalar '+( $4 ? '\\u'+$4 : '\\U'+$5 )+' at '+where());
+	return fromCodePoint(codePoint);
+};
+
+const BasicString = literal => literal.replace(ESCAPED_IN_SINGLE_LINE, unEscapeSingleLine);
+
+const MultiLineBasicString = literal => literal.replace(ESCAPED_IN_MULTI_LINE, unEscapeMultiLine);
+
 function assignInterpolationString (table, finalKey, delimiter) {
 	enableInterpolationString || throwSyntaxError(where());
 	DELIMITER_CHECK.test(delimiter) && throwSyntaxError('Interpolation String opening tag incorrect at '+where());
@@ -446,7 +451,7 @@ function assignInterpolationString (table, finalKey, delimiter) {
 						replacer = Replacer.slice(1, -1);
 						break;
 					case '"':
-						replacer = SingleLine(Replacer.slice(1, -1));
+						replacer = BasicString(Replacer.slice(1, -1));
 						break;
 					case '{':
 						const map = newMap(Replacer, true);
@@ -494,11 +499,14 @@ function newMap (interpolation, usedForRegExp) {
 	const tokens = interpolation.match(INTERPOLATION_TOKEN);
 	for ( let length = tokens.length, index = 0; index<length; ) {
 		let search = tokens[index++];
-		search = search[0]==="'" ? search.slice(1, -1) : SingleLine(search.slice(1, -1));
-		usedForRegExp || search || throwSyntaxError('Characters to replace can not be empty, which was found at '+where());
-		map.has(search) && throwSyntaxError('Duplicate '+( usedForRegExp ? 'replacer' : 'characters to replace' )+' at '+where());
+		search = search[0]==="'" ? search.slice(1, -1) : BasicString(search.slice(1, -1));
+		usedForRegExp
+		|| search
+		|| throwSyntaxError('Characters to replace can not be empty, which was found at '+where());
+		map.has(search)
+		&& throwSyntaxError('Duplicate '+( usedForRegExp ? 'replacer' : 'characters to replace' )+' at '+where());
 		let replacer = tokens[index++];
-		replacer = replacer[0]==="'" ? replacer.slice(1, -1) : SingleLine(replacer.slice(1, -1));
+		replacer = replacer[0]==="'" ? replacer.slice(1, -1) : BasicString(replacer.slice(1, -1));
 		map.set(search, replacer);
 	}
 	return map;
@@ -510,25 +518,16 @@ function newRegExp (pattern, flags) {
 }
 
 function ensureConstructor (type) {
-	customConstructors || throwSyntaxError(where());
-	FUNCTION.has(customConstructors) || type in customConstructors || throwError(where());
+	customConstructors
+	|| throwSyntaxError(where());
+	FUNCTION.has(customConstructors)
+	|| type in customConstructors
+	|| throwError(where());
 }
 
 function construct (type, value) {
 	return FUNCTION.has(customConstructors) ? customConstructors(type, value) : customConstructors[type](value);
 }
-
-const closeTables = new WeakSet;
-const openTables = new WeakSet;
-
-const ArrayOfNulls = -1;
-const ArrayOfStrings = 1;
-const ArrayOfInlineTables = 2;
-const ArrayOfInlineArrays = 3;
-const ArrayOfBooleans = 4;
-const ArrayOfFloats = 5;
-const ArrayOfDatetimes = 6;
-const ArrayOfIntegers = 7;
 
 function parse (toml_source, toml_version, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger = true, extensionOptions = null) {
 	if ( isBuffer(toml_source) ) { toml_source = toml_source.toString(); }
@@ -594,7 +593,7 @@ function parseKeys (key_key) {
 		const key = keys[index];
 		if ( key.startsWith("'") ) { keys[index] = key.slice(1, -1); }
 		else if ( key.startsWith('"') ) {
-			keys[index] = SingleLine(key.slice(1, -1));
+			keys[index] = BasicString(key.slice(1, -1));
 		}
 	}
 	return keys;
@@ -677,7 +676,7 @@ function assignInline (lastInlineTable, lineRest) {
 							literal.includes(':') || literal.indexOf('-')!==literal.lastIndexOf('-') && !literal.startsWith('-') ? new Datetime(literal) :
 								literal.includes('.') || ( literal.includes('e') || literal.includes('E') ) && !literal.startsWith('0x') ? Float(literal) :
 									enableNull && literal==='null' || enableNil && literal==='nil' ? null :
-										Integer(literal, useBigInt, allowLonger);
+										IntegerDepends(literal);
 			break;
 	}
 	if ( custom ) { table[finalKey] = construct(type, table[finalKey]); }
@@ -722,14 +721,14 @@ function assignLiteralString (table, finalKey, literal) {
 function assignBasicString (table, finalKey, literal) {
 	if ( literal.charAt(1)!=='"' || literal.charAt(2)!=='"' ) {
 		const $ = BASIC_STRING_exec(literal);
-		table[finalKey] = SingleLine($[1]);
+		table[finalKey] = BasicString($[1]);
 		return $[2];
 	}
 	literal = literal.slice(3);
 	const $ = MULTI_LINE_BASIC_STRING_exec_0(literal);
 	if ( literal.startsWith('"""', $.length) ) {
 		ESCAPED_EXCLUDE_CONTROL_CHARACTER_test($) || throwSyntaxError(where());
-		table[finalKey] = SingleLine($);
+		table[finalKey] = BasicString($);
 		return literal.slice($.length+3).replace(PRE_WHITESPACE, '');
 	}
 	if ( literal ) {
@@ -742,7 +741,7 @@ function assignBasicString (table, finalKey, literal) {
 		const $ = MULTI_LINE_BASIC_STRING_exec_0(line);
 		if ( line.startsWith('"""', $.length) ) {
 			ESCAPED_EXCLUDE_CONTROL_CHARACTER_test($) || throwSyntaxError(where());
-			table[finalKey] = MultiLine(literal+$);
+			table[finalKey] = MultiLineBasicString(literal+$);
 			return line.slice($.length+3).replace(PRE_WHITESPACE, '');
 		}
 		line += '\n';
@@ -845,50 +844,43 @@ function pushInline (array, lineRest) {
 	const custom = lineRest.startsWith('!!');
 	let type;
 	if ( custom ) {
-		typify===unlimitedType || throwSyntaxError('Only mixable arrays could contain custom type. Check '+where());
+		//options.typify && iterator.throwSyntaxError('Only mixable arrays could contain custom type. Check '+iterator.where());
 		( { 1: type, 2: lineRest } = _VALUE_PAIR.exec(lineRest) || throwSyntaxError(where()) );
 		ensureConstructor(type);
 	}
 	const lastIndex = ''+array.length;
 	switch ( lineRest[0] ) {
 		case "'":
-			lineRest = assignLiteralString(typify(array, ArrayOfStrings), lastIndex, lineRest);
+			lineRest = assignLiteralString(asStrings(array), lastIndex, lineRest);
 			break;
 		case '"':
-			lineRest = assignBasicString(typify(array, ArrayOfStrings), lastIndex, lineRest);
+			lineRest = assignBasicString(asStrings(array), lastIndex, lineRest);
 			break;
 		case '{':
-			lineRest = assignInlineTable(typify(array, ArrayOfInlineTables), lastIndex, lineRest);
+			lineRest = assignInlineTable(asTables(array), lastIndex, lineRest);
 			break;
 		case '[':
-			lineRest = assignInlineArray(typify(array, ArrayOfInlineArrays), lastIndex, lineRest);
+			lineRest = assignInlineArray(asArrays(array), lastIndex, lineRest);
 			break;
 		case '`':
-			lineRest = assignInterpolationString(typify(array, ArrayOfStrings), lastIndex, lineRest);
+			lineRest = assignInterpolationString(asStrings(array), lastIndex, lineRest);
 			break;
 		default:
 			let literal;
 			( { 1: literal, 2: lineRest } = VALUE_REST.exec(lineRest) || throwSyntaxError(where()) );
-			if ( literal==='true' ) { typify(array, ArrayOfBooleans).push(true); }
-			else if ( literal==='false' ) { typify(array, ArrayOfBooleans).push(false); }
-			else if ( literal==='inf' || literal==='+inf' ) { typify(array, ArrayOfFloats).push(Infinity); }
-			else if ( literal==='-inf' ) { typify(array, ArrayOfFloats).push(-Infinity); }
-			else if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) {
-				typify(array, ArrayOfFloats).push(NaN);
-			}
+			if ( literal==='true' ) { asBooleans(array).push(true); }
+			else if ( literal==='false' ) { asBooleans(array).push(false); }
+			else if ( literal==='inf' || literal==='+inf' ) { asFloats(array).push(Infinity); }
+			else if ( literal==='-inf' ) { asFloats(array).push(-Infinity); }
+			else if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) { asFloats(array).push(NaN); }
 			else if ( literal.includes(':') || literal.indexOf('-')!==literal.lastIndexOf('-') && !literal.startsWith('-') ) {
-				typify(array, ArrayOfDatetimes).push(new Datetime(literal));
+				asDatetimes(array).push(new Datetime(literal));
 			}
 			else if ( literal.includes('.') || ( literal.includes('e') || literal.includes('E') ) && !literal.startsWith('0x') ) {
-				typify(array, ArrayOfFloats).push(Float(literal));
+				asFloats(array).push(Float(literal));
 			}
-			else if ( enableNull && literal==='null' || enableNil && literal==='nil' ) {
-				typify(array, ArrayOfNulls).push(null);
-			}
-			else {
-				typify(array, ArrayOfIntegers).
-						push(Integer(literal, useBigInt, allowLonger));
-			}
+			else if ( enableNull && literal==='null' || enableNil && literal==='nil' ) { asNulls(array).push(null); }
+			else { asIntegers(array).push(IntegerDepends(literal)); }
 			break;
 	}
 	if ( custom ) { array[lastIndex] = construct(type, array[lastIndex]); }
@@ -901,9 +893,8 @@ function pushInline (array, lineRest) {
 
 const TOML = {
 	parse,
-	Datetime,
-	Table,
-	version
+	version,
+	get default () { return this; }
 };
 
 module.exports = TOML;

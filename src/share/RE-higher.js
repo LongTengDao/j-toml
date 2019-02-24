@@ -1,16 +1,6 @@
 
 /* types */
 
-export const ESCAPED_IN_SINGLE_LINE = /\\(?:([\\"])|([btnfr])|u(.{4})|U(.{8}))/g;
-
-export const UNDERSCORES = /_/g;
-
-export const XOB_INTEGER = /^0x[0-9A-Fa-f]+(?:_[0-9A-Fa-f]+)*|o[0-7]+(?:_[0-7]+)*|b[01]+(?:_[01]+)*$/;
-export const INTEGER = /^[-+]?[1-9]\d*(?:_\d+)*$/;
-
-export const FLOAT = /^[-+]?(?:0|[1-9]\d*(?:_\d+)*)(?:\.\d+(?:_\d+)*)?(?:[eE][-+]?\d+(?:_\d+)*)?$/;
-export const FLOAT_NOT_INTEGER = /[.eE]/;
-
 const _29_ = /(?:0[1-9]|1\d|2[0-9])/;
 const _30_ = /(?:0[1-9]|[12]\d|30)/;
 const _31_ = /(?:0[1-9]|[12]\d|3[01])/;
@@ -26,19 +16,18 @@ export const DATETIME = /^(?:<HMS>|(<YMD>)(?:(<T>)(<HMS>)(<Z>)?)?)$/;
 
 const Whitespace = /[ \t]/;
 
-export const BOM = /^\uFEFF/;
-export const EOL = /\r?\n/;
-
 export const PRE_WHITESPACE = /^<Whitespace>+/;
 export const KEYS = /[\w-]+|"(?:[^\\"]+|\\[^])*"|'[^']*'/g;
 export const VALUE_REST = /^((?:\d\d\d\d-\d\d-\d\d \d)?[\w\-+.:]+)<Whitespace>*([^]*)$/;
 export const LITERAL_STRING = /^'([^'\x00-\x08\x0B-\x1F\x7F]*)'<Whitespace>*([^]*)/;
-export const MULTI_LINE_LITERAL_STRING = /^([^]*?)'''<Whitespace>*([^]*)/;
+export const MULTI_LINE_LITERAL_STRING = /^([^]*?)'''(?!')<Whitespace>*([^]*)/;
 export const CONTROL_CHARACTER_EXCLUDE_TAB = /[\x00-\x08\x0B-\x1F\x7F]/;
 export const ESCAPED_IN_MULTI_LINE = /\n|\\(?:([ \n]+)|([\\"])|([btnfr])|u([^]{4})|U([^]{8}))/g;
 export const SYM_WHITESPACE = /^[^]<Whitespace>*/;
 
 export const _VALUE_PAIR = /^!!([\w-]*)<Whitespace>+([^ \t#][^]*)$/;
+
+/* parser-extension */
 
 const String_ = /'[^']*'|"(?:[^\\"]+|\\[^])*"/;
 const KeyValuePairs = /(?:<String_>)<Whitespace>*=<Whitespace>*(?:<String_>)<Whitespace>*(?:,<Whitespace>*(?:<String_>)<Whitespace>*=<Whitespace>*(?:<String_>)<Whitespace>*)*/;
