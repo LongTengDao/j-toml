@@ -1,5 +1,6 @@
+// @ts-ignore
 import version from './version?text';
-import parse from './parser.js';
+import parse from './parser';
 
 const TOML = {
 	parse,

@@ -1,5 +1,6 @@
-import * as iterator from './iterator.js';
-import * as RE from './RE-higher.js?<RegExp>';
+import * as iterator from './iterator';
+// @ts-ignore
+import * as RE from './RE-higher?<RegExp>';
 
 /* parser */
 

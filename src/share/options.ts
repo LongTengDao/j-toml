@@ -1,7 +1,7 @@
-import { WeakSet, create, Error, getOwnPropertyNames, getPrototypeOf, stringify, TypeError, isSafeInteger, RangeError, Proxy, WeakMap } from '../global.js';
-import { Table, OrderedTable } from '../types/Table.js';
-import { BigIntInteger, NumberInteger, DependInteger } from '../types/Integer.js';
-import * as iterator from './iterator.js';
+import { WeakSet, create, Error, getOwnPropertyNames, getPrototypeOf, stringify, TypeError, isSafeInteger, RangeError, Proxy, WeakMap } from '../global';
+import { Table, OrderedTable } from '../types/Table';
+import { BigIntInteger, NumberInteger, DependInteger } from '../types/Integer';
+import * as iterator from './iterator';
 
 export const FUNCTION = new WeakSet;
 export const unType = array => array;

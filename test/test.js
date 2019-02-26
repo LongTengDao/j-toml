@@ -2,7 +2,7 @@
 
 module.exports = require('@ltd/j-dev')(__dirname+'/..')(async ({ import_default, get }) => {
 	
-	const TOML = await import_default('src/default.js', {
+	const TOML = await import_default('src/default', {
 		require: moduleName => {
 			if ( moduleName==='@ltd/j-orderify' ) { return require(__dirname+'/../../j-orderify/dist/NPM/index.js'); }
 			throw moduleName;

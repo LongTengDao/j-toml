@@ -1,3 +1,4 @@
+declare const global :any;
 export const {
 	WeakSet, WeakMap, SyntaxError, RangeError, TypeError, Error, BigInt, Date, parseInt, Infinity, NaN, Map, RegExp, Proxy, Symbol,
 	Symbol: { for: Symbol_for },

@@ -1,24 +1,24 @@
-import { Error, TypeError, Infinity, NaN, isArray, Symbol_for, isBuffer, Symbol } from './global.js';
-import * as iterator from './share/iterator.js';
-import { isTable, closeTables, openTables } from './types/Table.js';
-import { Datetime } from './types/Datetime.js';
-import { Float } from './types/Float.js';
-import { BasicString, MultiLineBasicString } from './types/String.js';
-import * as options from './share/options.js';
-import * as RE from './share/RE.js';
-import { assignInterpolationString, ensureConstructor, construct } from './parser-extension.js';
+import { Error, TypeError, Infinity, NaN, isArray, Symbol_for, isBuffer, Symbol } from './global';
+import * as iterator from './share/iterator';
+import { isTable, closeTables, openTables } from './types/Table';
+import { Datetime } from './types/Datetime';
+import { Float } from './types/Float';
+import { BasicString, MultiLineBasicString } from './types/String';
+import * as options from './share/options';
+import * as RE from './share/RE';
+import { assignInterpolationString, ensureConstructor, construct } from './parser-extension';
 
-export default function parse (toml_source, toml_version, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger = true, extensionOptions = null) {
+export default function parse (toml_source :string | Uint8Array, toml_version :0.5, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines :string, useBigInt_forInteger :boolean | number = true, extensionOptions = null) :object {
 	if ( isBuffer(toml_source) ) { toml_source = toml_source.toString(); }
 	if ( typeof toml_source!=='string' ) { throw new TypeError('TOML.parse(source)'); }
 	if ( toml_version!==0.5 ) { throw new Error('TOML.parse(,version)'); }
 	options.use(useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger, extensionOptions);
-	const rootTable = new options.TableDepends;
+	const rootTable :object = new options.TableDepends;
 	try {
 		iterator.from(toml_source.replace(RE.BOM, '').split(RE.EOL));
-		let lastSectionTable = rootTable;
+		let lastSectionTable :object = rootTable;
 		while ( iterator.rest() ) {
-			const line = iterator.next().replace(RE.PRE_WHITESPACE, '');
+			const line :string = iterator.next().replace(RE.PRE_WHITESPACE, '');
 			if ( line==='' ) { }
 			else if ( line.startsWith('#') ) {
 				if ( options.keepComment ) { lastSectionTable[Symbol('#')] = line.slice(1); }
@@ -29,7 +29,7 @@ export default function parse (toml_source, toml_version, useWhatToJoinMultiLine
 				lastSectionTable = appendTable(rootTable, keys, $_asArrayItem$$, hash);
 			}
 			else {
-				const rest = assignInline(lastSectionTable, line);
+				const rest :string = assignInline(lastSectionTable, line);
 				if ( rest==='' ) { }
 				else if ( rest.startsWith('#') ) {
 					if ( options.keepComment ) { lastSectionTable[Symbol('#')] = rest.slice(1); }
@@ -45,13 +45,13 @@ export default function parse (toml_source, toml_version, useWhatToJoinMultiLine
 	return rootTable;
 };
 
-function appendTable (table, key_key, asArrayItem, hash) {
-	const leadingKeys = parseKeys(key_key);
-	const finalKey = leadingKeys.pop();
+function appendTable (table :object, key_key :string, asArrayItem :boolean, hash :string) :object {
+	const leadingKeys :string[] = parseKeys(key_key);
+	const finalKey :string = leadingKeys.pop();
 	table = prepareTable(table, leadingKeys);
-	let lastTable;
+	let lastTable :object;
 	if ( asArrayItem ) {
-		let arrayOfTables;
+		let arrayOfTables :object[];
 		if ( finalKey in table ) { closeTables.has(arrayOfTables = table[finalKey]) && iterator.throwError('Trying to push Table to non-ArrayOfTables value at '+iterator.where()); }
 		else { arrayOfTables = table[finalKey] = []; }
 		arrayOfTables.push(lastTable = new options.TableDepends);
@@ -67,23 +67,21 @@ function appendTable (table, key_key, asArrayItem, hash) {
 	return lastTable;
 }
 
-function parseKeys (key_key) {
-	const keys = key_key.match(RE.KEYS);
-	for ( let index = keys.length; index--; ) {
-		const key = keys[index];
+function parseKeys (key_key :string) :string[] {
+	const keys :RegExpMatchArray = key_key.match(RE.KEYS);
+	for ( let index :number = keys.length; index--; ) {
+		const key :string = keys[index];
 		if ( key.startsWith("'") ) { keys[index] = key.slice(1, -1); }
-		else if ( key.startsWith('"') ) {
-			keys[index] = BasicString(key.slice(1, -1));
-		}
+		else if ( key.startsWith('"') ) { keys[index] = BasicString(key.slice(1, -1)); }
 	}
 	return keys;
 }
 
-function prepareTable (table, keys) {
-	const { length } = keys;
-	let index = 0;
+function prepareTable (table :object, keys :string[]) :object {
+	const { length } :string[] = keys;
+	let index :number = 0;
 	while ( index<length ) {
-		const key = keys[index++];
+		const key :string = keys[index++];
 		if ( key in table ) {
 			table = table[key];
 			if ( isTable(table) ) {
@@ -91,6 +89,7 @@ function prepareTable (table, keys) {
 			}
 			else if ( isArray(table) ) {
 				closeTables.has(table) && iterator.throwError('Trying to append value to static Inline Array at '+iterator.where());
+				// @ts-ignore
 				table = table[table.length-1];
 			}
 			else { iterator.throwError('Trying to define table through non-Table value at '+iterator.where()); }
@@ -104,11 +103,11 @@ function prepareTable (table, keys) {
 	return table;
 }
 
-function prepareInlineTable (table, keys) {
-	const { length } = keys;
-	let index = 0;
+function prepareInlineTable (table :object, keys :string[]) :object {
+	const { length } :string[] = keys;
+	let index :number = 0;
 	while ( index<length ) {
-		const key = keys[index++];
+		const key :string = keys[index++];
 		if ( key in table ) {
 			table = table[key];
 			isTable(table) || iterator.throwError('Trying to assign property through non-Table value at '+iterator.where());
@@ -123,12 +122,12 @@ function prepareInlineTable (table, keys) {
 	return table;
 }
 
-function assignInline (lastInlineTable, lineRest) {
+function assignInline (lastInlineTable :object, lineRest :string) :string {
 	const { 1: left, 2: custom, 3: type, 4: right } = RE.KEY_VALUE_PAIR_exec(lineRest);
 	custom && ensureConstructor(type);
-	const leadingKeys = parseKeys(left);
-	const finalKey = leadingKeys.pop();
-	const table = prepareInlineTable(lastInlineTable, leadingKeys);
+	const leadingKeys :string[] = parseKeys(left);
+	const finalKey :string = leadingKeys.pop();
+	const table :object = prepareInlineTable(lastInlineTable, leadingKeys);
 	finalKey in table && iterator.throwError('Duplicate property definition at '+iterator.where());
 	switch ( right[0] ) {
 		case "'":
@@ -147,7 +146,7 @@ function assignInline (lastInlineTable, lineRest) {
 			lineRest = assignInterpolationString(table, finalKey, right);
 			break;
 		default:
-			let literal;
+			let literal :string;
 			( { 1: literal, 2: lineRest } = RE.VALUE_REST.exec(right) || iterator.throwSyntaxError(iterator.where()) );
 			table[finalKey] =
 				literal==='true' ? true : literal==='false' ? false :
@@ -167,8 +166,8 @@ function assignInline (lastInlineTable, lineRest) {
 	return lineRest;
 }
 
-function assignLiteralString (table, finalKey, literal) {
-	let $;
+function assignLiteralString (table :object, finalKey :string, literal :string) :string {
+	let $ :RegExpExecArray;
 	if ( literal.charAt(1)!=="'" || literal.charAt(2)!=="'" ) {
 		$ = RE.LITERAL_STRING.exec(literal) || iterator.throwSyntaxError(iterator.where());
 		table[finalKey] = $[1];
@@ -185,9 +184,9 @@ function assignLiteralString (table, finalKey, literal) {
 		RE.CONTROL_CHARACTER_EXCLUDE_TAB.test(literal) && iterator.throwSyntaxError('Control characters other than tab are not permitted in a Literal String, which was found at '+iterator.where());
 		literal += options.useWhatToJoinMultiLineString;
 	}
-	const start = iterator.mark();
+	const start :number = iterator.mark();
 	for ( ; ; ) {
-		const line = iterator.must('Literal String', start);
+		const line :string = iterator.must('Literal String', start);
 		$ = RE.MULTI_LINE_LITERAL_STRING.exec(line);
 		if ( $ ) {
 			RE.CONTROL_CHARACTER_EXCLUDE_TAB.test($[1]) && iterator.throwSyntaxError('Control characters other than tab are not permitted in a Literal String, which was found at '+iterator.where());
@@ -198,7 +197,7 @@ function assignLiteralString (table, finalKey, literal) {
 	}
 }
 
-function assignBasicString (table, finalKey, literal) {
+function assignBasicString (table :object, finalKey :string, literal :string) :string {
 	if ( literal.charAt(1)!=='"' || literal.charAt(2)!=='"' ) {
 		const $ = RE.BASIC_STRING_exec(literal);
 		table[finalKey] = BasicString($[1]);
@@ -215,9 +214,9 @@ function assignBasicString (table, finalKey, literal) {
 		literal += '\n';
 		RE.ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(literal) || iterator.throwSyntaxError(iterator.where());
 	}
-	const start = iterator.mark();
+	const start :number = iterator.mark();
 	for ( ; ; ) {
-		let line = iterator.must('Basic String', start);
+		let line :string = iterator.must('Basic String', start);
 		const $ = RE.MULTI_LINE_BASIC_STRING_exec_0(line);
 		if ( line.startsWith('"""', $.length) ) {
 			RE.ESCAPED_EXCLUDE_CONTROL_CHARACTER_test($) || iterator.throwSyntaxError(iterator.where());
@@ -230,12 +229,12 @@ function assignBasicString (table, finalKey, literal) {
 	}
 }
 
-function assignInlineTable (table, finalKey, lineRest) {
-	const inlineTable = table[finalKey] = new options.TableDepends;
+function assignInlineTable (table :object, finalKey :string, lineRest :string) :string {
+	const inlineTable :object = table[finalKey] = new options.TableDepends;
 	closeTables.add(inlineTable);
 	lineRest = lineRest.replace(RE.SYM_WHITESPACE, '');
 	if ( options.allowInlineTableMultiLineAndTrailingCommaEvenNoComma ) {
-		const start = iterator.mark();
+		const start :number = iterator.mark();
 		for ( ; ; ) {
 			for ( ; ; ) {
 				if ( lineRest==='' ) { }
@@ -273,10 +272,10 @@ function assignInlineTable (table, finalKey, lineRest) {
 	}
 }
 
-function assignInlineArray (table, finalKey, lineRest) {
-	const inlineArray = table[finalKey] = [];
+function assignInlineArray (table :object, finalKey :string, lineRest :string) :string {
+	const inlineArray :any[] = table[finalKey] = [];
 	closeTables.add(inlineArray);
-	const start = iterator.mark();
+	const start :number = iterator.mark();
 	lineRest = lineRest.replace(RE.SYM_WHITESPACE, '');
 	for ( ; ; ) {
 		if ( lineRest==='' ) { }
@@ -320,15 +319,15 @@ function assignInlineArray (table, finalKey, lineRest) {
 	}
 }
 
-function pushInline (array, lineRest) {
+function pushInline (array :any[], lineRest :string) :string {
 	const custom = lineRest.startsWith('!!');
-	let type;
+	let type :string;
 	if ( custom ) {
 		//options.typify && iterator.throwSyntaxError('Only mixable arrays could contain custom type. Check '+iterator.where());
 		( { 1: type, 2: lineRest } = RE._VALUE_PAIR.exec(lineRest) || iterator.throwSyntaxError(iterator.where()) );
 		ensureConstructor(type);
 	}
-	const lastIndex = ''+array.length;
+	const lastIndex :string = ''+array.length;
 	switch ( lineRest[0] ) {
 		case "'":
 			lineRest = assignLiteralString(options.asStrings(array), lastIndex, lineRest);
@@ -346,7 +345,7 @@ function pushInline (array, lineRest) {
 			lineRest = assignInterpolationString(options.asStrings(array), lastIndex, lineRest);
 			break;
 		default:
-			let literal;
+			let literal :string;
 			( { 1: literal, 2: lineRest } = RE.VALUE_REST.exec(lineRest) || iterator.throwSyntaxError(iterator.where()) );
 			if ( literal==='true' ) { options.asBooleans(array).push(true); }
 			else if ( literal==='false' ) { options.asBooleans(array).push(false); }

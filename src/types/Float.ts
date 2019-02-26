@@ -1,8 +1,8 @@
-import * as RE from '../share/RE.js';
-//import { Infinity, NaN } from '../global.js';
-import * as iterator from '../share/iterator.js';
+import * as RE from '../share/RE';
+//import { Infinity, NaN } from '../global';
+import * as iterator from '../share/iterator';
 
-export const Float = literal => {
+export const Float = (literal :string) :number => {
 	if ( RE.FLOAT.test(literal) && RE.FLOAT_NOT_INTEGER.test(literal) ) {
 		return +literal.replace(RE.UNDERSCORES, '');
 		//const number = +literal.replace(RE.UNDERSCORES, '');

@@ -1,4 +1,4 @@
-import { SyntaxError, RangeError, TypeError, Error } from '../global.js';
+import { SyntaxError, RangeError, TypeError, Error } from '../global';
 
 const NONE = [];
 let sourceLines = NONE;
