@@ -1,6 +1,10 @@
 {
 	"compilerOptions": {
 		"target": "ESNext",
-		"experimentalDecorators": true
+		"experimentalDecorators": true,
+		"baseUrl": "..",
+		"paths": {
+			"@ltd/*": ["../../LongTengDao/*/src/export"]
+		}
 	}
 }

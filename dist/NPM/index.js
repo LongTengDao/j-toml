@@ -2,13 +2,13 @@
 
 const version = '0.5.54';
 
-const { WeakSet, WeakMap, SyntaxError, RangeError, TypeError, Error: Error$1, BigInt, Date, parseInt, Infinity, NaN, Map, RegExp, Proxy, Symbol, Symbol: { for: Symbol_for }, Array: { isArray }, String: { fromCodePoint }, Number: { isSafeInteger }, Object: { create, getOwnPropertyNames }, Reflect: { getPrototypeOf }, JSON: { stringify }, Buffer: { isBuffer }, } = global;
+const { WeakSet, WeakMap: WeakMap$1, SyntaxError, RangeError, TypeError, Error: Error$1, BigInt, Date, parseInt, Infinity, NaN, Map, RegExp, Proxy: Proxy$1, Symbol, Symbol: { for: Symbol_for }, Array: { isArray }, String: { fromCodePoint }, Number: { isSafeInteger }, Object: { create, getOwnPropertyNames }, Reflect: { getPrototypeOf }, JSON: { stringify }, Buffer: { isBuffer }, } = global;
 
 const NONE = [];
 let sourceLines = NONE;
 let lastLineIndex = -1;
 let lineIndex = -1;
-const from = array => {
+const from = (array) => {
     sourceLines = array;
     lastLineIndex = sourceLines.length - 1;
     lineIndex = -1;
@@ -27,10 +27,10 @@ const must = (message, startIndex) => {
     return sourceLines[++lineIndex];
 };
 const where = () => 'line ' + (lineIndex + 1) + ': ' + sourceLines[lineIndex];
-const throwSyntaxError = message => throws(new SyntaxError(message));
-const throwRangeError = message => throws(new RangeError(message));
-const throwTypeError = message => throws(new TypeError(message));
-const throwError = message => throws(new Error$1(message));
+const throwSyntaxError = (message) => throws(new SyntaxError(message));
+const throwRangeError = (message) => throws(new RangeError(message));
+const throwTypeError = (message) => throws(new TypeError(message));
+const throwError = (message) => throws(new Error$1(message));
 function throws(error) {
     if (sourceLines !== NONE) {
         error.lineIndex = lineIndex;
@@ -39,6 +39,52 @@ function throws(error) {
     }
     throw error;
 }
+
+/*!
+ * 模块名称：@ltd/j-orderify
+ * 模块功能：返回一个能保证给定对象的属性按此后添加顺序排列的 proxy，即使键名是 symbol，或整数 string。
+   　　　　　Return a proxy for given object, which can guarantee own keys are in setting order, even if the key name is symbol or int string.
+ * 模块版本：1.0.0
+ * 许可条款：LGPL-3.0
+ * 所属作者：龙腾道 <LongTengDao@LongTengDao.com> (www.LongTengDao.com)
+ * 问题反馈：https://GitHub.com/LongTengDao/j-orderify/issues
+ * 项目主页：https://GitHub.com/LongTengDao/j-orderify/
+ */
+
+// @ts-ignore
+const { defineProperty, deleteProperty, ownKeys } = Reflect;
+const ownKeysKeepers = new WeakMap;
+const handlers = Object.create(null, {
+    defineProperty: {
+        value(target, key, descriptor) {
+            if (defineProperty(target, key, descriptor)) {
+                ownKeysKeepers.get(target).add(key);
+                return true;
+            }
+            return false;
+        }
+    },
+    deleteProperty: {
+        value(target, key) {
+            if (deleteProperty(target, key)) {
+                ownKeysKeepers.get(target).delete(key);
+                return true;
+            }
+            return false;
+        }
+    },
+    ownKeys: {
+        value(target) {
+            return [...ownKeysKeepers.get(target)];
+        }
+    },
+});
+const orderify = (object) => {
+    ownKeysKeepers.set(object, new Set(ownKeys(object)));
+    return new Proxy(object, handlers);
+};
+
+/*¡ @ltd/j-orderify */
 
 function Table() { }
 const OrderedTable = function Table() { return orderify(this); };
@@ -104,7 +150,8 @@ function BASIC_STRING_exec(_2) {
     for (let _1 = '';;) {
         const $ = BASIC_STRING.exec(_2);
         if ($ === null) {
-            _2.startsWith('"') || throwSyntaxError(where());
+            _2.startsWith('"')
+                || throwSyntaxError(where());
             return { 1: _1, 2: _2.replace(SYM_WHITESPACE, '') };
         }
         _1 += $[0];
@@ -119,16 +166,21 @@ function TABLE_DEFINITION_exec(_) {
     _ = _.slice(_1 ? 2 : 1).replace(PRE_WHITESPACE, '');
     const _2 = getKeys(_);
     _ = _.slice(_2.length).replace(PRE_WHITESPACE, '');
-    _.startsWith(']') || throwSyntaxError(where());
+    _.startsWith(']')
+        || throwSyntaxError(where());
     const _3 = _.charAt(1) === ']';
     _ = _.slice(_3 ? 2 : 1).replace(PRE_WHITESPACE, '');
-    _ === '' || _.startsWith('#') || throwSyntaxError(where());
+    _ === ''
+        || _.startsWith('#')
+        || throwSyntaxError(where());
     return { 1: _1, 2: _2, 3: _3, 4: _ };
 }
 const KEY_VALUE_PAIR = /^[ \t]*=[ \t]*(!!([\w-]*)[ \t]+)?([^ \t#][^]*)$/;
 function KEY_VALUE_PAIR_exec(_) {
     const _1 = getKeys(_);
-    const $ = KEY_VALUE_PAIR.exec(_.slice(_1.length)) || throwSyntaxError(where());
+    const $ = KEY_VALUE_PAIR.exec(_.slice(_1.length));
+    $
+        || throwSyntaxError(where());
     return { 1: _1, 2: $[1], 3: $[2], 4: $[3] };
 }
 function getKeys(_) {
@@ -138,7 +190,8 @@ function getKeys(_) {
             for (let key = '"';;) {
                 const $ = BASIC_STRING.exec(_);
                 if ($ === null) {
-                    _.startsWith('"') || throwSyntaxError(where());
+                    _.startsWith('"')
+                        || throwSyntaxError(where());
                     _ = _.slice(1);
                     keys += key + '"';
                     break;
@@ -148,7 +201,7 @@ function getKeys(_) {
             }
         }
         else {
-            const key = ((_.startsWith("'") ? LITERAL_KEY : BARE_KEY).exec(_) || throwSyntaxError(where()))[0];
+            const key = ((_.startsWith('\'') ? LITERAL_KEY : BARE_KEY).exec(_) || throwSyntaxError(where()))[0];
             _ = _.slice(key.length);
             keys += key;
         }
@@ -230,9 +283,9 @@ const DependInteger = (literal) => {
 };
 
 const FUNCTION = new WeakSet;
-const unType = array => array;
-const { asInlineArrayOfNulls, asInlineArrayOfStrings, asInlineArrayOfTables, asInlineArrayOfArrays, asInlineArrayOfBooleans, asInlineArrayOfFloats, asInlineArrayOfDatetimes, asInlineArrayOfIntegers } = new Proxy(new WeakMap, {
-    get: arrayTypes => function typify(array) {
+const unType = (array) => array;
+const { asInlineArrayOfNulls, asInlineArrayOfStrings, asInlineArrayOfTables, asInlineArrayOfArrays, asInlineArrayOfBooleans, asInlineArrayOfFloats, asInlineArrayOfDatetimes, asInlineArrayOfIntegers } = new Proxy$1(new WeakMap$1, {
+    get: (arrayTypes) => function typify(array) {
         if (arrayTypes.has(array)) {
             arrayTypes.get(array) === typify
                 || throwTypeError('Types in array must be same. Check ' + where());

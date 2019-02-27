@@ -1,6 +1,4 @@
-// @ts-ignore
 import { orderify } from '@ltd/j-orderify';
-declare function orderify (object :object) :object;
 import { create, WeakSet } from '../global';
 
 export function Table () :void { }

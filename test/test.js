@@ -4,7 +4,7 @@ module.exports = require('@ltd/j-dev')(__dirname+'/..')(async ({ import_default,
 	
 	const TOML = await import_default('src/default', {
 		require: moduleName => {
-			if ( moduleName==='@ltd/j-orderify' ) { return require(__dirname+'/../../j-orderify/dist/NPM/index.js'); }
+			if ( moduleName==='@ltd/j-orderify' ) { return require(__dirname+'/../../../LongTengDao/j-orderify/dist/NPM/index.js'); }
 			throw moduleName;
 		},
 		__filename: 'test/built.js',

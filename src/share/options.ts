@@ -4,9 +4,9 @@ import { BigIntInteger, NumberInteger, DependInteger } from '../types/Integer';
 import * as iterator from './iterator';
 
 export const FUNCTION = new WeakSet;
-export const unType = array => array;
+export const unType = (array :any[]) :any[] => array;
 export const { asInlineArrayOfNulls, asInlineArrayOfStrings, asInlineArrayOfTables, asInlineArrayOfArrays, asInlineArrayOfBooleans, asInlineArrayOfFloats, asInlineArrayOfDatetimes, asInlineArrayOfIntegers } = new Proxy(new WeakMap, {
-	get: arrayTypes => function typify (array) {
+	get: (arrayTypes) :Function => function typify (array :any[]) :any[] {
 		if ( arrayTypes.has(array) ) {
 			arrayTypes.get(array)===typify
 			|| iterator.throwTypeError('Types in array must be same. Check '+iterator.where());
@@ -16,20 +16,20 @@ export const { asInlineArrayOfNulls, asInlineArrayOfStrings, asInlineArrayOfTabl
 	}
 });
 
-export let useWhatToJoinMultiLineString;
-export let IntegerDepends, IntegerMin, IntegerMax;
-export let TableDepends;
-export let open;
-export let allowLonger;
-export let keepComment;
-export let enableNull;
-export let enableNil;
-export let allowInlineTableMultiLineAndTrailingCommaEvenNoComma;
-export let enableInterpolationString;
-export let asNulls, asStrings, asTables, asArrays, asBooleans, asFloats, asDatetimes, asIntegers;
-export let customConstructors;
+export let useWhatToJoinMultiLineString :string;
+export let IntegerDepends :Function, IntegerMin :number, IntegerMax :number;
+export let TableDepends :Function;
+export let open :boolean;
+export let allowLonger :boolean;
+export let keepComment :boolean;
+export let enableNull :boolean;
+export let enableNil :boolean;
+export let allowInlineTableMultiLineAndTrailingCommaEvenNoComma :boolean;
+export let enableInterpolationString :boolean;
+export let asNulls :Function, asStrings :Function, asTables :Function, asArrays :Function, asBooleans :Function, asFloats :Function, asDatetimes :Function, asIntegers :Function;
+export let customConstructors :Function | object;
 
-export function use (useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger, extensionOptions) {
+export function use (useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines :string, useBigInt_forInteger :boolean | number, extensionOptions) :void {
 	if ( typeof useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines!=='string' ) { throw new TypeError('TOML.parse(,,multiLineJoiner)'); }
 	if ( useBigInt_forInteger===true ) { IntegerDepends = BigIntInteger; }
 	else if ( useBigInt_forInteger===false ) { IntegerDepends = NumberInteger; }
@@ -47,7 +47,7 @@ export function use (useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines
 		}
 	}
 	useWhatToJoinMultiLineString = useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines;
-	let typify;
+	let typify :boolean;
 	if ( extensionOptions===null ) {
 		TableDepends = Table;
 		open = allowLonger = keepComment = enableNull = enableNil = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = enableInterpolationString = false;
@@ -124,6 +124,6 @@ export function use (useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines
 	else { asNulls = asStrings = asTables = asArrays = asBooleans = asFloats = asDatetimes = asIntegers = unType; }
 }
 
-export function clear () {
+export function clear () :void {
 	customConstructors = null;
 }
