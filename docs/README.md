@@ -19,11 +19,11 @@ npm install @ltd/j-toml
 ```js
 const TOML = require('@ltd/j-toml');
 
-const sourceContent = `
-     I_am_normal    = "..."
-     hasOwnProperty = "..."
-     constructor    = "..."
-     __proto__      = "..."
+const sourceContent  = `
+      I_am_normal    = "..."
+      hasOwnProperty = "..."
+      constructor    = "..."
+      __proto__      = "..."
 `;
 
 const rootTable = TOML.parse(sourceContent, 0.5, '\n');
@@ -123,19 +123,19 @@ npm install @ltd/j-toml
 ```js
 const TOML = require('@ltd/j-toml');
 
-const sourceContent = `
-     I_am_normal    = "..."
-     hasOwnProperty = "..."
-     constructor    = "..."
-     __proto__      = "..."
+const 源内容           = `
+      "一个普通的键名" = "..."
+      hasOwnProperty   = "..."
+      constructor      = "..."
+      __proto__        = "..."
 `;
 
-const rootTable = TOML.parse(sourceContent, 0.5, '\n');
+const 根表 = TOML.parse(源内容, 0.5, '\n');
 
-rootTable.I_am_normal    // "..."
-rootTable.hasOwnProperty // "..."
-rootTable.constructor    // "..."
-rootTable.__proto__      // "..."
+根表.一个普通的键名 // "..."
+根表.hasOwnProperty // "..."
+根表.constructor    // "..."
+根表.__proto__      // "..."
 ```
 
 `TOML.parse`
