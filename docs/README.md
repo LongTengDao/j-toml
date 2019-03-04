@@ -19,17 +19,19 @@ npm install @ltd/j-toml
 ```js
 const TOML = require('@ltd/j-toml');
 
-const rootTable = TOML.parse(`
-I_am_normal    = "..."
-hasOwnProperty = "..."
-constructor    = "..."
-__proto__      = "..."
-`, 0.5, '\n');
+const sourceContent = `
+     I_am_normal    = "..."
+     hasOwnProperty = "..."
+     constructor    = "..."
+     __proto__      = "..."
+`;
 
-rootTable.I_am_normal    === "..." // true
-rootTable.hasOwnProperty === "..." // true
-rootTable.constructor    === "..." // true
-rootTable.__proto__      === "..." // true
+const rootTable = TOML.parse(sourceContent, 0.5, '\n');
+
+rootTable.I_am_normal    // "..."
+rootTable.hasOwnProperty // "..."
+rootTable.constructor    // "..."
+rootTable.__proto__      // "..."
 ```
 
 `TOML.parse`
@@ -37,6 +39,16 @@ rootTable.__proto__      === "..." // true
 
 ```
 TOML.parse(sourceContent, version, multiLineJoiner[, useBigInt=true[, xOptions]]);
+```
+
+```ts
+function parse (
+         sourceContent   :string | Buffer,
+         version         :0.5,
+         multiLineJoiner :string,
+         useBigInt?      :boolean | number = true,
+         xOptions?       :object
+) :object;
 ```
 
 ### `arguments`
