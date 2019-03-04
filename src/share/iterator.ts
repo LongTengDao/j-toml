@@ -19,13 +19,14 @@ export const rest = () :boolean => lineIndex!==lastLineIndex;
 
 export const mark = () :number => lineIndex;
 
+declare class FriendlyError extends Error {
+	lineIndex? :number;
+	lineNumber? :number;
+}
+
 export const must = (message :string, startIndex :number) :string => {
-	if ( lineIndex===lastLineIndex ) {
-		const error = new SyntaxError(message+' is not close until the end of the file, which started from line '+( startIndex+1 )+': '+sourceLines[startIndex]);
-		error.lineIndex = lineIndex;
-		//done();
-		throw error;
-	}
+	lineIndex===lastLineIndex
+	&& throws(new SyntaxError(message+' is not close until the end of the file, which started from line '+( startIndex+1 )+': '+sourceLines[startIndex]));
 	return sourceLines[++lineIndex];
 };
 
@@ -39,7 +40,7 @@ export const throwTypeError = (message :string) :never => throws(new TypeError(m
 
 export const throwError = (message :string) :never => throws(new Error(message));
 
-function throws (error) :never {
+function throws (error :FriendlyError) :never {
 	if ( sourceLines!==NONE ) {
 		error.lineIndex = lineIndex;
 		error.lineNumber = lineIndex+1;

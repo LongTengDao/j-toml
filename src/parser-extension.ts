@@ -24,15 +24,15 @@ export function assignInterpolationString (table :object, finalKey :string, deli
 	if ( lineRest.startsWith('(') ) {
 		const interpolations_rest :RegExpExecArray = RE.INTERPOLATIONS.exec(lineRest) || iterator.throwSyntaxError(iterator.where());
 		lineRest = interpolations_rest[2];
-		for ( const interpolation of interpolations_rest[1].match(RE.INTERPOLATION) ) {
+		for ( const interpolation of <RegExpMatchArray>interpolations_rest[1].match(RE.INTERPOLATION) ) {
 			if ( RE.REGEXP_MODE.test(interpolation) ) {
-				const { 1: pattern, 2: flags, 3: Replacer } :RegExpExecArray = RE.PATTERN_FLAGS_REPLACER.exec(interpolation);
+				const { 1: pattern, 2: flags, 3: Replacer } :RegExpExecArray = <RegExpExecArray>RE.PATTERN_FLAGS_REPLACER.exec(interpolation);
 				let search :RegExp;
 				try { search = new RegExp(pattern, flags); }
-				catch (error) { iterator.throwSyntaxError('Invalid regExp at '+iterator.where()); }
+				catch (error) { throw iterator.throwSyntaxError('Invalid regExp at '+iterator.where()); }
 				let replacer;
 				switch ( Replacer[0] ) {
-					case "'":
+					case '\'':
 						replacer = <string>Replacer.slice(1, -1);
 						break;
 					case '"':
@@ -43,9 +43,9 @@ export function assignInterpolationString (table :object, finalKey :string, deli
 						replacer = (match :string) :string => map.has(match) ? map.get(match) : match;
 						break;
 					case '[':
-						const { 1: whole, 2: subs } :RegExpExecArray = RE.WHOLE_AND_SUBS.exec(Replacer);
+						const { 1: whole, 2: subs } :RegExpExecArray = <RegExpExecArray>RE.WHOLE_AND_SUBS.exec(Replacer);
 						const maps = [null];
-						for ( const sub of subs.match(RE.SUB) ) { maps.push(newMap(sub, true)); }
+						for ( const sub of <RegExpMatchArray>subs.match(RE.SUB) ) { maps.push(newMap(sub, true)); }
 						replacer = (...args :any[]) :string => whole.replace(RE.DOLLAR, ($n :string) :string => {
 							if ( $n==='$$' ) { return '$'; }
 							const n :string = $n.slice(1);
@@ -81,30 +81,32 @@ export function assignInterpolationString (table :object, finalKey :string, deli
 
 function newMap (interpolation :string, usedForRegExp :boolean) {
 	const map = new Map;
-	const tokens :RegExpMatchArray = interpolation.match(RE.INTERPOLATION_TOKEN);
+	const tokens :RegExpMatchArray = <RegExpMatchArray>interpolation.match(RE.INTERPOLATION_TOKEN);
 	for ( let length :number = tokens.length, index = 0; index<length; ) {
 		let search :string = tokens[index++];
-		search = search[0]==="'" ? search.slice(1, -1) : BasicString(search.slice(1, -1));
+		search = search[0]==='\'' ? search.slice(1, -1) : BasicString(search.slice(1, -1));
 		usedForRegExp
 		|| search
 		|| iterator.throwSyntaxError('Characters to replace can not be empty, which was found at '+iterator.where());
 		map.has(search)
 		&& iterator.throwSyntaxError('Duplicate '+( usedForRegExp ? 'replacer' : 'characters to replace' )+' at '+iterator.where());
 		let replacer :string = tokens[index++];
-		replacer = replacer[0]==="'" ? replacer.slice(1, -1) : BasicString(replacer.slice(1, -1));
+		replacer = replacer[0]==='\'' ? replacer.slice(1, -1) : BasicString(replacer.slice(1, -1));
 		map.set(search, replacer);
 	}
 	return map;
 }
 
-export function ensureConstructor (type? :string) :void {
+export function ensureConstructor (type :string) :void {
 	options.customConstructors
 	|| iterator.throwSyntaxError(iterator.where());
-	options.FUNCTION.has(options.customConstructors)
-	|| type in options.customConstructors
+	options.FUNCTION.has(<Function | object>options.customConstructors)
+	|| type in <object>options.customConstructors
 	|| iterator.throwError(iterator.where());
 }
 
 export function construct (type :string, value :any) :any {
-	return options.FUNCTION.has(options.customConstructors) ? options.customConstructors(type, value) : options.customConstructors[type](value);
+	return options.FUNCTION.has(options.customConstructors)
+		? ( <Function>options.customConstructors )(type, value)
+		: ( <object>options.customConstructors )[type](value);
 }

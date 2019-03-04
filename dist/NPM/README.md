@@ -19,17 +19,19 @@ npm install @ltd/j-toml
 ```
 const TOML = require('@ltd/j-toml');
 
-const rootTable = TOML.parse(`
-I_am_normal    = "..."
-hasOwnProperty = "..."
-constructor    = "..."
-__proto__      = "..."
-`, 0.5, '\n');
+const sourceContent = `
+     I_am_normal    = "..."
+     hasOwnProperty = "..."
+     constructor    = "..."
+     __proto__      = "..."
+`;
 
-rootTable.I_am_normal    === "..." // true
-rootTable.hasOwnProperty === "..." // true
-rootTable.constructor    === "..." // true
-rootTable.__proto__      === "..." // true
+const rootTable = TOML.parse(sourceContent, 0.5, '\n');
+
+rootTable.I_am_normal    // "..."
+rootTable.hasOwnProperty // "..."
+rootTable.constructor    // "..."
+rootTable.__proto__      // "..."
 ```
 
 `TOML.parse`
@@ -37,6 +39,16 @@ rootTable.__proto__      === "..." // true
 
 ```
 TOML.parse(sourceContent, version, multiLineJoiner[, useBigInt=true[, xOptions]]);
+```
+
+```
+function parse (
+         sourceContent   :string | Buffer,
+         version         :0.5,
+         multiLineJoiner :string,
+         useBigInt?      :boolean | number = true,
+         xOptions?       :object
+) :Table;
 ```
 
 ### `arguments`
@@ -73,7 +85,7 @@ TOML.parse(sourceContent, version, multiLineJoiner[, useBigInt=true[, xOptions]]
     
 4.  **`xOptions`**
     
-    *   type: `Object`
+    *   type: `object`
     
     The extensional features not in the spec.  
     Include keeping the key/value pairs order of tables, integers larger than `long`, comment information, `null` value, mixed-type array, multi-line inline table with trailing comma even no comma, interpolation string, custom constructor, etc.  
@@ -111,17 +123,19 @@ npm install @ltd/j-toml
 ```
 const TOML = require('@ltd/j-toml');
 
-const rootTable = TOML.parse(`
-I_am_normal    = "..."
-hasOwnProperty = "..."
-constructor    = "..."
-__proto__      = "..."
-`, 0.5, '\n');
+const sourceContent = `
+     I_am_normal    = "..."
+     hasOwnProperty = "..."
+     constructor    = "..."
+     __proto__      = "..."
+`;
 
-rootTable.I_am_normal    === "..." // true
-rootTable.hasOwnProperty === "..." // true
-rootTable.constructor    === "..." // true
-rootTable.__proto__      === "..." // true
+const rootTable = TOML.parse(sourceContent, 0.5, '\n');
+
+rootTable.I_am_normal    // "..."
+rootTable.hasOwnProperty // "..."
+rootTable.constructor    // "..."
+rootTable.__proto__      // "..."
 ```
 
 `TOML.parse`
@@ -129,6 +143,16 @@ rootTable.__proto__      === "..." // true
 
 ```
 TOML.parse(源内容, 遵循规范版本, 多行拼接字符[, 使用BigInt=true[, 超级选项]]);
+```
+
+```
+function parse (
+         源内容       :string | Buffer,
+         遵循规范版本 :0.5,
+         多行拼接字符 :string,
+         使用BigInt?  :boolean | number = true,
+         超级选项?    :object
+) :Table;
 ```
 
 ### `arguments`
@@ -165,7 +189,7 @@ TOML.parse(源内容, 遵循规范版本, 多行拼接字符[, 使用BigInt=true
     
 4.  **`超级选项`**
     
-    *   type: `Object`
+    *   type: `object`
     
     标准中所没有的扩展功能。  
     包括保持表中键值对的顺序、超出长整型的整数、保留注释信息、`null` 值、跨行行内表及尾逗号甚至省略逗号、混合类型的数组、插值字符串、自定义构造器等。  

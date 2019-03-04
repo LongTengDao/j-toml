@@ -7,8 +7,11 @@ const value_cache = Symbol('value_cache');
 
 export class Datetime extends Date {
 	
+	type :string;
+	
 	constructor (literal :string) {
-		const [hms_ms = '', YMD = '', T = '', HMS_MS = hms_ms, Z = ''] :RegExpExecArray = RE.DATETIME.exec(literal) || iterator.throwSyntaxError('Invalid Datetime '+literal+' at '+iterator.where());
+		// @ts-ignore
+		const { 0: hms_ms = '', 1: YMD = '', 2: T = '', 3: HMS_MS = hms_ms, 4: Z = '' } :RegExpExecArray = RE.DATETIME.exec(literal) || iterator.throwSyntaxError('Invalid Datetime '+literal+' at '+iterator.where());
 		super(
 			Z ? YMD+'T'+HMS_MS+Z :
 				T ? YMD+'T'+HMS_MS :

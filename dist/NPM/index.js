@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.54';
+const version = '0.5.55';
 
 const { WeakSet, WeakMap: WeakMap$1, SyntaxError, RangeError, TypeError, Error: Error$1, BigInt, Date, parseInt, Infinity, NaN, Map, RegExp, Proxy: Proxy$1, Symbol, Symbol: { for: Symbol_for }, Array: { isArray }, String: { fromCodePoint }, Number: { isSafeInteger }, Object: { create, getOwnPropertyNames }, Reflect: { getPrototypeOf }, JSON: { stringify }, Buffer: { isBuffer }, } = global;
 
@@ -18,12 +18,8 @@ const next = () => sourceLines[++lineIndex];
 const rest = () => lineIndex !== lastLineIndex;
 const mark = () => lineIndex;
 const must = (message, startIndex) => {
-    if (lineIndex === lastLineIndex) {
-        const error = new SyntaxError(message + ' is not close until the end of the file, which started from line ' + (startIndex + 1) + ': ' + sourceLines[startIndex]);
-        error.lineIndex = lineIndex;
-        //done();
-        throw error;
-    }
+    lineIndex === lastLineIndex
+        && throws(new SyntaxError(message + ' is not close until the end of the file, which started from line ' + (startIndex + 1) + ': ' + sourceLines[startIndex]));
     return sourceLines[++lineIndex];
 };
 const where = () => 'line ' + (lineIndex + 1) + ': ' + sourceLines[lineIndex];
@@ -44,7 +40,7 @@ function throws(error) {
  * 模块名称：@ltd/j-orderify
  * 模块功能：返回一个能保证给定对象的属性按此后添加顺序排列的 proxy，即使键名是 symbol，或整数 string。
    　　　　　Return a proxy for given object, which can guarantee own keys are in setting order, even if the key name is symbol or int string.
- * 模块版本：1.0.0
+ * 模块版本：2.0.0
  * 许可条款：LGPL-3.0
  * 所属作者：龙腾道 <LongTengDao@LongTengDao.com> (www.LongTengDao.com)
  * 问题反馈：https://GitHub.com/LongTengDao/j-orderify/issues
@@ -218,7 +214,8 @@ const literal_cache = Symbol('literal_cache');
 const value_cache = Symbol('value_cache');
 class Datetime extends Date {
     constructor(literal) {
-        const [hms_ms = '', YMD = '', T = '', HMS_MS = hms_ms, Z = ''] = DATETIME.exec(literal) || throwSyntaxError('Invalid Datetime ' + literal + ' at ' + where());
+        // @ts-ignore
+        const { 0: hms_ms = '', 1: YMD = '', 2: T = '', 3: HMS_MS = hms_ms, 4: Z = '' } = DATETIME.exec(literal) || throwSyntaxError('Invalid Datetime ' + literal + ' at ' + where());
         super(Z ? YMD + 'T' + HMS_MS + Z :
             T ? YMD + 'T' + HMS_MS :
                 YMD ? YMD + 'T00:00:00.000'
@@ -251,7 +248,7 @@ const Float = (literal) => {
     //if ( literal==='inf' || literal==='+inf' ) { return Infinity; }
     //if ( literal==='-inf' ) { return -Infinity; }
     //if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) { return NaN; }
-    throwSyntaxError('Invalid Float ' + literal + ' at ' + where());
+    throw throwSyntaxError('Invalid Float ' + literal + ' at ' + where());
 };
 
 const NumberInteger = (literal) => {
@@ -486,11 +483,11 @@ function assignInterpolationString(table, finalKey, delimiter) {
                     search = new RegExp(pattern, flags);
                 }
                 catch (error) {
-                    throwSyntaxError('Invalid regExp at ' + where());
+                    throw throwSyntaxError('Invalid regExp at ' + where());
                 }
                 let replacer;
                 switch (Replacer[0]) {
-                    case "'":
+                    case '\'':
                         replacer = Replacer.slice(1, -1);
                         break;
                     case '"':
@@ -545,14 +542,14 @@ function newMap(interpolation, usedForRegExp) {
     const tokens = interpolation.match(INTERPOLATION_TOKEN);
     for (let length = tokens.length, index = 0; index < length;) {
         let search = tokens[index++];
-        search = search[0] === "'" ? search.slice(1, -1) : BasicString(search.slice(1, -1));
+        search = search[0] === '\'' ? search.slice(1, -1) : BasicString(search.slice(1, -1));
         usedForRegExp
             || search
             || throwSyntaxError('Characters to replace can not be empty, which was found at ' + where());
         map.has(search)
             && throwSyntaxError('Duplicate ' + (usedForRegExp ? 'replacer' : 'characters to replace') + ' at ' + where());
         let replacer = tokens[index++];
-        replacer = replacer[0] === "'" ? replacer.slice(1, -1) : BasicString(replacer.slice(1, -1));
+        replacer = replacer[0] === '\'' ? replacer.slice(1, -1) : BasicString(replacer.slice(1, -1));
         map.set(search, replacer);
     }
     return map;
@@ -565,7 +562,9 @@ function ensureConstructor(type) {
         || throwError(where());
 }
 function construct(type, value) {
-    return FUNCTION.has(customConstructors) ? customConstructors(type, value) : customConstructors[type](value);
+    return FUNCTION.has(customConstructors)
+        ? customConstructors(type, value)
+        : customConstructors[type](value);
 }
 
 function parse(toml_source, toml_version, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger = true, extensionOptions = null) {
@@ -649,7 +648,7 @@ function parseKeys(key_key) {
     const keys = key_key.match(KEYS);
     for (let index = keys.length; index--;) {
         const key = keys[index];
-        if (key.startsWith("'")) {
+        if (key.startsWith('\'')) {
             keys[index] = key.slice(1, -1);
         }
         else if (key.startsWith('"')) {
@@ -715,7 +714,7 @@ function assignInline(lastInlineTable, lineRest) {
     const table = prepareInlineTable(lastInlineTable, leadingKeys);
     finalKey in table && throwError('Duplicate property definition at ' + where());
     switch (right[0]) {
-        case "'":
+        case '\'':
             lineRest = assignLiteralString(table, finalKey, right);
             break;
         case '"':
@@ -754,7 +753,7 @@ function assignInline(lastInlineTable, lineRest) {
 }
 function assignLiteralString(table, finalKey, literal) {
     let $;
-    if (literal.charAt(1) !== "'" || literal.charAt(2) !== "'") {
+    if (literal.charAt(1) !== '\'' || literal.charAt(2) !== '\'') {
         $ = LITERAL_STRING.exec(literal) || throwSyntaxError(where());
         table[finalKey] = $[1];
         return $[2];
@@ -945,7 +944,7 @@ function pushInline(array, lineRest) {
     }
     const lastIndex = '' + array.length;
     switch (lineRest[0]) {
-        case "'":
+        case '\'':
             lineRest = assignLiteralString(asStrings(array), lastIndex, lineRest);
             break;
         case '"':

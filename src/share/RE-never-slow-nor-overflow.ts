@@ -7,7 +7,7 @@ const MULTI_LINE_BASIC_STRING :RegExp = /^(?:[^\\"]+|\\[^]|""?(?!"))/;
 export function MULTI_LINE_BASIC_STRING_exec_0 (_ :string) :string {
 	for ( let _0 :string = ''; ; ) {
 		if ( _==='' ) { return _0; }
-		const $ :RegExpExecArray = MULTI_LINE_BASIC_STRING.exec(_);
+		const $ :RegExpExecArray | null = MULTI_LINE_BASIC_STRING.exec(_);
 		if ( $===null ) { return _0; }
 		_0 += $[0];
 		_ = _.slice($[0].length);
@@ -23,7 +23,7 @@ const BASIC_STRING :RegExp = /^(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|
 export function BASIC_STRING_exec (_2 :string) :{ 1 :string, 2 :string } {
 	_2 = _2.slice(1);
 	for ( let _1 :string = ''; ; ) {
-		const $ :RegExpExecArray = BASIC_STRING.exec(_2);
+		const $ :RegExpExecArray | null = BASIC_STRING.exec(_2);
 		if ( $===null ) {
 			_2.startsWith('"')
 			|| iterator.throwSyntaxError(iterator.where());
@@ -56,7 +56,7 @@ export function TABLE_DEFINITION_exec (_ :string) :{ 1 :boolean, 2 :string, 3 :b
 const KEY_VALUE_PAIR :RegExp = /^[ \t]*=[ \t]*(!!([\w-]*)[ \t]+)?([^ \t#][^]*)$/;
 export function KEY_VALUE_PAIR_exec (_ :string) :{ 1 :string, 2 :string, 3 :string, 4 :string } {
 	const _1 :string = getKeys(_);
-	const $ :RegExpExecArray = KEY_VALUE_PAIR.exec(_.slice(_1.length));
+	const $ :RegExpExecArray = <RegExpExecArray>KEY_VALUE_PAIR.exec(_.slice(_1.length));
 	$
 	|| iterator.throwSyntaxError(iterator.where());
 	return { 1: _1, 2: $[1], 3: $[2], 4: $[3] };
@@ -67,7 +67,7 @@ function getKeys (_ :string) :string {
 		if ( _.startsWith('"') ) {
 			_ = _.slice(1);
 			for ( let key :string = '"'; ; ) {
-				const $ :RegExpExecArray = BASIC_STRING.exec(_);
+				const $ :RegExpExecArray | null = BASIC_STRING.exec(_);
 				if ( $===null ) {
 					_.startsWith('"')
 					|| iterator.throwSyntaxError(iterator.where());
@@ -84,7 +84,7 @@ function getKeys (_ :string) :string {
 			_ = _.slice(key.length);
 			keys += key;
 		}
-		const $ :RegExpExecArray = DOT_KEY.exec(_);
+		const $ :RegExpExecArray | null = DOT_KEY.exec(_);
 		if ( $===null ) { return keys; }
 		_ = _.slice($[0].length);
 		keys += $[0];

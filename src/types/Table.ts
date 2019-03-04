@@ -2,7 +2,8 @@ import { orderify } from '@ltd/j-orderify';
 import { create, WeakSet } from '../global';
 
 export function Table () :void { }
-export const OrderedTable = function Table () { return orderify(this); };
+export const OrderedTable = function Table (this :object) :object { return orderify(this); };
+export type Table = typeof Table | typeof OrderedTable;
 
 OrderedTable.prototype = Table.prototype = create(null);
 

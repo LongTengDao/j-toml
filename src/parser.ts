@@ -8,7 +8,7 @@ import * as options from './share/options';
 import * as RE from './share/RE';
 import { assignInterpolationString, ensureConstructor, construct } from './parser-extension';
 
-export default function parse (toml_source :string | Uint8Array, toml_version :0.5, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines :string, useBigInt_forInteger :boolean | number = true, extensionOptions = null) :object {
+export default function parse (toml_source :string | Buffer, toml_version :0.5, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines :string, useBigInt_forInteger? :boolean | number = true, extensionOptions? = null) :object {
 	if ( isBuffer(toml_source) ) { toml_source = toml_source.toString(); }
 	if ( typeof toml_source!=='string' ) { throw new TypeError('TOML.parse(source)'); }
 	if ( toml_version!==0.5 ) { throw new Error('TOML.parse(,version)'); }
@@ -71,7 +71,7 @@ function parseKeys (key_key :string) :string[] {
 	const keys :RegExpMatchArray = key_key.match(RE.KEYS);
 	for ( let index :number = keys.length; index--; ) {
 		const key :string = keys[index];
-		if ( key.startsWith("'") ) { keys[index] = key.slice(1, -1); }
+		if ( key.startsWith('\'') ) { keys[index] = key.slice(1, -1); }
 		else if ( key.startsWith('"') ) { keys[index] = BasicString(key.slice(1, -1)); }
 	}
 	return keys;
@@ -124,13 +124,13 @@ function prepareInlineTable (table :object, keys :string[]) :object {
 
 function assignInline (lastInlineTable :object, lineRest :string) :string {
 	const { 1: left, 2: custom, 3: type, 4: right } = RE.KEY_VALUE_PAIR_exec(lineRest);
-	custom && ensureConstructor(type);
+	custom && ensureConstructor(<string>type);
 	const leadingKeys :string[] = parseKeys(left);
 	const finalKey :string = leadingKeys.pop();
 	const table :object = prepareInlineTable(lastInlineTable, leadingKeys);
 	finalKey in table && iterator.throwError('Duplicate property definition at '+iterator.where());
 	switch ( right[0] ) {
-		case "'":
+		case '\'':
 			lineRest = assignLiteralString(table, finalKey, right);
 			break;
 		case '"':
@@ -168,7 +168,7 @@ function assignInline (lastInlineTable :object, lineRest :string) :string {
 
 function assignLiteralString (table :object, finalKey :string, literal :string) :string {
 	let $ :RegExpExecArray;
-	if ( literal.charAt(1)!=="'" || literal.charAt(2)!=="'" ) {
+	if ( literal.charAt(1)!=='\'' || literal.charAt(2)!=='\'' ) {
 		$ = RE.LITERAL_STRING.exec(literal) || iterator.throwSyntaxError(iterator.where());
 		table[finalKey] = $[1];
 		return $[2];
@@ -329,7 +329,7 @@ function pushInline (array :any[], lineRest :string) :string {
 	}
 	const lastIndex :string = ''+array.length;
 	switch ( lineRest[0] ) {
-		case "'":
+		case '\'':
 			lineRest = assignLiteralString(options.asStrings(array), lastIndex, lineRest);
 			break;
 		case '"':

@@ -18,7 +18,7 @@ export const { asInlineArrayOfNulls, asInlineArrayOfStrings, asInlineArrayOfTabl
 
 export let useWhatToJoinMultiLineString :string;
 export let IntegerDepends :Function, IntegerMin :number, IntegerMax :number;
-export let TableDepends :Function;
+export let TableDepends :Table;
 export let open :boolean;
 export let allowLonger :boolean;
 export let keepComment :boolean;
@@ -27,10 +27,10 @@ export let enableNil :boolean;
 export let allowInlineTableMultiLineAndTrailingCommaEvenNoComma :boolean;
 export let enableInterpolationString :boolean;
 export let asNulls :Function, asStrings :Function, asTables :Function, asArrays :Function, asBooleans :Function, asFloats :Function, asDatetimes :Function, asIntegers :Function;
-export let customConstructors :Function | object;
+export let customConstructors :Function | object | null;
 
 export function use (useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines :string, useBigInt_forInteger :boolean | number, extensionOptions) :void {
-	if ( typeof useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines!=='string' ) { throw new TypeError('TOML.parse(,,multiLineJoiner)'); }
+	if ( typeof <unknown>useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines!=='string' ) { throw new TypeError('TOML.parse(,,multiLineJoiner)'); }
 	if ( useBigInt_forInteger===true ) { IntegerDepends = BigIntInteger; }
 	else if ( useBigInt_forInteger===false ) { IntegerDepends = NumberInteger; }
 	else {
@@ -93,7 +93,7 @@ export function use (useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines
 				}
 				else {
 					const origin = customConstructors;
-					customConstructors = create(null);
+					customConstructors = <object>create(null);
 					for ( const type of getOwnPropertyNames(origin) ) {
 						const customConstructor = origin[type];
 						if ( typeof customConstructor!=='function' ) {

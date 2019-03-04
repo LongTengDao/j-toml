@@ -12,5 +12,5 @@ export const Float = (literal :string) :number => {
 	//if ( literal==='inf' || literal==='+inf' ) { return Infinity; }
 	//if ( literal==='-inf' ) { return -Infinity; }
 	//if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) { return NaN; }
-	iterator.throwSyntaxError('Invalid Float '+literal+' at '+iterator.where());
+	throw iterator.throwSyntaxError('Invalid Float '+literal+' at '+iterator.where());
 };
