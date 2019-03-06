@@ -1,4 +1,5 @@
-import { Symbol, Date } from '../global';
+import Symbol from '.Symbol';
+import Date from '.Date';
 import * as RE from '../share/RE';
 import * as iterator from '../share/iterator';
 

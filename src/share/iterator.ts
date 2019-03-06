@@ -1,4 +1,7 @@
-import { SyntaxError, RangeError, TypeError, Error } from '../global';
+import SyntaxError from '.SyntaxError';
+import RangeError from '.RangeError';
+import TypeError from '.TypeError';
+import Error from '.Error';
 
 const NONE :string[] = [];
 let sourceLines :string[] = NONE;

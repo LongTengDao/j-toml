@@ -1,4 +1,14 @@
-import { WeakSet, create, Error, getOwnPropertyNames, getPrototypeOf, stringify, TypeError, isSafeInteger, RangeError, Proxy, WeakMap } from '../global';
+import WeakSet from '.WeakSet';
+import create from '.Object.create';
+import Error from '.Error';
+import getOwnPropertyNames from '.Object.getOwnPropertyNames';
+import getPrototypeOf from '.Reflect.getPrototypeOf';
+import stringify from '.JSON.stringify';
+import TypeError from '.TypeError';
+import isSafeInteger from '.Number.isSafeInteger';
+import RangeError from '.RangeError';
+import Proxy from '.Proxy';
+import WeakMap from '.WeakMap';
 import { Table, OrderedTable } from '../types/Table';
 import { BigIntInteger, NumberInteger, DependInteger } from '../types/Integer';
 import * as iterator from './iterator';

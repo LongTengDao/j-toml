@@ -1,7 +1,8 @@
 import * as RE from '../share/RE';
 import * as iterator from '../share/iterator';
 import * as options from '../share/options';
-import { isSafeInteger, BigInt } from '../global';
+import isSafeInteger from '.Number.isSafeInteger';
+import BigInt from '.BigInt';
 
 export const NumberInteger = (literal :string) :number => {
 	if ( literal==='0' || literal==='+0' || literal==='-0' ) { return 0; }

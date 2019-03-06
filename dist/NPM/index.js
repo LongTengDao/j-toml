@@ -1,8 +1,12 @@
 ﻿'use strict';
 
-const version = '0.5.55';
+const version = '0.5.56';
 
-const { WeakSet, WeakMap: WeakMap$1, SyntaxError, RangeError, TypeError, Error: Error$1, BigInt, Date, parseInt, Infinity, NaN, Map, RegExp, Proxy: Proxy$1, Symbol, Symbol: { for: Symbol_for }, Array: { isArray }, String: { fromCodePoint }, Number: { isSafeInteger }, Object: { create, getOwnPropertyNames }, Reflect: { getPrototypeOf }, JSON: { stringify }, Buffer: { isBuffer }, } = global;
+const isArray = Array.isArray;
+
+const Symbol_for = Symbol.for;
+
+const isBuffer = Buffer.isBuffer;
 
 const NONE = [];
 let sourceLines = NONE;
@@ -26,7 +30,7 @@ const where = () => 'line ' + (lineIndex + 1) + ': ' + sourceLines[lineIndex];
 const throwSyntaxError = (message) => throws(new SyntaxError(message));
 const throwRangeError = (message) => throws(new RangeError(message));
 const throwTypeError = (message) => throws(new TypeError(message));
-const throwError = (message) => throws(new Error$1(message));
+const throwError = (message) => throws(new Error(message));
 function throws(error) {
     if (sourceLines !== NONE) {
         error.lineIndex = lineIndex;
@@ -40,15 +44,19 @@ function throws(error) {
  * 模块名称：@ltd/j-orderify
  * 模块功能：返回一个能保证给定对象的属性按此后添加顺序排列的 proxy，即使键名是 symbol，或整数 string。
    　　　　　Return a proxy for given object, which can guarantee own keys are in setting order, even if the key name is symbol or int string.
- * 模块版本：2.0.0
+ * 模块版本：2.3.1
  * 许可条款：LGPL-3.0
  * 所属作者：龙腾道 <LongTengDao@LongTengDao.com> (www.LongTengDao.com)
  * 问题反馈：https://GitHub.com/LongTengDao/j-orderify/issues
  * 项目主页：https://GitHub.com/LongTengDao/j-orderify/
  */
 
-// @ts-ignore
-const { defineProperty, deleteProperty, ownKeys } = Reflect;
+const defineProperty = Reflect.defineProperty;
+
+const deleteProperty = Reflect.deleteProperty;
+
+const ownKeys = Reflect.ownKeys;
+
 const ownKeysKeepers = new WeakMap;
 const handlers = Object.create(null, {
     defineProperty: {
@@ -81,6 +89,8 @@ const orderify = (object) => {
 };
 
 /*¡ @ltd/j-orderify */
+
+const create = Object.create;
 
 function Table() { }
 const OrderedTable = function Table() { return orderify(this); };
@@ -238,6 +248,7 @@ class Datetime extends Date {
     }
 }
 
+// @ts-ignore
 const Float = (literal) => {
     if (FLOAT.test(literal) && FLOAT_NOT_INTEGER.test(literal)) {
         return +literal.replace(UNDERSCORES, '');
@@ -248,8 +259,18 @@ const Float = (literal) => {
     //if ( literal==='inf' || literal==='+inf' ) { return Infinity; }
     //if ( literal==='-inf' ) { return -Infinity; }
     //if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) { return NaN; }
-    throw throwSyntaxError('Invalid Float ' + literal + ' at ' + where());
+    throwSyntaxError('Invalid Float ' + literal + ' at ' + where());
 };
+
+const fromCodePoint = String.fromCodePoint;
+
+const getOwnPropertyNames = Object.getOwnPropertyNames;
+
+const getPrototypeOf = Reflect.getPrototypeOf;
+
+const stringify = JSON.stringify;
+
+const isSafeInteger = Number.isSafeInteger;
 
 const NumberInteger = (literal) => {
     if (literal === '0' || literal === '+0' || literal === '-0') {
@@ -281,7 +302,7 @@ const DependInteger = (literal) => {
 
 const FUNCTION = new WeakSet;
 const unType = (array) => array;
-const { asInlineArrayOfNulls, asInlineArrayOfStrings, asInlineArrayOfTables, asInlineArrayOfArrays, asInlineArrayOfBooleans, asInlineArrayOfFloats, asInlineArrayOfDatetimes, asInlineArrayOfIntegers } = new Proxy$1(new WeakMap$1, {
+const { asInlineArrayOfNulls, asInlineArrayOfStrings, asInlineArrayOfTables, asInlineArrayOfArrays, asInlineArrayOfBooleans, asInlineArrayOfFloats, asInlineArrayOfDatetimes, asInlineArrayOfIntegers } = new Proxy(new WeakMap, {
     get: (arrayTypes) => function typify(array) {
         if (arrayTypes.has(array)) {
             arrayTypes.get(array) === typify
@@ -355,17 +376,17 @@ function use(useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBig
             if (typeof customConstructors === 'function') {
                 if (typify) {
                     customConstructors = null;
-                    throw new Error$1('TOML.parse(,,,,{ mix:false, new(){} })');
+                    throw new Error('TOML.parse(,,,,{ mix:false, new(){} })');
                 }
                 if (customConstructors.length !== 2) {
-                    throw new Error$1('TOML.parse(,,,,xOptions.new.length)');
+                    throw new Error('TOML.parse(,,,,xOptions.new.length)');
                 }
                 FUNCTION.add(customConstructors);
             }
             else if (typeof customConstructors === 'object') {
                 if (typify) {
                     customConstructors = null;
-                    throw new Error$1('TOML.parse(,,,,{ mix:false, new:{} })');
+                    throw new Error('TOML.parse(,,,,{ mix:false, new:{} })');
                 }
                 if (getPrototypeOf(customConstructors) === null) {
                     for (const type of getOwnPropertyNames(customConstructors)) {
@@ -375,7 +396,7 @@ function use(useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBig
                         }
                         if (customConstructors[type].length) {
                             customConstructors = null;
-                            throw new Error$1('TOML.parse(,,,,xOptions.new[' + stringify(type) + '].length)');
+                            throw new Error('TOML.parse(,,,,xOptions.new[' + stringify(type) + '].length)');
                         }
                     }
                 }
@@ -390,7 +411,7 @@ function use(useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBig
                         }
                         if (customConstructors[type].length) {
                             customConstructors = null;
-                            throw new Error$1('TOML.parse(,,,,xOptions.new[' + stringify(type) + '].length)');
+                            throw new Error('TOML.parse(,,,,xOptions.new[' + stringify(type) + '].length)');
                         }
                         customConstructors[type] = customConstructor;
                     }
@@ -575,7 +596,7 @@ function parse(toml_source, toml_version, useWhatToJoinMultiLineString_notUsingF
         throw new TypeError('TOML.parse(source)');
     }
     if (toml_version !== 0.5) {
-        throw new Error$1('TOML.parse(,version)');
+        throw new Error('TOML.parse(,version)');
     }
     use(useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger, extensionOptions);
     const rootTable = new TableDepends;
@@ -596,11 +617,11 @@ function parse(toml_source, toml_version, useWhatToJoinMultiLineString_notUsingF
                 lastSectionTable = appendTable(rootTable, keys, $_asArrayItem$$, hash);
             }
             else {
-                const rest$$1 = assignInline(lastSectionTable, line);
-                if (rest$$1 === '') ;
-                else if (rest$$1.startsWith('#')) {
+                const rest = assignInline(lastSectionTable, line);
+                if (rest === '') ;
+                else if (rest.startsWith('#')) {
                     if (keepComment) {
-                        lastSectionTable[Symbol('#')] = rest$$1.slice(1);
+                        lastSectionTable[Symbol('#')] = rest.slice(1);
                     }
                 }
                 else {
@@ -1001,7 +1022,6 @@ function pushInline(array, lineRest) {
     return lineRest;
 }
 
-// @ts-ignore
 const TOML = {
     parse,
     version,

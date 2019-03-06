@@ -1,5 +1,6 @@
 import { orderify } from '@ltd/j-orderify';
-import { create, WeakSet } from '../global';
+import create from '.Object.create';
+import WeakSet from '.WeakSet';
 
 export function Table () :void { }
 export const OrderedTable = function Table (this :object) :object { return orderify(this); };

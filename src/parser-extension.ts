@@ -1,4 +1,5 @@
-import { Map, RegExp } from './global';
+import Map from '.Map';
+import RegExp from '.RegExp';
 import * as iterator from './share/iterator';
 import * as options from './share/options';
 import { BasicString } from './types/String';

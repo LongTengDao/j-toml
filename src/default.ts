@@ -1,4 +1,3 @@
-// @ts-ignore
 import version from './version?text';
 import parse from './parser';
 

@@ -1,7 +1,8 @@
 import * as RE from '../share/RE';
-//import { Infinity, NaN } from '../global';
+//import Infinity, NaN from '.Infinity'+'.NaN';
 import * as iterator from '../share/iterator';
 
+// @ts-ignore
 export const Float = (literal :string) :number => {
 	if ( RE.FLOAT.test(literal) && RE.FLOAT_NOT_INTEGER.test(literal) ) {
 		return +literal.replace(RE.UNDERSCORES, '');
@@ -12,5 +13,5 @@ export const Float = (literal :string) :number => {
 	//if ( literal==='inf' || literal==='+inf' ) { return Infinity; }
 	//if ( literal==='-inf' ) { return -Infinity; }
 	//if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) { return NaN; }
-	throw iterator.throwSyntaxError('Invalid Float '+literal+' at '+iterator.where());
+	iterator.throwSyntaxError('Invalid Float '+literal+' at '+iterator.where());
 };

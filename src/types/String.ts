@@ -1,4 +1,5 @@
-import { parseInt, fromCodePoint } from '../global';
+import parseInt from '.parseInt';
+import fromCodePoint from '.String.fromCodePoint';
 import * as iterator from '../share/iterator';
 import * as options from '../share/options';
 import * as RE from '../share/RE';

@@ -18,9 +18,8 @@ require('../test/test.js')(async ({ build, get, map, ful }) => {
 	});
 	
 	await map(
-		'docs/README.md',
-		string => string.replace(/(\n```+)[^`\r\n]+/g, '$1').replace(/(\n\d\. {2})#+ +([^\r\n]*)/g, '$1**$2**'),
-		'dist/NPM/README.md',
+		['docs/README.md', string => string.replace(/(\n```+)[^`\r\n]+/g, '$1').replace(/(\n\d\. {2})#+ +([^\r\n]*)/g, '$1**$2**'), 'dist/NPM/README.md'],
+		['src/d.ts', 'dist/TSD/j-toml.d.ts'],
 	);
 	
 });

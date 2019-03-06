@@ -1,4 +1,11 @@
-import { Error, TypeError, Infinity, NaN, isArray, Symbol_for, isBuffer, Symbol } from './global';
+import Error from '.Error';
+import TypeError from '.TypeError';
+import Infinity from '.Infinity';
+import NaN from '.NaN';
+import isArray from '.Array.isArray';
+import Symbol_for from '.Symbol.for';
+import isBuffer from '.Buffer.isBuffer';
+import Symbol from '.Symbol';
 import * as iterator from './share/iterator';
 import { isTable, closeTables, openTables } from './types/Table';
 import { Datetime } from './types/Datetime';
