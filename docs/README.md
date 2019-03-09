@@ -1,5 +1,4 @@
 
-__________________________
 **[English]** | [简体中文]
 __________________
 [@ltd/j-toml v0.5]<a id="user-content-english">&nbsp;</a>
@@ -213,7 +212,7 @@ function parse (
 
 ______________________
 [English] | [简体中文]
-______________________
+
 [English]:          #user-content-english
 [简体中文]:         #user-content-简体中文
 [@ltd/j-toml v0.5]: https://www.npmjs.com/package/@ltd/j-toml
