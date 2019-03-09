@@ -1,10 +1,40 @@
 declare module '@ltd/j-toml' {
+	
 	type Table = object;
+	
 	export function parse (
-		sourceContent   :string | Buffer,
-		version         :0.5,
+		sourceContent :string | Buffer,
+		specificationVersion :0.5,
 		multiLineJoiner :string,
-		useBigInt?      :true | false | number,
-		xOptions?       :object
+		useBigInt? :true | false | number,
+		xOptions? :
+			{
+				order? :boolean,
+				open? :boolean,
+				longer? :boolean,
+				hash? :boolean,
+				null? :boolean,
+				nil? :boolean,
+				multi? :boolean,
+				ins? :boolean,
+				mix? :boolean,
+			}
+			|
+			{
+				order? :boolean,
+				open? :boolean,
+				longer? :boolean,
+				hash? :boolean,
+				null? :boolean,
+				nil? :boolean,
+				multi? :boolean,
+				ins? :boolean,
+				mix :true,
+				new :
+					{ [type :string] :(value :any) => any }
+					|
+					( (type :string, value :any) => any )
+			}
 	) :Table;
+	
 }

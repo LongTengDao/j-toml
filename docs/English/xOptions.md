@@ -147,6 +147,8 @@ The original parsed result of interpolation string always use `\n` as newline, n
 key = !!type 'value'
 ```
 
+Note: This option requires `xOptions.mix` enabled at the same time, because the custom types could not be properly classified.
+
 `xOptions.hash`
 ---------------
 

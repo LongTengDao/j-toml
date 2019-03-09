@@ -15,8 +15,17 @@ import * as iterator from './iterator';
 
 export const FUNCTION = new WeakSet;
 export const unType = (array :any[]) :any[] => array;
-export const { asInlineArrayOfNulls, asInlineArrayOfStrings, asInlineArrayOfTables, asInlineArrayOfArrays, asInlineArrayOfBooleans, asInlineArrayOfFloats, asInlineArrayOfDatetimes, asInlineArrayOfIntegers } = new Proxy(new WeakMap, {
-	get: (arrayTypes) :Function => function typify (array :any[]) :any[] {
+export const {
+	asInlineArrayOfNulls,
+	asInlineArrayOfStrings,
+	asInlineArrayOfTables,
+	asInlineArrayOfArrays,
+	asInlineArrayOfBooleans,
+	asInlineArrayOfFloats,
+	asInlineArrayOfDatetimes,
+	asInlineArrayOfIntegers,
+} = <{ [each :string] :(array :any[]) => any[] }><object>new Proxy(new WeakMap, {
+	get: (arrayTypes) => function typify (array :any[]) :any[] {
 		if ( arrayTypes.has(array) ) {
 			arrayTypes.get(array)===typify
 			|| iterator.throwTypeError('Types in array must be same. Check '+iterator.where());
@@ -39,7 +48,8 @@ export let enableInterpolationString :boolean;
 export let asNulls :Function, asStrings :Function, asTables :Function, asArrays :Function, asBooleans :Function, asFloats :Function, asDatetimes :Function, asIntegers :Function;
 export let customConstructors :Function | object | null;
 
-export function use (useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines :string, useBigInt_forInteger :boolean | number, extensionOptions) :void {
+export function use (specificationVersion :0.5, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines :string, useBigInt_forInteger :boolean | number, extensionOptions) :void {
+	if ( specificationVersion!==0.5 ) { throw new Error('TOML.parse(,specificationVersion)'); }
 	if ( typeof <unknown>useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines!=='string' ) { throw new TypeError('TOML.parse(,,multiLineJoiner)'); }
 	if ( useBigInt_forInteger===true ) { IntegerDepends = BigIntInteger; }
 	else if ( useBigInt_forInteger===false ) { IntegerDepends = NumberInteger; }

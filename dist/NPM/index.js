@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.57';
+const version = '0.5.58';
 
 const isArray = Array.isArray;
 
@@ -96,19 +96,6 @@ function Table() { }
 const OrderedTable = function Table() { return orderify(this); };
 OrderedTable.prototype = Table.prototype = create(null);
 const isTable = (value) => value instanceof Table;
-const closeTables = new WeakSet;
-const openTables = new WeakSet;
-
-/* types */
-const ESCAPED_IN_SINGLE_LINE = /\\(?:([\\"])|([btnfr])|u(.{4})|U(.{8}))/g;
-const UNDERSCORES = /_/g;
-const XOB_INTEGER = /^0x[0-9A-Fa-f]+(?:_[0-9A-Fa-f]+)*|o[0-7]+(?:_[0-7]+)*|b[01]+(?:_[01]+)*$/;
-const INTEGER = /^[-+]?[1-9]\d*(?:_\d+)*$/;
-const FLOAT = /^[-+]?(?:0|[1-9]\d*(?:_\d+)*)(?:\.\d+(?:_\d+)*)?(?:[eE][-+]?\d+(?:_\d+)*)?$/;
-const FLOAT_NOT_INTEGER = /[.eE]/;
-/* parser */
-const BOM = /^\uFEFF/;
-const EOL = /\r?\n/;
 
 /* types */
 const DATETIME = /^(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?|(\d\d\d\d-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|02-(?:0[1-9]|1\d|2[0-9])))(?:([T ])((?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?)(Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)?)?)$/;
@@ -220,6 +207,17 @@ function getKeys(_) {
     }
 }
 
+/* types */
+const ESCAPED_IN_SINGLE_LINE = /\\(?:([\\"])|([btnfr])|u(.{4})|U(.{8}))/g;
+const UNDERSCORES = /_/g;
+const XOB_INTEGER = /^0x[0-9A-Fa-f]+(?:_[0-9A-Fa-f]+)*|o[0-7]+(?:_[0-7]+)*|b[01]+(?:_[01]+)*$/;
+const INTEGER = /^[-+]?[1-9]\d*(?:_\d+)*$/;
+const FLOAT = /^[-+]?(?:0|[1-9]\d*(?:_\d+)*)(?:\.\d+(?:_\d+)*)?(?:[eE][-+]?\d+(?:_\d+)*)?$/;
+const FLOAT_NOT_INTEGER = /[.eE]/;
+/* parser */
+const BOM = /^\uFEFF/;
+const EOL = /\r?\n/;
+
 const literal_cache = Symbol('literal_cache');
 const value_cache = Symbol('value_cache');
 class Datetime extends Date {
@@ -302,7 +300,7 @@ const DependInteger = (literal) => {
 
 const FUNCTION = new WeakSet;
 const unType = (array) => array;
-const { asInlineArrayOfNulls, asInlineArrayOfStrings, asInlineArrayOfTables, asInlineArrayOfArrays, asInlineArrayOfBooleans, asInlineArrayOfFloats, asInlineArrayOfDatetimes, asInlineArrayOfIntegers } = new Proxy(new WeakMap, {
+const { asInlineArrayOfNulls, asInlineArrayOfStrings, asInlineArrayOfTables, asInlineArrayOfArrays, asInlineArrayOfBooleans, asInlineArrayOfFloats, asInlineArrayOfDatetimes, asInlineArrayOfIntegers, } = new Proxy(new WeakMap, {
     get: (arrayTypes) => function typify(array) {
         if (arrayTypes.has(array)) {
             arrayTypes.get(array) === typify
@@ -326,7 +324,10 @@ let allowInlineTableMultiLineAndTrailingCommaEvenNoComma;
 let enableInterpolationString;
 let asNulls, asStrings, asTables, asArrays, asBooleans, asFloats, asDatetimes, asIntegers;
 let customConstructors;
-function use(useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger, extensionOptions) {
+function use(specificationVersion, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger, extensionOptions) {
+    if (specificationVersion !== 0.5) {
+        throw new Error('TOML.parse(,specificationVersion)');
+    }
     if (typeof useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines !== 'string') {
         throw new TypeError('TOML.parse(,,multiLineJoiner)');
     }
@@ -588,20 +589,19 @@ function construct(type, value) {
         : customConstructors[type](value);
 }
 
-function parse(toml_source, toml_version, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger = true, extensionOptions = null) {
-    if (isBuffer(toml_source)) {
-        toml_source = toml_source.toString();
+const sealedInline = new WeakSet;
+const openTables = new WeakSet;
+function parse(sourceContent, specificationVersion, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger = true, extensionOptions = null) {
+    if (typeof sourceContent !== 'string') {
+        if (!isBuffer(sourceContent)) {
+            throw new TypeError('TOML.parse(sourceContent)');
+        }
+        sourceContent = sourceContent.toString();
     }
-    if (typeof toml_source !== 'string') {
-        throw new TypeError('TOML.parse(source)');
-    }
-    if (toml_version !== 0.5) {
-        throw new Error('TOML.parse(,version)');
-    }
-    use(useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger, extensionOptions);
+    use(specificationVersion, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger, extensionOptions);
     const rootTable = new TableDepends;
     try {
-        from(toml_source.replace(BOM, '').split(EOL));
+        from(sourceContent.replace(BOM, '').split(EOL));
         let lastSectionTable = rootTable;
         while (rest()) {
             const line = next().replace(PRE_WHITESPACE, '');
@@ -644,7 +644,7 @@ function appendTable(table, key_key, asArrayItem, hash) {
     if (asArrayItem) {
         let arrayOfTables;
         if (finalKey in table) {
-            closeTables.has(arrayOfTables = table[finalKey]) && throwError('Trying to push Table to non-ArrayOfTables value at ' + where());
+            sealedInline.has(arrayOfTables = table[finalKey]) && throwError('Trying to push Table to non-ArrayOfTables value at ' + where());
         }
         else {
             arrayOfTables = table[finalKey] = [];
@@ -686,10 +686,10 @@ function prepareTable(table, keys) {
         if (key in table) {
             table = table[key];
             if (isTable(table)) {
-                closeTables.has(table) && throwError('Trying to define table through static Inline Object at ' + where());
+                sealedInline.has(table) && throwError('Trying to define table through static Inline Object at ' + where());
             }
             else if (isArray(table)) {
-                closeTables.has(table) && throwError('Trying to append value to static Inline Array at ' + where());
+                sealedInline.has(table) && throwError('Trying to append value to static Inline Array at ' + where());
                 // @ts-ignore
                 table = table[table.length - 1];
             }
@@ -715,7 +715,7 @@ function prepareInlineTable(table, keys) {
         if (key in table) {
             table = table[key];
             isTable(table) || throwError('Trying to assign property through non-Table value at ' + where());
-            closeTables.has(table) && throwError('Trying to assign property through static Inline Object at ' + where());
+            sealedInline.has(table) && throwError('Trying to assign property through static Inline Object at ' + where());
         }
         else {
             table = table[key] = new TableDepends;
@@ -835,7 +835,7 @@ function assignBasicString(table, finalKey, literal) {
 }
 function assignInlineTable(table, finalKey, lineRest) {
     const inlineTable = table[finalKey] = new TableDepends;
-    closeTables.add(inlineTable);
+    sealedInline.add(inlineTable);
     lineRest = lineRest.replace(SYM_WHITESPACE, '');
     if (allowInlineTableMultiLineAndTrailingCommaEvenNoComma) {
         const start = mark();
@@ -893,7 +893,7 @@ function assignInlineTable(table, finalKey, lineRest) {
 }
 function assignInlineArray(table, finalKey, lineRest) {
     const inlineArray = table[finalKey] = [];
-    closeTables.add(inlineArray);
+    sealedInline.add(inlineArray);
     const start = mark();
     lineRest = lineRest.replace(SYM_WHITESPACE, '');
     for (;;) {

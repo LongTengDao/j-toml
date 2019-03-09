@@ -1,4 +1,3 @@
-import Error from '.Error';
 import TypeError from '.TypeError';
 import Infinity from '.Infinity';
 import NaN from '.NaN';
@@ -6,23 +5,34 @@ import isArray from '.Array.isArray';
 import Symbol_for from '.Symbol.for';
 import isBuffer from '.Buffer.isBuffer';
 import Symbol from '.Symbol';
+import WeakSet from '.WeakSet';
 import * as iterator from './share/iterator';
-import { isTable, closeTables, openTables } from './types/Table';
+import { isTable } from './types/Table';
 import { Datetime } from './types/Datetime';
 import { Float } from './types/Float';
 import { BasicString, MultiLineBasicString } from './types/String';
 import * as options from './share/options';
 import * as RE from './share/RE';
-import { assignInterpolationString, ensureConstructor, construct } from './parser-extension';
+import { assignInterpolationString, ensureConstructor, construct } from './parse+';
 
-export default function parse (toml_source :string | Buffer, toml_version :0.5, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines :string, useBigInt_forInteger? :boolean | number = true, extensionOptions? = null) :object {
-	if ( isBuffer(toml_source) ) { toml_source = toml_source.toString(); }
-	if ( typeof toml_source!=='string' ) { throw new TypeError('TOML.parse(source)'); }
-	if ( toml_version!==0.5 ) { throw new Error('TOML.parse(,version)'); }
-	options.use(useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger, extensionOptions);
+const sealedInline = new WeakSet;
+const openTables = new WeakSet;
+
+export default function parse (
+	sourceContent :string | Buffer,
+	specificationVersion :0.5,
+	useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines :string,
+	useBigInt_forInteger? :boolean | number = true,
+	extensionOptions? = null
+) :object {
+	if ( typeof sourceContent!=='string' ) {
+		if ( !isBuffer(sourceContent) ) { throw new TypeError('TOML.parse(sourceContent)'); }
+		sourceContent = sourceContent.toString();
+	}
+	options.use(specificationVersion, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger, extensionOptions);
 	const rootTable :object = new options.TableDepends;
 	try {
-		iterator.from(toml_source.replace(RE.BOM, '').split(RE.EOL));
+		iterator.from(sourceContent.replace(RE.BOM, '').split(RE.EOL));
 		let lastSectionTable :object = rootTable;
 		while ( iterator.rest() ) {
 			const line :string = iterator.next().replace(RE.PRE_WHITESPACE, '');
@@ -59,7 +69,7 @@ function appendTable (table :object, key_key :string, asArrayItem :boolean, hash
 	let lastTable :object;
 	if ( asArrayItem ) {
 		let arrayOfTables :object[];
-		if ( finalKey in table ) { closeTables.has(arrayOfTables = table[finalKey]) && iterator.throwError('Trying to push Table to non-ArrayOfTables value at '+iterator.where()); }
+		if ( finalKey in table ) { sealedInline.has(arrayOfTables = table[finalKey]) && iterator.throwError('Trying to push Table to non-ArrayOfTables value at '+iterator.where()); }
 		else { arrayOfTables = table[finalKey] = []; }
 		arrayOfTables.push(lastTable = new options.TableDepends);
 	}
@@ -92,10 +102,10 @@ function prepareTable (table :object, keys :string[]) :object {
 		if ( key in table ) {
 			table = table[key];
 			if ( isTable(table) ) {
-				closeTables.has(table) && iterator.throwError('Trying to define table through static Inline Object at '+iterator.where());
+				sealedInline.has(table) && iterator.throwError('Trying to define table through static Inline Object at '+iterator.where());
 			}
 			else if ( isArray(table) ) {
-				closeTables.has(table) && iterator.throwError('Trying to append value to static Inline Array at '+iterator.where());
+				sealedInline.has(table) && iterator.throwError('Trying to append value to static Inline Array at '+iterator.where());
 				// @ts-ignore
 				table = table[table.length-1];
 			}
@@ -118,7 +128,7 @@ function prepareInlineTable (table :object, keys :string[]) :object {
 		if ( key in table ) {
 			table = table[key];
 			isTable(table) || iterator.throwError('Trying to assign property through non-Table value at '+iterator.where());
-			closeTables.has(table) && iterator.throwError('Trying to assign property through static Inline Object at '+iterator.where());
+			sealedInline.has(table) && iterator.throwError('Trying to assign property through static Inline Object at '+iterator.where());
 		}
 		else {
 			table = table[key] = new options.TableDepends;
@@ -238,7 +248,7 @@ function assignBasicString (table :object, finalKey :string, literal :string) :s
 
 function assignInlineTable (table :object, finalKey :string, lineRest :string) :string {
 	const inlineTable :object = table[finalKey] = new options.TableDepends;
-	closeTables.add(inlineTable);
+	sealedInline.add(inlineTable);
 	lineRest = lineRest.replace(RE.SYM_WHITESPACE, '');
 	if ( options.allowInlineTableMultiLineAndTrailingCommaEvenNoComma ) {
 		const start :number = iterator.mark();
@@ -281,7 +291,7 @@ function assignInlineTable (table :object, finalKey :string, lineRest :string) :
 
 function assignInlineArray (table :object, finalKey :string, lineRest :string) :string {
 	const inlineArray :any[] = table[finalKey] = [];
-	closeTables.add(inlineArray);
+	sealedInline.add(inlineArray);
 	const start :number = iterator.mark();
 	lineRest = lineRest.replace(RE.SYM_WHITESPACE, '');
 	for ( ; ; ) {
