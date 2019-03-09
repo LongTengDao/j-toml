@@ -1,6 +1,6 @@
 
-_________________________________________________________________________
-[**English**](#user-content-english) | [简体中文](#user-content-简体中文)
+________________________________________________________________________________
+[**English**](#user-content-english) | [<u>简体中文</u>](#user-content-简体中文)
 _________________________________________________________
 [@ltd/j-toml v0.5]<a id="user-content-english">&nbsp;</a>
 ==================
@@ -105,8 +105,8 @@ Return the root table (tables parsed by this implementation are objects without 
 If the arguments not meet the requirement, there will be an error; if there is any error with the source, the error object will has two number properties `lineIndex` and `lineNumber` to help locating that.  
 Only one kind of case will cause the recursion parser stack overflow: `k=[{ k=[{ k=[{ ...thousands of layers... }] }] }]`. If there is an issue manifesting the necessity, I will rewrite using loop.
 
-_________________________________________________________________________
-[English](#user-content-english) | [**简体中文**](#user-content-简体中文)
+________________________________________________________________________________
+[<u>English</u>](#user-content-english) | [**简体中文**](#user-content-简体中文)
 __________________________________________________________
 [@ltd/j-toml v0.5]<a id="user-content-简体中文">&nbsp;</a>
 ==================
