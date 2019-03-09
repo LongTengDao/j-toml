@@ -1,6 +1,6 @@
 
 **[English]** | [简体中文]
-__________________
+__________________________
 [@ltd/j-toml v0.5]<a id="user-content-english">&nbsp;</a>
 ==================
 
@@ -15,7 +15,7 @@ which is the best config format he had ever seen.
 npm install @ltd/j-toml
 ```
 
-```js
+```javascript
 const TOML = require('@ltd/j-toml');
 
 const sourceContent  = `
@@ -121,7 +121,7 @@ __________________
 npm install @ltd/j-toml
 ```
 
-```js
+```javascript
 const TOML = require('@ltd/j-toml');
 
 const 源内容           = `
@@ -213,8 +213,8 @@ function parse (
 ______________________
 [English] | [简体中文]
 
-[English]:          #user-content-english
-[简体中文]:         #user-content-简体中文
+[English]:          https://GitHub.com/LongTengDao/j-toml/#user-content-english
+[简体中文]:         https://GitHub.com/LongTengDao/j-toml/#user-content-简体中文
 [@ltd/j-toml v0.5]: https://www.npmjs.com/package/@ltd/j-toml
 [TOML v0.5]:        https://GitHub.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md
 [汤小明语 v0.5]:    https://GitHub.com/LongTengDao/TOML/blob/龙腾道-译/versions/cn/toml-v0.5.0.md
