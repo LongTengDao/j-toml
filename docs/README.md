@@ -1,6 +1,6 @@
 
-[English](#user-content-english) | [简体中文](#user-content-简体中文)
-
+_________________________________________________________________________
+[**English**](#user-content-english) | [简体中文](#user-content-简体中文)
 _________________________________________________________
 [@ltd/j-toml v0.5]<a id="user-content-english">&nbsp;</a>
 ==================
@@ -38,16 +38,16 @@ rootTable.__proto__      // "..."
 ------------
 
 ```
-TOML.parse(sourceContent, version, multiLineJoiner[, useBigInt=true[, xOptions]]);
+TOML.parse(sourceContent, specificationVersion, multiLineJoiner[, useBigInt=true[, xOptions]]);
 ```
 
 ```typescript
 function parse (
-         sourceContent   :string | Buffer,
-         version         :0.5,
-         multiLineJoiner :string,
-         useBigInt?      :boolean | number = true,
-         xOptions?       :object
+         sourceContent        :string | Buffer,
+         specificationVersion :0.5,
+         multiLineJoiner      :string,
+         useBigInt?           :boolean | number = true,
+         xOptions?            :object
 ) :Table;
 ```
 
@@ -61,7 +61,7 @@ function parse (
     If the `string` starts with UTF BOM, that's ok.  
     You can also pass in a `Buffer`. But it must be UTF 8 encoding, that's not a technology problem, but a requirement in the specification.
     
-1.  #### `version`
+1.  #### `specificationVersion`
     
     *   required
     *   type: `0.5`
@@ -105,6 +105,8 @@ Return the root table (tables parsed by this implementation are objects without 
 If the arguments not meet the requirement, there will be an error; if there is any error with the source, the error object will has two number properties `lineIndex` and `lineNumber` to help locating that.  
 Only one kind of case will cause the recursion parser stack overflow: `k=[{ k=[{ k=[{ ...thousands of layers... }] }] }]`. If there is an issue manifesting the necessity, I will rewrite using loop.
 
+_________________________________________________________________________
+[English](#user-content-english) | [**简体中文**](#user-content-简体中文)
 __________________________________________________________
 [@ltd/j-toml v0.5]<a id="user-content-简体中文">&nbsp;</a>
 ==================
