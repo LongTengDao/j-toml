@@ -211,7 +211,9 @@ function parse (
 如果参数不符合要求，会抛出错误；如果源文本有错误，错误对象会有 `lineIndex` 和 `lineNumber` 两个数值属性来帮助定位。  
 只有一类情况会导致递归解析器栈溢出：`k=[{ k=[{ k=[{ ……成千上万层…… }] }] }]`。如果有 issue 表明实际使用中的必要性，我会改写成循环实现。
 
-____________________
+______________________
+[English] | [简体中文]
+______________________
 [English]:          #user-content-english
 [简体中文]:         #user-content-简体中文
 [@ltd/j-toml v0.5]: https://www.npmjs.com/package/@ltd/j-toml
