@@ -1,7 +1,7 @@
 
-________________________________________________________________________________
-[**English**](#user-content-english) | [<u>简体中文</u>](#user-content-简体中文)
-_________________________________________________________
+__________________________
+**[English]** | [简体中文]
+__________________
 [@ltd/j-toml v0.5]<a id="user-content-english">&nbsp;</a>
 ==================
 
@@ -105,9 +105,9 @@ Return the root table (tables parsed by this implementation are objects without 
 If the arguments not meet the requirement, there will be an error; if there is any error with the source, the error object will has two number properties `lineIndex` and `lineNumber` to help locating that.  
 Only one kind of case will cause the recursion parser stack overflow: `k=[{ k=[{ k=[{ ...thousands of layers... }] }] }]`. If there is an issue manifesting the necessity, I will rewrite using loop.
 
-________________________________________________________________________________
-[<u>English</u>](#user-content-english) | [**简体中文**](#user-content-简体中文)
-__________________________________________________________
+___________________________
+[English] | **[简体中文]**
+__________________
 [@ltd/j-toml v0.5]<a id="user-content-简体中文">&nbsp;</a>
 ==================
 
@@ -212,6 +212,8 @@ function parse (
 只有一类情况会导致递归解析器栈溢出：`k=[{ k=[{ k=[{ ……成千上万层…… }] }] }]`。如果有 issue 表明实际使用中的必要性，我会改写成循环实现。
 
 ____________________
+[English]:          #user-content-english
+[简体中文]:         #user-content-简体中文
 [@ltd/j-toml v0.5]: https://www.npmjs.com/package/@ltd/j-toml
 [TOML v0.5]:        https://GitHub.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md
 [汤小明语 v0.5]:    https://GitHub.com/LongTengDao/TOML/blob/龙腾道-译/versions/cn/toml-v0.5.0.md
