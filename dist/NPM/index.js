@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.58';
+const version = '0.5.59';
 
 const isArray = Array.isArray;
 
@@ -782,12 +782,11 @@ function assignLiteralString(table, finalKey, literal) {
     literal = literal.slice(3);
     $ = MULTI_LINE_LITERAL_STRING.exec(literal);
     if ($) {
-        CONTROL_CHARACTER_EXCLUDE_TAB.test($[1]) && throwSyntaxError('Control characters other than tab are not permitted in a Literal String, which was found at ' + where());
-        table[finalKey] = $[1];
+        table[finalKey] = checkLiteralString($[1]);
         return $[2];
     }
     if (literal) {
-        CONTROL_CHARACTER_EXCLUDE_TAB.test(literal) && throwSyntaxError('Control characters other than tab are not permitted in a Literal String, which was found at ' + where());
+        checkLiteralString(literal);
         literal += useWhatToJoinMultiLineString;
     }
     const start = mark();
@@ -795,12 +794,16 @@ function assignLiteralString(table, finalKey, literal) {
         const line = must('Literal String', start);
         $ = MULTI_LINE_LITERAL_STRING.exec(line);
         if ($) {
-            CONTROL_CHARACTER_EXCLUDE_TAB.test($[1]) && throwSyntaxError('Control characters other than tab are not permitted in a Literal String, which was found at ' + where());
-            table[finalKey] = literal + $[1];
+            table[finalKey] = literal + checkLiteralString($[1]);
             return $[2];
         }
         literal += line + useWhatToJoinMultiLineString;
     }
+}
+function checkLiteralString(literal) {
+    CONTROL_CHARACTER_EXCLUDE_TAB.test(literal) && throwSyntaxError('Control characters other than tab are not permitted in a Multi-Line Literal String, which was found at ' + where());
+    literal.includes('\'\'\'') && throwSyntaxError('Ending single quotes more than two are not permitted in a Multi-Line Literal String, which was found at ' + where());
+    return literal;
 }
 function assignBasicString(table, finalKey, literal) {
     if (literal.charAt(1) !== '"' || literal.charAt(2) !== '"') {

@@ -23,7 +23,7 @@ export default function parse (
 	specificationVersion :0.5,
 	useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines :string,
 	useBigInt_forInteger? :boolean | number = true,
-	extensionOptions? = null
+	extensionOptions?                       = null
 ) :object {
 	if ( typeof sourceContent!=='string' ) {
 		if ( !isBuffer(sourceContent) ) { throw new TypeError('TOML.parse(sourceContent)'); }
@@ -193,12 +193,11 @@ function assignLiteralString (table :object, finalKey :string, literal :string) 
 	literal = literal.slice(3);
 	$ = RE.MULTI_LINE_LITERAL_STRING.exec(literal);
 	if ( $ ) {
-		RE.CONTROL_CHARACTER_EXCLUDE_TAB.test($[1]) && iterator.throwSyntaxError('Control characters other than tab are not permitted in a Literal String, which was found at '+iterator.where());
-		table[finalKey] = $[1];
+		table[finalKey] = checkLiteralString($[1]);
 		return $[2];
 	}
 	if ( literal ) {
-		RE.CONTROL_CHARACTER_EXCLUDE_TAB.test(literal) && iterator.throwSyntaxError('Control characters other than tab are not permitted in a Literal String, which was found at '+iterator.where());
+		checkLiteralString(literal);
 		literal += options.useWhatToJoinMultiLineString;
 	}
 	const start :number = iterator.mark();
@@ -206,12 +205,17 @@ function assignLiteralString (table :object, finalKey :string, literal :string) 
 		const line :string = iterator.must('Literal String', start);
 		$ = RE.MULTI_LINE_LITERAL_STRING.exec(line);
 		if ( $ ) {
-			RE.CONTROL_CHARACTER_EXCLUDE_TAB.test($[1]) && iterator.throwSyntaxError('Control characters other than tab are not permitted in a Literal String, which was found at '+iterator.where());
-			table[finalKey] = literal+$[1];
+			table[finalKey] = literal+checkLiteralString($[1]);
 			return $[2];
 		}
 		literal += line+options.useWhatToJoinMultiLineString;
 	}
+}
+
+function checkLiteralString (literal :string) :string {
+	RE.CONTROL_CHARACTER_EXCLUDE_TAB.test(literal) && iterator.throwSyntaxError('Control characters other than tab are not permitted in a Multi-Line Literal String, which was found at '+iterator.where());
+	literal.includes('\'\'\'') && iterator.throwSyntaxError('Ending single quotes more than two are not permitted in a Multi-Line Literal String, which was found at '+iterator.where());
+	return literal;
 }
 
 function assignBasicString (table :object, finalKey :string, literal :string) :string {
