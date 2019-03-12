@@ -1,5 +1,7 @@
 declare module '@ltd/j-toml' {
 	
+	export const version :string;
+	
 	type Table = object;
 	
 	export function parse (
