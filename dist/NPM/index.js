@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.60';
+const version = '0.5.61';
 
 const isArray = Array.isArray;
 
@@ -97,25 +97,179 @@ const OrderedTable = function Table() { return orderify(this); };
 OrderedTable.prototype = Table.prototype = create(null);
 const isTable = (value) => value instanceof Table;
 
+const NT = /[\n\t]/g;
+function Source(raw, substitutions) {
+    let source = raw[0];
+    for (let length = substitutions.length, index = 0; index < length;) {
+        const substitution = substitutions[index];
+        source += (typeof substitution === 'string' ? substitution : substitution.source) + raw[++index];
+    }
+    return source.replace(NT, '');
+}
+const newRegExp = new Proxy(({ raw }, ...substitutions) => RegExp(Source(raw, substitutions)), create(null, {
+    get: {
+        value(newRegExp, flags) {
+            return ({ raw }, ...substitutions) => RegExp(Source(raw, substitutions), flags);
+        }
+    }
+}));
+
 /* types */
-const DATETIME = /^(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?|(\d\d\d\d-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|02-(?:0[1-9]|1\d|2[0-9])))(?:([T ])((?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?)(Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)?)?)$/;
-const PRE_WHITESPACE = /^[ \t]+/;
+const _29_ = /(?:0[1-9]|1\d|2[0-9])/;
+const _30_ = /(?:0[1-9]|[12]\d|30)/;
+const _31_ = /(?:0[1-9]|[12]\d|3[01])/;
+const _23_ = /(?:[01]\d|2[0-3])/;
+const _59_ = /[0-5]\d/;
+const YMD = newRegExp `
+	\d\d\d\d-
+	(?:
+		(?:0[13578]|1[02])-${_31_}
+	|
+		(?:0[469]|11)-${_30_}
+	|
+		02-${_29_}
+	)`;
+const T = /[T ]/;
+const HMS = newRegExp `
+	${_23_}:${_59_}:${_59_}(?:\.\d+)?`;
+const Z = newRegExp `
+		Z
+	|
+		[+-]${_23_}:${_59_}`;
+const DATETIME = newRegExp `
+	^
+	(?:
+		${HMS}
+	|
+		(${YMD})
+		(?:
+			(${T})
+			(${HMS})
+			(${Z})?
+		)?
+	)
+	$`;
+/* parser */
+const Whitespace = /[ \t]/;
+const PRE_WHITESPACE = newRegExp `
+	^${Whitespace}+`;
 const KEYS = /[\w-]+|"(?:[^\\"]+|\\[^])*"|'[^']*'/g;
-const VALUE_REST = /^((?:\d\d\d\d-\d\d-\d\d \d)?[\w\-+.:]+)[ \t]*([^]*)$/;
-const LITERAL_STRING = /^'([^'\x00-\x08\x0B-\x1F\x7F]*)'[ \t]*([^]*)/;
-const MULTI_LINE_LITERAL_STRING = /^([^]*?)'''(?!')[ \t]*([^]*)/;
+const VALUE_REST = newRegExp `
+	^
+	(
+		(?:\d\d\d\d-\d\d-\d\d \d)?
+		[\w\-+.:]+
+	)
+	${Whitespace}*
+	([^]*)
+	$`;
+const LITERAL_STRING = newRegExp `
+	^
+	'([^'\x00-\x08\x0B-\x1F\x7F]*)'
+	${Whitespace}*
+	([^]*)`;
+const MULTI_LINE_LITERAL_STRING = newRegExp `
+	^
+	([^]*?)
+	'''(?!')
+	${Whitespace}*
+	([^]*)`;
 const CONTROL_CHARACTER_EXCLUDE_TAB = /[\x00-\x08\x0B-\x1F\x7F]/;
 const ESCAPED_IN_MULTI_LINE = /\n|\\(?:([ \n]+)|([\\"])|([btnfr])|u([^]{4})|U([^]{8}))/g;
-const SYM_WHITESPACE = /^[^][ \t]*/;
-const _VALUE_PAIR = /^!!([\w-]*)[ \t]+([^ \t#][^]*)$/;
-const SUB = /{[ \t]*}|{[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*)*}/g;
+const SYM_WHITESPACE = newRegExp `
+	^
+	[^]
+	${Whitespace}*`;
+const _VALUE_PAIR = newRegExp `
+	^
+	!!([\w-]*)
+	${Whitespace}+
+	([^ \t#][^]*)
+	$`;
+/* parser-extension */
+const String_ = /'[^']*'|"(?:[^\\"]+|\\[^])*"/;
+const KeyValuePairs = newRegExp `
+	(?:${String_})
+	${Whitespace}*
+	=
+	${Whitespace}*
+	(?:${String_})
+	${Whitespace}*
+	(?:
+		,
+		${Whitespace}*
+		(?:${String_})
+		${Whitespace}*
+		=
+		${Whitespace}*
+		(?:${String_})
+		${Whitespace}*
+	)*`;
+const NonEmptyObject = newRegExp `
+	{${Whitespace}*${KeyValuePairs}}`;
+const Object$1 = newRegExp `
+		{${Whitespace}*}
+	|
+		${NonEmptyObject}`;
+const StringOrArray = newRegExp `
+		${String_}
+	|
+		${NonEmptyObject}
+	|
+		\[
+		${Whitespace}+
+		(?:${String_})
+		${Whitespace}*
+		(?:
+			,
+			${Whitespace}*
+			(?:${Object$1})
+			${Whitespace}*
+		)+
+		]`;
+const RegExpContent = /(?:[^\\[/]+|\[(?:[^\\\]]+|\\[^])*]|\\[^])+/;
+const Rule = newRegExp `
+	\(
+		${Whitespace}*
+		(?:
+			/${RegExpContent}/[a-z]*
+			${Whitespace}*
+			=
+			${Whitespace}*
+			(?:${StringOrArray})
+			${Whitespace}*
+		|
+			${KeyValuePairs}
+		)
+	\)`;
+const SUB = newRegExp.g `
+	${Object$1}`;
 const DELIMITER_CHECK = /[^`]/;
-const INTERPOLATION = /\([ \t]*(?:\/(?:[^\\[/]+|\[(?:[^\\\]]+|\\[^])*]|\\[^])+\/[a-z]*[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*"|{[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*)*}|\[[ \t]+(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:{[ \t]*}|{[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*)*})[ \t]*)+])[ \t]*|(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*)*)\)/g;
-const INTERPOLATIONS = /^(?:\([ \t]*(?:\/(?:[^\\[/]+|\[(?:[^\\\]]+|\\[^])*]|\\[^])+\/[a-z]*[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*"|{[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*)*}|\[[ \t]+(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:{[ \t]*}|{[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*)*})[ \t]*)+])[ \t]*|(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*)*)\)[ \t]*)*[ \t]*([^]*)$/;
-const INTERPOLATION_TOKEN = /'[^']*'|"(?:[^\\"]+|\\[^])*"/g;
-const REGEXP_MODE = /^\([ \t]*\//;
-const PATTERN_FLAGS_REPLACER = /\/((?:[^\\[/]+|\[(?:[^\\\]]+|\\[^])*]|\\[^])+)\/([a-z]*)[ \t]*=[ \t]*('[^']*'|"(?:[^\\"]+|\\[^])*"|{[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*)*}|\[[ \t]+(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:{[ \t]*}|{[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*(?:,[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*=[ \t]*(?:'[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*)*})[ \t]*)+])/;
-const WHOLE_AND_SUBS = /('[^']*'|"(?:[^\\"]+|\\[^])*")[ \t]*([^]*)/;
+const INTERPOLATION = newRegExp.g `
+	${Rule}`;
+const INTERPOLATIONS = newRegExp `
+	^
+	(?:
+		${Rule}
+		${Whitespace}*
+	)*
+	${Whitespace}*
+	([^]*)
+	$`;
+const INTERPOLATION_TOKEN = newRegExp.g `
+	${String_}`;
+const REGEXP_MODE = newRegExp `
+	^\(${Whitespace}*/`;
+const PATTERN_FLAGS_REPLACER = newRegExp `
+	/(${RegExpContent})/([a-z]*)
+	${Whitespace}*
+	=
+	${Whitespace}*
+	(${StringOrArray})`;
+const WHOLE_AND_SUBS = newRegExp `
+	(${String_})
+	${Whitespace}*
+	([^]*)`;
 const DOLLAR = /\$(?:[1-9]\d?|\$)/g;
 
 /* parser */

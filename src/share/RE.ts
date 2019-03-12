@@ -1,4 +1,4 @@
-export * from './RE-higher.RegExp';
+export * from './RE-higher';
 export * from './RE-never-slow-nor-overflow';
 
 /* types */

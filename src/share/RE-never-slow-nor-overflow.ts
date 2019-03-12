@@ -1,5 +1,5 @@
 import * as iterator from './iterator';
-import * as RE from './RE-higher.RegExp';
+import * as RE from './RE-higher';
 
 /* parser */
 
