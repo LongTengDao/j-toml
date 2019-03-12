@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.61';
+const version = '0.5.62';
 
 const isArray = Array.isArray;
 
@@ -97,22 +97,38 @@ const OrderedTable = function Table() { return orderify(this); };
 OrderedTable.prototype = Table.prototype = create(null);
 const isTable = (value) => value instanceof Table;
 
-const NT = /[\n\t]/g;
+/*!
+ * 模块名称：@ltd/j-regexp
+ * 模块功能：可读性更好的正则表达式创建方式。
+   　　　　　More readable way for creating RegExp.
+ * 模块版本：1.0.0
+ * 许可条款：LGPL-3.0
+ * 所属作者：龙腾道 <LongTengDao@LongTengDao.com> (www.LongTengDao.com)
+ * 问题反馈：https://GitHub.com/LongTengDao/j-regexp/issues
+ * 项目主页：https://GitHub.com/LongTengDao/j-regexp/
+ */
+
+const slice = Array.prototype.slice;
+
+var NT = /[\n\t]/g;
 function Source(raw, substitutions) {
-    let source = raw[0];
-    for (let length = substitutions.length, index = 0; index < length;) {
-        const substitution = substitutions[index];
+    var source = raw[0];
+    for (var length = substitutions.length, index = 0; index < length;) {
+        var substitution = substitutions[index];
         source += (typeof substitution === 'string' ? substitution : substitution.source) + raw[++index];
     }
     return source.replace(NT, '');
 }
-const newRegExp = new Proxy(({ raw }, ...substitutions) => RegExp(Source(raw, substitutions)), create(null, {
-    get: {
-        value(newRegExp, flags) {
-            return ({ raw }, ...substitutions) => RegExp(Source(raw, substitutions), flags);
-        }
-    }
-}));
+function newRegExp(template) {
+    return RegExp(Source(template.raw, slice.call(arguments, 1)));
+}
+function NewRegExp(flags) {
+    return function newRegExp(template) {
+        return RegExp(Source(template.raw, slice.call(arguments, 1)), flags);
+    };
+}
+
+/*¡ @ltd/j-regexp */
 
 /* types */
 const _29_ = /(?:0[1-9]|1\d|2[0-9])/;
@@ -242,10 +258,10 @@ const Rule = newRegExp `
 			${KeyValuePairs}
 		)
 	\)`;
-const SUB = newRegExp.g `
+const SUB = NewRegExp('g') `
 	${Object$1}`;
 const DELIMITER_CHECK = /[^`]/;
-const INTERPOLATION = newRegExp.g `
+const INTERPOLATION = NewRegExp('g') `
 	${Rule}`;
 const INTERPOLATIONS = newRegExp `
 	^
@@ -256,7 +272,7 @@ const INTERPOLATIONS = newRegExp `
 	${Whitespace}*
 	([^]*)
 	$`;
-const INTERPOLATION_TOKEN = newRegExp.g `
+const INTERPOLATION_TOKEN = NewRegExp('g') `
 	${String_}`;
 const REGEXP_MODE = newRegExp `
 	^\(${Whitespace}*/`;

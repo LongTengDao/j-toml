@@ -1,4 +1,4 @@
-import newRegExp from './newRegExp';
+import { newRegExp, NewRegExp } from '@ltd/j-regexp';
 
 /* types */
 
@@ -154,12 +154,12 @@ const Rule = newRegExp`
 		)
 	\)`;
 
-export const SUB = newRegExp.g`
+export const SUB = NewRegExp('g')`
 	${Object}`;
 
 export const DELIMITER_CHECK = /[^`]/;
 
-export const INTERPOLATION = newRegExp.g`
+export const INTERPOLATION = NewRegExp('g')`
 	${Rule}`;
 
 export const INTERPOLATIONS = newRegExp`
@@ -172,7 +172,7 @@ export const INTERPOLATIONS = newRegExp`
 	([^]*)
 	$`;
 
-export const INTERPOLATION_TOKEN = newRegExp.g`
+export const INTERPOLATION_TOKEN = NewRegExp('g')`
 	${String_}`;
 
 export const REGEXP_MODE = newRegExp`

@@ -14,6 +14,7 @@ require('../test/test.js')(async ({ build, get, map, ful }) => {
 		},
 		locate: {
 			'@ltd/j-orderify': ful('../../LongTengDao/j-orderify/dist/ESM/j-orderify!'),
+			'@ltd/j-regexp': ful('../../LongTengDao/j-regexp/dist/ESM/j-regexp!'),
 		},
 	});
 	
