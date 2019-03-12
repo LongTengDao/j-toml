@@ -13,7 +13,7 @@ require('../test/test.js')(async ({ build, get, map, ful }) => {
 			},
 		},
 		locate: {
-			'@ltd/j-orderify': ful('../../LongTengDao/j-orderify/dist/ESM/j-orderify!.js'),
+			'@ltd/j-orderify': ful('../../LongTengDao/j-orderify/dist/ESM/j-orderify!'),
 		},
 	});
 	
