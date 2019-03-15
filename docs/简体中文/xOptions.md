@@ -75,18 +75,6 @@ y = 2
 key = null
 ```
 
-`超级选项.nil`
---------------
-
-*   type: `boolean`
-*   default: `false`
-
-是否允许 `null` 值类型（`nil` 字面量）。
-
-```
-key = nil
-```
-
 `超级选项.ins`
 --------------
 
@@ -104,23 +92,6 @@ keyB = ``
 `value` A
 ``
 
-keyC = `
-NAME open SITE.
-Nice.
-` ( 'NAME'="Mr. \u0043", 'PLACE'='GitHub' )
-
-keyD = `
-Mr. C open GitHub,
-saw `x<y`.
-` ( '<'='&lt;' ) ( /`(.*?)`/g = '<code>$1</code>' ) ( "\n"=' ' )
-
-keyE = `
-Mr. \x43 open GitHub.
-` ( /\\x\d{2}/g = { '\x43'='C' } )
-
-keyF = `
-{{ NAME | Mr }} open {{ SITE }}.
-` ( /{{ *(.*?) *(?:\| *(.*?) *)?}}/g = ['$2$1',{ 'NAME'='Mr. C', 'SITE'='GitHub' }, { 'Mr'='Mr. ' }] )
 ```
 
 用 JSON 表示解析出的内容就是：
@@ -128,11 +99,7 @@ keyF = `
 ```json
 {
     "keyA": "value `A`",
-    "keyB": "`value` A",
-    "keyC": "Mr. C open GitHub.\nNice.",
-    "keyE": "Mr. C open GitHub, saw <code>x&lt;y</code>.",
-    "keyD": "Mr. C open GitHub.",
-    "keyF": "Mr. C open GitHub."
+    "keyB": "`value` A"
 }
 ```
 
@@ -142,42 +109,16 @@ keyF = `
 --------------
 
 *   type: `{ [type]: function (value) { } }` / `function (type, value) { }`
+*   default: `null`
 
 ```
-key = !!type 'value'
+key = (type) 'value'
 ```
 
 注意：如果开启此选项，要求同时开启 `超级选项.mix`，因为无法妥善归类自定义类型。
 
-`超级选项.hash`
----------------
-
-*   type: `boolean`
-*   default: `false`
-
-是否保留注释内容。
-
-```toml
-# comment 0
-[table] # comment 1
-key = 'value' # comment 2
-```
-
-最终得到的表大抵相当于：
-
-```js
-({
-    [Symbol('#')]: ' comment 0',
-    table: {
-    	key: 'value',
-    	[Symbol.for('key')]: ' comment 2'
-    },
-    [Symbol.for('table')]: ' comment 1'
-})
-```
-
 `超级选项.open`
---------------
+----------------
 
 *   type: `boolean`
 *   default: `false`

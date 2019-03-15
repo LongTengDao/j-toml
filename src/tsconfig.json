@@ -9,6 +9,7 @@
 		"noImplicitReturns": true,
 		"noImplicitThis": true,
 		"strictNullChecks": true,
-		"alwaysStrict": true
+		"alwaysStrict": true,
+		"noUnusedLocals": true
 	}
 }

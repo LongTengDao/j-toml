@@ -1,34 +1,34 @@
+import SyntaxError from '.SyntaxError';
+import Error from '.Error';
 import isArray from '.Array.isArray';
-import Symbol_for from '.Symbol.for';
 import WeakSet from '.WeakSet';
-import * as iterator from './share/iterator';
-import { isTable } from './types/Table';
-import { BasicString, MultiLineBasicString } from './types/String';
-import * as options from './share/options';
-import * as RE from './share/RE';
+import * as iterator from '../share/iterator';
+import { isTable } from '../types/Table';
+import { BasicString, MultiLineBasicString } from '../types/String';
+import * as options from '../share/options';
+import * as RE from '../share/RE';
 
 export const sealedInline = new WeakSet;
 const openTables = new WeakSet;
 
-export function appendTable (table :object, key_key :string, asArrayItem :boolean, hash :string) :object {
+export function appendTable (table :object, key_key :string, asArrayItem :boolean) :object {
 	const leadingKeys :string[] = parseKeys(key_key);
 	const finalKey :string = leadingKeys.pop();
 	table = prepareTable(table, leadingKeys);
 	let lastTable :object;
 	if ( asArrayItem ) {
 		let arrayOfTables :object[];
-		if ( finalKey in table ) { sealedInline.has(arrayOfTables = table[finalKey]) && iterator.throwError('Trying to push Table to non-ArrayOfTables value at '+iterator.where()); }
+		if ( finalKey in table ) { sealedInline.has(arrayOfTables = table[finalKey]) && iterator.throws(Error('Trying to push Table to non-ArrayOfTables value at '+iterator.where())); }
 		else { arrayOfTables = table[finalKey] = []; }
 		arrayOfTables.push(lastTable = new options.TableDepends);
 	}
 	else {
 		if ( finalKey in table ) {
-			options.open && openTables.has(lastTable = table[finalKey]) || iterator.throwError('Duplicate Table definition at '+iterator.where());
+			options.open && openTables.has(lastTable = table[finalKey]) || iterator.throws(Error('Duplicate Table definition at '+iterator.where()));
 			openTables.delete(lastTable);
 		}
 		else { table[finalKey] = lastTable = new options.TableDepends; }
 	}
-	if ( options.keepComment && hash ) { table[Symbol_for(finalKey)] = hash.slice(1); }
 	return lastTable;
 }
 
@@ -50,14 +50,14 @@ function prepareTable (table :object, keys :string[]) :object {
 		if ( key in table ) {
 			table = table[key];
 			if ( isTable(table) ) {
-				sealedInline.has(table) && iterator.throwError('Trying to define table through static Inline Object at '+iterator.where());
+				sealedInline.has(table) && iterator.throws(Error('Trying to define table through static Inline Object at '+iterator.where()));
 			}
 			else if ( isArray(table) ) {
-				sealedInline.has(table) && iterator.throwError('Trying to append value to static Inline Array at '+iterator.where());
+				sealedInline.has(table) && iterator.throws(Error('Trying to append value to static Inline Array at '+iterator.where()));
 				// @ts-ignore
 				table = table[table.length-1];
 			}
-			else { iterator.throwError('Trying to define table through non-Table value at '+iterator.where()); }
+			else { iterator.throws(Error('Trying to define table through non-Table value at '+iterator.where())); }
 		}
 		else {
 			openTables.add(table = table[key] = new options.TableDepends);
@@ -75,8 +75,8 @@ export function prepareInlineTable (table :object, keys :string[]) :object {
 		const key :string = keys[index++];
 		if ( key in table ) {
 			table = table[key];
-			isTable(table) || iterator.throwError('Trying to assign property through non-Table value at '+iterator.where());
-			sealedInline.has(table) && iterator.throwError('Trying to assign property through static Inline Object at '+iterator.where());
+			isTable(table) || iterator.throws(Error('Trying to assign property through non-Table value at '+iterator.where()));
+			sealedInline.has(table) && iterator.throws(Error('Trying to assign property through static Inline Object at '+iterator.where()));
 		}
 		else {
 			table = table[key] = new options.TableDepends;
@@ -90,7 +90,7 @@ export function prepareInlineTable (table :object, keys :string[]) :object {
 export function assignLiteralString (table :object, finalKey :string, literal :string) :string {
 	let $ :RegExpExecArray;
 	if ( literal.charAt(1)!=='\'' || literal.charAt(2)!=='\'' ) {
-		$ = RE.LITERAL_STRING.exec(literal) || iterator.throwSyntaxError(iterator.where());
+		$ = RE.LITERAL_STRING.exec(literal) || iterator.throws(SyntaxError(iterator.where()));
 		table[finalKey] = $[1];
 		return $[2];
 	}
@@ -117,8 +117,7 @@ export function assignLiteralString (table :object, finalKey :string, literal :s
 }
 
 function checkLiteralString (literal :string) :string {
-	RE.CONTROL_CHARACTER_EXCLUDE_TAB.test(literal) && iterator.throwSyntaxError('Control characters other than tab are not permitted in a Multi-Line Literal String, which was found at '+iterator.where());
-	literal.includes('\'\'\'') && iterator.throwSyntaxError('Ending single quotes more than two are not permitted in a Multi-Line Literal String, which was found at '+iterator.where());
+	RE.CONTROL_CHARACTER_EXCLUDE_TAB.test(literal) && iterator.throws(SyntaxError('Control characters other than tab are not permitted in a Multi-Line Literal String, which was found at '+iterator.where()));
 	return literal;
 }
 
@@ -131,25 +130,25 @@ export function assignBasicString (table :object, finalKey :string, literal :str
 	literal = literal.slice(3);
 	const $ = RE.MULTI_LINE_BASIC_STRING_exec_0(literal);
 	if ( literal.startsWith('"""', $.length) ) {
-		RE.ESCAPED_EXCLUDE_CONTROL_CHARACTER_test($) || iterator.throwSyntaxError(iterator.where());
+		RE.ESCAPED_EXCLUDE_CONTROL_CHARACTER_test($) || iterator.throws(SyntaxError(iterator.where()));
 		table[finalKey] = BasicString($);
 		return literal.slice($.length+3).replace(RE.PRE_WHITESPACE, '');
 	}
 	if ( literal ) {
 		literal += '\n';
-		RE.ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(literal) || iterator.throwSyntaxError(iterator.where());
+		RE.ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(literal) || iterator.throws(SyntaxError(iterator.where()));
 	}
 	const start :number = iterator.mark();
 	for ( ; ; ) {
 		let line :string = iterator.must('Basic String', start);
 		const $ = RE.MULTI_LINE_BASIC_STRING_exec_0(line);
 		if ( line.startsWith('"""', $.length) ) {
-			RE.ESCAPED_EXCLUDE_CONTROL_CHARACTER_test($) || iterator.throwSyntaxError(iterator.where());
+			RE.ESCAPED_EXCLUDE_CONTROL_CHARACTER_test($) || iterator.throws(SyntaxError(iterator.where()));
 			table[finalKey] = MultiLineBasicString(literal+$);
 			return line.slice($.length+3).replace(RE.PRE_WHITESPACE, '');
 		}
 		line += '\n';
-		RE.ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(line) || iterator.throwSyntaxError(iterator.where());
+		RE.ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(line) || iterator.throws(SyntaxError(iterator.where()));
 		literal += line;
 	}
 }

@@ -1,10 +1,281 @@
 ﻿'use strict';
 
-const version = '0.5.64';
-
-const Symbol_for = Symbol.for;
+const version = '0.5.65';
 
 const isBuffer = Buffer.isBuffer;
+
+/* types */
+const ESCAPED_IN_SINGLE_LINE = /\\(?:([\\"])|([btnfr])|u(.{4})|U(.{8}))/g;
+const UNDERSCORES = /_/g;
+const XOB_INTEGER = /^0x[0-9A-Fa-f]+(?:_[0-9A-Fa-f]+)*|o[0-7]+(?:_[0-7]+)*|b[01]+(?:_[01]+)*$/;
+const INTEGER = /^[-+]?[1-9]\d*(?:_\d+)*$/;
+const FLOAT = /^[-+]?(?:0|[1-9]\d*(?:_\d+)*)(?:\.\d+(?:_\d+)*)?(?:[eE][-+]?\d+(?:_\d+)*)?$/;
+const FLOAT_NOT_INTEGER = /[.eE]/;
+/* parse */
+const NON_SCALAR = /[\uD800-\uDFFF]/u; // \u{10FFFF}- > \uFFFD ?
+const BOM = /^\uFEFF/;
+const EOL = /\r?\n/;
+
+/*!
+ * 模块名称：@ltd/j-regexp
+ * 模块功能：可读性更好的正则表达式创建方式。
+   　　　　　More readable way for creating RegExp.
+ * 模块版本：1.0.0
+ * 许可条款：LGPL-3.0
+ * 所属作者：龙腾道 <LongTengDao@LongTengDao.com> (www.LongTengDao.com)
+ * 问题反馈：https://GitHub.com/LongTengDao/j-regexp/issues
+ * 项目主页：https://GitHub.com/LongTengDao/j-regexp/
+ */
+
+const slice = Array.prototype.slice;
+
+var NT = /[\n\t]/g;
+function Source(raw, substitutions) {
+    var source = raw[0];
+    for (var length = substitutions.length, index = 0; index < length;) {
+        var substitution = substitutions[index];
+        source += (typeof substitution === 'string' ? substitution : substitution.source) + raw[++index];
+    }
+    return source.replace(NT, '');
+}
+function newRegExp(template) {
+    return RegExp(Source(template.raw, slice.call(arguments, 1)));
+}
+
+/*¡ @ltd/j-regexp */
+
+/* types */
+const _29_ = /(?:0[1-9]|1\d|2[0-9])/;
+const _30_ = /(?:0[1-9]|[12]\d|30)/;
+const _31_ = /(?:0[1-9]|[12]\d|3[01])/;
+const _23_ = /(?:[01]\d|2[0-3])/;
+const _59_ = /[0-5]\d/;
+const YMD = newRegExp `
+	\d\d\d\d-
+	(?:
+		(?:0[13578]|1[02])-${_31_}
+	|
+		(?:0[469]|11)-${_30_}
+	|
+		02-${_29_}
+	)`;
+const T = /[T ]/;
+const HMS = newRegExp `
+	${_23_}:${_59_}:${_59_}(?:\.\d+)?`;
+const Z = newRegExp `
+		Z
+	|
+		[+-]${_23_}:${_59_}`;
+const DATETIME = newRegExp `
+	^
+	(?:
+		${HMS}
+	|
+		(${YMD})
+		(?:
+			(${T})
+			(${HMS})
+			(${Z})?
+		)?
+	)
+	$`;
+/* parse */
+const Whitespace = /[ \t]/;
+const PRE_WHITESPACE = newRegExp `
+	^${Whitespace}+`;
+const KEYS = /[\w-]+|"(?:[^\\"]+|\\[^])*"|'[^']*'/g;
+const VALUE_REST = newRegExp `
+	^
+	(
+		(?:\d\d\d\d-\d\d-\d\d \d)?
+		[\w\-+.:]+
+	)
+	${Whitespace}*
+	([^]*)
+	$`;
+const LITERAL_STRING = newRegExp `
+	^
+	'([^'\x00-\x08\x0B-\x1F\x7F]*)'
+	${Whitespace}*
+	([^]*)`;
+const MULTI_LINE_LITERAL_STRING = newRegExp `
+	^
+	([^]*?)
+	'''
+	${Whitespace}*
+	([^]*)`;
+const CONTROL_CHARACTER_EXCLUDE_TAB = /[\x00-\x08\x0B-\x1F\x7F]/;
+const ESCAPED_IN_MULTI_LINE = /\n|\\(?:([ \n]+)|([\\"])|([btnfr])|u([^]{4})|U([^]{8}))/g;
+const SYM_WHITESPACE = newRegExp `
+	^
+	[^]
+	${Whitespace}*`;
+const KEY_VALUE_PAIR = newRegExp `
+	^
+	[ \t]*
+	=
+	[ \t]*
+	(
+		\(([\w-:., ]+)\)
+		[ \t]+
+	)?
+	(
+		[^ \t#]
+		[^]*
+	)
+	$`;
+const _VALUE_PAIR = newRegExp `
+	^
+	\(([\w-:., ]+)\)
+	${Whitespace}+
+	([^ \t#][^]*)
+	$`;
+
+/* parser */
+const MULTI_LINE_BASIC_STRING = /^(?:[^\\"]+|\\[^]|""?(?!"))/;
+function MULTI_LINE_BASIC_STRING_exec_0(_) {
+    for (let _0 = '';;) {
+        if (_ === '') {
+            return _0;
+        }
+        const $ = MULTI_LINE_BASIC_STRING.exec(_);
+        if ($ === null) {
+            return _0;
+        }
+        _0 += $[0];
+        _ = _.slice($[0].length);
+    }
+}
+const ESCAPED_EXCLUDE_CONTROL_CHARACTER = /[^\\\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\ \n]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
+function ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(_) {
+    return _.replace(ESCAPED_EXCLUDE_CONTROL_CHARACTER, '') === '';
+}
+const BASIC_STRING = /^(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/;
+function BASIC_STRING_exec(_2) {
+    _2 = _2.slice(1);
+    for (let _1 = '';;) {
+        const $ = BASIC_STRING.exec(_2);
+        if ($ === null) {
+            _2.startsWith('"')
+                || throws(SyntaxError(where()));
+            return { 1: _1, 2: _2.replace(SYM_WHITESPACE, '') };
+        }
+        _1 += $[0];
+        _2 = _2.slice($[0].length);
+    }
+}
+const BARE_KEY = /^[\w-]+/;
+const LITERAL_KEY = /^'[^'\x00-\x08\x0B-\x1F\x7F]*'/;
+const DOT_KEY = /^[ \t]*\.[ \t]*/;
+function TABLE_DEFINITION_exec(_) {
+    const _1 = _.charAt(1) === '[';
+    _ = _.slice(_1 ? 2 : 1).replace(PRE_WHITESPACE, '');
+    const _2 = getKeys(_);
+    _ = _.slice(_2.length).replace(PRE_WHITESPACE, '');
+    _.startsWith(']')
+        || throws(SyntaxError(where()));
+    const _3 = _.charAt(1) === ']';
+    _ = _.slice(_3 ? 2 : 1).replace(PRE_WHITESPACE, '');
+    _ === ''
+        || _.startsWith('#')
+        || throws(SyntaxError(where()));
+    return { 1: _1, 2: _2, 3: _3 };
+}
+function KEY_VALUE_PAIR_exec(_) {
+    const _1 = getKeys(_);
+    const $ = KEY_VALUE_PAIR.exec(_.slice(_1.length)) || throws(SyntaxError(where()));
+    return { 1: _1, 2: $[1], 3: $[2], 4: $[3] };
+}
+function getKeys(_) {
+    for (let keys = '';;) {
+        if (_.startsWith('"')) {
+            _ = _.slice(1);
+            for (let key = '"';;) {
+                const $ = BASIC_STRING.exec(_);
+                if ($ === null) {
+                    _.startsWith('"')
+                        || throws(SyntaxError(where()));
+                    _ = _.slice(1);
+                    keys += key + '"';
+                    break;
+                }
+                _ = _.slice($[0].length);
+                key += $[0];
+            }
+        }
+        else {
+            const key = ((_.startsWith('\'') ? LITERAL_KEY : BARE_KEY).exec(_) || throws(SyntaxError(where())))[0];
+            _ = _.slice(key.length);
+            keys += key;
+        }
+        const $ = DOT_KEY.exec(_);
+        if ($ === null) {
+            return keys;
+        }
+        _ = _.slice($[0].length);
+        keys += $[0];
+    }
+}
+
+const NONE = [];
+let sourceLines = NONE;
+let lastLineIndex = -1;
+let lineIndex = -1;
+function noop(lineRest) { return ''; }
+noop.previous = noop;
+let stacks_length = 0;
+let last = noop;
+function from(source) {
+    if (sourceLines !== NONE) {
+        throw Error('Inner error: parsing in parsing.');
+    }
+    if (NON_SCALAR.test(source)) {
+        throw Error('toml doc must be a (ful-scalar) valid utf8 file.');
+    }
+    sourceLines = source.replace(BOM, '').split(EOL);
+    lastLineIndex = sourceLines.length - 1;
+    lineIndex = -1;
+    stacks_length = 0;
+    last = noop;
+}
+const next = () => sourceLines[++lineIndex];
+const rest = () => lineIndex !== lastLineIndex;
+const mark = () => lineIndex;
+function must(message, startIndex) {
+    lineIndex === lastLineIndex
+        && throws(new SyntaxError(message + ' is not close until the end of the file, which started from line ' + (startIndex + 1) + ': ' + sourceLines[startIndex]));
+    return sourceLines[++lineIndex];
+}
+const where = () => 'line ' + (lineIndex + 1) + ': ' + sourceLines[lineIndex];
+function done() {
+    sourceLines = NONE;
+    last = noop;
+}
+function stacks_pop() {
+    const item = last;
+    last = last.previous;
+    --stacks_length;
+    return item;
+}
+function stacks_push(item) {
+    item.previous = last;
+    last = item;
+    ++stacks_length;
+}
+function stacks_insertBeforeLast(item) {
+    item.previous = last.previous;
+    last.previous = item;
+    ++stacks_length;
+}
+function throws(error) {
+    if (sourceLines !== NONE) {
+        error.lineIndex = lineIndex;
+        error.lineNumber = lineIndex + 1;
+        //done();
+        //options.clear();
+    }
+    throw error;
+}
 
 const create = Object.create;
 
@@ -71,318 +342,27 @@ const OrderedTable = function Table() { return orderify(this); };
 OrderedTable.prototype = Table.prototype = create(null);
 const isTable = (value) => value instanceof Table;
 
-/*!
- * 模块名称：@ltd/j-regexp
- * 模块功能：可读性更好的正则表达式创建方式。
-   　　　　　More readable way for creating RegExp.
- * 模块版本：1.0.0
- * 许可条款：LGPL-3.0
- * 所属作者：龙腾道 <LongTengDao@LongTengDao.com> (www.LongTengDao.com)
- * 问题反馈：https://GitHub.com/LongTengDao/j-regexp/issues
- * 项目主页：https://GitHub.com/LongTengDao/j-regexp/
- */
-
-const slice = Array.prototype.slice;
-
-var NT = /[\n\t]/g;
-function Source(raw, substitutions) {
-    var source = raw[0];
-    for (var length = substitutions.length, index = 0; index < length;) {
-        var substitution = substitutions[index];
-        source += (typeof substitution === 'string' ? substitution : substitution.source) + raw[++index];
-    }
-    return source.replace(NT, '');
-}
-function newRegExp(template) {
-    return RegExp(Source(template.raw, slice.call(arguments, 1)));
-}
-function NewRegExp(flags) {
-    return function newRegExp(template) {
-        return RegExp(Source(template.raw, slice.call(arguments, 1)), flags);
-    };
-}
-
-/*¡ @ltd/j-regexp */
-
-/* types */
-const _29_ = /(?:0[1-9]|1\d|2[0-9])/;
-const _30_ = /(?:0[1-9]|[12]\d|30)/;
-const _31_ = /(?:0[1-9]|[12]\d|3[01])/;
-const _23_ = /(?:[01]\d|2[0-3])/;
-const _59_ = /[0-5]\d/;
-const YMD = newRegExp `
-	\d\d\d\d-
-	(?:
-		(?:0[13578]|1[02])-${_31_}
-	|
-		(?:0[469]|11)-${_30_}
-	|
-		02-${_29_}
-	)`;
-const T = /[T ]/;
-const HMS = newRegExp `
-	${_23_}:${_59_}:${_59_}(?:\.\d+)?`;
-const Z = newRegExp `
-		Z
-	|
-		[+-]${_23_}:${_59_}`;
-const DATETIME = newRegExp `
-	^
-	(?:
-		${HMS}
-	|
-		(${YMD})
-		(?:
-			(${T})
-			(${HMS})
-			(${Z})?
-		)?
-	)
-	$`;
-/* parser */
-const Whitespace = /[ \t]/;
-const PRE_WHITESPACE = newRegExp `
-	^${Whitespace}+`;
-const KEYS = /[\w-]+|"(?:[^\\"]+|\\[^])*"|'[^']*'/g;
-const VALUE_REST = newRegExp `
-	^
-	(
-		(?:\d\d\d\d-\d\d-\d\d \d)?
-		[\w\-+.:]+
-	)
-	${Whitespace}*
-	([^]*)
-	$`;
-const LITERAL_STRING = newRegExp `
-	^
-	'([^'\x00-\x08\x0B-\x1F\x7F]*)'
-	${Whitespace}*
-	([^]*)`;
-const MULTI_LINE_LITERAL_STRING = newRegExp `
-	^
-	([^]*?)
-	'''(?!')
-	${Whitespace}*
-	([^]*)`;
-const CONTROL_CHARACTER_EXCLUDE_TAB = /[\x00-\x08\x0B-\x1F\x7F]/;
-const ESCAPED_IN_MULTI_LINE = /\n|\\(?:([ \n]+)|([\\"])|([btnfr])|u([^]{4})|U([^]{8}))/g;
-const SYM_WHITESPACE = newRegExp `
-	^
-	[^]
-	${Whitespace}*`;
-const _VALUE_PAIR = newRegExp `
-	^
-	!!([\w-]*)
-	${Whitespace}+
-	([^ \t#][^]*)
-	$`;
-/* parser-extension */
-const String_ = /'[^']*'|"(?:[^\\"]+|\\[^])*"/;
-const KeyValuePairs = newRegExp `
-	(?:${String_})
-	${Whitespace}*
-	=
-	${Whitespace}*
-	(?:${String_})
-	${Whitespace}*
-	(?:
-		,
-		${Whitespace}*
-		(?:${String_})
-		${Whitespace}*
-		=
-		${Whitespace}*
-		(?:${String_})
-		${Whitespace}*
-	)*`;
-const NonEmptyObject = newRegExp `
-	{${Whitespace}*${KeyValuePairs}}`;
-const Object$1 = newRegExp `
-		{${Whitespace}*}
-	|
-		${NonEmptyObject}`;
-const StringOrArray = newRegExp `
-		${String_}
-	|
-		${NonEmptyObject}
-	|
-		\[
-		${Whitespace}+
-		(?:${String_})
-		${Whitespace}*
-		(?:
-			,
-			${Whitespace}*
-			(?:${Object$1})
-			${Whitespace}*
-		)+
-		]`;
-const RegExpContent = /(?:[^\\[/]+|\[(?:[^\\\]]+|\\[^])*]|\\[^])+/;
-const Rule = newRegExp `
-	\(
-		${Whitespace}*
-		(?:
-			/${RegExpContent}/[a-z]*
-			${Whitespace}*
-			=
-			${Whitespace}*
-			(?:${StringOrArray})
-			${Whitespace}*
-		|
-			${KeyValuePairs}
-		)
-	\)`;
-const SUB = NewRegExp('g') `
-	${Object$1}`;
-const DELIMITER_CHECK = /[^`]/;
-const INTERPOLATION = NewRegExp('g') `
-	${Rule}`;
-const INTERPOLATIONS = newRegExp `
-	^
-	(?:
-		${Rule}
-		${Whitespace}*
-	)*
-	${Whitespace}*
-	([^]*)
-	$`;
-const INTERPOLATION_TOKEN = NewRegExp('g') `
-	${String_}`;
-const REGEXP_MODE = newRegExp `
-	^\(${Whitespace}*/`;
-const PATTERN_FLAGS_REPLACER = newRegExp `
-	/(${RegExpContent})/([a-z]*)
-	${Whitespace}*
-	=
-	${Whitespace}*
-	(${StringOrArray})`;
-const WHOLE_AND_SUBS = newRegExp `
-	(${String_})
-	${Whitespace}*
-	([^]*)`;
-const DOLLAR = /\$(?:[1-9]\d?|\$)/g;
-
-/* parser */
-const MULTI_LINE_BASIC_STRING = /^(?:[^\\"]+|\\[^]|""?(?!"))/;
-function MULTI_LINE_BASIC_STRING_exec_0(_) {
-    for (let _0 = '';;) {
-        if (_ === '') {
-            return _0;
-        }
-        const $ = MULTI_LINE_BASIC_STRING.exec(_);
-        if ($ === null) {
-            return _0;
-        }
-        _0 += $[0];
-        _ = _.slice($[0].length);
-    }
-}
-const ESCAPED_EXCLUDE_CONTROL_CHARACTER = /[^\\\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\ \n]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
-function ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(_) {
-    return _.replace(ESCAPED_EXCLUDE_CONTROL_CHARACTER, '') === '';
-}
-const BASIC_STRING = /^(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/;
-function BASIC_STRING_exec(_2) {
-    _2 = _2.slice(1);
-    for (let _1 = '';;) {
-        const $ = BASIC_STRING.exec(_2);
-        if ($ === null) {
-            _2.startsWith('"')
-                || throwSyntaxError(where());
-            return { 1: _1, 2: _2.replace(SYM_WHITESPACE, '') };
-        }
-        _1 += $[0];
-        _2 = _2.slice($[0].length);
-    }
-}
-const BARE_KEY = /^[\w-]+/;
-const LITERAL_KEY = /^'[^'\x00-\x08\x0B-\x1F\x7F]*'/;
-const DOT_KEY = /^[ \t]*\.[ \t]*/;
-function TABLE_DEFINITION_exec(_) {
-    const _1 = _.charAt(1) === '[';
-    _ = _.slice(_1 ? 2 : 1).replace(PRE_WHITESPACE, '');
-    const _2 = getKeys(_);
-    _ = _.slice(_2.length).replace(PRE_WHITESPACE, '');
-    _.startsWith(']')
-        || throwSyntaxError(where());
-    const _3 = _.charAt(1) === ']';
-    _ = _.slice(_3 ? 2 : 1).replace(PRE_WHITESPACE, '');
-    _ === ''
-        || _.startsWith('#')
-        || throwSyntaxError(where());
-    return { 1: _1, 2: _2, 3: _3, 4: _ };
-}
-const KEY_VALUE_PAIR = /^[ \t]*=[ \t]*(!!([\w-]*)[ \t]+)?([^ \t#][^]*)$/;
-function KEY_VALUE_PAIR_exec(_) {
-    const _1 = getKeys(_);
-    const $ = KEY_VALUE_PAIR.exec(_.slice(_1.length));
-    $
-        || throwSyntaxError(where());
-    return { 1: _1, 2: $[1], 3: $[2], 4: $[3] };
-}
-function getKeys(_) {
-    for (let keys = '';;) {
-        if (_.startsWith('"')) {
-            _ = _.slice(1);
-            for (let key = '"';;) {
-                const $ = BASIC_STRING.exec(_);
-                if ($ === null) {
-                    _.startsWith('"')
-                        || throwSyntaxError(where());
-                    _ = _.slice(1);
-                    keys += key + '"';
-                    break;
-                }
-                _ = _.slice($[0].length);
-                key += $[0];
-            }
-        }
-        else {
-            const key = ((_.startsWith('\'') ? LITERAL_KEY : BARE_KEY).exec(_) || throwSyntaxError(where()))[0];
-            _ = _.slice(key.length);
-            keys += key;
-        }
-        const $ = DOT_KEY.exec(_);
-        if ($ === null) {
-            return keys;
-        }
-        _ = _.slice($[0].length);
-        keys += $[0];
-    }
-}
-
-/* types */
-const ESCAPED_IN_SINGLE_LINE = /\\(?:([\\"])|([btnfr])|u(.{4})|U(.{8}))/g;
-const UNDERSCORES = /_/g;
-const XOB_INTEGER = /^0x[0-9A-Fa-f]+(?:_[0-9A-Fa-f]+)*|o[0-7]+(?:_[0-7]+)*|b[01]+(?:_[01]+)*$/;
-const INTEGER = /^[-+]?[1-9]\d*(?:_\d+)*$/;
-const FLOAT = /^[-+]?(?:0|[1-9]\d*(?:_\d+)*)(?:\.\d+(?:_\d+)*)?(?:[eE][-+]?\d+(?:_\d+)*)?$/;
-const FLOAT_NOT_INTEGER = /[.eE]/;
-/* parser */
-const BOM = /^\uFEFF/;
-const EOL = /\r?\n/;
-
 const NumberInteger = (literal) => {
     if (literal === '0' || literal === '+0' || literal === '-0') {
         return 0;
     }
     (literal.charAt(0) === '0' ? XOB_INTEGER : INTEGER).test(literal)
-        || throwSyntaxError('Invalid Integer ' + literal + ' at ' + where());
+        || throws(SyntaxError('Invalid Integer ' + literal + ' at ' + where()));
     const number = +literal.replace(UNDERSCORES, '');
     allowLonger
         || isSafeInteger(number)
-        || throwRangeError('Integer did not use BitInt must be Number.isSafeInteger, not includes ' + literal + ' meet at ' + where());
+        || throws(RangeError('Integer did not use BitInt must be Number.isSafeInteger, not includes ' + literal + ' meet at ' + where()));
     return number;
 };
 const BigIntInteger = (literal) => {
     if (literal === '0' || literal === '+0' || literal === '-0') {
         return 0n;
     }
-    (literal.charAt(0) === '0' ? XOB_INTEGER : INTEGER).test(literal) || throwSyntaxError('Invalid Integer ' + literal + ' at ' + where());
+    (literal.charAt(0) === '0' ? XOB_INTEGER : INTEGER).test(literal) || throws(SyntaxError('Invalid Integer ' + literal + ' at ' + where()));
     const bigInt = BigInt(literal.replace(UNDERSCORES, ''));
     allowLonger
         || -9223372036854775808n <= bigInt && bigInt <= 9223372036854775807n // ( min = -(2n**(64n-1n)) || ~max ) <= long <= ( max = 2n**(64n-1n)-1n || ~min )
-        || throwRangeError('Integer expect 64 bit range (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807), not includes ' + literal + ' meet at ' + where());
+        || throws(RangeError('Integer expect 64 bit range (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807), not includes ' + literal + ' meet at ' + where()));
     return bigInt;
 };
 const DependInteger = (literal) => {
@@ -390,13 +370,25 @@ const DependInteger = (literal) => {
     return IntegerMin <= bigInt && bigInt <= IntegerMax ? +(bigInt + '') : bigInt;
 };
 
-const FUNCTION = new WeakSet;
+/* options */
+let useWhatToJoinMultiLineString;
+let IntegerDepends, IntegerMin, IntegerMax;
+/* xOptions */
+let TableDepends;
+let open;
+let allowLonger;
+let enableNull;
+let allowInlineTableMultiLineAndTrailingCommaEvenNoComma;
+let enableInterpolationString;
+let asNulls, asStrings, asTables, asArrays, asBooleans, asFloats, asDatetimes, asIntegers;
+let customConstructors;
+/* xOptions.mix */
 const unType = (array) => array;
 const { asInlineArrayOfNulls, asInlineArrayOfStrings, asInlineArrayOfTables, asInlineArrayOfArrays, asInlineArrayOfBooleans, asInlineArrayOfFloats, asInlineArrayOfDatetimes, asInlineArrayOfIntegers, } = new Proxy(new WeakMap, {
     get: (arrayTypes) => function typify(array) {
         if (arrayTypes.has(array)) {
             arrayTypes.get(array) === typify
-                || throwTypeError('Types in array must be same. Check ' + where());
+                || throws(TypeError('Types in array must be same. Check ' + where()));
         }
         else {
             arrayTypes.set(array, typify);
@@ -404,18 +396,37 @@ const { asInlineArrayOfNulls, asInlineArrayOfStrings, asInlineArrayOfTables, asI
         return array;
     }
 });
-let useWhatToJoinMultiLineString;
-let IntegerDepends, IntegerMin, IntegerMax;
-let TableDepends;
-let open;
-let allowLonger;
-let keepComment;
-let enableNull;
-let enableNil;
-let allowInlineTableMultiLineAndTrailingCommaEvenNoComma;
-let enableInterpolationString;
-let asNulls, asStrings, asTables, asArrays, asBooleans, asFloats, asDatetimes, asIntegers;
-let customConstructors;
+let WC = [];
+function wc_on(each) { WC.push(each); }
+function wc_off(each) { throw throws(SyntaxError(where())); }
+let wc = wc_off;
+function Wc() {
+    let index = WC.length;
+    if (index) {
+        done();
+        const c = customConstructors;
+        const s = WC;
+        customConstructors = null;
+        WC = [];
+        if (typeof c === 'function') {
+            while (index--) {
+                const { parent, key, type } = s.pop();
+                parent[key] = c(type, parent[key]);
+            }
+        }
+        else {
+            while (index--) {
+                const { parent, key, type } = s.pop();
+                parent[key] = c[type](parent[key]);
+            }
+        }
+    }
+}
+/* use & clear */
+function clear() {
+    customConstructors = null;
+    WC.length = 0;
+}
 function use(specificationVersion, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger, extensionOptions) {
     if (specificationVersion !== 0.5) {
         throw new Error('TOML.parse(,specificationVersion)');
@@ -450,7 +461,7 @@ function use(specificationVersion, useWhatToJoinMultiLineString_notUsingForSplit
     let typify;
     if (extensionOptions === null) {
         TableDepends = Table;
-        open = allowLonger = keepComment = enableNull = enableNil = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = enableInterpolationString = false;
+        open = allowLonger = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = enableInterpolationString = false;
         customConstructors = null;
         typify = true;
     }
@@ -458,23 +469,24 @@ function use(specificationVersion, useWhatToJoinMultiLineString_notUsingForSplit
         TableDepends = extensionOptions.order ? OrderedTable : Table;
         open = !!extensionOptions.open;
         allowLonger = !!extensionOptions.longer;
-        keepComment = !!extensionOptions.hash;
         enableNull = !!extensionOptions.null;
-        enableNil = !!extensionOptions.nil;
         allowInlineTableMultiLineAndTrailingCommaEvenNoComma = !!extensionOptions.multi;
         enableInterpolationString = !!extensionOptions.ins;
         typify = !extensionOptions.mix;
         customConstructors = extensionOptions.new || null;
-        if (customConstructors !== null) {
+        if (customConstructors === null) {
+            wc = wc_off;
+        }
+        else {
             if (typeof customConstructors === 'function') {
                 if (typify) {
                     customConstructors = null;
                     throw new Error('TOML.parse(,,,,{ mix:false, new(){} })');
                 }
                 if (customConstructors.length !== 2) {
+                    customConstructors = null;
                     throw new Error('TOML.parse(,,,,xOptions.new.length)');
                 }
-                FUNCTION.add(customConstructors);
             }
             else if (typeof customConstructors === 'object') {
                 if (typify) {
@@ -513,6 +525,7 @@ function use(specificationVersion, useWhatToJoinMultiLineString_notUsingForSplit
             else {
                 throw new TypeError('TOML.parse(,,,,xOptions.new)');
             }
+            wc = wc_on;
         }
     }
     if (typify) {
@@ -529,79 +542,13 @@ function use(specificationVersion, useWhatToJoinMultiLineString_notUsingForSplit
         asNulls = asStrings = asTables = asArrays = asBooleans = asFloats = asDatetimes = asIntegers = unType;
     }
 }
-function clear() {
-    customConstructors = null;
-}
-
-const NONE = [];
-let sourceLines = NONE;
-let lastLineIndex = -1;
-let lineIndex = -1;
-let stacks_length = 0;
-const noop = (lineRest) => '';
-noop.previous = noop;
-noop.next = noop;
-let last = noop;
-function stacks_pop() {
-    --stacks_length;
-    const item = last;
-    last = last.previous;
-    last.next = noop; //
-    return item;
-}
-function stacks_push(item) {
-    ++stacks_length;
-    item.previous = last;
-    last.next = item;
-    last = item;
-}
-function stacks_pushBeforeLast(item) {
-    ++stacks_length;
-    item.previous = last.previous;
-    item.next = last;
-    last.previous.next = item;
-    last.previous = item;
-}
-const from = (array) => {
-    sourceLines = array;
-    lastLineIndex = sourceLines.length - 1;
-    lineIndex = -1;
-};
-const done = () => {
-    sourceLines = NONE;
-    stacks_length = 0;
-    last = noop;
-    noop.next = noop;
-};
-const next = () => sourceLines[++lineIndex];
-const rest = () => lineIndex !== lastLineIndex;
-const mark = () => lineIndex;
-const must = (message, startIndex) => {
-    lineIndex === lastLineIndex
-        && throws(new SyntaxError(message + ' is not close until the end of the file, which started from line ' + (startIndex + 1) + ': ' + sourceLines[startIndex]));
-    return sourceLines[++lineIndex];
-};
-const where = () => 'line ' + (lineIndex + 1) + ': ' + sourceLines[lineIndex];
-const throwSyntaxError = (message) => throws(new SyntaxError(message));
-const throwRangeError = (message) => throws(new RangeError(message));
-const throwTypeError = (message) => throws(new TypeError(message));
-const throwError = (message) => throws(new Error(message));
-function throws(error) {
-    if (sourceLines !== NONE) {
-        error.lineIndex = lineIndex;
-        error.lineNumber = lineIndex + 1;
-        done();
-        clear();
-    }
-    throw error;
-}
 
 const literal_cache = Symbol('literal_cache');
 const value_cache = Symbol('value_cache');
 class Datetime extends Date {
     constructor(literal) {
         // @ts-ignore
-        const { 0: hms_ms = '', 1: YMD = '', 2: T = '', 3: HMS_MS = hms_ms, 4: Z = '' } = DATETIME.exec(literal) || throwSyntaxError('Invalid Datetime ' + literal + ' at ' + where());
+        const { 0: hms_ms = '', 1: YMD = '', 2: T = '', 3: HMS_MS = hms_ms, 4: Z = '' } = DATETIME.exec(literal) || throws(SyntaxError('Invalid Datetime ' + literal + ' at ' + where()));
         super(Z ? YMD + 'T' + HMS_MS + Z :
             T ? YMD + 'T' + HMS_MS :
                 YMD ? YMD + 'T00:00:00.000'
@@ -629,14 +576,16 @@ const Float = (literal) => {
     if (FLOAT.test(literal) && FLOAT_NOT_INTEGER.test(literal)) {
         return +literal.replace(UNDERSCORES, '');
         //const number = +literal.replace(RE.UNDERSCORES, '');
-        //isFinite(number) || iterator.throwRangeError('Float can not be as big as Infinity, like '+literal+' at '+where());
+        //isFinite(number) || iterator.throws(RangeError('Float can not be as big as Infinity, like '+literal+' at '+where()));
         //return number;
     }
     //if ( literal==='inf' || literal==='+inf' ) { return Infinity; }
     //if ( literal==='-inf' ) { return -Infinity; }
     //if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) { return NaN; }
-    throwSyntaxError('Invalid Float ' + literal + ' at ' + where());
+    throws(SyntaxError('Invalid Float ' + literal + ' at ' + where()));
 };
+
+const isArray = Array.isArray;
 
 const fromCodePoint = String.fromCodePoint;
 
@@ -650,7 +599,7 @@ const unEscapeSingleLine = (match, p1, p2, p3, p4) => {
     }
     const codePoint = parseInt(p3 || p4, 16);
     (0xD7FF < codePoint && codePoint < 0xE000 || 0x10FFFF < codePoint)
-        && throwRangeError('Invalid Unicode Scalar ' + (p3 ? '\\u' + p3 : '\\U' + p4) + ' at ' + where());
+        && throws(RangeError('Invalid Unicode Scalar ' + (p3 ? '\\u' + p3 : '\\U' + p4) + ' at ' + where()));
     return fromCodePoint(codePoint);
 };
 const unEscapeMultiLine = (match, p1, p2, p3, p4, p5) => {
@@ -659,7 +608,7 @@ const unEscapeMultiLine = (match, p1, p2, p3, p4, p5) => {
     }
     if (p1) {
         p1.includes('\n')
-            || throwSyntaxError('Back slash leading whitespaces can only appear at the end of a line, but see ' + where());
+            || throws(SyntaxError('Back slash leading whitespaces can only appear at the end of a line, but see ' + where()));
         return '';
     }
     if (p2) {
@@ -670,129 +619,15 @@ const unEscapeMultiLine = (match, p1, p2, p3, p4, p5) => {
     }
     const codePoint = parseInt(p4 || p5, 16);
     (0xD7FF < codePoint && codePoint < 0xE000 || 0x10FFFF < codePoint)
-        && throwRangeError('Invalid Unicode Scalar ' + (p4 ? '\\u' + p4 : '\\U' + p5) + ' at ' + where());
+        && throws(RangeError('Invalid Unicode Scalar ' + (p4 ? '\\u' + p4 : '\\U' + p5) + ' at ' + where()));
     return fromCodePoint(codePoint);
 };
 const BasicString = (literal) => literal.replace(ESCAPED_IN_SINGLE_LINE, unEscapeSingleLine);
 const MultiLineBasicString = (literal) => literal.replace(ESCAPED_IN_MULTI_LINE, unEscapeMultiLine);
 
-function assignInterpolationString(table, finalKey, delimiter) {
-    enableInterpolationString || throwSyntaxError(where());
-    DELIMITER_CHECK.test(delimiter) && throwSyntaxError('Interpolation String opening tag incorrect at ' + where());
-    let string;
-    let lineRest;
-    {
-        const literals = [];
-        for (const start = mark();;) {
-            const literal = must('Interpolation String', start);
-            if (literal.startsWith(delimiter)) {
-                lineRest = literal.slice(delimiter.length).replace(PRE_WHITESPACE, '');
-                break;
-            }
-            literals.push(literal);
-        }
-        string = literals.join('\n');
-    }
-    if (lineRest.startsWith('(')) {
-        const interpolations_rest = INTERPOLATIONS.exec(lineRest) || throwSyntaxError(where());
-        lineRest = interpolations_rest[2];
-        for (const interpolation of interpolations_rest[1].match(INTERPOLATION)) {
-            if (REGEXP_MODE.test(interpolation)) {
-                const { 1: pattern, 2: flags, 3: Replacer } = PATTERN_FLAGS_REPLACER.exec(interpolation);
-                let search;
-                try {
-                    search = new RegExp(pattern, flags);
-                }
-                catch (error) {
-                    throw throwSyntaxError('Invalid regExp at ' + where());
-                }
-                let replacer;
-                switch (Replacer[0]) {
-                    case '\'':
-                        replacer = Replacer.slice(1, -1);
-                        break;
-                    case '"':
-                        replacer = BasicString(Replacer.slice(1, -1));
-                        break;
-                    case '{':
-                        const map = newMap(Replacer, true);
-                        replacer = (match) => map.has(match) ? map.get(match) : match;
-                        break;
-                    case '[':
-                        const { 1: whole, 2: subs } = WHOLE_AND_SUBS.exec(Replacer);
-                        const maps = [null];
-                        for (const sub of subs.match(SUB)) {
-                            maps.push(newMap(sub, true));
-                        }
-                        replacer = (...args) => whole.replace(DOLLAR, ($n) => {
-                            if ($n === '$$') {
-                                return '$';
-                            }
-                            const n = $n.slice(1);
-                            const arg = args[n] || '';
-                            const map = maps[n];
-                            return map && map.has(arg) ? map.get(arg) : arg;
-                        });
-                        break;
-                }
-                string = string.replace(search, replacer);
-            }
-            else {
-                const map = newMap(interpolation, false);
-                let round = '';
-                outer: for (let length = string.length, index = 0; index < length;) {
-                    for (const { 0: search, 1: replacer } of map) {
-                        if (string.startsWith(search, index)) {
-                            round += replacer;
-                            index += search.length;
-                            continue outer;
-                        }
-                    }
-                    round += string[index];
-                    ++index;
-                }
-                string = round;
-            }
-        }
-    }
-    table[finalKey] = string;
-    return lineRest;
-}
-function newMap(interpolation, usedForRegExp) {
-    const map = new Map;
-    const tokens = interpolation.match(INTERPOLATION_TOKEN);
-    for (let length = tokens.length, index = 0; index < length;) {
-        let search = tokens[index++];
-        search = search[0] === '\'' ? search.slice(1, -1) : BasicString(search.slice(1, -1));
-        usedForRegExp
-            || search
-            || throwSyntaxError('Characters to replace can not be empty, which was found at ' + where());
-        map.has(search)
-            && throwSyntaxError('Duplicate ' + (usedForRegExp ? 'replacer' : 'characters to replace') + ' at ' + where());
-        let replacer = tokens[index++];
-        replacer = replacer[0] === '\'' ? replacer.slice(1, -1) : BasicString(replacer.slice(1, -1));
-        map.set(search, replacer);
-    }
-    return map;
-}
-function ensureConstructor(type) {
-    customConstructors
-        || throwSyntaxError(where());
-    FUNCTION.has(customConstructors)
-        || type in customConstructors
-        || throwError(where());
-}
-function construct(type, value) {
-    return FUNCTION.has(customConstructors)
-        ? customConstructors(type, value)
-        : customConstructors[type](value);
-}
-
-const isArray = Array.isArray;
-
 const sealedInline = new WeakSet;
 const openTables = new WeakSet;
-function appendTable(table, key_key, asArrayItem, hash) {
+function appendTable(table, key_key, asArrayItem) {
     const leadingKeys = parseKeys(key_key);
     const finalKey = leadingKeys.pop();
     table = prepareTable(table, leadingKeys);
@@ -800,7 +635,7 @@ function appendTable(table, key_key, asArrayItem, hash) {
     if (asArrayItem) {
         let arrayOfTables;
         if (finalKey in table) {
-            sealedInline.has(arrayOfTables = table[finalKey]) && throwError('Trying to push Table to non-ArrayOfTables value at ' + where());
+            sealedInline.has(arrayOfTables = table[finalKey]) && throws(Error('Trying to push Table to non-ArrayOfTables value at ' + where()));
         }
         else {
             arrayOfTables = table[finalKey] = [];
@@ -809,15 +644,12 @@ function appendTable(table, key_key, asArrayItem, hash) {
     }
     else {
         if (finalKey in table) {
-            open && openTables.has(lastTable = table[finalKey]) || throwError('Duplicate Table definition at ' + where());
+            open && openTables.has(lastTable = table[finalKey]) || throws(Error('Duplicate Table definition at ' + where()));
             openTables.delete(lastTable);
         }
         else {
             table[finalKey] = lastTable = new TableDepends;
         }
-    }
-    if (keepComment && hash) {
-        table[Symbol_for(finalKey)] = hash.slice(1);
     }
     return lastTable;
 }
@@ -842,15 +674,15 @@ function prepareTable(table, keys) {
         if (key in table) {
             table = table[key];
             if (isTable(table)) {
-                sealedInline.has(table) && throwError('Trying to define table through static Inline Object at ' + where());
+                sealedInline.has(table) && throws(Error('Trying to define table through static Inline Object at ' + where()));
             }
             else if (isArray(table)) {
-                sealedInline.has(table) && throwError('Trying to append value to static Inline Array at ' + where());
+                sealedInline.has(table) && throws(Error('Trying to append value to static Inline Array at ' + where()));
                 // @ts-ignore
                 table = table[table.length - 1];
             }
             else {
-                throwError('Trying to define table through non-Table value at ' + where());
+                throws(Error('Trying to define table through non-Table value at ' + where()));
             }
         }
         else {
@@ -870,8 +702,8 @@ function prepareInlineTable(table, keys) {
         const key = keys[index++];
         if (key in table) {
             table = table[key];
-            isTable(table) || throwError('Trying to assign property through non-Table value at ' + where());
-            sealedInline.has(table) && throwError('Trying to assign property through static Inline Object at ' + where());
+            isTable(table) || throws(Error('Trying to assign property through non-Table value at ' + where()));
+            sealedInline.has(table) && throws(Error('Trying to assign property through static Inline Object at ' + where()));
         }
         else {
             table = table[key] = new TableDepends;
@@ -886,7 +718,7 @@ function prepareInlineTable(table, keys) {
 function assignLiteralString(table, finalKey, literal) {
     let $;
     if (literal.charAt(1) !== '\'' || literal.charAt(2) !== '\'') {
-        $ = LITERAL_STRING.exec(literal) || throwSyntaxError(where());
+        $ = LITERAL_STRING.exec(literal) || throws(SyntaxError(where()));
         table[finalKey] = $[1];
         return $[2];
     }
@@ -912,8 +744,7 @@ function assignLiteralString(table, finalKey, literal) {
     }
 }
 function checkLiteralString(literal) {
-    CONTROL_CHARACTER_EXCLUDE_TAB.test(literal) && throwSyntaxError('Control characters other than tab are not permitted in a Multi-Line Literal String, which was found at ' + where());
-    literal.includes('\'\'\'') && throwSyntaxError('Ending single quotes more than two are not permitted in a Multi-Line Literal String, which was found at ' + where());
+    CONTROL_CHARACTER_EXCLUDE_TAB.test(literal) && throws(SyntaxError('Control characters other than tab are not permitted in a Multi-Line Literal String, which was found at ' + where()));
     return literal;
 }
 function assignBasicString(table, finalKey, literal) {
@@ -925,27 +756,298 @@ function assignBasicString(table, finalKey, literal) {
     literal = literal.slice(3);
     const $ = MULTI_LINE_BASIC_STRING_exec_0(literal);
     if (literal.startsWith('"""', $.length)) {
-        ESCAPED_EXCLUDE_CONTROL_CHARACTER_test($) || throwSyntaxError(where());
+        ESCAPED_EXCLUDE_CONTROL_CHARACTER_test($) || throws(SyntaxError(where()));
         table[finalKey] = BasicString($);
         return literal.slice($.length + 3).replace(PRE_WHITESPACE, '');
     }
     if (literal) {
         literal += '\n';
-        ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(literal) || throwSyntaxError(where());
+        ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(literal) || throws(SyntaxError(where()));
     }
     const start = mark();
     for (;;) {
         let line = must('Basic String', start);
         const $ = MULTI_LINE_BASIC_STRING_exec_0(line);
         if (line.startsWith('"""', $.length)) {
-            ESCAPED_EXCLUDE_CONTROL_CHARACTER_test($) || throwSyntaxError(where());
+            ESCAPED_EXCLUDE_CONTROL_CHARACTER_test($) || throws(SyntaxError(where()));
             table[finalKey] = MultiLineBasicString(literal + $);
             return line.slice($.length + 3).replace(PRE_WHITESPACE, '');
         }
         line += '\n';
-        ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(line) || throwSyntaxError(where());
+        ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(line) || throws(SyntaxError(where()));
         literal += line;
     }
+}
+
+const DELIMITER_CHECK = /[^`]/;
+function assignInterpolationString(table, finalKey, delimiter) {
+    enableInterpolationString || throws(SyntaxError(where()));
+    DELIMITER_CHECK.test(delimiter) && throws(SyntaxError('Interpolation String opening tag incorrect at ' + where()));
+    let string;
+    let lineRest;
+    {
+        const literals = [];
+        for (const start = mark();;) {
+            const literal = must('Interpolation String', start);
+            if (literal.startsWith(delimiter)) {
+                lineRest = literal.slice(delimiter.length).replace(PRE_WHITESPACE, '');
+                break;
+            }
+            literals.push(literal);
+        }
+        string = literals.join('\n');
+    }
+    table[finalKey] = string;
+    return lineRest;
+}
+
+function Root() {
+    const rootTable = new TableDepends;
+    let lastSectionTable = rootTable;
+    while (rest()) {
+        const line = next().replace(PRE_WHITESPACE, '');
+        if (line === '') ;
+        else if (line.startsWith('#')) ;
+        else if (line.startsWith('[')) {
+            const { 1: $_asArrayItem$$, 2: keys, 3: $$asArrayItem$_ } = TABLE_DEFINITION_exec(line);
+            $_asArrayItem$$ === $$asArrayItem$_ || throws(SyntaxError('Square brackets of table define statement not match at ' + where()));
+            lastSectionTable = appendTable(rootTable, keys, $_asArrayItem$$);
+        }
+        else {
+            let rest = assign(lastSectionTable, line);
+            while (stacks_length) {
+                rest = stacks_pop()(rest);
+            }
+            rest === '' || rest.startsWith('#') || throws(SyntaxError(where()));
+        }
+    }
+    return rootTable;
+}
+function assign(lastInlineTable_array, lineRest) {
+    let left;
+    let _type_;
+    let type;
+    ({ 1: left, 2: _type_, 3: type, 4: lineRest } = KEY_VALUE_PAIR_exec(lineRest));
+    const leadingKeys = parseKeys(left);
+    const finalKey = leadingKeys.pop();
+    const table = prepareInlineTable(lastInlineTable_array, leadingKeys);
+    finalKey in table && throws(Error('Duplicate property definition at ' + where()));
+    _type_ && wc({ parent: table, key: finalKey, type });
+    switch (lineRest[0]) {
+        case '\'':
+            return assignLiteralString(table, finalKey, lineRest);
+        case '"':
+            return assignBasicString(table, finalKey, lineRest);
+        case '`':
+            return assignInterpolationString(table, finalKey, lineRest);
+        case '{':
+            stacks_push(lineRest => equalInlineTable(table, finalKey, lineRest));
+            return lineRest;
+        case '[':
+            stacks_push(lineRest => equalInlineArray(table, finalKey, lineRest));
+            return lineRest;
+    }
+    let literal;
+    ({ 1: literal, 2: lineRest } = VALUE_REST.exec(lineRest) || throws(SyntaxError(where())));
+    table[finalKey] =
+        literal === 'true' ? true : literal === 'false' ? false :
+            literal === 'inf' || literal === '+inf' ? Infinity : literal === '-inf' ? -Infinity :
+                literal === 'nan' || literal === '+nan' || literal === '-nan' ? NaN :
+                    literal.includes(':') || literal.indexOf('-') !== literal.lastIndexOf('-') && !literal.startsWith('-') ? new Datetime(literal) :
+                        literal.includes('.') || (literal.includes('e') || literal.includes('E')) && !literal.startsWith('0x') ? Float(literal) :
+                            enableNull && literal === 'null' ? null :
+                                IntegerDepends(literal);
+    return lineRest;
+}
+function push(lastInlineTable_array, lineRest) {
+    if (lineRest.startsWith('(')) {
+        let type;
+        ({ 1: type, 2: lineRest } = _VALUE_PAIR.exec(lineRest) || throws(SyntaxError(where())));
+        wc({ parent: lastInlineTable_array, key: lastInlineTable_array.length, type });
+    }
+    const lastIndex = '' + lastInlineTable_array.length;
+    switch (lineRest[0]) {
+        case '\'':
+            return assignLiteralString(asStrings(lastInlineTable_array), lastIndex, lineRest);
+        case '"':
+            return assignBasicString(asStrings(lastInlineTable_array), lastIndex, lineRest);
+        case '`':
+            return assignInterpolationString(asStrings(lastInlineTable_array), lastIndex, lineRest);
+        case '{':
+            stacks_push(lineRest => equalInlineTable(asTables(lastInlineTable_array), lastIndex, lineRest));
+            return lineRest;
+        case '[':
+            stacks_push(lineRest => equalInlineArray(asArrays(lastInlineTable_array), lastIndex, lineRest));
+            return lineRest;
+    }
+    let literal;
+    ({ 1: literal, 2: lineRest } = VALUE_REST.exec(lineRest) || throws(SyntaxError(where())));
+    if (literal === 'true') {
+        asBooleans(lastInlineTable_array).push(true);
+    }
+    else if (literal === 'false') {
+        asBooleans(lastInlineTable_array).push(false);
+    }
+    else if (literal === 'inf' || literal === '+inf') {
+        asFloats(lastInlineTable_array).push(Infinity);
+    }
+    else if (literal === '-inf') {
+        asFloats(lastInlineTable_array).push(-Infinity);
+    }
+    else if (literal === 'nan' || literal === '+nan' || literal === '-nan') {
+        asFloats(lastInlineTable_array).push(NaN);
+    }
+    else if (literal.includes(':') || literal.indexOf('-') !== literal.lastIndexOf('-') && !literal.startsWith('-')) {
+        asDatetimes(lastInlineTable_array).push(new Datetime(literal));
+    }
+    else if (literal.includes('.') || (literal.includes('e') || literal.includes('E')) && !literal.startsWith('0x')) {
+        asFloats(lastInlineTable_array).push(Float(literal));
+    }
+    else if (enableNull && literal === 'null') {
+        asNulls(lastInlineTable_array).push(null);
+    }
+    else {
+        asIntegers(lastInlineTable_array).push(IntegerDepends(literal));
+    }
+    return lineRest;
+}
+function equalInlineTable(table, finalKey, lineRest) {
+    const inlineTable = table[finalKey] = new TableDepends;
+    sealedInline.add(inlineTable);
+    lineRest = lineRest.replace(SYM_WHITESPACE, '');
+    if (allowInlineTableMultiLineAndTrailingCommaEvenNoComma) {
+        const start = mark();
+        const length = stacks_length;
+        return function callee(lineRest) {
+            for (;;) {
+                while (lineRest === '' || lineRest.startsWith('#')) {
+                    lineRest = must('Inline Table', start).replace(PRE_WHITESPACE, '');
+                }
+                if (lineRest.startsWith('}')) {
+                    return lineRest.replace(SYM_WHITESPACE, '');
+                }
+                lineRest = assign(inlineTable, lineRest);
+                if (stacks_length > length) {
+                    stacks_insertBeforeLast(function inserted(lineRest) {
+                        //
+                        while (lineRest === '' || lineRest.startsWith('#')) { //
+                            lineRest = must('Inline Table', start).replace(PRE_WHITESPACE, ''); //
+                        } //
+                        if (lineRest.startsWith(',')) {
+                            lineRest = lineRest.replace(SYM_WHITESPACE, '');
+                        } //
+                        //
+                        return callee(lineRest);
+                    });
+                    return lineRest;
+                }
+                while (lineRest === '' || lineRest.startsWith('#')) {
+                    lineRest = must('Inline Table', start).replace(PRE_WHITESPACE, '');
+                }
+                if (lineRest.startsWith(',')) {
+                    lineRest = lineRest.replace(SYM_WHITESPACE, '');
+                }
+            }
+        }(lineRest);
+    }
+    else {
+        if (lineRest.startsWith('}')) {
+            return lineRest.replace(SYM_WHITESPACE, '');
+        }
+        (lineRest === '' || lineRest.startsWith('#')) && throws(SyntaxError('Inline Table is intended to appear on a single line, which broken at ' + where()));
+        const length = stacks_length;
+        return function callee(lineRest) {
+            for (;;) {
+                lineRest = assign(inlineTable, lineRest);
+                if (stacks_length > length) {
+                    stacks_insertBeforeLast(function inserted(lineRest) {
+                        //
+                        if (lineRest.startsWith('}')) {
+                            return lineRest.replace(SYM_WHITESPACE, '');
+                        } //
+                        if (lineRest.startsWith(',')) { //
+                            lineRest = lineRest.replace(SYM_WHITESPACE, ''); //
+                            lineRest.startsWith('}') && throws(SyntaxError('The last property of an Inline Table can not have a trailing comma, which was found at ' + where())); //
+                        } //
+                        (lineRest === '' || lineRest.startsWith('#')) && throws(SyntaxError('Inline Table is intended to appear on a single line, which broken at ' + where())); //
+                        //
+                        return callee(lineRest);
+                    });
+                    return lineRest;
+                }
+                if (lineRest.startsWith('}')) {
+                    return lineRest.replace(SYM_WHITESPACE, '');
+                }
+                if (lineRest.startsWith(',')) {
+                    lineRest = lineRest.replace(SYM_WHITESPACE, '');
+                    lineRest.startsWith('}') && throws(SyntaxError('The last property of an Inline Table can not have a trailing comma, which was found at ' + where()));
+                }
+                (lineRest === '' || lineRest.startsWith('#')) && throws(SyntaxError('Inline Table is intended to appear on a single line, which broken at ' + where()));
+            }
+        }(lineRest);
+    }
+}
+function equalInlineArray(table, finalKey, lineRest) {
+    const inlineArray = table[finalKey] = [];
+    sealedInline.add(inlineArray);
+    const start = mark();
+    lineRest = lineRest.replace(SYM_WHITESPACE, '');
+    while (lineRest === '' || lineRest.startsWith('#')) {
+        lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, '');
+    }
+    if (lineRest.startsWith(']')) {
+        return lineRest.replace(SYM_WHITESPACE, '');
+    }
+    const length = stacks_length;
+    return function callee(lineRest) {
+        for (;;) {
+            lineRest = push(inlineArray, lineRest);
+            if (stacks_length > length) {
+                stacks_insertBeforeLast(function inserted(lineRest) {
+                    //
+                    while (lineRest === '' || lineRest.startsWith('#')) { //
+                        lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, ''); //
+                    } //
+                    if (lineRest.startsWith(',')) { //
+                        lineRest = lineRest.replace(SYM_WHITESPACE, ''); //
+                        while (lineRest === '' || lineRest.startsWith('#')) { //
+                            lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, ''); //
+                        } //
+                        if (lineRest.startsWith(']')) {
+                            return lineRest.replace(SYM_WHITESPACE, '');
+                        } //
+                    } //
+                    else { //
+                        if (lineRest.startsWith(']')) {
+                            return lineRest.replace(SYM_WHITESPACE, '');
+                        } //
+                        throws(SyntaxError(where())); //
+                    } //
+                    //
+                    return callee(lineRest);
+                });
+                return lineRest;
+            }
+            while (lineRest === '' || lineRest.startsWith('#')) {
+                lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, '');
+            }
+            if (lineRest.startsWith(',')) {
+                lineRest = lineRest.replace(SYM_WHITESPACE, '');
+                while (lineRest === '' || lineRest.startsWith('#')) {
+                    lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, '');
+                }
+                if (lineRest.startsWith(']')) {
+                    return lineRest.replace(SYM_WHITESPACE, '');
+                }
+            }
+            else {
+                if (lineRest.startsWith(']')) {
+                    return lineRest.replace(SYM_WHITESPACE, '');
+                }
+                throws(SyntaxError(where()));
+            }
+        }
+    }(lineRest);
 }
 
 function parse(sourceContent, specificationVersion, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger = true, extensionOptions = null) {
@@ -956,398 +1058,19 @@ function parse(sourceContent, specificationVersion, useWhatToJoinMultiLineString
         sourceContent = sourceContent.toString();
     }
     use(specificationVersion, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger, extensionOptions);
-    const rootTable = new TableDepends;
-    from(sourceContent.replace(BOM, '').split(EOL));
-    let lastSectionTable = rootTable;
-    while (rest()) {
-        const line = next().replace(PRE_WHITESPACE, '');
-        if (line === '') ;
-        else if (line.startsWith('#')) {
-            if (keepComment) {
-                lastSectionTable[Symbol('#')] = line.slice(1);
-            }
+    try {
+        from(sourceContent);
+        try {
+            const rootTable = Root();
+            Wc();
+            return rootTable;
         }
-        else if (line.startsWith('[')) {
-            const { 1: $_asArrayItem$$, 2: keys, 3: $$asArrayItem$_, 4: hash } = TABLE_DEFINITION_exec(line);
-            $_asArrayItem$$ === $$asArrayItem$_ || throwSyntaxError('Square brackets of table define statement not match at ' + where());
-            lastSectionTable = appendTable(rootTable, keys, $_asArrayItem$$, hash);
-        }
-        else {
-            const $_assignInline_pushInline = true;
-            let rest = setInline($_assignInline_pushInline, lastSectionTable, line);
-            while (stacks_length) {
-                rest = stacks_pop()(rest);
-            }
-            if (rest === '') ;
-            else if (rest.startsWith('#')) {
-                if (keepComment) {
-                    lastSectionTable[Symbol('#')] = rest.slice(1);
-                }
-            }
-            else {
-                throwSyntaxError(where());
-            }
+        finally {
+            done();
         }
     }
-    done();
-    clear();
-    return rootTable;
-}
-function setInline($_assignInline_pushInline, lastInlineTable_array, lineRest) {
-    let $_assignInlineTable_assignInlineArray = false;
-    if ($_assignInline_pushInline) {
-        const { 1: left, 2: custom, 3: type, 4: right } = KEY_VALUE_PAIR_exec(lineRest);
-        custom && ensureConstructor(type);
-        const leadingKeys = parseKeys(left);
-        const finalKey = leadingKeys.pop();
-        const table = prepareInlineTable(lastInlineTable_array, leadingKeys);
-        finalKey in table && throwError('Duplicate property definition at ' + where());
-        switch (right[0]) {
-            case '\'':
-                lineRest = assignLiteralString(table, finalKey, right);
-                break;
-            case '"':
-                lineRest = assignBasicString(table, finalKey, right);
-                break;
-            case '`':
-                lineRest = assignInterpolationString(table, finalKey, right);
-                break;
-            default:
-                let literal;
-                ({ 1: literal, 2: lineRest } = VALUE_REST.exec(right) || throwSyntaxError(where()));
-                table[finalKey] =
-                    literal === 'true' ? true : literal === 'false' ? false :
-                        literal === 'inf' || literal === '+inf' ? Infinity : literal === '-inf' ? -Infinity :
-                            literal === 'nan' || literal === '+nan' || literal === '-nan' ? NaN :
-                                literal.includes(':') || literal.indexOf('-') !== literal.lastIndexOf('-') && !literal.startsWith('-') ? new Datetime(literal) :
-                                    literal.includes('.') || (literal.includes('e') || literal.includes('E')) && !literal.startsWith('0x') ? Float(literal) :
-                                        enableNull && literal === 'null' || enableNil && literal === 'nil' ? null :
-                                            IntegerDepends(literal);
-                break;
-            case '{':
-                $_assignInlineTable_assignInlineArray = true;
-            case '[':
-                stacks_push((lineRest) => {
-                    lineRest = assignInlineLevel($_assignInlineTable_assignInlineArray, table, finalKey, lineRest);
-                    //
-                    if (custom) {
-                        table[finalKey] = construct(type, table[finalKey]);
-                    } //
-                    if (keepComment && lineRest.startsWith('#')) { //
-                        table[Symbol_for(finalKey)] = lineRest.slice(1); //
-                        return ''; //
-                    } //
-                    return lineRest; //
-                    //
-                });
-                return right;
-        }
-        if (custom) {
-            table[finalKey] = construct(type, table[finalKey]);
-        }
-        if (keepComment && lineRest.startsWith('#')) {
-            table[Symbol_for(finalKey)] = lineRest.slice(1);
-            return '';
-        }
-        return lineRest;
-    }
-    else {
-        const custom = lineRest.startsWith('!!');
-        let type;
-        if (custom) {
-            //options.typify && iterator.throwSyntaxError('Only mixable arrays could contain custom type. Check '+iterator.where());
-            ({ 1: type, 2: lineRest } = _VALUE_PAIR.exec(lineRest) || throwSyntaxError(where()));
-            ensureConstructor(type);
-        }
-        const lastIndex = '' + lastInlineTable_array.length;
-        switch (lineRest[0]) {
-            case '\'':
-                lineRest = assignLiteralString(asStrings(lastInlineTable_array), lastIndex, lineRest);
-                break;
-            case '"':
-                lineRest = assignBasicString(asStrings(lastInlineTable_array), lastIndex, lineRest);
-                break;
-            case '`':
-                lineRest = assignInterpolationString(asStrings(lastInlineTable_array), lastIndex, lineRest);
-                break;
-            default:
-                let literal;
-                ({ 1: literal, 2: lineRest } = VALUE_REST.exec(lineRest) || throwSyntaxError(where()));
-                if (literal === 'true') {
-                    asBooleans(lastInlineTable_array).push(true);
-                }
-                else if (literal === 'false') {
-                    asBooleans(lastInlineTable_array).push(false);
-                }
-                else if (literal === 'inf' || literal === '+inf') {
-                    asFloats(lastInlineTable_array).push(Infinity);
-                }
-                else if (literal === '-inf') {
-                    asFloats(lastInlineTable_array).push(-Infinity);
-                }
-                else if (literal === 'nan' || literal === '+nan' || literal === '-nan') {
-                    asFloats(lastInlineTable_array).push(NaN);
-                }
-                else if (literal.includes(':') || literal.indexOf('-') !== literal.lastIndexOf('-') && !literal.startsWith('-')) {
-                    asDatetimes(lastInlineTable_array).push(new Datetime(literal));
-                }
-                else if (literal.includes('.') || (literal.includes('e') || literal.includes('E')) && !literal.startsWith('0x')) {
-                    asFloats(lastInlineTable_array).push(Float(literal));
-                }
-                else if (enableNull && literal === 'null' || enableNil && literal === 'nil') {
-                    asNulls(lastInlineTable_array).push(null);
-                }
-                else {
-                    asIntegers(lastInlineTable_array).push(IntegerDepends(literal));
-                }
-                break;
-            case '{':
-                $_assignInlineTable_assignInlineArray = true;
-            case '[':
-                stacks_push((lineRest) => {
-                    lineRest = assignInlineLevel($_assignInlineTable_assignInlineArray, asArrays(lastInlineTable_array), lastIndex, lineRest);
-                    //
-                    if (custom) {
-                        lastInlineTable_array[lastIndex] = construct(type, lastInlineTable_array[lastIndex]);
-                    } //
-                    if (keepComment && lineRest.startsWith('#')) { //
-                        lastInlineTable_array[Symbol_for(lastIndex)] = lineRest.slice(1); //
-                        return ''; //
-                    } //
-                    return lineRest; //
-                    //
-                });
-                return lineRest;
-        }
-        if (custom) {
-            lastInlineTable_array[lastIndex] = construct(type, lastInlineTable_array[lastIndex]);
-        }
-        if (keepComment && lineRest.startsWith('#')) {
-            lastInlineTable_array[Symbol_for(lastIndex)] = lineRest.slice(1);
-            return '';
-        }
-        return lineRest;
-    }
-}
-function assignInlineLevel($_assignInlineTable_assignInlineArray, table, finalKey, lineRest) {
-    const $_assignInline_pushInline = $_assignInlineTable_assignInlineArray;
-    if ($_assignInlineTable_assignInlineArray) {
-        const inlineTable = table[finalKey] = new TableDepends;
-        sealedInline.add(inlineTable);
-        lineRest = lineRest.replace(SYM_WHITESPACE, '');
-        if (allowInlineTableMultiLineAndTrailingCommaEvenNoComma) {
-            const start = mark();
-            const length = stacks_length;
-            return function callee(lineRest) {
-                for (;;) {
-                    for (;;) {
-                        if (lineRest === '') ;
-                        else if (lineRest.startsWith('#')) {
-                            if (keepComment) {
-                                table[Symbol('#')] = lineRest.slice(1);
-                            }
-                        }
-                        else {
-                            break;
-                        }
-                        lineRest = must('Inline Table', start).replace(PRE_WHITESPACE, '');
-                    }
-                    if (lineRest.startsWith('}')) {
-                        return lineRest.replace(SYM_WHITESPACE, '');
-                    }
-                    lineRest = setInline($_assignInline_pushInline, inlineTable, lineRest);
-                    if (stacks_length > length) {
-                        stacks_pushBeforeLast((lineRest) => {
-                            //
-                            for (;;) { //
-                                if (lineRest === '') ; //
-                                else if (lineRest.startsWith('#')) { //
-                                    if (keepComment) {
-                                        table[Symbol('#')] = lineRest.slice(1);
-                                    } //
-                                } //
-                                else {
-                                    break;
-                                } //
-                                lineRest = must('Inline Table', start).replace(PRE_WHITESPACE, ''); //
-                            } //
-                            if (lineRest.startsWith(',')) {
-                                lineRest = lineRest.replace(SYM_WHITESPACE, '');
-                            } //
-                            //
-                            return callee(lineRest);
-                        });
-                        return lineRest;
-                    }
-                    for (;;) {
-                        if (lineRest === '') ;
-                        else if (lineRest.startsWith('#')) {
-                            if (keepComment) {
-                                table[Symbol('#')] = lineRest.slice(1);
-                            }
-                        }
-                        else {
-                            break;
-                        }
-                        lineRest = must('Inline Table', start).replace(PRE_WHITESPACE, '');
-                    }
-                    if (lineRest.startsWith(',')) {
-                        lineRest = lineRest.replace(SYM_WHITESPACE, '');
-                    }
-                }
-            }(lineRest);
-        }
-        else {
-            if (lineRest.startsWith('}')) {
-                return lineRest.replace(SYM_WHITESPACE, '');
-            }
-            (lineRest === '' || lineRest.startsWith('#')) && throwSyntaxError('Inline Table is intended to appear on a single line, which broken at ' + where());
-            const length = stacks_length;
-            return function callee(lineRest) {
-                for (;;) {
-                    lineRest = setInline($_assignInline_pushInline, inlineTable, lineRest);
-                    if (stacks_length > length) {
-                        stacks_pushBeforeLast((lineRest) => {
-                            //
-                            if (lineRest.startsWith('}')) {
-                                return lineRest.replace(SYM_WHITESPACE, '');
-                            } //
-                            if (lineRest.startsWith(',')) { //
-                                lineRest = lineRest.replace(SYM_WHITESPACE, ''); //
-                                lineRest.startsWith('}') && throwSyntaxError('The last property of an Inline Table can not have a trailing comma, which was found at ' + where()); //
-                            } //
-                            (lineRest === '' || lineRest.startsWith('#')) && throwSyntaxError('Inline Table is intended to appear on a single line, which broken at ' + where()); //
-                            //
-                            return callee(lineRest);
-                        });
-                        return lineRest;
-                    }
-                    if (lineRest.startsWith('}')) {
-                        return lineRest.replace(SYM_WHITESPACE, '');
-                    }
-                    if (lineRest.startsWith(',')) {
-                        lineRest = lineRest.replace(SYM_WHITESPACE, '');
-                        lineRest.startsWith('}') && throwSyntaxError('The last property of an Inline Table can not have a trailing comma, which was found at ' + where());
-                    }
-                    (lineRest === '' || lineRest.startsWith('#')) && throwSyntaxError('Inline Table is intended to appear on a single line, which broken at ' + where());
-                }
-            }(lineRest);
-        }
-    }
-    else {
-        const inlineArray = table[finalKey] = [];
-        sealedInline.add(inlineArray);
-        const start = mark();
-        lineRest = lineRest.replace(SYM_WHITESPACE, '');
-        for (;;) {
-            if (lineRest === '') ;
-            else if (lineRest.startsWith('#')) {
-                if (keepComment) {
-                    table[Symbol('#')] = lineRest.slice(1);
-                }
-            }
-            else {
-                break;
-            }
-            lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, '');
-        }
-        if (lineRest.startsWith(']')) {
-            return lineRest.replace(SYM_WHITESPACE, '');
-        }
-        const length = stacks_length;
-        return function callee(lineRest) {
-            for (;;) {
-                lineRest = setInline($_assignInline_pushInline, inlineArray, lineRest);
-                if (stacks_length > length) {
-                    stacks_pushBeforeLast((lineRest) => {
-                        //
-                        for (;;) { //
-                            if (lineRest === '') ; //
-                            else if (lineRest.startsWith('#')) { //
-                                if (keepComment) {
-                                    table[Symbol('#')] = lineRest.slice(1);
-                                } //
-                            } //
-                            else {
-                                break;
-                            } //
-                            lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, ''); //
-                        } //
-                        if (lineRest.startsWith(',')) { //
-                            lineRest = lineRest.replace(SYM_WHITESPACE, ''); //
-                            if (keepComment && lineRest.startsWith('#')) { //
-                                inlineArray[Symbol_for(inlineArray.length - 1 + '')] = lineRest.slice(1); //
-                                lineRest = ''; //
-                            } //
-                            for (;;) { //
-                                if (lineRest === '') ; //
-                                else if (lineRest.startsWith('#')) { //
-                                    if (keepComment) {
-                                        table[Symbol('#')] = lineRest.slice(1);
-                                    } //
-                                } //
-                                else {
-                                    break;
-                                } //
-                                lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, ''); //
-                            } //
-                            if (lineRest.startsWith(']')) {
-                                return lineRest.replace(SYM_WHITESPACE, '');
-                            } //
-                        } //
-                        else { //
-                            if (lineRest.startsWith(']')) {
-                                return lineRest.replace(SYM_WHITESPACE, '');
-                            } //
-                            throwSyntaxError(where()); //
-                        } //
-                        //
-                        return callee(lineRest);
-                    });
-                    return lineRest;
-                }
-                for (;;) {
-                    if (lineRest === '') ;
-                    else if (lineRest.startsWith('#')) {
-                        if (keepComment) {
-                            table[Symbol('#')] = lineRest.slice(1);
-                        }
-                    }
-                    else {
-                        break;
-                    }
-                    lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, '');
-                }
-                if (lineRest.startsWith(',')) {
-                    lineRest = lineRest.replace(SYM_WHITESPACE, '');
-                    if (keepComment && lineRest.startsWith('#')) {
-                        inlineArray[Symbol_for(inlineArray.length - 1 + '')] = lineRest.slice(1);
-                        lineRest = '';
-                    }
-                    for (;;) {
-                        if (lineRest === '') ;
-                        else if (lineRest.startsWith('#')) {
-                            if (keepComment) {
-                                table[Symbol('#')] = lineRest.slice(1);
-                            }
-                        }
-                        else {
-                            break;
-                        }
-                        lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, '');
-                    }
-                    if (lineRest.startsWith(']')) {
-                        return lineRest.replace(SYM_WHITESPACE, '');
-                    }
-                }
-                else {
-                    if (lineRest.startsWith(']')) {
-                        return lineRest.replace(SYM_WHITESPACE, '');
-                    }
-                    throwSyntaxError(where());
-                }
-            }
-        }(lineRest);
+    finally {
+        clear();
     }
 }
 

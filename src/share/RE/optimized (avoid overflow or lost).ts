@@ -1,5 +1,6 @@
-import * as iterator from './iterator';
-import * as RE from './RE-higher';
+import SyntaxError from '.SyntaxError';
+import * as iterator from '../iterator';
+import * as RE from './nested (readable)';
 
 /* parser */
 
@@ -26,7 +27,7 @@ export function BASIC_STRING_exec (_2 :string) :{ 1 :string, 2 :string } {
 		const $ :RegExpExecArray | null = BASIC_STRING.exec(_2);
 		if ( $===null ) {
 			_2.startsWith('"')
-			|| iterator.throwSyntaxError(iterator.where());
+			|| iterator.throws(SyntaxError(iterator.where()));
 			return { 1: _1, 2: _2.replace(RE.SYM_WHITESPACE, '') };
 		}
 		_1 += $[0];
@@ -38,27 +39,24 @@ const BARE_KEY :RegExp = /^[\w-]+/;
 const LITERAL_KEY :RegExp = /^'[^'\x00-\x08\x0B-\x1F\x7F]*'/;
 const DOT_KEY :RegExp = /^[ \t]*\.[ \t]*/;
 
-export function TABLE_DEFINITION_exec (_ :string) :{ 1 :boolean, 2 :string, 3 :boolean, 4 :string } {
+export function TABLE_DEFINITION_exec (_ :string) :{ 1 :boolean, 2 :string, 3 :boolean } {
 	const _1 :boolean = _.charAt(1)==='[';
 	_ = _.slice(_1 ? 2 : 1).replace(RE.PRE_WHITESPACE, '');
 	const _2 :string = getKeys(_);
 	_ = _.slice(_2.length).replace(RE.PRE_WHITESPACE, '');
 	_.startsWith(']')
-	|| iterator.throwSyntaxError(iterator.where());
+	|| iterator.throws(SyntaxError(iterator.where()));
 	const _3 :boolean = _.charAt(1)===']';
 	_ = _.slice(_3 ? 2 : 1).replace(RE.PRE_WHITESPACE, '');
 	_===''
 	|| _.startsWith('#')
-	|| iterator.throwSyntaxError(iterator.where());
-	return { 1: _1, 2: _2, 3: _3, 4: _ };
+	|| iterator.throws(SyntaxError(iterator.where()));
+	return { 1: _1, 2: _2, 3: _3 };
 }
 
-const KEY_VALUE_PAIR :RegExp = /^[ \t]*=[ \t]*(!!([\w-]*)[ \t]+)?([^ \t#][^]*)$/;
 export function KEY_VALUE_PAIR_exec (_ :string) :{ 1 :string, 2 :string, 3 :string, 4 :string } {
 	const _1 :string = getKeys(_);
-	const $ :RegExpExecArray = <RegExpExecArray>KEY_VALUE_PAIR.exec(_.slice(_1.length));
-	$
-	|| iterator.throwSyntaxError(iterator.where());
+	const $ :RegExpExecArray = RE.KEY_VALUE_PAIR.exec(_.slice(_1.length)) || iterator.throws(SyntaxError(iterator.where()));
 	return { 1: _1, 2: $[1], 3: $[2], 4: $[3] };
 }
 
@@ -70,7 +68,7 @@ function getKeys (_ :string) :string {
 				const $ :RegExpExecArray | null = BASIC_STRING.exec(_);
 				if ( $===null ) {
 					_.startsWith('"')
-					|| iterator.throwSyntaxError(iterator.where());
+					|| iterator.throws(SyntaxError(iterator.where()));
 					_ = _.slice(1);
 					keys += key+'"';
 					break;
@@ -80,7 +78,7 @@ function getKeys (_ :string) :string {
 			}
 		}
 		else {
-			const key :string = ( ( _.startsWith('\'') ? LITERAL_KEY : BARE_KEY ).exec(_) || iterator.throwSyntaxError(iterator.where()) )[0];
+			const key :string = ( ( _.startsWith('\'') ? LITERAL_KEY : BARE_KEY ).exec(_) || iterator.throws(SyntaxError(iterator.where())) )[0];
 			_ = _.slice(key.length);
 			keys += key;
 		}

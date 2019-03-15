@@ -1,3 +1,5 @@
+import SyntaxError from '.SyntaxError';
+import Error from '.Error';
 import Symbol from '.Symbol';
 import Date from '.Date';
 import * as RE from '../share/RE';
@@ -12,7 +14,7 @@ export class Datetime extends Date {
 	
 	constructor (literal :string) {
 		// @ts-ignore
-		const { 0: hms_ms = '', 1: YMD = '', 2: T = '', 3: HMS_MS = hms_ms, 4: Z = '' } :RegExpExecArray = RE.DATETIME.exec(literal) || iterator.throwSyntaxError('Invalid Datetime '+literal+' at '+iterator.where());
+		const { 0: hms_ms = '', 1: YMD = '', 2: T = '', 3: HMS_MS = hms_ms, 4: Z = '' } :RegExpExecArray = RE.DATETIME.exec(literal) || iterator.throws(SyntaxError('Invalid Datetime '+literal+' at '+iterator.where()));
 		super(
 			Z ? YMD+'T'+HMS_MS+Z :
 				T ? YMD+'T'+HMS_MS :

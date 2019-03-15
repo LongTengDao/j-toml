@@ -9,7 +9,6 @@ declare module '.Infinity' { export default Infinity; }
 declare module '.NaN' { export default NaN; }
 declare module '.Array.isArray' { export default Array.isArray; }
 declare module '.Symbol' { export default Symbol; }
-declare module '.Symbol.for' { export default Symbol.for; }
 declare module '.Buffer.isBuffer' { export default Buffer.isBuffer; }
 declare module '.SyntaxError' { export default SyntaxError; }
 declare module '.RangeError' { export default RangeError; }

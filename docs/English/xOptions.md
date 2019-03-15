@@ -75,18 +75,6 @@ y = 2
 key = null
 ```
 
-`xOptions.nil`
---------------
-
-*   type: `boolean`
-*   default: `false`
-
-`null` value support (by `nil` literal).
-
-```
-key = nil
-```
-
 `xOptions.ins`
 --------------
 
@@ -103,24 +91,6 @@ value `A`
 keyB = ``
 `value` A
 ``
-
-keyC = `
-NAME open SITE.
-Nice.
-` ( 'NAME'="Mr. \u0043", 'PLACE'='GitHub' )
-
-keyD = `
-Mr. C open GitHub,
-saw `x<y`.
-` ( '<'='&lt;' ) ( /`(.*?)`/g = '<code>$1</code>' ) ( "\n"=' ' )
-
-keyE = `
-Mr. \x43 open GitHub.
-` ( /\\x\d{2}/g = { '\x43'='C' } )
-
-keyF = `
-{{ NAME | Mr }} open {{ SITE }}.
-` ( /{{ *(.*?) *(?:\| *(.*?) *)?}}/g = ['$2$1',{ 'NAME'='Mr. C', 'SITE'='GitHub' }, { 'Mr'='Mr. ' }] )
 ```
 
 In JSON land, that would give you the following structure:
@@ -128,11 +98,7 @@ In JSON land, that would give you the following structure:
 ```json
 {
     "keyA": "value `A`",
-    "keyB": "`value` A",
-    "keyC": "Mr. C open GitHub.\nNice.",
-    "keyE": "Mr. C open GitHub, saw <code>x&lt;y</code>.",
-    "keyD": "Mr. C open GitHub.",
-    "keyF": "Mr. C open GitHub."
+    "keyB": "`value` A"
 }
 ```
 
@@ -144,37 +110,10 @@ The original parsed result of interpolation string always use `\n` as newline, n
 *   type: `{ [type]: function (value) { } }` / `function (type, value) { }`
 
 ```
-key = !!type 'value'
+key = (type) 'value'
 ```
 
 Note: This option requires `xOptions.mix` enabled at the same time, because the custom types could not be properly classified.
-
-`xOptions.hash`
----------------
-
-*   type: `boolean`
-*   default: `false`
-
-Comments information.
-
-```toml
-# comment 0
-[table] # comment 1
-key = 'value' # comment 2
-```
-
-In JavaScript land, that would give you the following structure:
-
-```js
-({
-    [Symbol('#')]: ' comment 0',
-    table: {
-    	key: 'value',
-    	[Symbol.for('key')]: ' comment 2'
-    },
-    [Symbol.for('table')]: ' comment 1'
-})
-```
 
 `xOptions.open`
 --------------
