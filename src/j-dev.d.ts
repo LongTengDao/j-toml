@@ -10,6 +10,7 @@ declare module '.NaN' { export default NaN; }
 declare module '.Array.isArray' { export default Array.isArray; }
 declare module '.Symbol' { export default Symbol; }
 declare module '.Buffer.isBuffer' { export default Buffer.isBuffer; }
+declare module '.Buffer.from' { export default Buffer.from; }
 declare module '.SyntaxError' { export default SyntaxError; }
 declare module '.RangeError' { export default RangeError; }
 declare module '.TypeError' { export default TypeError; }

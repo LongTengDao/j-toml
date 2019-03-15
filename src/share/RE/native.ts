@@ -13,6 +13,6 @@ export const FLOAT_NOT_INTEGER = /[.eE]/;
 
 /* parse */
 
-export const NON_SCALAR = /[\uD800-\uDFFF]/u;// \u{10FFFF}- > \uFFFD ?
+export const NON_SCALAR = /[\uD800-\uDFFF]/u;// \u{10FFFF}- > \uFFFD
 export const BOM = /^\uFEFF/;
 export const EOL = /\r?\n/;

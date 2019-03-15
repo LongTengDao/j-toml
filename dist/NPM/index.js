@@ -1,8 +1,10 @@
 ﻿'use strict';
 
-const version = '0.5.65';
+const version = '0.5.66';
 
 const isBuffer = Buffer.isBuffer;
+
+const from = Buffer.from;
 
 /* types */
 const ESCAPED_IN_SINGLE_LINE = /\\(?:([\\"])|([btnfr])|u(.{4})|U(.{8}))/g;
@@ -12,7 +14,7 @@ const INTEGER = /^[-+]?[1-9]\d*(?:_\d+)*$/;
 const FLOAT = /^[-+]?(?:0|[1-9]\d*(?:_\d+)*)(?:\.\d+(?:_\d+)*)?(?:[eE][-+]?\d+(?:_\d+)*)?$/;
 const FLOAT_NOT_INTEGER = /[.eE]/;
 /* parse */
-const NON_SCALAR = /[\uD800-\uDFFF]/u; // \u{10FFFF}- > \uFFFD ?
+const NON_SCALAR = /[\uD800-\uDFFF]/u; // \u{10FFFF}- > \uFFFD
 const BOM = /^\uFEFF/;
 const EOL = /\r?\n/;
 
@@ -225,13 +227,12 @@ function noop(lineRest) { return ''; }
 noop.previous = noop;
 let stacks_length = 0;
 let last = noop;
-function from(source) {
+function could() {
     if (sourceLines !== NONE) {
         throw Error('Inner error: parsing in parsing.');
     }
-    if (NON_SCALAR.test(source)) {
-        throw Error('toml doc must be a (ful-scalar) valid utf8 file.');
-    }
+}
+function todo(source) {
     sourceLines = source.replace(BOM, '').split(EOL);
     lastLineIndex = sourceLines.length - 1;
     lineIndex = -1;
@@ -427,10 +428,7 @@ function clear() {
     customConstructors = null;
     WC.length = 0;
 }
-function use(specificationVersion, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger, extensionOptions) {
-    if (specificationVersion !== 0.5) {
-        throw new Error('TOML.parse(,specificationVersion)');
-    }
+function use(useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger, extensionOptions) {
     if (typeof useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines !== 'string') {
         throw new TypeError('TOML.parse(,,multiLineJoiner)');
     }
@@ -480,27 +478,22 @@ function use(specificationVersion, useWhatToJoinMultiLineString_notUsingForSplit
         else {
             if (typeof customConstructors === 'function') {
                 if (typify) {
-                    customConstructors = null;
                     throw new Error('TOML.parse(,,,,{ mix:false, new(){} })');
                 }
                 if (customConstructors.length !== 2) {
-                    customConstructors = null;
                     throw new Error('TOML.parse(,,,,xOptions.new.length)');
                 }
             }
             else if (typeof customConstructors === 'object') {
                 if (typify) {
-                    customConstructors = null;
                     throw new Error('TOML.parse(,,,,{ mix:false, new:{} })');
                 }
                 if (getPrototypeOf(customConstructors) === null) {
                     for (const type of getOwnPropertyNames(customConstructors)) {
                         if (typeof customConstructors[type] !== 'function') {
-                            customConstructors = null;
                             throw new TypeError('TOML.parse(,,,,xOptions.new[' + stringify(type) + '])');
                         }
                         if (customConstructors[type].length) {
-                            customConstructors = null;
                             throw new Error('TOML.parse(,,,,xOptions.new[' + stringify(type) + '].length)');
                         }
                     }
@@ -511,11 +504,9 @@ function use(specificationVersion, useWhatToJoinMultiLineString_notUsingForSplit
                     for (const type of getOwnPropertyNames(origin)) {
                         const customConstructor = origin[type];
                         if (typeof customConstructor !== 'function') {
-                            customConstructors = null;
                             throw new TypeError('TOML.parse(,,,,xOptions.new[' + stringify(type) + '])');
                         }
                         if (customConstructors[type].length) {
-                            customConstructors = null;
                             throw new Error('TOML.parse(,,,,xOptions.new[' + stringify(type) + '].length)');
                         }
                         customConstructors[type] = customConstructor;
@@ -1051,15 +1042,26 @@ function equalInlineArray(table, finalKey, lineRest) {
 }
 
 function parse(sourceContent, specificationVersion, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger = true, extensionOptions = null) {
+    could();
     if (typeof sourceContent !== 'string') {
         if (!isBuffer(sourceContent)) {
             throw new TypeError('TOML.parse(sourceContent)');
         }
-        sourceContent = sourceContent.toString();
+        const buffer = sourceContent;
+        sourceContent = buffer.toString();
+        if (!from(buffer).equals(buffer)) {
+            throw Error('A TOML doc must be a (ful-scalar) valid utf8 file.');
+        }
     }
-    use(specificationVersion, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger, extensionOptions);
+    if (NON_SCALAR.test(sourceContent)) {
+        throw Error('A TOML doc must be a (ful-scalar) valid utf8 file.');
+    }
+    if (specificationVersion !== 0.5) {
+        throw new Error('TOML.parse(,specificationVersion)');
+    }
     try {
-        from(sourceContent);
+        use(useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger, extensionOptions);
+        todo(sourceContent);
         try {
             const rootTable = Root();
             Wc();

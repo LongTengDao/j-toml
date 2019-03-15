@@ -89,8 +89,7 @@ export function clear () :void {
 	WC.length = 0;
 }
 
-export function use (specificationVersion :0.5, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines :string, useBigInt_forInteger :boolean | number, extensionOptions) :void {
-	if ( specificationVersion!==0.5 ) { throw new Error('TOML.parse(,specificationVersion)'); }
+export function use (useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines :string, useBigInt_forInteger :boolean | number, extensionOptions) :void {
 	if ( typeof <unknown>useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines!=='string' ) { throw new TypeError('TOML.parse(,,multiLineJoiner)'); }
 	if ( useBigInt_forInteger===true ) { IntegerDepends = BigIntInteger; }
 	else if ( useBigInt_forInteger===false ) { IntegerDepends = NumberInteger; }
@@ -127,30 +126,15 @@ export function use (specificationVersion :0.5, useWhatToJoinMultiLineString_not
 		if ( customConstructors===null ) { wc = wc_off; }
 		else {
 			if ( typeof customConstructors==='function' ) {
-				if ( typify ) {
-					customConstructors = null;
-					throw new Error('TOML.parse(,,,,{ mix:false, new(){} })');
-				}
-				if ( customConstructors.length!==2 ) {
-					customConstructors = null;
-					throw new Error('TOML.parse(,,,,xOptions.new.length)');
-				}
+				if ( typify ) { throw new Error('TOML.parse(,,,,{ mix:false, new(){} })'); }
+				if ( customConstructors.length!==2 ) { throw new Error('TOML.parse(,,,,xOptions.new.length)'); }
 			}
 			else if ( typeof customConstructors==='object' ) {
-				if ( typify ) {
-					customConstructors = null;
-					throw new Error('TOML.parse(,,,,{ mix:false, new:{} })');
-				}
+				if ( typify ) { throw new Error('TOML.parse(,,,,{ mix:false, new:{} })'); }
 				if ( getPrototypeOf(customConstructors)===null ) {
 					for ( const type of getOwnPropertyNames(customConstructors) ) {
-						if ( typeof customConstructors[type]!=='function' ) {
-							customConstructors = null;
-							throw new TypeError('TOML.parse(,,,,xOptions.new['+stringify(type)+'])');
-						}
-						if ( customConstructors[type].length ) {
-							customConstructors = null;
-							throw new Error('TOML.parse(,,,,xOptions.new['+stringify(type)+'].length)');
-						}
+						if ( typeof customConstructors[type]!=='function' ) { throw new TypeError('TOML.parse(,,,,xOptions.new['+stringify(type)+'])'); }
+						if ( customConstructors[type].length ) { throw new Error('TOML.parse(,,,,xOptions.new['+stringify(type)+'].length)'); }
 					}
 				}
 				else {
@@ -158,14 +142,8 @@ export function use (specificationVersion :0.5, useWhatToJoinMultiLineString_not
 					customConstructors = <object>create(null);
 					for ( const type of getOwnPropertyNames(origin) ) {
 						const customConstructor = origin[type];
-						if ( typeof customConstructor!=='function' ) {
-							customConstructors = null;
-							throw new TypeError('TOML.parse(,,,,xOptions.new['+stringify(type)+'])');
-						}
-						if ( customConstructors[type].length ) {
-							customConstructors = null;
-							throw new Error('TOML.parse(,,,,xOptions.new['+stringify(type)+'].length)');
-						}
+						if ( typeof customConstructor!=='function' ) { throw new TypeError('TOML.parse(,,,,xOptions.new['+stringify(type)+'])'); }
+						if ( customConstructors[type].length ) { throw new Error('TOML.parse(,,,,xOptions.new['+stringify(type)+'].length)'); }
 						customConstructors[type] = customConstructor;
 					}
 				}

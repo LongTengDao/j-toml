@@ -16,9 +16,11 @@ export let stacks_length = 0;
 let last :typeof noop = noop;
 
 
-export function from (source :string) :void {
+export function could () :void {
 	if ( sourceLines!==NONE ) { throw Error('Inner error: parsing in parsing.'); }
-	if ( RE.NON_SCALAR.test(source) ) { throw Error('toml doc must be a (ful-scalar) valid utf8 file.'); }
+}
+
+export function todo (source :string) :void {
 	sourceLines = source.replace(RE.BOM, '').split(RE.EOL);
 	lastLineIndex = sourceLines.length-1;
 	lineIndex = -1;
