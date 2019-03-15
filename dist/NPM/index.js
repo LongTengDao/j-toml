@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.63';
+const version = '0.5.64';
 
 const Symbol_for = Symbol.for;
 
