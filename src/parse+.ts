@@ -107,7 +107,7 @@ export function ensureConstructor (type :string) :void {
 }
 
 export function construct (type :string, value :any) :any {
-	return options.FUNCTION.has(options.customConstructors)
+	return options.FUNCTION.has(<Function | object>options.customConstructors)
 		? ( <Function>options.customConstructors )(type, value)
 		: ( <object>options.customConstructors )[type](value);
 }

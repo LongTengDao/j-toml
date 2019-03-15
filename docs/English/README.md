@@ -101,16 +101,6 @@ Return the root table (tables parsed by this implementation are objects without 
 
 If the arguments not meet the requirement, there will be an error; if there is any error with the source, the error object will has two number properties `lineIndex` and `lineNumber` to help locating that.
 
-There is only one kind of case which will cause the recursive parser itself stack overflow (if there is an issue manifesting the necessity, I will rewrite using loop):
-
-```
-array        = [ [ [ ...thousands of layers... ] ] ]
-
-inline-table = { k = { k = { ...thousands of layers... } } }
-
-xxxxxx       = [{ k = [{ k = [{ ...thousands of layers... }] }] }]
-```
-
 [@ltd/j-toml v0.5]: https://www.npmjs.com/package/@ltd/j-toml
 [TOML v0.5]:        https://GitHub.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md
 [xOptions]:         https://GitHub.com/LongTengDao/j-toml/blob/master/docs/English/xOptions.md

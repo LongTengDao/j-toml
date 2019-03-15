@@ -2,11 +2,38 @@ import SyntaxError from '.SyntaxError';
 import RangeError from '.RangeError';
 import TypeError from '.TypeError';
 import Error from '.Error';
+import * as options from './options';
 
 const NONE :string[] = [];
 let sourceLines :string[] = NONE;
 let lastLineIndex :number = -1;
 let lineIndex :number = -1;
+
+export let stacks_length = 0;
+const noop = (lineRest :string) :string => '';
+noop.previous = noop;
+noop.next = noop;
+let last = noop;
+export function stacks_pop () {
+	--stacks_length;
+	const item = last;
+	last = last.previous;
+	last.next = noop;//
+	return item;
+}
+export function stacks_push (item) {
+	++stacks_length;
+	item.previous = last;
+	last.next = item;
+	last = item;
+}
+export function stacks_pushBeforeLast (item) {
+	++stacks_length;
+	item.previous = last.previous;
+	item.next = last;
+	last.previous.next = item;
+	last.previous = item;
+}
 
 export const from = (array :string[]) :void => {
 	sourceLines = array;
@@ -14,7 +41,12 @@ export const from = (array :string[]) :void => {
 	lineIndex = -1;
 };
 
-export const done = () :void => { sourceLines = NONE; };
+export const done = () :void => {
+	sourceLines = NONE;
+	stacks_length = 0;
+	last = noop;
+	noop.next = noop;
+};
 
 export const next = () :string => sourceLines[++lineIndex];
 
@@ -47,7 +79,8 @@ function throws (error :FriendlyError) :never {
 	if ( sourceLines!==NONE ) {
 		error.lineIndex = lineIndex;
 		error.lineNumber = lineIndex+1;
-		//done();
+		done();
+		options.clear();
 	}
 	throw error;
 }

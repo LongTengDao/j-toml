@@ -101,16 +101,6 @@ function parse (
 
 如果参数不符合要求，会抛出错误；如果源文本有错误，错误对象会有 `lineIndex` 和 `lineNumber` 两个数值属性来帮助定位。
 
-只有一类情况会导致递归解析器自身栈溢出（如果有 issue 表明实际使用中的必要性，我会改写成循环实现）：
-
-```
-数组   = [ [ [ ……成千上万层…… ] ] ]
-
-行内表 = { k = { k = { ……成千上万层…… } } }
-
-××× = [{ k = [{ k = [{ ……成千上万层…… }] }] }]
-```
-
 [@ltd/j-toml v0.5]: https://www.npmjs.com/package/@ltd/j-toml
 [汤小明语 v0.5]:    https://GitHub.com/LongTengDao/TOML/blob/龙腾道-译/versions/cn/toml-v0.5.0.md
 [超级选项]:         https://GitHub.com/LongTengDao/j-toml/blob/master/docs/简体中文/xOptions.md

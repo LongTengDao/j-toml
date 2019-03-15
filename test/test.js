@@ -11,6 +11,11 @@ module.exports = require('@ltd/j-dev')(__dirname+'/..')(async ({ import_default,
 		__filename: 'test/built.js',
 	});
 	
+	TOML.parse([
+		`["${'bt\\b\\t'.repeat(10000)}${'\\b\\t'.repeat(10000)}"]`,
+		'k=[{'.repeat(10000)+'}]'.repeat(10000),
+	].join('\n'), 0.5, '\r\n');
+	
 	const toml = TOML.parse(await get('./test/sample.toml'), 0.5, '\n', true);
 	
 	compare('integer', {

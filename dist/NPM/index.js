@@ -1,44 +1,20 @@
 ﻿'use strict';
 
-const version = '0.5.62';
-
-const isArray = Array.isArray;
+const version = '0.5.63';
 
 const Symbol_for = Symbol.for;
 
 const isBuffer = Buffer.isBuffer;
 
-const NONE = [];
-let sourceLines = NONE;
-let lastLineIndex = -1;
-let lineIndex = -1;
-const from = (array) => {
-    sourceLines = array;
-    lastLineIndex = sourceLines.length - 1;
-    lineIndex = -1;
-};
-const done = () => { sourceLines = NONE; };
-const next = () => sourceLines[++lineIndex];
-const rest = () => lineIndex !== lastLineIndex;
-const mark = () => lineIndex;
-const must = (message, startIndex) => {
-    lineIndex === lastLineIndex
-        && throws(new SyntaxError(message + ' is not close until the end of the file, which started from line ' + (startIndex + 1) + ': ' + sourceLines[startIndex]));
-    return sourceLines[++lineIndex];
-};
-const where = () => 'line ' + (lineIndex + 1) + ': ' + sourceLines[lineIndex];
-const throwSyntaxError = (message) => throws(new SyntaxError(message));
-const throwRangeError = (message) => throws(new RangeError(message));
-const throwTypeError = (message) => throws(new TypeError(message));
-const throwError = (message) => throws(new Error(message));
-function throws(error) {
-    if (sourceLines !== NONE) {
-        error.lineIndex = lineIndex;
-        error.lineNumber = lineIndex + 1;
-        //done();
-    }
-    throw error;
-}
+const create = Object.create;
+
+const getOwnPropertyNames = Object.getOwnPropertyNames;
+
+const getPrototypeOf = Reflect.getPrototypeOf;
+
+const stringify = JSON.stringify;
+
+const isSafeInteger = Number.isSafeInteger;
 
 /*!
  * 模块名称：@ltd/j-orderify
@@ -50,8 +26,6 @@ function throws(error) {
  * 问题反馈：https://GitHub.com/LongTengDao/j-orderify/issues
  * 项目主页：https://GitHub.com/LongTengDao/j-orderify/
  */
-
-const create = Object.create;
 
 const defineProperty = Reflect.defineProperty;
 
@@ -388,58 +362,6 @@ const FLOAT_NOT_INTEGER = /[.eE]/;
 const BOM = /^\uFEFF/;
 const EOL = /\r?\n/;
 
-const literal_cache = Symbol('literal_cache');
-const value_cache = Symbol('value_cache');
-class Datetime extends Date {
-    constructor(literal) {
-        // @ts-ignore
-        const { 0: hms_ms = '', 1: YMD = '', 2: T = '', 3: HMS_MS = hms_ms, 4: Z = '' } = DATETIME.exec(literal) || throwSyntaxError('Invalid Datetime ' + literal + ' at ' + where());
-        super(Z ? YMD + 'T' + HMS_MS + Z :
-            T ? YMD + 'T' + HMS_MS :
-                YMD ? YMD + 'T00:00:00.000'
-                    : '1970-01-01T' + HMS_MS);
-        this.type =
-            Z ? 'Offset Date-Time' :
-                T ? 'Local Date-Time' :
-                    YMD ? 'Local Date'
-                        : 'Local Time';
-        this[literal_cache] = literal;
-        this[value_cache] = this.getTime();
-    }
-    //static isDatetime (value :any) :boolean { return value instanceof Datetime; }
-    //toJSON (this :Datetime) :string { return this.toISOString(); }
-    toISOString() {
-        if (this.getTime() === this[value_cache]) {
-            return this[literal_cache];
-        }
-        throw new Error('Datetime value has been modified.');
-    }
-}
-
-// @ts-ignore
-const Float = (literal) => {
-    if (FLOAT.test(literal) && FLOAT_NOT_INTEGER.test(literal)) {
-        return +literal.replace(UNDERSCORES, '');
-        //const number = +literal.replace(RE.UNDERSCORES, '');
-        //isFinite(number) || iterator.throwRangeError('Float can not be as big as Infinity, like '+literal+' at '+where());
-        //return number;
-    }
-    //if ( literal==='inf' || literal==='+inf' ) { return Infinity; }
-    //if ( literal==='-inf' ) { return -Infinity; }
-    //if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) { return NaN; }
-    throwSyntaxError('Invalid Float ' + literal + ' at ' + where());
-};
-
-const fromCodePoint = String.fromCodePoint;
-
-const getOwnPropertyNames = Object.getOwnPropertyNames;
-
-const getPrototypeOf = Reflect.getPrototypeOf;
-
-const stringify = JSON.stringify;
-
-const isSafeInteger = Number.isSafeInteger;
-
 const NumberInteger = (literal) => {
     if (literal === '0' || literal === '+0' || literal === '-0') {
         return 0;
@@ -611,6 +533,113 @@ function clear() {
     customConstructors = null;
 }
 
+const NONE = [];
+let sourceLines = NONE;
+let lastLineIndex = -1;
+let lineIndex = -1;
+let stacks_length = 0;
+const noop = (lineRest) => '';
+noop.previous = noop;
+noop.next = noop;
+let last = noop;
+function stacks_pop() {
+    --stacks_length;
+    const item = last;
+    last = last.previous;
+    last.next = noop; //
+    return item;
+}
+function stacks_push(item) {
+    ++stacks_length;
+    item.previous = last;
+    last.next = item;
+    last = item;
+}
+function stacks_pushBeforeLast(item) {
+    ++stacks_length;
+    item.previous = last.previous;
+    item.next = last;
+    last.previous.next = item;
+    last.previous = item;
+}
+const from = (array) => {
+    sourceLines = array;
+    lastLineIndex = sourceLines.length - 1;
+    lineIndex = -1;
+};
+const done = () => {
+    sourceLines = NONE;
+    stacks_length = 0;
+    last = noop;
+    noop.next = noop;
+};
+const next = () => sourceLines[++lineIndex];
+const rest = () => lineIndex !== lastLineIndex;
+const mark = () => lineIndex;
+const must = (message, startIndex) => {
+    lineIndex === lastLineIndex
+        && throws(new SyntaxError(message + ' is not close until the end of the file, which started from line ' + (startIndex + 1) + ': ' + sourceLines[startIndex]));
+    return sourceLines[++lineIndex];
+};
+const where = () => 'line ' + (lineIndex + 1) + ': ' + sourceLines[lineIndex];
+const throwSyntaxError = (message) => throws(new SyntaxError(message));
+const throwRangeError = (message) => throws(new RangeError(message));
+const throwTypeError = (message) => throws(new TypeError(message));
+const throwError = (message) => throws(new Error(message));
+function throws(error) {
+    if (sourceLines !== NONE) {
+        error.lineIndex = lineIndex;
+        error.lineNumber = lineIndex + 1;
+        done();
+        clear();
+    }
+    throw error;
+}
+
+const literal_cache = Symbol('literal_cache');
+const value_cache = Symbol('value_cache');
+class Datetime extends Date {
+    constructor(literal) {
+        // @ts-ignore
+        const { 0: hms_ms = '', 1: YMD = '', 2: T = '', 3: HMS_MS = hms_ms, 4: Z = '' } = DATETIME.exec(literal) || throwSyntaxError('Invalid Datetime ' + literal + ' at ' + where());
+        super(Z ? YMD + 'T' + HMS_MS + Z :
+            T ? YMD + 'T' + HMS_MS :
+                YMD ? YMD + 'T00:00:00.000'
+                    : '1970-01-01T' + HMS_MS);
+        this.type =
+            Z ? 'Offset Date-Time' :
+                T ? 'Local Date-Time' :
+                    YMD ? 'Local Date'
+                        : 'Local Time';
+        this[literal_cache] = literal;
+        this[value_cache] = this.getTime();
+    }
+    //static isDatetime (value :any) :boolean { return value instanceof Datetime; }
+    //toJSON (this :Datetime) :string { return this.toISOString(); }
+    toISOString() {
+        if (this.getTime() === this[value_cache]) {
+            return this[literal_cache];
+        }
+        throw new Error('Datetime value has been modified.');
+    }
+}
+
+// @ts-ignore
+const Float = (literal) => {
+    if (FLOAT.test(literal) && FLOAT_NOT_INTEGER.test(literal)) {
+        return +literal.replace(UNDERSCORES, '');
+        //const number = +literal.replace(RE.UNDERSCORES, '');
+        //isFinite(number) || iterator.throwRangeError('Float can not be as big as Infinity, like '+literal+' at '+where());
+        //return number;
+    }
+    //if ( literal==='inf' || literal==='+inf' ) { return Infinity; }
+    //if ( literal==='-inf' ) { return -Infinity; }
+    //if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) { return NaN; }
+    throwSyntaxError('Invalid Float ' + literal + ' at ' + where());
+};
+
+const fromCodePoint = String.fromCodePoint;
+
 const ESCAPE_ALIAS = { b: '\b', t: '\t', n: '\n', f: '\f', r: '\r' };
 const unEscapeSingleLine = (match, p1, p2, p3, p4) => {
     if (p1) {
@@ -759,53 +788,10 @@ function construct(type, value) {
         : customConstructors[type](value);
 }
 
+const isArray = Array.isArray;
+
 const sealedInline = new WeakSet;
 const openTables = new WeakSet;
-function parse(sourceContent, specificationVersion, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger = true, extensionOptions = null) {
-    if (typeof sourceContent !== 'string') {
-        if (!isBuffer(sourceContent)) {
-            throw new TypeError('TOML.parse(sourceContent)');
-        }
-        sourceContent = sourceContent.toString();
-    }
-    use(specificationVersion, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger, extensionOptions);
-    const rootTable = new TableDepends;
-    try {
-        from(sourceContent.replace(BOM, '').split(EOL));
-        let lastSectionTable = rootTable;
-        while (rest()) {
-            const line = next().replace(PRE_WHITESPACE, '');
-            if (line === '') ;
-            else if (line.startsWith('#')) {
-                if (keepComment) {
-                    lastSectionTable[Symbol('#')] = line.slice(1);
-                }
-            }
-            else if (line.startsWith('[')) {
-                const { 1: $_asArrayItem$$, 2: keys, 3: $$asArrayItem$_, 4: hash } = TABLE_DEFINITION_exec(line);
-                $_asArrayItem$$ === $$asArrayItem$_ || throwSyntaxError('Square brackets of table define statement not match at ' + where());
-                lastSectionTable = appendTable(rootTable, keys, $_asArrayItem$$, hash);
-            }
-            else {
-                const rest = assignInline(lastSectionTable, line);
-                if (rest === '') ;
-                else if (rest.startsWith('#')) {
-                    if (keepComment) {
-                        lastSectionTable[Symbol('#')] = rest.slice(1);
-                    }
-                }
-                else {
-                    throwSyntaxError(where());
-                }
-            }
-        }
-    }
-    finally {
-        done();
-        clear();
-    }
-    return rootTable;
-}
 function appendTable(table, key_key, asArrayItem, hash) {
     const leadingKeys = parseKeys(key_key);
     const finalKey = leadingKeys.pop();
@@ -897,51 +883,6 @@ function prepareInlineTable(table, keys) {
     }
     return table;
 }
-function assignInline(lastInlineTable, lineRest) {
-    const { 1: left, 2: custom, 3: type, 4: right } = KEY_VALUE_PAIR_exec(lineRest);
-    custom && ensureConstructor(type);
-    const leadingKeys = parseKeys(left);
-    const finalKey = leadingKeys.pop();
-    const table = prepareInlineTable(lastInlineTable, leadingKeys);
-    finalKey in table && throwError('Duplicate property definition at ' + where());
-    switch (right[0]) {
-        case '\'':
-            lineRest = assignLiteralString(table, finalKey, right);
-            break;
-        case '"':
-            lineRest = assignBasicString(table, finalKey, right);
-            break;
-        case '{':
-            lineRest = assignInlineTable(table, finalKey, right);
-            break;
-        case '[':
-            lineRest = assignInlineArray(table, finalKey, right);
-            break;
-        case '`':
-            lineRest = assignInterpolationString(table, finalKey, right);
-            break;
-        default:
-            let literal;
-            ({ 1: literal, 2: lineRest } = VALUE_REST.exec(right) || throwSyntaxError(where()));
-            table[finalKey] =
-                literal === 'true' ? true : literal === 'false' ? false :
-                    literal === 'inf' || literal === '+inf' ? Infinity : literal === '-inf' ? -Infinity :
-                        literal === 'nan' || literal === '+nan' || literal === '-nan' ? NaN :
-                            literal.includes(':') || literal.indexOf('-') !== literal.lastIndexOf('-') && !literal.startsWith('-') ? new Datetime(literal) :
-                                literal.includes('.') || (literal.includes('e') || literal.includes('E')) && !literal.startsWith('0x') ? Float(literal) :
-                                    enableNull && literal === 'null' || enableNil && literal === 'nil' ? null :
-                                        IntegerDepends(literal);
-            break;
-    }
-    if (custom) {
-        table[finalKey] = construct(type, table[finalKey]);
-    }
-    if (keepComment && lineRest.startsWith('#')) {
-        table[Symbol_for(finalKey)] = lineRest.slice(1);
-        return '';
-    }
-    return lineRest;
-}
 function assignLiteralString(table, finalKey, literal) {
     let $;
     if (literal.charAt(1) !== '\'' || literal.charAt(2) !== '\'') {
@@ -1006,86 +947,298 @@ function assignBasicString(table, finalKey, literal) {
         literal += line;
     }
 }
-function assignInlineTable(table, finalKey, lineRest) {
-    const inlineTable = table[finalKey] = new TableDepends;
-    sealedInline.add(inlineTable);
-    lineRest = lineRest.replace(SYM_WHITESPACE, '');
-    if (allowInlineTableMultiLineAndTrailingCommaEvenNoComma) {
-        const start = mark();
-        for (;;) {
-            for (;;) {
-                if (lineRest === '') ;
-                else if (lineRest.startsWith('#')) {
-                    if (keepComment) {
-                        table[Symbol('#')] = lineRest.slice(1);
-                    }
+
+function parse(sourceContent, specificationVersion, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger = true, extensionOptions = null) {
+    if (typeof sourceContent !== 'string') {
+        if (!isBuffer(sourceContent)) {
+            throw new TypeError('TOML.parse(sourceContent)');
+        }
+        sourceContent = sourceContent.toString();
+    }
+    use(specificationVersion, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger, extensionOptions);
+    const rootTable = new TableDepends;
+    from(sourceContent.replace(BOM, '').split(EOL));
+    let lastSectionTable = rootTable;
+    while (rest()) {
+        const line = next().replace(PRE_WHITESPACE, '');
+        if (line === '') ;
+        else if (line.startsWith('#')) {
+            if (keepComment) {
+                lastSectionTable[Symbol('#')] = line.slice(1);
+            }
+        }
+        else if (line.startsWith('[')) {
+            const { 1: $_asArrayItem$$, 2: keys, 3: $$asArrayItem$_, 4: hash } = TABLE_DEFINITION_exec(line);
+            $_asArrayItem$$ === $$asArrayItem$_ || throwSyntaxError('Square brackets of table define statement not match at ' + where());
+            lastSectionTable = appendTable(rootTable, keys, $_asArrayItem$$, hash);
+        }
+        else {
+            const $_assignInline_pushInline = true;
+            let rest = setInline($_assignInline_pushInline, lastSectionTable, line);
+            while (stacks_length) {
+                rest = stacks_pop()(rest);
+            }
+            if (rest === '') ;
+            else if (rest.startsWith('#')) {
+                if (keepComment) {
+                    lastSectionTable[Symbol('#')] = rest.slice(1);
+                }
+            }
+            else {
+                throwSyntaxError(where());
+            }
+        }
+    }
+    done();
+    clear();
+    return rootTable;
+}
+function setInline($_assignInline_pushInline, lastInlineTable_array, lineRest) {
+    let $_assignInlineTable_assignInlineArray = false;
+    if ($_assignInline_pushInline) {
+        const { 1: left, 2: custom, 3: type, 4: right } = KEY_VALUE_PAIR_exec(lineRest);
+        custom && ensureConstructor(type);
+        const leadingKeys = parseKeys(left);
+        const finalKey = leadingKeys.pop();
+        const table = prepareInlineTable(lastInlineTable_array, leadingKeys);
+        finalKey in table && throwError('Duplicate property definition at ' + where());
+        switch (right[0]) {
+            case '\'':
+                lineRest = assignLiteralString(table, finalKey, right);
+                break;
+            case '"':
+                lineRest = assignBasicString(table, finalKey, right);
+                break;
+            case '`':
+                lineRest = assignInterpolationString(table, finalKey, right);
+                break;
+            default:
+                let literal;
+                ({ 1: literal, 2: lineRest } = VALUE_REST.exec(right) || throwSyntaxError(where()));
+                table[finalKey] =
+                    literal === 'true' ? true : literal === 'false' ? false :
+                        literal === 'inf' || literal === '+inf' ? Infinity : literal === '-inf' ? -Infinity :
+                            literal === 'nan' || literal === '+nan' || literal === '-nan' ? NaN :
+                                literal.includes(':') || literal.indexOf('-') !== literal.lastIndexOf('-') && !literal.startsWith('-') ? new Datetime(literal) :
+                                    literal.includes('.') || (literal.includes('e') || literal.includes('E')) && !literal.startsWith('0x') ? Float(literal) :
+                                        enableNull && literal === 'null' || enableNil && literal === 'nil' ? null :
+                                            IntegerDepends(literal);
+                break;
+            case '{':
+                $_assignInlineTable_assignInlineArray = true;
+            case '[':
+                stacks_push((lineRest) => {
+                    lineRest = assignInlineLevel($_assignInlineTable_assignInlineArray, table, finalKey, lineRest);
+                    //
+                    if (custom) {
+                        table[finalKey] = construct(type, table[finalKey]);
+                    } //
+                    if (keepComment && lineRest.startsWith('#')) { //
+                        table[Symbol_for(finalKey)] = lineRest.slice(1); //
+                        return ''; //
+                    } //
+                    return lineRest; //
+                    //
+                });
+                return right;
+        }
+        if (custom) {
+            table[finalKey] = construct(type, table[finalKey]);
+        }
+        if (keepComment && lineRest.startsWith('#')) {
+            table[Symbol_for(finalKey)] = lineRest.slice(1);
+            return '';
+        }
+        return lineRest;
+    }
+    else {
+        const custom = lineRest.startsWith('!!');
+        let type;
+        if (custom) {
+            //options.typify && iterator.throwSyntaxError('Only mixable arrays could contain custom type. Check '+iterator.where());
+            ({ 1: type, 2: lineRest } = _VALUE_PAIR.exec(lineRest) || throwSyntaxError(where()));
+            ensureConstructor(type);
+        }
+        const lastIndex = '' + lastInlineTable_array.length;
+        switch (lineRest[0]) {
+            case '\'':
+                lineRest = assignLiteralString(asStrings(lastInlineTable_array), lastIndex, lineRest);
+                break;
+            case '"':
+                lineRest = assignBasicString(asStrings(lastInlineTable_array), lastIndex, lineRest);
+                break;
+            case '`':
+                lineRest = assignInterpolationString(asStrings(lastInlineTable_array), lastIndex, lineRest);
+                break;
+            default:
+                let literal;
+                ({ 1: literal, 2: lineRest } = VALUE_REST.exec(lineRest) || throwSyntaxError(where()));
+                if (literal === 'true') {
+                    asBooleans(lastInlineTable_array).push(true);
+                }
+                else if (literal === 'false') {
+                    asBooleans(lastInlineTable_array).push(false);
+                }
+                else if (literal === 'inf' || literal === '+inf') {
+                    asFloats(lastInlineTable_array).push(Infinity);
+                }
+                else if (literal === '-inf') {
+                    asFloats(lastInlineTable_array).push(-Infinity);
+                }
+                else if (literal === 'nan' || literal === '+nan' || literal === '-nan') {
+                    asFloats(lastInlineTable_array).push(NaN);
+                }
+                else if (literal.includes(':') || literal.indexOf('-') !== literal.lastIndexOf('-') && !literal.startsWith('-')) {
+                    asDatetimes(lastInlineTable_array).push(new Datetime(literal));
+                }
+                else if (literal.includes('.') || (literal.includes('e') || literal.includes('E')) && !literal.startsWith('0x')) {
+                    asFloats(lastInlineTable_array).push(Float(literal));
+                }
+                else if (enableNull && literal === 'null' || enableNil && literal === 'nil') {
+                    asNulls(lastInlineTable_array).push(null);
                 }
                 else {
-                    break;
+                    asIntegers(lastInlineTable_array).push(IntegerDepends(literal));
                 }
-                lineRest = must('Inline Table', start).replace(PRE_WHITESPACE, '');
-            }
+                break;
+            case '{':
+                $_assignInlineTable_assignInlineArray = true;
+            case '[':
+                stacks_push((lineRest) => {
+                    lineRest = assignInlineLevel($_assignInlineTable_assignInlineArray, asArrays(lastInlineTable_array), lastIndex, lineRest);
+                    //
+                    if (custom) {
+                        lastInlineTable_array[lastIndex] = construct(type, lastInlineTable_array[lastIndex]);
+                    } //
+                    if (keepComment && lineRest.startsWith('#')) { //
+                        lastInlineTable_array[Symbol_for(lastIndex)] = lineRest.slice(1); //
+                        return ''; //
+                    } //
+                    return lineRest; //
+                    //
+                });
+                return lineRest;
+        }
+        if (custom) {
+            lastInlineTable_array[lastIndex] = construct(type, lastInlineTable_array[lastIndex]);
+        }
+        if (keepComment && lineRest.startsWith('#')) {
+            lastInlineTable_array[Symbol_for(lastIndex)] = lineRest.slice(1);
+            return '';
+        }
+        return lineRest;
+    }
+}
+function assignInlineLevel($_assignInlineTable_assignInlineArray, table, finalKey, lineRest) {
+    const $_assignInline_pushInline = $_assignInlineTable_assignInlineArray;
+    if ($_assignInlineTable_assignInlineArray) {
+        const inlineTable = table[finalKey] = new TableDepends;
+        sealedInline.add(inlineTable);
+        lineRest = lineRest.replace(SYM_WHITESPACE, '');
+        if (allowInlineTableMultiLineAndTrailingCommaEvenNoComma) {
+            const start = mark();
+            const length = stacks_length;
+            return function callee(lineRest) {
+                for (;;) {
+                    for (;;) {
+                        if (lineRest === '') ;
+                        else if (lineRest.startsWith('#')) {
+                            if (keepComment) {
+                                table[Symbol('#')] = lineRest.slice(1);
+                            }
+                        }
+                        else {
+                            break;
+                        }
+                        lineRest = must('Inline Table', start).replace(PRE_WHITESPACE, '');
+                    }
+                    if (lineRest.startsWith('}')) {
+                        return lineRest.replace(SYM_WHITESPACE, '');
+                    }
+                    lineRest = setInline($_assignInline_pushInline, inlineTable, lineRest);
+                    if (stacks_length > length) {
+                        stacks_pushBeforeLast((lineRest) => {
+                            //
+                            for (;;) { //
+                                if (lineRest === '') ; //
+                                else if (lineRest.startsWith('#')) { //
+                                    if (keepComment) {
+                                        table[Symbol('#')] = lineRest.slice(1);
+                                    } //
+                                } //
+                                else {
+                                    break;
+                                } //
+                                lineRest = must('Inline Table', start).replace(PRE_WHITESPACE, ''); //
+                            } //
+                            if (lineRest.startsWith(',')) {
+                                lineRest = lineRest.replace(SYM_WHITESPACE, '');
+                            } //
+                            //
+                            return callee(lineRest);
+                        });
+                        return lineRest;
+                    }
+                    for (;;) {
+                        if (lineRest === '') ;
+                        else if (lineRest.startsWith('#')) {
+                            if (keepComment) {
+                                table[Symbol('#')] = lineRest.slice(1);
+                            }
+                        }
+                        else {
+                            break;
+                        }
+                        lineRest = must('Inline Table', start).replace(PRE_WHITESPACE, '');
+                    }
+                    if (lineRest.startsWith(',')) {
+                        lineRest = lineRest.replace(SYM_WHITESPACE, '');
+                    }
+                }
+            }(lineRest);
+        }
+        else {
             if (lineRest.startsWith('}')) {
                 return lineRest.replace(SYM_WHITESPACE, '');
             }
-            lineRest = assignInline(inlineTable, lineRest);
-            for (;;) {
-                if (lineRest === '') ;
-                else if (lineRest.startsWith('#')) {
-                    if (keepComment) {
-                        table[Symbol('#')] = lineRest.slice(1);
+            (lineRest === '' || lineRest.startsWith('#')) && throwSyntaxError('Inline Table is intended to appear on a single line, which broken at ' + where());
+            const length = stacks_length;
+            return function callee(lineRest) {
+                for (;;) {
+                    lineRest = setInline($_assignInline_pushInline, inlineTable, lineRest);
+                    if (stacks_length > length) {
+                        stacks_pushBeforeLast((lineRest) => {
+                            //
+                            if (lineRest.startsWith('}')) {
+                                return lineRest.replace(SYM_WHITESPACE, '');
+                            } //
+                            if (lineRest.startsWith(',')) { //
+                                lineRest = lineRest.replace(SYM_WHITESPACE, ''); //
+                                lineRest.startsWith('}') && throwSyntaxError('The last property of an Inline Table can not have a trailing comma, which was found at ' + where()); //
+                            } //
+                            (lineRest === '' || lineRest.startsWith('#')) && throwSyntaxError('Inline Table is intended to appear on a single line, which broken at ' + where()); //
+                            //
+                            return callee(lineRest);
+                        });
+                        return lineRest;
                     }
+                    if (lineRest.startsWith('}')) {
+                        return lineRest.replace(SYM_WHITESPACE, '');
+                    }
+                    if (lineRest.startsWith(',')) {
+                        lineRest = lineRest.replace(SYM_WHITESPACE, '');
+                        lineRest.startsWith('}') && throwSyntaxError('The last property of an Inline Table can not have a trailing comma, which was found at ' + where());
+                    }
+                    (lineRest === '' || lineRest.startsWith('#')) && throwSyntaxError('Inline Table is intended to appear on a single line, which broken at ' + where());
                 }
-                else {
-                    break;
-                }
-                lineRest = must('Inline Table', start).replace(PRE_WHITESPACE, '');
-            }
-            if (lineRest.startsWith(',')) {
-                lineRest = lineRest.replace(SYM_WHITESPACE, '');
-            }
+            }(lineRest);
         }
     }
     else {
-        if (lineRest.startsWith('}')) {
-            return lineRest.replace(SYM_WHITESPACE, '');
-        }
-        (lineRest === '' || lineRest.startsWith('#')) && throwSyntaxError('Inline Table is intended to appear on a single line, which broken at ' + where());
-        for (;;) {
-            lineRest = assignInline(inlineTable, lineRest);
-            if (lineRest.startsWith('}')) {
-                return lineRest.replace(SYM_WHITESPACE, '');
-            }
-            if (lineRest.startsWith(',')) {
-                lineRest = lineRest.replace(SYM_WHITESPACE, '');
-                lineRest.startsWith('}') && throwSyntaxError('The last property of an Inline Table can not have a trailing comma, which was found at ' + where());
-            }
-            (lineRest === '' || lineRest.startsWith('#')) && throwSyntaxError('Inline Table is intended to appear on a single line, which broken at ' + where());
-        }
-    }
-}
-function assignInlineArray(table, finalKey, lineRest) {
-    const inlineArray = table[finalKey] = [];
-    sealedInline.add(inlineArray);
-    const start = mark();
-    lineRest = lineRest.replace(SYM_WHITESPACE, '');
-    for (;;) {
-        if (lineRest === '') ;
-        else if (lineRest.startsWith('#')) {
-            if (keepComment) {
-                table[Symbol('#')] = lineRest.slice(1);
-            }
-        }
-        else {
-            break;
-        }
-        lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, '');
-    }
-    if (lineRest.startsWith(']')) {
-        return lineRest.replace(SYM_WHITESPACE, '');
-    }
-    for (;;) {
-        lineRest = pushInline(inlineArray, lineRest);
+        const inlineArray = table[finalKey] = [];
+        sealedInline.add(inlineArray);
+        const start = mark();
+        lineRest = lineRest.replace(SYM_WHITESPACE, '');
         for (;;) {
             if (lineRest === '') ;
             else if (lineRest.startsWith('#')) {
@@ -1098,101 +1251,104 @@ function assignInlineArray(table, finalKey, lineRest) {
             }
             lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, '');
         }
-        if (lineRest.startsWith(',')) {
-            lineRest = lineRest.replace(SYM_WHITESPACE, '');
-            if (keepComment && lineRest.startsWith('#')) {
-                inlineArray[Symbol_for(inlineArray.length - 1 + '')] = lineRest.slice(1);
-                lineRest = '';
-            }
+        if (lineRest.startsWith(']')) {
+            return lineRest.replace(SYM_WHITESPACE, '');
+        }
+        const length = stacks_length;
+        return function callee(lineRest) {
             for (;;) {
-                if (lineRest === '') ;
-                else if (lineRest.startsWith('#')) {
-                    if (keepComment) {
-                        table[Symbol('#')] = lineRest.slice(1);
+                lineRest = setInline($_assignInline_pushInline, inlineArray, lineRest);
+                if (stacks_length > length) {
+                    stacks_pushBeforeLast((lineRest) => {
+                        //
+                        for (;;) { //
+                            if (lineRest === '') ; //
+                            else if (lineRest.startsWith('#')) { //
+                                if (keepComment) {
+                                    table[Symbol('#')] = lineRest.slice(1);
+                                } //
+                            } //
+                            else {
+                                break;
+                            } //
+                            lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, ''); //
+                        } //
+                        if (lineRest.startsWith(',')) { //
+                            lineRest = lineRest.replace(SYM_WHITESPACE, ''); //
+                            if (keepComment && lineRest.startsWith('#')) { //
+                                inlineArray[Symbol_for(inlineArray.length - 1 + '')] = lineRest.slice(1); //
+                                lineRest = ''; //
+                            } //
+                            for (;;) { //
+                                if (lineRest === '') ; //
+                                else if (lineRest.startsWith('#')) { //
+                                    if (keepComment) {
+                                        table[Symbol('#')] = lineRest.slice(1);
+                                    } //
+                                } //
+                                else {
+                                    break;
+                                } //
+                                lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, ''); //
+                            } //
+                            if (lineRest.startsWith(']')) {
+                                return lineRest.replace(SYM_WHITESPACE, '');
+                            } //
+                        } //
+                        else { //
+                            if (lineRest.startsWith(']')) {
+                                return lineRest.replace(SYM_WHITESPACE, '');
+                            } //
+                            throwSyntaxError(where()); //
+                        } //
+                        //
+                        return callee(lineRest);
+                    });
+                    return lineRest;
+                }
+                for (;;) {
+                    if (lineRest === '') ;
+                    else if (lineRest.startsWith('#')) {
+                        if (keepComment) {
+                            table[Symbol('#')] = lineRest.slice(1);
+                        }
+                    }
+                    else {
+                        break;
+                    }
+                    lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, '');
+                }
+                if (lineRest.startsWith(',')) {
+                    lineRest = lineRest.replace(SYM_WHITESPACE, '');
+                    if (keepComment && lineRest.startsWith('#')) {
+                        inlineArray[Symbol_for(inlineArray.length - 1 + '')] = lineRest.slice(1);
+                        lineRest = '';
+                    }
+                    for (;;) {
+                        if (lineRest === '') ;
+                        else if (lineRest.startsWith('#')) {
+                            if (keepComment) {
+                                table[Symbol('#')] = lineRest.slice(1);
+                            }
+                        }
+                        else {
+                            break;
+                        }
+                        lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, '');
+                    }
+                    if (lineRest.startsWith(']')) {
+                        return lineRest.replace(SYM_WHITESPACE, '');
                     }
                 }
                 else {
-                    break;
+                    if (lineRest.startsWith(']')) {
+                        return lineRest.replace(SYM_WHITESPACE, '');
+                    }
+                    throwSyntaxError(where());
                 }
-                lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, '');
             }
-            if (lineRest.startsWith(']')) {
-                return lineRest.replace(SYM_WHITESPACE, '');
-            }
-        }
-        else {
-            if (lineRest.startsWith(']')) {
-                return lineRest.replace(SYM_WHITESPACE, '');
-            }
-            throwSyntaxError(where());
-        }
+        }(lineRest);
     }
-}
-function pushInline(array, lineRest) {
-    const custom = lineRest.startsWith('!!');
-    let type;
-    if (custom) {
-        //options.typify && iterator.throwSyntaxError('Only mixable arrays could contain custom type. Check '+iterator.where());
-        ({ 1: type, 2: lineRest } = _VALUE_PAIR.exec(lineRest) || throwSyntaxError(where()));
-        ensureConstructor(type);
-    }
-    const lastIndex = '' + array.length;
-    switch (lineRest[0]) {
-        case '\'':
-            lineRest = assignLiteralString(asStrings(array), lastIndex, lineRest);
-            break;
-        case '"':
-            lineRest = assignBasicString(asStrings(array), lastIndex, lineRest);
-            break;
-        case '{':
-            lineRest = assignInlineTable(asTables(array), lastIndex, lineRest);
-            break;
-        case '[':
-            lineRest = assignInlineArray(asArrays(array), lastIndex, lineRest);
-            break;
-        case '`':
-            lineRest = assignInterpolationString(asStrings(array), lastIndex, lineRest);
-            break;
-        default:
-            let literal;
-            ({ 1: literal, 2: lineRest } = VALUE_REST.exec(lineRest) || throwSyntaxError(where()));
-            if (literal === 'true') {
-                asBooleans(array).push(true);
-            }
-            else if (literal === 'false') {
-                asBooleans(array).push(false);
-            }
-            else if (literal === 'inf' || literal === '+inf') {
-                asFloats(array).push(Infinity);
-            }
-            else if (literal === '-inf') {
-                asFloats(array).push(-Infinity);
-            }
-            else if (literal === 'nan' || literal === '+nan' || literal === '-nan') {
-                asFloats(array).push(NaN);
-            }
-            else if (literal.includes(':') || literal.indexOf('-') !== literal.lastIndexOf('-') && !literal.startsWith('-')) {
-                asDatetimes(array).push(new Datetime(literal));
-            }
-            else if (literal.includes('.') || (literal.includes('e') || literal.includes('E')) && !literal.startsWith('0x')) {
-                asFloats(array).push(Float(literal));
-            }
-            else if (enableNull && literal === 'null' || enableNil && literal === 'nil') {
-                asNulls(array).push(null);
-            }
-            else {
-                asIntegers(array).push(IntegerDepends(literal));
-            }
-            break;
-    }
-    if (custom) {
-        array[lastIndex] = construct(type, array[lastIndex]);
-    }
-    if (keepComment && lineRest.startsWith('#')) {
-        array[Symbol_for(lastIndex)] = lineRest.slice(1);
-        return '';
-    }
-    return lineRest;
 }
 
 const TOML = {
