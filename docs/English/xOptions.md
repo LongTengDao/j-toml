@@ -143,6 +143,8 @@ array = (tag) [
 
 Tags are processed from after to before.
 
+Tag content could include any character rather than `(` `)` <code>&#92;</code> `"` `'` <code>&#96;</code> CR LF U+2028 U+2029.
+
 Note: This option requires `xOptions.mix` enabled at the same time, because the custom returned value could not be properly classified.
 
 `xOptions.open`

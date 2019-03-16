@@ -84,7 +84,7 @@ export const SYM_WHITESPACE = newRegExp`
 	${Whitespace}*`;
 
 
-const Tag = /[\w\-:=[\]{}., \t~!@$%^&*+|/?]+/;
+const Tag = /[^()\\"'`\r\n\u2028\u2029]+/;
 
 export const KEY_VALUE_PAIR = newRegExp`
 	^

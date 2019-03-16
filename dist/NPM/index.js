@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.67';
+const version = '0.5.68';
 
 const isBuffer = Buffer.isBuffer;
 
@@ -112,7 +112,7 @@ const SYM_WHITESPACE = newRegExp `
 	^
 	[^]
 	${Whitespace}*`;
-const Tag = /[\w\-:=[\]{}., \t~!@$%^&*+|/?]+/;
+const Tag = /[^()\\"'`\r\n\u2028\u2029]+/;
 const KEY_VALUE_PAIR = newRegExp `
 	^
 	${Whitespace}*
