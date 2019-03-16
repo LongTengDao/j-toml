@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.68';
+const version = '0.5.69';
 
 const isBuffer = Buffer.isBuffer;
 
@@ -247,7 +247,7 @@ function could() {
     }
 }
 function todo(source) {
-    sourceLines = source.replace(BOM, '').split(EOL);
+    sourceLines = source.split(EOL);
     lastLineIndex = sourceLines.length - 1;
     lineIndex = -1;
     stacks_length = 0;
@@ -1012,18 +1012,19 @@ function equalInlineArray(table, finalKey, lineRest) {
 
 function parse(sourceContent, specificationVersion, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger = true, extensionOptions = null) {
     could();
-    if (typeof sourceContent !== 'string') {
-        if (!isBuffer(sourceContent)) {
-            throw new TypeError('TOML.parse(sourceContent)');
-        }
+    if (isBuffer(sourceContent)) {
         const buffer = sourceContent;
         sourceContent = buffer.toString();
         if (!from(buffer).equals(buffer)) {
-            throw Error('A TOML doc must be a (ful-scalar) valid utf8 file.');
+            throw Error('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any unknown code point.');
         }
+        sourceContent = sourceContent.replace(BOM, '');
+    }
+    if (typeof sourceContent !== 'string') {
+        throw new TypeError('TOML.parse(sourceContent)');
     }
     if (NON_SCALAR.test(sourceContent)) {
-        throw Error('A TOML doc must be a (ful-scalar) valid utf8 file.');
+        throw Error('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any uncoupled UCS-4 character code.');
     }
     if (specificationVersion !== 0.5) {
         throw new Error('TOML.parse(,specificationVersion)');

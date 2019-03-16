@@ -53,10 +53,15 @@ function parse (
 0.  #### `源内容`
     
     *   required
-    *   type: `string` / `Buffer(utf8)`
+    *   type: `string` / `Buffer(UTF-8)`
     
-    传入的 `string` 如果以 UTF BOM 开头，不会造成错误。  
-    你也可以传入 `Buffer`。但它必须是 UTF 8 编码的，这不是技术问题，而是规范的要求。
+    你可以传入 `string`，也可以传入文件原始的二进制 `Buffer`。
+    
+    一个区别是，当传入 `string` 时，只会根据规范检查所有字符是否均为有效的 Unicode 字符（未配对的 UCS-4 字符码是无效的）；  
+    而传入 `Buffer` 时，还会额外检查是否存在未知码点（而这在 `string` 状态下已经被自动替换为 `U+FFFD`）。
+    
+    另一个区别是，`Buffer` 允许以 UTF BOM 开头，这会用于文件编码的确认（但它必须是 UTF-8 编码的，这不是技术问题，而是规范的要求），并在正式解析前跳过；  
+    而 `string` 不允许，因为 BOM 属于 UTF 而非 TOML。
     
 1.  #### `遵循规范版本`
     

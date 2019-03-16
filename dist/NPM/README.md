@@ -55,10 +55,15 @@ function parse (
 0.  **`sourceContent`**
     
     *   required
-    *   type: `string` / `Buffer(utf8)`
+    *   type: `string` / `Buffer(UTF-8)`
     
-    If the `string` starts with UTF BOM, that's ok.  
-    You can also pass in a `Buffer`. But it must be UTF 8 encoding, that's not a technology problem, but a requirement in the specification.
+    You can pass in `string` or the original binary `Buffer` of the file.
+    
+    One difference is that when passing in `string`, parser will only check whether all characters are valid Unicode characters according to the specification (uncoupled UCS-4 character code is invalid);  
+    When `Buffer` is passed in, an additional check is made to see whether there is unknown code point (which has been automatically replaced by `U+FFFD` in the `string` state).
+    
+    Another difference is that `Buffer` can start with UTF BOM, which is used for validation of file encoding (but it must be UTF-8 encoding, which is not a technical limit, but a specification requirement), and skipped before real parsing;  
+    But `string` can't, because BOM belongs to UTF, not TOML.
     
 1.  **`specificationVersion`**
     

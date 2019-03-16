@@ -21,7 +21,7 @@ export function could () :void {
 }
 
 export function todo (source :string) :void {
-	sourceLines = source.replace(RE.BOM, '').split(RE.EOL);
+	sourceLines = source.split(RE.EOL);
 	lastLineIndex = sourceLines.length-1;
 	lineIndex = -1;
 	stacks_length = 0;
