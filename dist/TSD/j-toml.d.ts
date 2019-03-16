@@ -33,9 +33,9 @@ declare module '@ltd/j-toml' {
 				ins? :boolean,
 				mix :true,
 				new :
-					{ [type :string] :(value :any) => any }
+					{ [tag :string] :(value :any) => any }
 					|
-					( (type :string, value :any) => any )
+					( (tag :string, value :any) => any )
 			}
 	) :Table;
 	

@@ -1,11 +1,7 @@
-import create from '.Object.create';
 import SyntaxError from '.SyntaxError';
 import RangeError from '.RangeError';
 import TypeError from '.TypeError';
 import Error from '.Error';
-import getOwnPropertyNames from '.Object.getOwnPropertyNames';
-import getPrototypeOf from '.Reflect.getPrototypeOf';
-import stringify from '.JSON.stringify';
 import isSafeInteger from '.Number.isSafeInteger';
 import Proxy from '.Proxy';
 import WeakMap from '.WeakMap';
@@ -27,7 +23,7 @@ export let enableNull :boolean;
 export let allowInlineTableMultiLineAndTrailingCommaEvenNoComma :boolean;
 export let enableInterpolationString :boolean;
 export let asNulls :Function, asStrings :Function, asTables :Function, asArrays :Function, asBooleans :Function, asFloats :Function, asDatetimes :Function, asIntegers :Function;
-export let customConstructors :Function | object | null;
+let processor :Function | null;
 
 /* xOptions.mix */
 
@@ -54,39 +50,28 @@ export const {
 
 /* xOptions.new */
 
-type each = { parent :object | any[], key :string | number, type :string };
-let WC :each[] = [];
-function wc_on (each :each) :void { WC.push(each); }
-function wc_off (each :each) :never { throw iterator.throws(SyntaxError(iterator.where())); }
-export let wc :typeof wc_off | typeof wc_on = wc_off;
-export function Wc () {
-	let index = WC.length;
+type each = { table :object, key :string, tag :string } | { array :any[], index :number, tag :string } | { table :object, key :string, array :object[], index :number, tag :string };
+let collection :each[] = [];
+function collect_on (each :each) :void { collection.push(each); }
+function collect_off (each :each) :never { throw iterator.throws(SyntaxError(iterator.where())); }
+export let collect :typeof collect_off | typeof collect_on = collect_off;
+export function process () {
+	let index = collection.length;
 	if ( index ) {
 		iterator.done();
-		const c = customConstructors;
-		const s = WC;
-		customConstructors = null;
-		WC = [];
-		if ( typeof c==='function' ) {
-			while ( index-- ) {
-				const { parent, key, type } = <each>s.pop();
-				parent[key] = c(type, parent[key]);
-			}
-		}
-		else {
-			while ( index-- ) {
-				const { parent, key, type } = <each>s.pop();
-				parent[key] = ( <object>c )[type](parent[key]);
-			}
-		}
+		const process = <Function>processor;
+		const queue = collection;
+		processor = null;
+		collection = [];
+		while ( index-- ) { process(<each>queue.pop()); }
 	}
 }
 
 /* use & clear */
 
 export function clear () :void {
-	customConstructors = null;
-	WC.length = 0;
+	processor = null;
+	collection.length = 0;
 }
 
 export function use (useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines :string, useBigInt_forInteger :boolean | number, extensionOptions) :void {
@@ -111,7 +96,7 @@ export function use (useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines
 	if ( extensionOptions===null ) {
 		TableDepends = Table;
 		open = allowLonger = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = enableInterpolationString = false;
-		customConstructors = null;
+		processor = null;
 		typify = true;
 	}
 	else {
@@ -122,35 +107,13 @@ export function use (useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines
 		allowInlineTableMultiLineAndTrailingCommaEvenNoComma = !!extensionOptions.multi;
 		enableInterpolationString = !!extensionOptions.ins;
 		typify = !extensionOptions.mix;
-		customConstructors = extensionOptions.new || null;
-		if ( customConstructors===null ) { wc = wc_off; }
-		else {
-			if ( typeof customConstructors==='function' ) {
-				if ( typify ) { throw new Error('TOML.parse(,,,,{ mix:false, new(){} })'); }
-				if ( customConstructors.length!==2 ) { throw new Error('TOML.parse(,,,,xOptions.new.length)'); }
-			}
-			else if ( typeof customConstructors==='object' ) {
-				if ( typify ) { throw new Error('TOML.parse(,,,,{ mix:false, new:{} })'); }
-				if ( getPrototypeOf(customConstructors)===null ) {
-					for ( const type of getOwnPropertyNames(customConstructors) ) {
-						if ( typeof customConstructors[type]!=='function' ) { throw new TypeError('TOML.parse(,,,,xOptions.new['+stringify(type)+'])'); }
-						if ( customConstructors[type].length ) { throw new Error('TOML.parse(,,,,xOptions.new['+stringify(type)+'].length)'); }
-					}
-				}
-				else {
-					const origin = customConstructors;
-					customConstructors = <object>create(null);
-					for ( const type of getOwnPropertyNames(origin) ) {
-						const customConstructor = origin[type];
-						if ( typeof customConstructor!=='function' ) { throw new TypeError('TOML.parse(,,,,xOptions.new['+stringify(type)+'])'); }
-						if ( customConstructors[type].length ) { throw new Error('TOML.parse(,,,,xOptions.new['+stringify(type)+'].length)'); }
-						customConstructors[type] = customConstructor;
-					}
-				}
-			}
-			else { throw new TypeError('TOML.parse(,,,,xOptions.new)'); }
-			wc = wc_on;
+		processor = extensionOptions.new || null;
+		if ( processor ) {
+			if ( typeof processor!=='function' ) { throw new TypeError('TOML.parse(,,,,xOptions.tag)'); }
+			if ( typify ) { throw new Error('TOML.parse(,,,,xOptions) xOptions.tag needs xOptions.mix to be true'); }
+			collect = collect_on;
 		}
+		else { collect = collect_off; }
 	}
 	if ( typify ) {
 		asNulls = asInlineArrayOfNulls;

@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.66';
+const version = '0.5.67';
 
 const isBuffer = Buffer.isBuffer;
 
@@ -112,14 +112,19 @@ const SYM_WHITESPACE = newRegExp `
 	^
 	[^]
 	${Whitespace}*`;
+const Tag = /[\w\-:=[\]{}., \t~!@$%^&*+|/?]+/;
 const KEY_VALUE_PAIR = newRegExp `
 	^
-	[ \t]*
+	${Whitespace}*
+	(?:
+		\((${Tag})\)
+		${Whitespace}*
+	)?
 	=
-	[ \t]*
-	(
-		\(([\w-:., ]+)\)
-		[ \t]+
+	${Whitespace}*
+	(?:
+		\((${Tag})\)
+		${Whitespace}*
 	)?
 	(
 		[^ \t#]
@@ -128,9 +133,15 @@ const KEY_VALUE_PAIR = newRegExp `
 	$`;
 const _VALUE_PAIR = newRegExp `
 	^
-	\(([\w-:., ]+)\)
-	${Whitespace}+
+	\((${Tag})\)
+	${Whitespace}*
 	([^ \t#][^]*)
+	$`;
+const TAG_REST = newRegExp `
+	^
+	\((${Tag})\)
+	${Whitespace}*
+	([^]*)
 	$`;
 
 /* parser */
@@ -158,8 +169,7 @@ function BASIC_STRING_exec(_2) {
     for (let _1 = '';;) {
         const $ = BASIC_STRING.exec(_2);
         if ($ === null) {
-            _2.startsWith('"')
-                || throws(SyntaxError(where()));
+            _2.startsWith('"') || throws(SyntaxError(where()));
             return { 1: _1, 2: _2.replace(SYM_WHITESPACE, '') };
         }
         _1 += $[0];
@@ -169,24 +179,29 @@ function BASIC_STRING_exec(_2) {
 const BARE_KEY = /^[\w-]+/;
 const LITERAL_KEY = /^'[^'\x00-\x08\x0B-\x1F\x7F]*'/;
 const DOT_KEY = /^[ \t]*\.[ \t]*/;
-function TABLE_DEFINITION_exec(_) {
-    const _1 = _.charAt(1) === '[';
-    _ = _.slice(_1 ? 2 : 1).replace(PRE_WHITESPACE, '');
-    const _2 = getKeys(_);
-    _ = _.slice(_2.length).replace(PRE_WHITESPACE, '');
-    _.startsWith(']')
-        || throws(SyntaxError(where()));
-    const _3 = _.charAt(1) === ']';
-    _ = _.slice(_3 ? 2 : 1).replace(PRE_WHITESPACE, '');
-    _ === ''
-        || _.startsWith('#')
-        || throws(SyntaxError(where()));
-    return { 1: _1, 2: _2, 3: _3 };
+function TABLE_DEFINITION_exec_groups(_) {
+    const $_asArrayItem$$ = _.charAt(1) === '[';
+    _ = _.slice($_asArrayItem$$ ? 2 : 1).replace(PRE_WHITESPACE, '');
+    const keys = getKeys(_);
+    _ = _.slice(keys.length).replace(PRE_WHITESPACE, '');
+    let tagInner = '';
+    if (_.startsWith('(')) {
+        ({ 1: tagInner, 2: _ } = TAG_REST.exec(_) || throws(SyntaxError(where())));
+    }
+    _.startsWith(']') || throws(SyntaxError(where()));
+    const $$asArrayItem$_ = _.charAt(1) === ']';
+    _ = _.slice($$asArrayItem$_ ? 2 : 1).replace(PRE_WHITESPACE, '');
+    let tagOuter = '';
+    if (_.startsWith('(')) {
+        ({ 1: tagOuter, 2: _ } = TAG_REST.exec(_) || throws(SyntaxError(where())));
+    }
+    _ === '' || _.startsWith('#') || throws(SyntaxError(where()));
+    return { $_asArrayItem$$, keys, tagInner, $$asArrayItem$_, tagOuter };
 }
-function KEY_VALUE_PAIR_exec(_) {
+function KEY_VALUE_PAIR_exec_groups(_) {
     const _1 = getKeys(_);
     const $ = KEY_VALUE_PAIR.exec(_.slice(_1.length)) || throws(SyntaxError(where()));
-    return { 1: _1, 2: $[1], 3: $[2], 4: $[3] };
+    return { left: _1, tagLeft: $[1] || '', tagRight: $[2] || '', right: $[3] };
 }
 function getKeys(_) {
     for (let keys = '';;) {
@@ -195,8 +210,7 @@ function getKeys(_) {
             for (let key = '"';;) {
                 const $ = BASIC_STRING.exec(_);
                 if ($ === null) {
-                    _.startsWith('"')
-                        || throws(SyntaxError(where()));
+                    _.startsWith('"') || throws(SyntaxError(where()));
                     _ = _.slice(1);
                     keys += key + '"';
                     break;
@@ -278,14 +292,6 @@ function throws(error) {
     throw error;
 }
 
-const create = Object.create;
-
-const getOwnPropertyNames = Object.getOwnPropertyNames;
-
-const getPrototypeOf = Reflect.getPrototypeOf;
-
-const stringify = JSON.stringify;
-
 const isSafeInteger = Number.isSafeInteger;
 
 /*!
@@ -298,6 +304,8 @@ const isSafeInteger = Number.isSafeInteger;
  * 问题反馈：https://GitHub.com/LongTengDao/j-orderify/issues
  * 项目主页：https://GitHub.com/LongTengDao/j-orderify/
  */
+
+const create = Object.create;
 
 const defineProperty = Reflect.defineProperty;
 
@@ -382,7 +390,7 @@ let enableNull;
 let allowInlineTableMultiLineAndTrailingCommaEvenNoComma;
 let enableInterpolationString;
 let asNulls, asStrings, asTables, asArrays, asBooleans, asFloats, asDatetimes, asIntegers;
-let customConstructors;
+let processor;
 /* xOptions.mix */
 const unType = (array) => array;
 const { asInlineArrayOfNulls, asInlineArrayOfStrings, asInlineArrayOfTables, asInlineArrayOfArrays, asInlineArrayOfBooleans, asInlineArrayOfFloats, asInlineArrayOfDatetimes, asInlineArrayOfIntegers, } = new Proxy(new WeakMap, {
@@ -397,36 +405,27 @@ const { asInlineArrayOfNulls, asInlineArrayOfStrings, asInlineArrayOfTables, asI
         return array;
     }
 });
-let WC = [];
-function wc_on(each) { WC.push(each); }
-function wc_off(each) { throw throws(SyntaxError(where())); }
-let wc = wc_off;
-function Wc() {
-    let index = WC.length;
+let collection = [];
+function collect_on(each) { collection.push(each); }
+function collect_off(each) { throw throws(SyntaxError(where())); }
+let collect = collect_off;
+function process() {
+    let index = collection.length;
     if (index) {
         done();
-        const c = customConstructors;
-        const s = WC;
-        customConstructors = null;
-        WC = [];
-        if (typeof c === 'function') {
-            while (index--) {
-                const { parent, key, type } = s.pop();
-                parent[key] = c(type, parent[key]);
-            }
-        }
-        else {
-            while (index--) {
-                const { parent, key, type } = s.pop();
-                parent[key] = c[type](parent[key]);
-            }
+        const process = processor;
+        const queue = collection;
+        processor = null;
+        collection = [];
+        while (index--) {
+            process(queue.pop());
         }
     }
 }
 /* use & clear */
 function clear() {
-    customConstructors = null;
-    WC.length = 0;
+    processor = null;
+    collection.length = 0;
 }
 function use(useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger, extensionOptions) {
     if (typeof useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines !== 'string') {
@@ -460,7 +459,7 @@ function use(useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBig
     if (extensionOptions === null) {
         TableDepends = Table;
         open = allowLonger = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = enableInterpolationString = false;
-        customConstructors = null;
+        processor = null;
         typify = true;
     }
     else {
@@ -471,52 +470,18 @@ function use(useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBig
         allowInlineTableMultiLineAndTrailingCommaEvenNoComma = !!extensionOptions.multi;
         enableInterpolationString = !!extensionOptions.ins;
         typify = !extensionOptions.mix;
-        customConstructors = extensionOptions.new || null;
-        if (customConstructors === null) {
-            wc = wc_off;
+        processor = extensionOptions.new || null;
+        if (processor) {
+            if (typeof processor !== 'function') {
+                throw new TypeError('TOML.parse(,,,,xOptions.tag)');
+            }
+            if (typify) {
+                throw new Error('TOML.parse(,,,,xOptions) xOptions.tag needs xOptions.mix to be true');
+            }
+            collect = collect_on;
         }
         else {
-            if (typeof customConstructors === 'function') {
-                if (typify) {
-                    throw new Error('TOML.parse(,,,,{ mix:false, new(){} })');
-                }
-                if (customConstructors.length !== 2) {
-                    throw new Error('TOML.parse(,,,,xOptions.new.length)');
-                }
-            }
-            else if (typeof customConstructors === 'object') {
-                if (typify) {
-                    throw new Error('TOML.parse(,,,,{ mix:false, new:{} })');
-                }
-                if (getPrototypeOf(customConstructors) === null) {
-                    for (const type of getOwnPropertyNames(customConstructors)) {
-                        if (typeof customConstructors[type] !== 'function') {
-                            throw new TypeError('TOML.parse(,,,,xOptions.new[' + stringify(type) + '])');
-                        }
-                        if (customConstructors[type].length) {
-                            throw new Error('TOML.parse(,,,,xOptions.new[' + stringify(type) + '].length)');
-                        }
-                    }
-                }
-                else {
-                    const origin = customConstructors;
-                    customConstructors = create(null);
-                    for (const type of getOwnPropertyNames(origin)) {
-                        const customConstructor = origin[type];
-                        if (typeof customConstructor !== 'function') {
-                            throw new TypeError('TOML.parse(,,,,xOptions.new[' + stringify(type) + '])');
-                        }
-                        if (customConstructors[type].length) {
-                            throw new Error('TOML.parse(,,,,xOptions.new[' + stringify(type) + '].length)');
-                        }
-                        customConstructors[type] = customConstructor;
-                    }
-                }
-            }
-            else {
-                throw new TypeError('TOML.parse(,,,,xOptions.new)');
-            }
-            wc = wc_on;
+            collect = collect_off;
         }
     }
     if (typify) {
@@ -618,7 +583,7 @@ const MultiLineBasicString = (literal) => literal.replace(ESCAPED_IN_MULTI_LINE,
 
 const sealedInline = new WeakSet;
 const openTables = new WeakSet;
-function appendTable(table, key_key, asArrayItem) {
+function appendTable(table, key_key, asArrayItem, tag) {
     const leadingKeys = parseKeys(key_key);
     const finalKey = leadingKeys.pop();
     table = prepareTable(table, leadingKeys);
@@ -631,6 +596,7 @@ function appendTable(table, key_key, asArrayItem) {
         else {
             arrayOfTables = table[finalKey] = [];
         }
+        tag && collect({ table, key: finalKey, array: arrayOfTables, index: arrayOfTables.length, tag });
         arrayOfTables.push(lastTable = new TableDepends);
     }
     else {
@@ -641,6 +607,7 @@ function appendTable(table, key_key, asArrayItem) {
         else {
             table[finalKey] = lastTable = new TableDepends;
         }
+        tag && collect({ table, key: finalKey, tag });
     }
     return lastTable;
 }
@@ -800,9 +767,10 @@ function Root() {
         if (line === '') ;
         else if (line.startsWith('#')) ;
         else if (line.startsWith('[')) {
-            const { 1: $_asArrayItem$$, 2: keys, 3: $$asArrayItem$_ } = TABLE_DEFINITION_exec(line);
+            const { $_asArrayItem$$, keys, tagInner, $$asArrayItem$_, tagOuter } = TABLE_DEFINITION_exec_groups(line);
             $_asArrayItem$$ === $$asArrayItem$_ || throws(SyntaxError('Square brackets of table define statement not match at ' + where()));
-            lastSectionTable = appendTable(rootTable, keys, $_asArrayItem$$);
+            tagInner && tagOuter && throws(SyntaxError('Tag for table define statement can not both in and out, which at ' + where()));
+            lastSectionTable = appendTable(rootTable, keys, $_asArrayItem$$, tagOuter || tagInner);
         }
         else {
             let rest = assign(lastSectionTable, line);
@@ -816,14 +784,15 @@ function Root() {
 }
 function assign(lastInlineTable_array, lineRest) {
     let left;
-    let _type_;
-    let type;
-    ({ 1: left, 2: _type_, 3: type, 4: lineRest } = KEY_VALUE_PAIR_exec(lineRest));
+    let tagLeft;
+    let tagRight;
+    ({ left, tagLeft, tagRight, right: lineRest } = KEY_VALUE_PAIR_exec_groups(lineRest));
     const leadingKeys = parseKeys(left);
     const finalKey = leadingKeys.pop();
     const table = prepareInlineTable(lastInlineTable_array, leadingKeys);
     finalKey in table && throws(Error('Duplicate property definition at ' + where()));
-    _type_ && wc({ parent: table, key: finalKey, type });
+    tagLeft && tagRight && throws(SyntaxError('Tag for key/value pair can not both left and right, which at ' + where()));
+    (tagLeft || tagRight) && collect({ parent: table, key: finalKey, tag: tagLeft || tagRight });
     switch (lineRest[0]) {
         case '\'':
             return assignLiteralString(table, finalKey, lineRest);
@@ -852,9 +821,9 @@ function assign(lastInlineTable_array, lineRest) {
 }
 function push(lastInlineTable_array, lineRest) {
     if (lineRest.startsWith('(')) {
-        let type;
-        ({ 1: type, 2: lineRest } = _VALUE_PAIR.exec(lineRest) || throws(SyntaxError(where())));
-        wc({ parent: lastInlineTable_array, key: lastInlineTable_array.length, type });
+        let tag;
+        ({ 1: tag, 2: lineRest } = _VALUE_PAIR.exec(lineRest) || throws(SyntaxError(where())));
+        collect({ array: lastInlineTable_array, index: lastInlineTable_array.length, tag });
     }
     const lastIndex = '' + lastInlineTable_array.length;
     switch (lineRest[0]) {
@@ -1064,7 +1033,7 @@ function parse(sourceContent, specificationVersion, useWhatToJoinMultiLineString
         todo(sourceContent);
         try {
             const rootTable = Root();
-            Wc();
+            process();
             return rootTable;
         }
         finally {

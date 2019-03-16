@@ -105,17 +105,46 @@ keyB = ``
 
 插值字符串原始解析结果总是以 `\n` 换行，而不会理睬 `multiLineJoiner` 参数。
 
-`超级选项.new`
+`超级选项.tag`
 --------------
 
-*   type: `{ [type]: function (value) { } }` / `function (type, value) { }`
+*   type:
+    ```typescript
+    type processorForEach = (each :
+        { table :Table, key :string,                                tag :string }
+        |
+        {                            array :any[],   index :number, tag :string }
+        |
+        { table :Table, key :string, array :Table[], index :number, tag :string }
+    ) => void
+    ```
 *   default: `null`
 
 ```
-key = (type) 'value'
+[table (tag)]
+
+key (tag) = 'value'
+
+array (tag) = [
+    (tag) 'item'
+]
 ```
 
-注意：如果开启此选项，要求同时开启 `超级选项.mix`，因为无法妥善归类自定义类型。
+或：
+
+```
+[table] (tag)
+
+key = (tag) 'value'
+
+array = (tag) [
+    (tag) 'item'
+]
+```
+
+标签是从后往前处理的。
+
+注意：如果开启此选项，要求同时开启 `超级选项.mix`，因为无法妥善归类自定义返回值。
 
 `超级选项.open`
 ----------------

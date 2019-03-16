@@ -28,7 +28,7 @@ export default function parse (
 		iterator.todo(sourceContent);
 		try {
 			const rootTable = Root();
-			options.Wc();
+			options.process();
 			return rootTable;
 		}
 		finally { iterator.done(); }

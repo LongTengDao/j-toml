@@ -26,8 +26,7 @@ export function BASIC_STRING_exec (_2 :string) :{ 1 :string, 2 :string } {
 	for ( let _1 :string = ''; ; ) {
 		const $ :RegExpExecArray | null = BASIC_STRING.exec(_2);
 		if ( $===null ) {
-			_2.startsWith('"')
-			|| iterator.throws(SyntaxError(iterator.where()));
+			_2.startsWith('"') || iterator.throws(SyntaxError(iterator.where()));
 			return { 1: _1, 2: _2.replace(RE.SYM_WHITESPACE, '') };
 		}
 		_1 += $[0];
@@ -39,25 +38,26 @@ const BARE_KEY :RegExp = /^[\w-]+/;
 const LITERAL_KEY :RegExp = /^'[^'\x00-\x08\x0B-\x1F\x7F]*'/;
 const DOT_KEY :RegExp = /^[ \t]*\.[ \t]*/;
 
-export function TABLE_DEFINITION_exec (_ :string) :{ 1 :boolean, 2 :string, 3 :boolean } {
-	const _1 :boolean = _.charAt(1)==='[';
-	_ = _.slice(_1 ? 2 : 1).replace(RE.PRE_WHITESPACE, '');
-	const _2 :string = getKeys(_);
-	_ = _.slice(_2.length).replace(RE.PRE_WHITESPACE, '');
-	_.startsWith(']')
-	|| iterator.throws(SyntaxError(iterator.where()));
-	const _3 :boolean = _.charAt(1)===']';
-	_ = _.slice(_3 ? 2 : 1).replace(RE.PRE_WHITESPACE, '');
-	_===''
-	|| _.startsWith('#')
-	|| iterator.throws(SyntaxError(iterator.where()));
-	return { 1: _1, 2: _2, 3: _3 };
+export function TABLE_DEFINITION_exec_groups (_ :string) :{ $_asArrayItem$$ :boolean, keys :string, tagInner :string, $$asArrayItem$_ :boolean, tagOuter :string } {
+	const $_asArrayItem$$ :boolean = _.charAt(1)==='[';
+	_ = _.slice($_asArrayItem$$ ? 2 : 1).replace(RE.PRE_WHITESPACE, '');
+	const keys :string = getKeys(_);
+	_ = _.slice(keys.length).replace(RE.PRE_WHITESPACE, '');
+	let tagInner :string = '';
+	if ( _.startsWith('(') ) { ( { 1: tagInner, 2: _ } = RE.TAG_REST.exec(_) || iterator.throws(SyntaxError(iterator.where())) ); }
+	_.startsWith(']') || iterator.throws(SyntaxError(iterator.where()));
+	const $$asArrayItem$_ :boolean = _.charAt(1)===']';
+	_ = _.slice($$asArrayItem$_ ? 2 : 1).replace(RE.PRE_WHITESPACE, '');
+	let tagOuter :string = '';
+	if ( _.startsWith('(') ) { ( { 1: tagOuter, 2: _ } = RE.TAG_REST.exec(_) || iterator.throws(SyntaxError(iterator.where())) ); }
+	_==='' || _.startsWith('#') || iterator.throws(SyntaxError(iterator.where()));
+	return { $_asArrayItem$$, keys, tagInner, $$asArrayItem$_, tagOuter };
 }
 
-export function KEY_VALUE_PAIR_exec (_ :string) :{ 1 :string, 2 :string, 3 :string, 4 :string } {
+export function KEY_VALUE_PAIR_exec_groups (_ :string) :{ left :string, tagLeft :string, tagRight :string, right :string } {
 	const _1 :string = getKeys(_);
 	const $ :RegExpExecArray = RE.KEY_VALUE_PAIR.exec(_.slice(_1.length)) || iterator.throws(SyntaxError(iterator.where()));
-	return { 1: _1, 2: $[1], 3: $[2], 4: $[3] };
+	return { left: _1, tagLeft: $[1] || '', tagRight: $[2] || '', right: $[3] };
 }
 
 function getKeys (_ :string) :string {
@@ -67,8 +67,7 @@ function getKeys (_ :string) :string {
 			for ( let key :string = '"'; ; ) {
 				const $ :RegExpExecArray | null = BASIC_STRING.exec(_);
 				if ( $===null ) {
-					_.startsWith('"')
-					|| iterator.throws(SyntaxError(iterator.where()));
+					_.startsWith('"') || iterator.throws(SyntaxError(iterator.where()));
 					_ = _.slice(1);
 					keys += key+'"';
 					break;

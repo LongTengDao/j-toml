@@ -18,9 +18,10 @@ export default function Root () {
 		if ( line==='' ) { }
 		else if ( line.startsWith('#') ) { }
 		else if ( line.startsWith('[') ) {
-			const { 1: $_asArrayItem$$, 2: keys, 3: $$asArrayItem$_ } = RE.TABLE_DEFINITION_exec(line);
+			const { $_asArrayItem$$, keys, tagInner, $$asArrayItem$_, tagOuter } = RE.TABLE_DEFINITION_exec_groups(line);
 			$_asArrayItem$$===$$asArrayItem$_ || iterator.throws(SyntaxError('Square brackets of table define statement not match at '+iterator.where()));
-			lastSectionTable = appendTable(rootTable, keys, $_asArrayItem$$);
+			tagInner && tagOuter && iterator.throws(SyntaxError('Tag for table define statement can not both in and out, which at '+iterator.where()));
+			lastSectionTable = appendTable(rootTable, keys, $_asArrayItem$$, tagOuter || tagInner);
 		}
 		else {
 			let rest :string = assign(lastSectionTable, line);
@@ -33,14 +34,15 @@ export default function Root () {
 
 function assign (lastInlineTable_array :object | any[], lineRest :string) :string {
 	let left;
-	let _type_;
-	let type;
-	( { 1: left, 2: _type_, 3: type, 4: lineRest } = RE.KEY_VALUE_PAIR_exec(lineRest) );
+	let tagLeft;
+	let tagRight;
+	( { left, tagLeft, tagRight, right: lineRest } = RE.KEY_VALUE_PAIR_exec_groups(lineRest) );
 	const leadingKeys :string[] = parseKeys(left);
 	const finalKey :string = leadingKeys.pop();
 	const table :object = prepareInlineTable(lastInlineTable_array, leadingKeys);
 	finalKey in table && iterator.throws(Error('Duplicate property definition at '+iterator.where()));
-	_type_ && options.wc({ parent: table, key: finalKey, type });
+	tagLeft && tagRight && iterator.throws(SyntaxError('Tag for key/value pair can not both left and right, which at '+iterator.where()));
+	( tagLeft || tagRight ) && options.collect({ parent: table, key: finalKey, tag: tagLeft || tagRight });
 	switch ( lineRest[0] ) {
 		case '\'':
 			return assignLiteralString(table, finalKey, lineRest);
@@ -70,9 +72,9 @@ function assign (lastInlineTable_array :object | any[], lineRest :string) :strin
 
 function push (lastInlineTable_array :object | any[], lineRest :string) :string {
 	if ( lineRest.startsWith('(') ) {
-		let type :string;
-		( { 1: type, 2: lineRest } = RE._VALUE_PAIR.exec(lineRest) || iterator.throws(SyntaxError(iterator.where()) ));
-		options.wc({ parent: lastInlineTable_array, key: lastInlineTable_array.length, type });
+		let tag :string;
+		( { 1: tag, 2: lineRest } = RE._VALUE_PAIR.exec(lineRest) || iterator.throws(SyntaxError(iterator.where()) ));
+		options.collect({ array: lastInlineTable_array, index: lastInlineTable_array.length, tag });
 	}
 	const lastIndex :string = ''+lastInlineTable_array.length;
 	switch ( lineRest[0] ) {

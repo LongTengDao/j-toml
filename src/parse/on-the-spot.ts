@@ -11,7 +11,7 @@ import * as RE from '../share/RE';
 export const sealedInline = new WeakSet;
 const openTables = new WeakSet;
 
-export function appendTable (table :object, key_key :string, asArrayItem :boolean) :object {
+export function appendTable (table :object, key_key :string, asArrayItem :boolean, tag :string) :object {
 	const leadingKeys :string[] = parseKeys(key_key);
 	const finalKey :string = leadingKeys.pop();
 	table = prepareTable(table, leadingKeys);
@@ -20,6 +20,7 @@ export function appendTable (table :object, key_key :string, asArrayItem :boolea
 		let arrayOfTables :object[];
 		if ( finalKey in table ) { sealedInline.has(arrayOfTables = table[finalKey]) && iterator.throws(Error('Trying to push Table to non-ArrayOfTables value at '+iterator.where())); }
 		else { arrayOfTables = table[finalKey] = []; }
+		tag && options.collect({ table, key: finalKey, array: arrayOfTables, index: arrayOfTables.length, tag });
 		arrayOfTables.push(lastTable = new options.TableDepends);
 	}
 	else {
@@ -28,6 +29,7 @@ export function appendTable (table :object, key_key :string, asArrayItem :boolea
 			openTables.delete(lastTable);
 		}
 		else { table[finalKey] = lastTable = new options.TableDepends; }
+		tag && options.collect({ table, key: finalKey, tag });
 	}
 	return lastTable;
 }

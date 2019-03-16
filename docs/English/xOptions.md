@@ -104,16 +104,46 @@ In JSON land, that would give you the following structure:
 
 The original parsed result of interpolation string always use `\n` as newline, not the value set by parameter `multiLineJoiner`.
 
-`xOptions.new`
+`xOptions.tag`
 --------------
 
-*   type: `{ [type]: function (value) { } }` / `function (type, value) { }`
+*   type:
+    ```typescript
+    type processorForEach = (each :
+        { table :Table, key :string,                                tag :string }
+        |
+        {                            array :any[],   index :number, tag :string }
+        |
+        { table :Table, key :string, array :Table[], index :number, tag :string }
+    ) => void
+    ```
+*   default: `null`
 
 ```
-key = (type) 'value'
+[table (tag)]
+
+key (tag) = 'value'
+
+array (tag) = [
+    (tag) 'item'
+]
 ```
 
-Note: This option requires `xOptions.mix` enabled at the same time, because the custom types could not be properly classified.
+Or:
+
+```
+[table] (tag)
+
+key = (tag) 'value'
+
+array = (tag) [
+    (tag) 'item'
+]
+```
+
+Tags are processed from after to before.
+
+Note: This option requires `xOptions.mix` enabled at the same time, because the custom returned value could not be properly classified.
 
 `xOptions.open`
 --------------

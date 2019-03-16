@@ -84,14 +84,20 @@ export const SYM_WHITESPACE = newRegExp`
 	${Whitespace}*`;
 
 
+const Tag = /[\w\-:=[\]{}., \t~!@$%^&*+|/?]+/;
+
 export const KEY_VALUE_PAIR = newRegExp`
 	^
-	[ \t]*
+	${Whitespace}*
+	(?:
+		\((${Tag})\)
+		${Whitespace}*
+	)?
 	=
-	[ \t]*
-	(
-		\(([\w-:., ]+)\)
-		[ \t]+
+	${Whitespace}*
+	(?:
+		\((${Tag})\)
+		${Whitespace}*
 	)?
 	(
 		[^ \t#]
@@ -101,7 +107,14 @@ export const KEY_VALUE_PAIR = newRegExp`
 
 export const _VALUE_PAIR = newRegExp`
 	^
-	\(([\w-:., ]+)\)
-	${Whitespace}+
+	\((${Tag})\)
+	${Whitespace}*
 	([^ \t#][^]*)
+	$`;
+
+export const TAG_REST = newRegExp`
+	^
+	\((${Tag})\)
+	${Whitespace}*
+	([^]*)
 	$`;
