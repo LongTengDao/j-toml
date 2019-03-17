@@ -123,6 +123,8 @@ keyB = ``
 ```
 [table (tag)]
 
+[[list]] (tag)
+
 key (tag) = 'value'
 
 array (tag) = [
@@ -134,6 +136,8 @@ array (tag) = [
 
 ```
 [table] (tag)
+
+[[list]] (tag)
 
 key = (tag) 'value'
 

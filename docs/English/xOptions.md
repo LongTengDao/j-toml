@@ -122,6 +122,8 @@ The original parsed result of interpolation string always use `\n` as newline, n
 ```
 [table (tag)]
 
+[[list (tag)]]
+
 key (tag) = 'value'
 
 array (tag) = [
@@ -133,6 +135,8 @@ Or:
 
 ```
 [table] (tag)
+
+[[list]] (tag)
 
 key = (tag) 'value'
 
