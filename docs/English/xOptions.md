@@ -109,13 +109,13 @@ The original parsed result of interpolation string always use `\n` as newline, n
 
 *   type:
     ```typescript
-    type processorForEach = (each :
+    function processorForEach (each :
         { table :Table, key :string,                                tag :string }
         |
         {                            array :any[],   index :number, tag :string }
         |
         { table :Table, key :string, array :Table[], index :number, tag :string }
-    ) => void
+    ) :void
     ```
 *   default: `null`
 

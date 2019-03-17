@@ -110,13 +110,13 @@ keyB = ``
 
 *   类型：
     ```typescript
-    type processorForEach = (each :
+    function processorForEach (each :
         { table :Table, key :string,                                tag :string }
         |
         {                            array :any[],   index :number, tag :string }
         |
         { table :Table, key :string, array :Table[], index :number, tag :string }
-    ) => void
+    ) :void
     ```
 *   默认值：`null`
 
