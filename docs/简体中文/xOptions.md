@@ -5,24 +5,24 @@
 `超级选项.order`
 ----------------
 
-*   type: `boolean`
-*   default: `false`
+*   类型：`boolean`
+*   默认值：`false`
 
 是否保持表中键值对的顺序。
 
 `超级选项.longer`
 -----------------
 
-*   type: `boolean`
-*   default: `false`
+*   类型：`boolean`
+*   默认值：`false`
 
 是否允许整数类型值超出 64 位范围（-9,223,372,036,854,775,808 至 9,223,372,036,854,775,807）限制。
 
 `超级选项.mix`
 --------------
 
-*   type: `boolean`
-*   default: `false`
+*   类型：`boolean`
+*   默认值：`false`
 
 是否允许混合类型的行内数组。
 
@@ -37,8 +37,8 @@ array = [
 `超级选项.multi`
 ----------------
 
-*   type: `boolean`
-*   default: `false`
+*   类型：`boolean`
+*   默认值：`false`
 
 是否允许多行写法的行内表。  
 附带尾逗号支持和省略逗号支持。
@@ -66,8 +66,8 @@ y = 2
 `超级选项.null`
 ---------------
 
-*   type: `boolean`
-*   default: `false`
+*   类型：`boolean`
+*   默认值：`false`
 
 是否允许 `null` 值类型（`null` 字面量）。
 
@@ -78,8 +78,8 @@ key = null
 `超级选项.ins`
 --------------
 
-*   type: `boolean`
-*   default: `false`
+*   类型：`boolean`
+*   默认值：`false`
 
 是否开启插值字符串支持。
 
@@ -108,7 +108,7 @@ keyB = ``
 `超级选项.tag`
 --------------
 
-*   type:
+*   类型：
     ```typescript
     type processorForEach = (each :
         { table :Table, key :string,                                tag :string }
@@ -118,7 +118,7 @@ keyB = ``
         { table :Table, key :string, array :Table[], index :number, tag :string }
     ) => void
     ```
-*   default: `null`
+*   默认值：`null`
 
 ```
 [table (tag)]

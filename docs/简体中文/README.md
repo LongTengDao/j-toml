@@ -52,8 +52,8 @@ function parse (
 
 0.  #### `源内容`
     
-    *   required
-    *   type: `string` / `Buffer(UTF-8)`
+    *   类型：`string` / `Buffer(UTF-8)`
+    *   必需
     
     你可以传入 `string`，也可以传入文件原始的二进制 `Buffer`。
     
@@ -65,29 +65,29 @@ function parse (
     
 1.  #### `遵循规范版本`
     
-    *   required
-    *   type: `0.5` / `0.4`
+    *   类型：`0.5` / `0.4`
+    *   必需
     
     如果没有特殊理由（例如为了处理历史遗留文件），建议使用最新的版本。
     
 2.  #### `多行拼接字符`
     
-    *   required
-    *   type: `string`
+    *   类型：`string`
+    *   必需
     
     对于多行字符串，用什么来拼接各行。  
     注意在解析 TOML 源时，按照 TOML 规范的要求，行分隔符总是 `"\n"` 或 `"\r\n"`。
     
 3.  #### `使用BigInt`
     
-    *   default: `true`
-    *   type: `boolean` / `number`
+    *   类型：`boolean` / `number`
+    *   默认值：`true`
     
     指定你是否要用 `BigInt` 来实现整数类型的值。`number` 类型的参数允许你精确控制超过多少才使用 `BigInt`，例如 `Number.MAX_SAFE_INTEGER`（自动通过 `-useBigInt` 获取负向界限，如果 `useBigInt>=0`；否则通过 `-useBigInt-1` 获取正向界限）。
     
 4.  #### `超级选项`
     
-    *   type: `object`
+    *   类型：`object`
     
     标准中所没有的扩展功能。  
     包括保持表中键值对的顺序、超出长整型的整数、保留注释信息、`null` 值、跨行行内表及尾逗号甚至省略逗号、混合类型的数组、插值字符串、自定义构造器等。  
@@ -96,12 +96,12 @@ function parse (
 
 ### `return`
 
-*   type: `Table`
+*   类型：`Table`
 
 返回根表（本实现解析出的表，是没有任何继承属性的对象）。
 
 ### `throw`
 
-*   type: `Error`
+*   类型：`Error`
 
 如果参数不符合要求，会抛出错误；如果源文本有错误，错误对象会有 `lineIndex` 和 `lineNumber` 两个数值属性来帮助定位。
