@@ -1,8 +1,8 @@
 
-[@ltd/j-toml v0.5]
-==================
+@ltd/j-toml
+===========
 
-[@ltd/j-toml v0.5] 是龙腾道为 [汤小明语 v0.5]（“汤小明的小巧明晰语言”）写的实现。  
+@ltd/j-toml 是龙腾道为 [汤小明语](https://ZhuanLan.ZhiHu.com/p/50412485)（“汤小明的小巧明晰语言”）写的实现。  
 ——这 TM 可能是“我”见过最好的配置文件书写格式了。  
 ——对于亲手折腾到爆炸的人而言。
 
@@ -41,7 +41,7 @@ TOML.parse(源内容, 遵循规范版本, 多行拼接字符[, 使用BigInt=true
 ```typescript
 function parse (
          源内容       :string | Buffer,
-         遵循规范版本 :0.5,
+         遵循规范版本 :0.5 | 0.4,
          多行拼接字符 :string,
          使用BigInt?  :boolean | number = true,
          超级选项?    :object
@@ -66,9 +66,9 @@ function parse (
 1.  #### `遵循规范版本`
     
     *   required
-    *   type: `0.5`
+    *   type: `0.5` / `0.4`
     
-    你必须显式地进行指定（尽管目前还不能使用别的值）。
+    如果没有特殊理由（例如为了处理历史遗留文件），建议使用最新的版本。
     
 2.  #### `多行拼接字符`
     
@@ -92,7 +92,7 @@ function parse (
     标准中所没有的扩展功能。  
     包括保持表中键值对的顺序、超出长整型的整数、保留注释信息、`null` 值、跨行行内表及尾逗号甚至省略逗号、混合类型的数组、插值字符串、自定义构造器等。  
     私有实验期功能，不建议随意使用。  
-    详见 [超级选项]。
+    详见 [超级选项](https://GitHub.com/LongTengDao/j-toml/blob/master/docs/简体中文/xOptions.md)。
 
 ### `return`
 
@@ -105,7 +105,3 @@ function parse (
 *   type: `Error`
 
 如果参数不符合要求，会抛出错误；如果源文本有错误，错误对象会有 `lineIndex` 和 `lineNumber` 两个数值属性来帮助定位。
-
-[@ltd/j-toml v0.5]: https://www.npmjs.com/package/@ltd/j-toml
-[汤小明语 v0.5]:    https://GitHub.com/LongTengDao/TOML/blob/龙腾道-译/versions/cn/toml-v0.5.0.md
-[超级选项]:         https://GitHub.com/LongTengDao/j-toml/blob/master/docs/简体中文/xOptions.md

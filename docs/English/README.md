@@ -1,8 +1,8 @@
 
-[@ltd/j-toml v0.5]
-==================
+@ltd/j-toml
+===========
 
-[@ltd/j-toml v0.5] is an implementation of [TOML v0.5] ("Tom's Obvious, Minimal Language") written by LongTengDao,  
+@ltd/j-toml is an implementation of [TOML](https://GitHub.com/toml-lang/toml/) ("Tom's Obvious, Minimal Language") written by LongTengDao,  
 which is the best config format he had ever seen.  
 (Obviously for exhausted people who tried to design that.)
 
@@ -41,7 +41,7 @@ TOML.parse(sourceContent, specificationVersion, multiLineJoiner[, useBigInt=true
 ```typescript
 function parse (
          sourceContent        :string | Buffer,
-         specificationVersion :0.5,
+         specificationVersion :0.5 | 0.4,
          multiLineJoiner      :string,
          useBigInt?           :boolean | number = true,
          xOptions?            :object
@@ -66,9 +66,9 @@ function parse (
 1.  #### `specificationVersion`
     
     *   required
-    *   type: `0.5`
+    *   type: `0.5` / `0.4`
     
-    You must specify it explicitly (though it can't be other value for the time being).
+    If there is no special reason (e.g. to deal with historical files), the latest version is recommended.
     
 2.  #### `multiLineJoiner`
     
@@ -92,7 +92,7 @@ function parse (
     The extensional features not in the spec.  
     Include keeping the key/value pairs order of tables, integers larger than `long`, comment information, `null` value, mixed-type array, multi-line inline table with trailing comma even no comma, interpolation string, custom constructor, etc.  
     They are private experimental discouraged features.  
-    See [xOptions].
+    See [xOptions](https://GitHub.com/LongTengDao/j-toml/blob/master/docs/English/xOptions.md).
 
 ### `return`
 
@@ -105,7 +105,3 @@ Return the root table (tables parsed by this implementation are objects without 
 *   type: `Error`
 
 If the arguments not meet the requirement, there will be an error; if there is any error with the source, the error object will has two number properties `lineIndex` and `lineNumber` to help locating that.
-
-[@ltd/j-toml v0.5]: https://www.npmjs.com/package/@ltd/j-toml
-[TOML v0.5]:        https://GitHub.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md
-[xOptions]:         https://GitHub.com/LongTengDao/j-toml/blob/master/docs/English/xOptions.md
