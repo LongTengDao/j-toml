@@ -1,41 +1,67 @@
 import SyntaxError from '.SyntaxError';
 import Error from '.Error';
-import Symbol from '.Symbol';
+import WeakMap from '.WeakMap';
 import Date from '.Date';
 import * as RE from '../share/RE';
 import * as iterator from '../share/iterator';
 
-const literal_cache = Symbol('literal_cache');
-const value_cache = Symbol('value_cache');
+const literal_cache = new WeakMap;
+const value_cache = new WeakMap;
 
-export class Datetime extends Date {
-	
-	type :string;
-	
-	constructor (literal :string) {
-		// @ts-ignore
-		const { 0: hms_ms = '', 1: YMD = '', 2: T = '', 3: HMS_MS = hms_ms, 4: Z = '' } :RegExpExecArray = RE.DATETIME.exec(literal) || iterator.throws(SyntaxError('Invalid Datetime '+literal+' at '+iterator.where()));
-		super(
-			Z ? YMD+'T'+HMS_MS+Z :
-				T ? YMD+'T'+HMS_MS :
-					YMD ? YMD+'T00:00:00.000'
-						: '1970-01-01T'+HMS_MS
-		);
-		this.type =
-			Z ? 'Offset Date-Time' :
-				T ? 'Local Date-Time' :
-					YMD ? 'Local Date'
-						: 'Local Time';
-		this[literal_cache] = literal;
-		this[value_cache] = this.getTime();
+class Datetime extends Date {
+	constructor (expression :string, literal :string) {
+		super(expression);
+		literal_cache.set(this, literal);
+		value_cache.set(this, this.getTime());
 	}
-	
-	//static isDatetime (value :any) :boolean { return value instanceof Datetime; }
-	
-	//toJSON (this :Datetime) :string { return this.toISOString(); }
+	// Date.prototype.toJSON => toISOString
 	toISOString (this :Datetime) :string {
-		if ( this.getTime()===this[value_cache] ) { return this[literal_cache]; }
+		if ( this.getTime()===value_cache.get(this) ) { return literal_cache.get(this); }
 		throw new Error('Datetime value has been modified.');
 	}
-	
+}
+
+export class OffsetDateTime extends Datetime {
+	constructor (literal :string) {
+		RE.OFFSET_DATETIME.test(literal)
+		|| iterator.throws(SyntaxError('Invalid Offset Date-Time '+literal+' at '+iterator.where()));
+		super(literal.replace(' ', 'T'), literal);
+	}
+	get '.' () {
+		const index :number = literal_cache.get(this).indexOf('.')+1;
+		return index ? literal_cache.get(this).slice(index).replace(RE.OFFSET, '') : '';
+	}
+}
+
+export class LocalDateTime extends Datetime {
+	constructor (literal :string) {
+		RE.LOCAL_DATETIME.test(literal)
+		|| iterator.throws(SyntaxError('Invalid Local Date-Time '+literal+' at '+iterator.where()));
+		super(literal.replace(' ', 'T'), literal);
+	}
+	get '.' () {
+		const index :number = literal_cache.get(this).indexOf('.')+1;
+		return index ? literal_cache.get(this).slice(index) : '';
+	}
+}
+
+export class LocalDate extends Datetime {
+	constructor (literal :string) {
+		RE.LOCAL_DATE.test(literal)
+		|| iterator.throws(SyntaxError('Invalid Local Date '+literal+' at '+iterator.where()));
+		super(literal+'T00:00:00.000', literal);
+	}
+	get '.' () { return ''; }
+}
+
+export class LocalTime extends Datetime {
+	constructor (literal :string) {
+		RE.LOCAL_TIME.test(literal)
+		|| iterator.throws(SyntaxError('Invalid Local Time '+literal+' at '+iterator.where()));
+		super('1970-01-01T'+literal, literal);
+	}
+	get '.' () {
+		const index :number = literal_cache.get(this).indexOf('.')+1;
+		return index ? literal_cache.get(this).slice(index) : '';
+	}
 }

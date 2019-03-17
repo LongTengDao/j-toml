@@ -3,12 +3,14 @@ import Error from '.Error';
 import Infinity from '.Infinity';
 import NaN from '.NaN';
 import * as iterator from '../share/iterator';
-import { Datetime } from '../types/Datetime';
+import { OffsetDateTime, LocalDateTime, LocalDate, LocalTime } from '../types/Datetime';
 import { Float } from '../types/Float';
 import * as options from '../share/options';
 import * as RE from '../share/RE';
 import { sealedInline, appendTable, parseKeys, prepareInlineTable, assignLiteralString, assignBasicString } from './on-the-spot';
 import { assignInterpolationString } from './x-feature';
+
+const OFFSET = /(?:[+-]\d\d:\d\d|Z)$/;
 
 export default function Root () {
 	const rootTable :object = new options.TableDepends;
@@ -58,22 +60,55 @@ function assign (lastInlineTable_array :object | any[], lineRest :string) :strin
 			return lineRest;
 	}
 	let literal :string;
-	( { 1: literal, 2: lineRest } = RE.VALUE_REST.exec(lineRest) || iterator.throws(SyntaxError(iterator.where()) ));
+	( { 1: literal, 2: lineRest } = RE.VALUE_REST.exec(lineRest) || iterator.throws(SyntaxError(iterator.where())) );
+	if ( options.sFloat ) {
+		if ( literal==='inf' || literal==='+inf' ) {
+			table[finalKey] = Infinity;
+			return lineRest;
+		}
+		if ( literal==='-inf' ) {
+			table[finalKey] = -Infinity;
+			return lineRest;
+		}
+		if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) {
+			table[finalKey] = NaN;
+			return lineRest;
+		}
+	}
+	if ( literal.includes(':') ) {
+		if ( literal.includes('-') ) {
+			if ( OFFSET.test(literal) ) {
+				table[finalKey] = new OffsetDateTime(literal);
+			}
+			else {
+				options.moreDatetime || iterator.throws(SyntaxError(iterator.where()));
+				table[finalKey] = new LocalDateTime(literal);
+			}
+		}
+		else {
+			options.moreDatetime || iterator.throws(SyntaxError(iterator.where()));
+			table[finalKey] = new LocalTime(literal);
+		}
+		return lineRest;
+	}
+	if ( literal.indexOf('-')!==literal.lastIndexOf('-') && !literal.startsWith('-') ) {
+		options.moreDatetime || iterator.throws(SyntaxError(iterator.where()));
+		table[finalKey] = new LocalDate(literal);
+		return lineRest;
+	}
 	table[finalKey] =
 		literal==='true' ? true : literal==='false' ? false :
-			literal==='inf' || literal==='+inf' ? Infinity : literal==='-inf' ? -Infinity :
-				literal==='nan' || literal==='+nan' || literal==='-nan' ? NaN :
-					literal.includes(':') || literal.indexOf('-')!==literal.lastIndexOf('-') && !literal.startsWith('-') ? new Datetime(literal) :
-						literal.includes('.') || ( literal.includes('e') || literal.includes('E') ) && !literal.startsWith('0x') ? Float(literal) :
-							options.enableNull && literal==='null' ? null :
-								options.IntegerDepends(literal);
+			literal.includes(':') || literal.indexOf('-')!==literal.lastIndexOf('-') && !literal.startsWith('-') ? new Datetime(literal) :
+				literal.includes('.') || ( literal.includes('e') || literal.includes('E') ) && !literal.startsWith('0x') ? Float(literal) :
+					options.enableNull && literal==='null' ? null :
+						options.IntegerDepends(literal);
 	return lineRest;
 }
 
 function push (lastInlineTable_array :object | any[], lineRest :string) :string {
 	if ( lineRest.startsWith('(') ) {
 		let tag :string;
-		( { 1: tag, 2: lineRest } = RE._VALUE_PAIR.exec(lineRest) || iterator.throws(SyntaxError(iterator.where()) ));
+		( { 1: tag, 2: lineRest } = RE._VALUE_PAIR.exec(lineRest) || iterator.throws(SyntaxError(iterator.where())) );
 		options.collect({ array: lastInlineTable_array, index: lastInlineTable_array.length, tag });
 	}
 	const lastIndex :string = ''+lastInlineTable_array.length;
@@ -92,15 +127,44 @@ function push (lastInlineTable_array :object | any[], lineRest :string) :string 
 			return lineRest;
 	}
 	let literal :string;
-	( { 1: literal, 2: lineRest } = RE.VALUE_REST.exec(lineRest) || iterator.throws(SyntaxError(iterator.where()) ));
+	( { 1: literal, 2: lineRest } = RE.VALUE_REST.exec(lineRest) || iterator.throws(SyntaxError(iterator.where())) );
+	if ( options.sFloat ) {
+		if ( literal==='inf' || literal==='+inf' ) {
+			options.asFloats(lastInlineTable_array).push(Infinity);
+			return lineRest;
+		}
+		if ( literal==='-inf' ) {
+			options.asFloats(lastInlineTable_array).push(-Infinity);
+			return lineRest;
+		}
+		if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) {
+			options.asFloats(lastInlineTable_array).push(NaN);
+			return lineRest;
+		}
+	}
+	if ( literal.includes(':') ) {
+		if ( literal.includes('-') ) {
+			if ( OFFSET.test(literal) ) {
+				options.asOffsetDateTimes(lastInlineTable_array).push(new OffsetDateTime(literal));
+			}
+			else {
+				options.moreDatetime || iterator.throws(SyntaxError(iterator.where()));
+				options.asLocalDateTimes(lastInlineTable_array).push(new LocalDateTime(literal));
+			}
+		}
+		else {
+			options.moreDatetime || iterator.throws(SyntaxError(iterator.where()));
+			options.asLocalTimes(lastInlineTable_array).push(new LocalTime(literal));
+		}
+		return lineRest;
+	}
+	if ( literal.indexOf('-')!==literal.lastIndexOf('-') && !literal.startsWith('-') ) {
+		options.moreDatetime || iterator.throws(SyntaxError(iterator.where()));
+		options.asLocalDates(lastInlineTable_array).push(new LocalDate(literal));
+		return lineRest;
+	}
 	if ( literal==='true' ) { options.asBooleans(lastInlineTable_array).push(true); }
 	else if ( literal==='false' ) { options.asBooleans(lastInlineTable_array).push(false); }
-	else if ( literal==='inf' || literal==='+inf' ) { options.asFloats(lastInlineTable_array).push(Infinity); }
-	else if ( literal==='-inf' ) { options.asFloats(lastInlineTable_array).push(-Infinity); }
-	else if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) { options.asFloats(lastInlineTable_array).push(NaN); }
-	else if ( literal.includes(':') || literal.indexOf('-')!==literal.lastIndexOf('-') && !literal.startsWith('-') ) {
-		options.asDatetimes(lastInlineTable_array).push(new Datetime(literal));
-	}
 	else if ( literal.includes('.') || ( literal.includes('e') || literal.includes('E') ) && !literal.startsWith('0x') ) {
 		options.asFloats(lastInlineTable_array).push(Float(literal));
 	}

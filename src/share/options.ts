@@ -16,13 +16,21 @@ export let IntegerDepends :Function, IntegerMin :number, IntegerMax :number;
 
 /* xOptions */
 
+type as = (array :any[]) => any[];
+
+export let moreDatetime :boolean;
+export let ctrl7F :boolean;
+export let nonEmptyKey :boolean;
+export let xob :boolean;
+export let sFloat :boolean;
 export let TableDepends :Table;
-export let open :boolean;
+export let openable :boolean;
 export let allowLonger :boolean;
 export let enableNull :boolean;
 export let allowInlineTableMultiLineAndTrailingCommaEvenNoComma :boolean;
 export let enableInterpolationString :boolean;
-export let asNulls :Function, asStrings :Function, asTables :Function, asArrays :Function, asBooleans :Function, asFloats :Function, asDatetimes :Function, asIntegers :Function;
+export let asNulls :as, asStrings :as, asTables :as, asArrays :as, asBooleans :as, asFloats :as, asIntegers :as;
+export let asOffsetDateTimes :as, asLocalDateTimes :as, asLocalDates :as, asLocalTimes :as;
 let processor :Function | null;
 
 /* xOptions.mix */
@@ -35,9 +43,12 @@ export const {
 	asInlineArrayOfArrays,
 	asInlineArrayOfBooleans,
 	asInlineArrayOfFloats,
-	asInlineArrayOfDatetimes,
 	asInlineArrayOfIntegers,
-} = <{ [each :string] :(array :any[]) => any[] }><object>new Proxy(new WeakMap, {
+	asInlineArrayOfOffsetDateTimes,
+	asInlineArrayOfLocalDateTimes,
+	asInlineArrayOfLocalDates,
+	asInlineArrayOfLocalTimes,
+} = <{ [each :string] :as }><object>new Proxy(new WeakMap, {
 	get: (arrayTypes) => function typify (array :any[]) :any[] {
 		if ( arrayTypes.has(array) ) {
 			arrayTypes.get(array)===typify
@@ -74,7 +85,8 @@ export function clear () :void {
 	collection.length = 0;
 }
 
-export function use (useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines :string, useBigInt_forInteger :boolean | number, extensionOptions) :void {
+export function use (specificationVersion, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines :string, useBigInt_forInteger :boolean | number, extensionOptions) :void {
+	if ( specificationVersion!==0.5 && specificationVersion!==0.4 ) { throw new Error('TOML.parse(,specificationVersion)'); }
 	if ( typeof <unknown>useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines!=='string' ) { throw new TypeError('TOML.parse(,,multiLineJoiner)'); }
 	if ( useBigInt_forInteger===true ) { IntegerDepends = BigIntInteger; }
 	else if ( useBigInt_forInteger===false ) { IntegerDepends = NumberInteger; }
@@ -92,16 +104,17 @@ export function use (useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines
 		}
 	}
 	useWhatToJoinMultiLineString = useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines;
+	moreDatetime = ctrl7F = xob = sFloat = specificationVersion===0.5;
+	nonEmptyKey = openable = specificationVersion===0.4;
 	let typify :boolean;
 	if ( extensionOptions===null ) {
 		TableDepends = Table;
-		open = allowLonger = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = enableInterpolationString = false;
+		allowLonger = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = enableInterpolationString = false;
 		processor = null;
 		typify = true;
 	}
 	else {
 		TableDepends = extensionOptions.order ? OrderedTable : Table;
-		open = !!extensionOptions.open;
 		allowLonger = !!extensionOptions.longer;
 		enableNull = !!extensionOptions.null;
 		allowInlineTableMultiLineAndTrailingCommaEvenNoComma = !!extensionOptions.multi;
@@ -122,8 +135,13 @@ export function use (useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines
 		asArrays = asInlineArrayOfArrays;
 		asBooleans = asInlineArrayOfBooleans;
 		asFloats = asInlineArrayOfFloats;
-		asDatetimes = asInlineArrayOfDatetimes;
 		asIntegers = asInlineArrayOfIntegers;
+		asOffsetDateTimes = asInlineArrayOfOffsetDateTimes;
+		asLocalDateTimes = asInlineArrayOfLocalDateTimes;
+		asLocalDates = asInlineArrayOfLocalDates;
+		asLocalTimes = asInlineArrayOfLocalTimes;
 	}
-	else { asNulls = asStrings = asTables = asArrays = asBooleans = asFloats = asDatetimes = asIntegers = unType; }
+	else {
+		asNulls = asStrings = asTables = asArrays = asBooleans = asFloats = asIntegers = asOffsetDateTimes = asLocalDateTimes = asLocalDates = asLocalTimes = unType;
+	}
 }

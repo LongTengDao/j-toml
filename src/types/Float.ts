@@ -1,18 +1,25 @@
 import SyntaxError from '.SyntaxError';
-import * as RE from '../share/RE';
 //import Infinity, NaN from '.Infinity'+'.NaN';
+import * as options from '../share/options';
 import * as iterator from '../share/iterator';
 
-// @ts-ignore
+const FLOAT = /^[-+]?(?:0|[1-9]\d*(?:_\d+)*)(?:\.\d+(?:_\d+)*)?(?:[eE][-+]?\d+(?:_\d+)*)?$/;
+const FLOAT_NOT_INTEGER = /[.eE]/;
+const UNDERSCORES = /_/g;
+
 export const Float = (literal :string) :number => {
-	if ( RE.FLOAT.test(literal) && RE.FLOAT_NOT_INTEGER.test(literal) ) {
-		return +literal.replace(RE.UNDERSCORES, '');
-		//const number = +literal.replace(RE.UNDERSCORES, '');
-		//isFinite(number) || iterator.throws(RangeError('Float can not be as big as Infinity, like '+literal+' at '+where()));
-		//return number;
+	if ( FLOAT.test(literal) && FLOAT_NOT_INTEGER.test(literal) ) {
+		if ( options.sFloat ) { return +literal.replace(UNDERSCORES, ''); }
+		else {
+			const number = +literal.replace(UNDERSCORES, '');
+			isFinite(number) || iterator.throws(RangeError('Float can not be as big as Infinity before TOML v0.5, like '+literal+' at '+iterator.where()));
+			return number;
+		}
 	}
-	//if ( literal==='inf' || literal==='+inf' ) { return Infinity; }
-	//if ( literal==='-inf' ) { return -Infinity; }
-	//if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) { return NaN; }
-	iterator.throws(SyntaxError('Invalid Float '+literal+' at '+iterator.where()));
+	//if ( options.sFloat ) {
+	//	if ( literal==='inf' || literal==='+inf' ) { return Infinity; }
+	//	if ( literal==='-inf' ) { return -Infinity; }
+	//	if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) { return NaN; }
+	//}
+	throw iterator.throws(SyntaxError('Invalid Float '+literal+' at '+iterator.where()));
 };

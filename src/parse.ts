@@ -4,12 +4,15 @@ import isBuffer from '.Buffer.isBuffer';
 import from from ".Buffer.from";
 import * as iterator from './share/iterator';
 import * as options from './share/options';
-import * as RE from './share/RE';
 import Root from './parse/level-loop';
+
+
+const BOM = /^\uFEFF/;
+const NON_SCALAR = /[\uD800-\uDFFF]/u;// \u{10FFFF}- > \uFFFD
 
 export default function parse (
 	sourceContent :Buffer | string,
-	specificationVersion :0.5,
+	specificationVersion :0.5 | 0.4,
 	useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines :string,
 	useBigInt_forInteger :boolean | number = true,
 	extensionOptions                       = null
@@ -19,13 +22,12 @@ export default function parse (
 		const buffer :Buffer = sourceContent;
 		sourceContent = buffer.toString();
 		if ( !from(buffer).equals(buffer) ) { throw Error('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any unknown code point.'); }
-		sourceContent = sourceContent.replace(RE.BOM, '');
+		sourceContent = sourceContent.replace(BOM, '');
 	}
 	if ( typeof sourceContent!=='string' ) { throw new TypeError('TOML.parse(sourceContent)'); }
-	if ( RE.NON_SCALAR.test(sourceContent) ) { throw Error('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any uncoupled UCS-4 character code.'); }
-	if ( specificationVersion!==0.5 ) { throw new Error('TOML.parse(,specificationVersion)'); }
+	if ( NON_SCALAR.test(sourceContent) ) { throw Error('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any uncoupled UCS-4 character code.'); }
 	try {
-		options.use(useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger, extensionOptions);
+		options.use(specificationVersion, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger, extensionOptions);
 		iterator.todo(sourceContent);
 		try {
 			const rootTable = Root();

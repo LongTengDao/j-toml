@@ -1,7 +1,6 @@
 import SyntaxError from '.SyntaxError';
 import Error from '.Error';
 //import * as options from './options';
-import * as RE from './RE';
 
 
 const NONE :string[] = [];
@@ -20,8 +19,9 @@ export function could () :void {
 	if ( sourceLines!==NONE ) { throw Error('Inner error: parsing in parsing.'); }
 }
 
+const EOL = /\r?\n/;
 export function todo (source :string) :void {
-	sourceLines = source.split(RE.EOL);
+	sourceLines = source.split(EOL);
 	lastLineIndex = sourceLines.length-1;
 	lineIndex = -1;
 	stacks_length = 0;

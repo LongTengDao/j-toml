@@ -6,13 +6,12 @@ declare module '@ltd/j-toml' {
 	
 	export function parse (
 		sourceContent :string | Buffer,
-		specificationVersion :0.5,
+		specificationVersion :0.5 | 0.4,
 		multiLineJoiner :string,
 		useBigInt? :true | false | number,
 		xOptions? :
 			{
 				order? :boolean,
-				open? :boolean,
 				longer? :boolean,
 				hash? :boolean,
 				null? :boolean,
@@ -24,7 +23,6 @@ declare module '@ltd/j-toml' {
 			|
 			{
 				order? :boolean,
-				open? :boolean,
 				longer? :boolean,
 				hash? :boolean,
 				null? :boolean,
@@ -32,10 +30,7 @@ declare module '@ltd/j-toml' {
 				multi? :boolean,
 				ins? :boolean,
 				mix :true,
-				new :
-					{ [tag :string] :(value :any) => any }
-					|
-					( (tag :string, value :any) => any )
+				tag :(tag :string, value :any) => any,
 			}
 	) :Table;
 	

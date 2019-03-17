@@ -4,9 +4,11 @@ import parseInt from '.parseInt';
 import fromCodePoint from '.String.fromCodePoint';
 import * as iterator from '../share/iterator';
 import * as options from '../share/options';
-import * as RE from '../share/RE';
 
 const ESCAPE_ALIAS = { b: '\b', t: '\t', n: '\n', f: '\f', r: '\r' };
+
+const ESCAPED_IN_SINGLE_LINE = /\\(?:([\\"])|([btnfr])|u(.{4})|U(.{8}))/g;
+const ESCAPED_IN_MULTI_LINE = /\n|\\(?:([ \t\n]+)|([\\"])|([btnfr])|u([^]{4})|U([^]{8}))/g;
 
 type p = string | undefined;
 type btnfr = 'b' | 'b' | 'n' | 'f' | 'r' | undefined;
@@ -20,7 +22,7 @@ const unEscapeSingleLine = (match :string, p1 :'"' | undefined, p2 :btnfr, p3 :p
 	return fromCodePoint(codePoint);
 };
 
-const unEscapeMultiLine = (match :string, p1 :'\n' | undefined, p2 :'"', p3 :btnfr, p4 :p, p5 :p) :string => {
+const unEscapeMultiLine = (match :string, p1 :string | undefined, p2 :'"', p3 :btnfr, p4 :p, p5 :p) :string => {
 	if ( match==='\n' ) { return options.useWhatToJoinMultiLineString; }
 	if ( p1 ) {
 		p1.includes('\n')
@@ -35,6 +37,6 @@ const unEscapeMultiLine = (match :string, p1 :'\n' | undefined, p2 :'"', p3 :btn
 	return fromCodePoint(codePoint);
 };
 
-export const BasicString = (literal :string) :string => literal.replace(RE.ESCAPED_IN_SINGLE_LINE, unEscapeSingleLine);
+export const BasicString = (literal :string) :string => literal.replace(ESCAPED_IN_SINGLE_LINE, unEscapeSingleLine);
 
-export const MultiLineBasicString = (literal :string) :string => literal.replace(RE.ESCAPED_IN_MULTI_LINE, unEscapeMultiLine);
+export const MultiLineBasicString = (literal :string) :string => literal.replace(ESCAPED_IN_MULTI_LINE, unEscapeMultiLine);

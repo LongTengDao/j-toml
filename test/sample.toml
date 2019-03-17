@@ -11,17 +11,14 @@ inline_table = { 1.1 = 1.1, 1.2 = 1.2, 2.1 = 2.1 }
 [string]
 basic = "\b\t\n\f\r\"\\\u0000\U00000000"
 literal = '\b\t\n\f\r\"\\\u0000\U00000000'
-multi-lines_basic.1 = """
-那只 敏捷的 棕 \
-
-
-  狐狸 跳 过了 \
-    那只 懒 狗。\""""
-multi-lines_basic.2 = """\
+multi-lines_basic.0 = """\
        那只 敏捷的 棕 \
        狐狸 跳 过了 \
+       
        那只 懒 狗。\
-       \\"""
+       """
+multi-lines_basic.1 = """\""""
+multi-lines_basic.2 = """\\"""
 multi-lines_literal = '''
 原始字符串中的
 第一个换行被剔除了。
@@ -39,6 +36,7 @@ multi-lines_literal = '''
 0xdead_beef = 0xdead_beef
 0o755 = 0o755
 0b11010110 = 0b11010110
+"+0b0" = +0b0
 
 [float]
 "+1.0" = +1.0

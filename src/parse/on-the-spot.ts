@@ -10,6 +10,7 @@ import * as RE from '../share/RE';
 
 export const sealedInline = new WeakSet;
 const openTables = new WeakSet;
+const openedTables = new WeakSet;
 
 export function appendTable (table :object, key_key :string, asArrayItem :boolean, tag :string) :object {
 	const leadingKeys :string[] = parseKeys(key_key);
@@ -25,10 +26,13 @@ export function appendTable (table :object, key_key :string, asArrayItem :boolea
 	}
 	else {
 		if ( finalKey in table ) {
-			options.open && openTables.has(lastTable = table[finalKey]) || iterator.throws(Error('Duplicate Table definition at '+iterator.where()));
+			options.openable && openTables.has(lastTable = table[finalKey]) && !openedTables.has(lastTable) || iterator.throws(Error('Duplicate Table definition at '+iterator.where()));
 			openTables.delete(lastTable);
 		}
-		else { table[finalKey] = lastTable = new options.TableDepends; }
+		else {
+			table[finalKey] = lastTable = new options.TableDepends;
+			options.openable && openedTables.add(lastTable);
+		}
 		tag && options.collect({ table, key: finalKey, tag });
 	}
 	return lastTable;
@@ -40,6 +44,11 @@ export function parseKeys (key_key :string) :string[] {
 		const key :string = keys[index];
 		if ( key.startsWith('\'') ) { keys[index] = key.slice(1, -1); }
 		else if ( key.startsWith('"') ) { keys[index] = BasicString(key.slice(1, -1)); }
+	}
+	if ( options.nonEmptyKey ) {
+		for ( let index :number = keys.length; index--; ) {
+			keys[index] || iterator.throws(SyntaxError('Empty key is not allowed before TOML v0.4, which at '+iterator.where()));
+		}
 	}
 	return keys;
 }
@@ -93,7 +102,7 @@ export function assignLiteralString (table :object, finalKey :string, literal :s
 	let $ :RegExpExecArray;
 	if ( literal.charAt(1)!=='\'' || literal.charAt(2)!=='\'' ) {
 		$ = RE.LITERAL_STRING.exec(literal) || iterator.throws(SyntaxError(iterator.where()));
-		table[finalKey] = $[1];
+		table[finalKey] = checkLiteralString($[1]);
 		return $[2];
 	}
 	literal = literal.slice(3);
@@ -118,8 +127,10 @@ export function assignLiteralString (table :object, finalKey :string, literal :s
 	}
 }
 
+const CONTROL_CHARACTER_EXCLUDE_TAB = /[\x00-\x08\x0B-\x1F\x7F]/;
+const CONTROL_CHARACTER_EXCLUDE_TAB_LESSER = /[\x00-\x08\x0B-\x1F]/;
 function checkLiteralString (literal :string) :string {
-	RE.CONTROL_CHARACTER_EXCLUDE_TAB.test(literal) && iterator.throws(SyntaxError('Control characters other than tab are not permitted in a Multi-Line Literal String, which was found at '+iterator.where()));
+	( options.ctrl7F ? CONTROL_CHARACTER_EXCLUDE_TAB : CONTROL_CHARACTER_EXCLUDE_TAB_LESSER ).test(literal) && iterator.throws(SyntaxError('Control characters other than tab are not permitted in a Literal String, which was found at '+iterator.where()));
 	return literal;
 }
 
@@ -133,7 +144,7 @@ export function assignBasicString (table :object, finalKey :string, literal :str
 	const $ = RE.MULTI_LINE_BASIC_STRING_exec_0(literal);
 	if ( literal.startsWith('"""', $.length) ) {
 		RE.ESCAPED_EXCLUDE_CONTROL_CHARACTER_test($) || iterator.throws(SyntaxError(iterator.where()));
-		table[finalKey] = BasicString($);
+		table[finalKey] = MultiLineBasicString($);
 		return literal.slice($.length+3).replace(RE.PRE_WHITESPACE, '');
 	}
 	if ( literal ) {

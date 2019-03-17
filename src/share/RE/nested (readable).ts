@@ -18,28 +18,33 @@ const YMD = newRegExp`
 		02-${_29_}
 	)`;
 
-const T = /[T ]/;
-
-const HMS = newRegExp`
+const HMS_ = newRegExp`
 	${_23_}:${_59_}:${_59_}(?:\.\d+)?`;
 
-const Z = newRegExp`
-		Z
-	|
-		[+-]${_23_}:${_59_}`;
+export const OFFSET = /(?:Z|[+-]\d\d:\d\d)$/;
 
-export const DATETIME = newRegExp`
+export const OFFSET_DATETIME = newRegExp`
 	^
-	(?:
-		${HMS}
-	|
-		(${YMD})
-		(?:
-			(${T})
-			(${HMS})
-			(${Z})?
-		)?
-	)
+	${YMD}
+	[T ]
+	${HMS_}
+	${OFFSET}`;
+
+export const LOCAL_DATETIME = newRegExp`
+	^
+	${YMD}
+	[T ]
+	${HMS_}
+	$`;
+
+export const LOCAL_DATE = newRegExp`
+	^
+	${YMD}
+	$`;
+
+export const LOCAL_TIME = newRegExp`
+	^
+	${HMS_}
 	$`;
 
 /* parse */
@@ -63,7 +68,7 @@ export const VALUE_REST = newRegExp`
 
 export const LITERAL_STRING = newRegExp`
 	^
-	'([^'\x00-\x08\x0B-\x1F\x7F]*)'
+	'([^']*)'
 	${Whitespace}*
 	([^]*)`;
 
@@ -73,10 +78,6 @@ export const MULTI_LINE_LITERAL_STRING = newRegExp`
 	'''
 	${Whitespace}*
 	([^]*)`;
-
-export const CONTROL_CHARACTER_EXCLUDE_TAB = /[\x00-\x08\x0B-\x1F\x7F]/;
-
-export const ESCAPED_IN_MULTI_LINE = /\n|\\(?:([ \n]+)|([\\"])|([btnfr])|u([^]{4})|U([^]{8}))/g;
 
 export const SYM_WHITESPACE = newRegExp`
 	^
