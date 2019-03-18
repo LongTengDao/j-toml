@@ -35,23 +35,41 @@ export default function Root () {
 };
 
 function assign (lastInlineTable_array :object | any[], lineRest :string) :string {
-	let left;
-	let tagLeft;
-	let tagRight;
+	let left :string;
+	let tagLeft :string;
+	let tagRight :string;
 	( { left, tagLeft, tagRight, right: lineRest } = RE.KEY_VALUE_PAIR_exec_groups(lineRest) );
 	const leadingKeys :string[] = parseKeys(left);
 	const finalKey :string = leadingKeys.pop();
 	const table :object = prepareInlineTable(lastInlineTable_array, leadingKeys);
 	finalKey in table && iterator.throws(Error('Duplicate property definition at '+iterator.where()));
-	tagLeft && tagRight && iterator.throws(SyntaxError('Tag for key/value pair can not both left and right, which at '+iterator.where()));
-	( tagLeft || tagRight ) && options.collect({ parent: table, key: finalKey, tag: tagLeft || tagRight });
+	tagLeft && options.collect({ table, key: finalKey, tag: tagLeft });
+	tagRight && options.collect({ table, key: finalKey, tag: tagRight });
 	switch ( lineRest[0] ) {
 		case '\'':
-			return assignLiteralString(table, finalKey, lineRest);
+			lineRest = assignLiteralString(table, finalKey, lineRest);
+			if ( lineRest.startsWith('(') ) {
+				tagRight && iterator.throws(SyntaxError('Tag can not be placed at both side of a value, which at '+iterator.where()));
+				( { 1: tagRight, 2: lineRest } = RE.TAG_REST.exec(lineRest) || iterator.throws(SyntaxError(iterator.where())) );
+				options.collect({ table, key: finalKey, tag: tagRight });
+			}
+			return lineRest;
 		case '"':
-			return assignBasicString(table, finalKey, lineRest);
+			lineRest = assignBasicString(table, finalKey, lineRest);
+			if ( lineRest.startsWith('(') ) {
+				tagRight && iterator.throws(SyntaxError('Tag can not be placed at both side of a value, which at '+iterator.where()));
+				( { 1: tagRight, 2: lineRest } = RE.TAG_REST.exec(lineRest) || iterator.throws(SyntaxError(iterator.where())) );
+				options.collect({ table, key: finalKey, tag: tagRight });
+			}
+			return lineRest;
 		case '`':
-			return assignInterpolationString(table, finalKey, lineRest);
+			lineRest = assignInterpolationString(table, finalKey, lineRest);
+			if ( lineRest.startsWith('(') ) {
+				tagRight && iterator.throws(SyntaxError('Tag can not be placed at both side of a value, which at '+iterator.where()));
+				( { 1: tagRight, 2: lineRest } = RE.TAG_REST.exec(lineRest) || iterator.throws(SyntaxError(iterator.where())) );
+				options.collect({ table, key: finalKey, tag: tagRight });
+			}
+			return lineRest;
 		case '{':
 			iterator.stacks_push(lineRest => equalInlineTable(table, finalKey, lineRest));
 			return lineRest;
@@ -61,6 +79,11 @@ function assign (lastInlineTable_array :object | any[], lineRest :string) :strin
 	}
 	let literal :string;
 	( { 1: literal, 2: lineRest } = RE.VALUE_REST.exec(lineRest) || iterator.throws(SyntaxError(iterator.where())) );
+	if ( lineRest.startsWith('(') ) {
+		tagRight && iterator.throws(SyntaxError('Tag can not be placed at both side of a value, which at '+iterator.where()));
+		( { 1: tagRight, 2: lineRest } = RE.TAG_REST.exec(lineRest) || iterator.throws(SyntaxError(iterator.where())) );
+		options.collect({ table, key: finalKey, tag: tagRight });
+	}
 	if ( options.sFloat ) {
 		if ( literal==='inf' || literal==='+inf' ) {
 			table[finalKey] = Infinity;
@@ -106,19 +129,38 @@ function assign (lastInlineTable_array :object | any[], lineRest :string) :strin
 }
 
 function push (lastInlineTable_array :object | any[], lineRest :string) :string {
-	if ( lineRest.startsWith('(') ) {
-		let tag :string;
+	let alreadyBefore = lineRest.startsWith('(');
+	let tag :string;
+	if ( alreadyBefore ) {
 		( { 1: tag, 2: lineRest } = RE._VALUE_PAIR.exec(lineRest) || iterator.throws(SyntaxError(iterator.where())) );
 		options.collect({ array: lastInlineTable_array, index: lastInlineTable_array.length, tag });
 	}
 	const lastIndex :string = ''+lastInlineTable_array.length;
 	switch ( lineRest[0] ) {
 		case '\'':
-			return assignLiteralString(options.asStrings(lastInlineTable_array), lastIndex, lineRest);
+			lineRest = assignLiteralString(options.asStrings(lastInlineTable_array), lastIndex, lineRest);
+			if ( lineRest.startsWith('(') ) {
+				alreadyBefore && iterator.throws(SyntaxError('Tag can not be placed at both side of a value, which at '+iterator.where()));
+				( { 1: tag, 2: lineRest } = RE.TAG_REST.exec(lineRest) || iterator.throws(SyntaxError(iterator.where())) );
+				options.collect({ array: lastInlineTable_array, index: lastInlineTable_array.length-1, tag });
+			}
+			return lineRest;
 		case '"':
-			return assignBasicString(options.asStrings(lastInlineTable_array), lastIndex, lineRest);
+			lineRest = assignBasicString(options.asStrings(lastInlineTable_array), lastIndex, lineRest);
+			if ( lineRest.startsWith('(') ) {
+				alreadyBefore && iterator.throws(SyntaxError('Tag can not be placed at both side of a value, which at '+iterator.where()));
+				( { 1: tag, 2: lineRest } = RE.TAG_REST.exec(lineRest) || iterator.throws(SyntaxError(iterator.where())) );
+				options.collect({ array: lastInlineTable_array, index: lastInlineTable_array.length-1, tag });
+			}
+			return lineRest;
 		case '`':
-			return assignInterpolationString(options.asStrings(lastInlineTable_array), lastIndex, lineRest);
+			lineRest = assignInterpolationString(options.asStrings(lastInlineTable_array), lastIndex, lineRest);
+			if ( lineRest.startsWith('(') ) {
+				alreadyBefore && iterator.throws(SyntaxError('Tag can not be placed at both side of a value, which at '+iterator.where()));
+				( { 1: tag, 2: lineRest } = RE.TAG_REST.exec(lineRest) || iterator.throws(SyntaxError(iterator.where())) );
+				options.collect({ array: lastInlineTable_array, index: lastInlineTable_array.length-1, tag });
+			}
+			return lineRest;
 		case '{':
 			iterator.stacks_push(lineRest => equalInlineTable(options.asTables(lastInlineTable_array), lastIndex, lineRest));
 			return lineRest;
@@ -128,6 +170,11 @@ function push (lastInlineTable_array :object | any[], lineRest :string) :string 
 	}
 	let literal :string;
 	( { 1: literal, 2: lineRest } = RE.VALUE_REST.exec(lineRest) || iterator.throws(SyntaxError(iterator.where())) );
+	if ( lineRest.startsWith('(') ) {
+		alreadyBefore && iterator.throws(SyntaxError('Tag can not be placed at both side of a value, which at '+iterator.where()));
+		( { 1: tag, 2: lineRest } = RE.TAG_REST.exec(lineRest) || iterator.throws(SyntaxError(iterator.where())) );
+		options.collect({ array: lastInlineTable_array, index: lastInlineTable_array.length, tag });
+	}
 	if ( options.sFloat ) {
 		if ( literal==='inf' || literal==='+inf' ) {
 			options.asFloats(lastInlineTable_array).push(Infinity);

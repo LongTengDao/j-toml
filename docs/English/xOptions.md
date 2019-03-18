@@ -128,8 +128,8 @@ key.a (tag) = 'val' (tag) # process({ table: root.key, key: 'a',                
 key.b (tag) = (tag) 'val' # process({ table: root.key, key: 'b',                                tag: 'tag' }) x2
 
 arr (tag) = (tag) [       # process({ table: root,     key: 'arr',                              tag: 'tag' }) x2
-    (tag) 'item',         # process({                               array: root.arr,  index: 0, tag: 'tag' })
-    'item' (tag),         # process({                               array: root.arr,  index: 1, tag: 'tag' })
+    'item' (tag),         # process({                               array: root.arr,  index: 0, tag: 'tag' })
+    (tag) 'item',         # process({                               array: root.arr,  index: 1, tag: 'tag' })
 ]
 
 [[list (tag)]] (tag)      # process({ table: root,     key: 'list', array: root.list, index: 0, tag: 'tag' }) x2

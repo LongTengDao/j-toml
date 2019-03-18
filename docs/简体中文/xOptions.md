@@ -129,8 +129,8 @@ key.a (tag) = '值' (tag) # 处理({ table: root.key, key: 'a',                 
 key.b (tag) = (tag) '值' # 处理({ table: root.key, key: 'b',                                tag: 'tag' }) x2
 
 arr (tag) = (tag) [      # 处理({ table: root,     key: 'arr',                              tag: 'tag' }) x2
-    (tag) '条目',        # 处理({                               array: root.arr,  index: 0, tag: 'tag' })
-    '条目' (tag),        # 处理({                               array: root.arr,  index: 1, tag: 'tag' })
+    '条目' (tag),        # 处理({                               array: root.arr,  index: 0, tag: 'tag' })
+    (tag) '条目',        # 处理({                               array: root.arr,  index: 1, tag: 'tag' })
 ]
 
 [[list (tag)]] (tag)     # 处理({ table: root,     key: 'list', array: root.list, index: 0, tag: 'tag' }) x2

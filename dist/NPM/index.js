@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.71';
+const version = '0.5.72';
 
 const isBuffer = Buffer.isBuffer;
 
@@ -854,15 +854,33 @@ function assign(lastInlineTable_array, lineRest) {
     const finalKey = leadingKeys.pop();
     const table = prepareInlineTable(lastInlineTable_array, leadingKeys);
     finalKey in table && throws(Error('Duplicate property definition at ' + where()));
-    tagLeft && tagRight && throws(SyntaxError('Tag for key/value pair can not both left and right, which at ' + where()));
-    (tagLeft || tagRight) && collect({ parent: table, key: finalKey, tag: tagLeft || tagRight });
+    tagLeft && collect({ table, key: finalKey, tag: tagLeft });
+    tagRight && collect({ table, key: finalKey, tag: tagRight });
     switch (lineRest[0]) {
         case '\'':
-            return assignLiteralString(table, finalKey, lineRest);
+            lineRest = assignLiteralString(table, finalKey, lineRest);
+            if (lineRest.startsWith('(')) {
+                tagRight && throws(SyntaxError('Tag can not be placed at both side of a value, which at ' + where()));
+                ({ 1: tagRight, 2: lineRest } = TAG_REST.exec(lineRest) || throws(SyntaxError(where())));
+                collect({ table, key: finalKey, tag: tagRight });
+            }
+            return lineRest;
         case '"':
-            return assignBasicString(table, finalKey, lineRest);
+            lineRest = assignBasicString(table, finalKey, lineRest);
+            if (lineRest.startsWith('(')) {
+                tagRight && throws(SyntaxError('Tag can not be placed at both side of a value, which at ' + where()));
+                ({ 1: tagRight, 2: lineRest } = TAG_REST.exec(lineRest) || throws(SyntaxError(where())));
+                collect({ table, key: finalKey, tag: tagRight });
+            }
+            return lineRest;
         case '`':
-            return assignInterpolationString(table, finalKey, lineRest);
+            lineRest = assignInterpolationString(table, finalKey, lineRest);
+            if (lineRest.startsWith('(')) {
+                tagRight && throws(SyntaxError('Tag can not be placed at both side of a value, which at ' + where()));
+                ({ 1: tagRight, 2: lineRest } = TAG_REST.exec(lineRest) || throws(SyntaxError(where())));
+                collect({ table, key: finalKey, tag: tagRight });
+            }
+            return lineRest;
         case '{':
             stacks_push(lineRest => equalInlineTable(table, finalKey, lineRest));
             return lineRest;
@@ -872,6 +890,11 @@ function assign(lastInlineTable_array, lineRest) {
     }
     let literal;
     ({ 1: literal, 2: lineRest } = VALUE_REST.exec(lineRest) || throws(SyntaxError(where())));
+    if (lineRest.startsWith('(')) {
+        tagRight && throws(SyntaxError('Tag can not be placed at both side of a value, which at ' + where()));
+        ({ 1: tagRight, 2: lineRest } = TAG_REST.exec(lineRest) || throws(SyntaxError(where())));
+        collect({ table, key: finalKey, tag: tagRight });
+    }
     if (sFloat) {
         if (literal === 'inf' || literal === '+inf') {
             table[finalKey] = Infinity;
@@ -916,19 +939,38 @@ function assign(lastInlineTable_array, lineRest) {
     return lineRest;
 }
 function push(lastInlineTable_array, lineRest) {
-    if (lineRest.startsWith('(')) {
-        let tag;
+    let alreadyBefore = lineRest.startsWith('(');
+    let tag;
+    if (alreadyBefore) {
         ({ 1: tag, 2: lineRest } = _VALUE_PAIR.exec(lineRest) || throws(SyntaxError(where())));
         collect({ array: lastInlineTable_array, index: lastInlineTable_array.length, tag });
     }
     const lastIndex = '' + lastInlineTable_array.length;
     switch (lineRest[0]) {
         case '\'':
-            return assignLiteralString(asStrings(lastInlineTable_array), lastIndex, lineRest);
+            lineRest = assignLiteralString(asStrings(lastInlineTable_array), lastIndex, lineRest);
+            if (lineRest.startsWith('(')) {
+                alreadyBefore && throws(SyntaxError('Tag can not be placed at both side of a value, which at ' + where()));
+                ({ 1: tag, 2: lineRest } = TAG_REST.exec(lineRest) || throws(SyntaxError(where())));
+                collect({ array: lastInlineTable_array, index: lastInlineTable_array.length - 1, tag });
+            }
+            return lineRest;
         case '"':
-            return assignBasicString(asStrings(lastInlineTable_array), lastIndex, lineRest);
+            lineRest = assignBasicString(asStrings(lastInlineTable_array), lastIndex, lineRest);
+            if (lineRest.startsWith('(')) {
+                alreadyBefore && throws(SyntaxError('Tag can not be placed at both side of a value, which at ' + where()));
+                ({ 1: tag, 2: lineRest } = TAG_REST.exec(lineRest) || throws(SyntaxError(where())));
+                collect({ array: lastInlineTable_array, index: lastInlineTable_array.length - 1, tag });
+            }
+            return lineRest;
         case '`':
-            return assignInterpolationString(asStrings(lastInlineTable_array), lastIndex, lineRest);
+            lineRest = assignInterpolationString(asStrings(lastInlineTable_array), lastIndex, lineRest);
+            if (lineRest.startsWith('(')) {
+                alreadyBefore && throws(SyntaxError('Tag can not be placed at both side of a value, which at ' + where()));
+                ({ 1: tag, 2: lineRest } = TAG_REST.exec(lineRest) || throws(SyntaxError(where())));
+                collect({ array: lastInlineTable_array, index: lastInlineTable_array.length - 1, tag });
+            }
+            return lineRest;
         case '{':
             stacks_push(lineRest => equalInlineTable(asTables(lastInlineTable_array), lastIndex, lineRest));
             return lineRest;
@@ -938,6 +980,11 @@ function push(lastInlineTable_array, lineRest) {
     }
     let literal;
     ({ 1: literal, 2: lineRest } = VALUE_REST.exec(lineRest) || throws(SyntaxError(where())));
+    if (lineRest.startsWith('(')) {
+        alreadyBefore && throws(SyntaxError('Tag can not be placed at both side of a value, which at ' + where()));
+        ({ 1: tag, 2: lineRest } = TAG_REST.exec(lineRest) || throws(SyntaxError(where())));
+        collect({ array: lastInlineTable_array, index: lastInlineTable_array.length, tag });
+    }
     if (sFloat) {
         if (literal === 'inf' || literal === '+inf') {
             asFloats(lastInlineTable_array).push(Infinity);

@@ -54,8 +54,8 @@ function parse (
 
 0.  **`sourceContent`**
     
-    *   required
     *   type: `string` / `Buffer(UTF-8)`
+    *   required
     
     You can pass in `string` or the original binary `Buffer` of the file.
     
@@ -67,23 +67,23 @@ function parse (
     
 1.  **`specificationVersion`**
     
-    *   required
     *   type: `0.5` / `0.4`
+    *   required
     
     If there is no special reason (e.g. to deal with historical files), the latest version is recommended.
     
 2.  **`multiLineJoiner`**
     
-    *   required
     *   type: `string`
+    *   required
     
     For the multi-line strings, use what to join the lines for result.  
-    Note that TOML always use `"\n"` or `"\r\n"` split the source lines while parsing, which defined in TOML spec.
+    Note that TOML always use `"\n"` or `"\r\n"` split the source lines while parsing, which defined in TOML specification.
     
 3.  **`useBigInt`**
     
-    *   default: `true`
     *   type: `boolean` / `number`
+    *   default: `true`
     
     Specify whether you want or not to use `BigInt` for integer type value. A `number` type argument allows you to control it by a max limit, like `Number.MAX_SAFE_INTEGER` (and the min limit from `-useBigInt`, if `useBigInt>=0`; otherwise as the min limit, and the max limit is `-useBigInt-1`).
     
@@ -91,7 +91,7 @@ function parse (
     
     *   type: `object`
     
-    The extensional features not in the spec.  
+    The extensional features not in the specification.  
     Include keeping the key/value pairs order of tables, integers larger than `long`, comment information, `null` value, mixed-type array, multi-line inline table with trailing comma even no comma, interpolation string, custom constructor, etc.  
     They are private experimental discouraged features.  
     See [xOptions](https://GitHub.com/LongTengDao/j-toml/blob/master/docs/English/xOptions.md).
