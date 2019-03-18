@@ -120,33 +120,26 @@ The original parsed result of interpolation string always use `\n` as newline, n
 *   default: `null`
 
 ```
-[table (tag)]
+[table.a (tag)]             # process({ table: root.table, key: 'a',     tag: 'tag' })
 
-[[list (tag)]]
+[table.b] (tag)             # process({ table: root.table, key: 'b',     tag: 'tag' })
 
-key (tag) = 'value'
+key.a (tag) = 'value' (tag) # process({ table: root.key,   key: 'a',     tag: 'tag' }) x2
+key.b (tag) = (tag) 'value' # process({ table: root.key,   key: 'b',     tag: 'tag' }) x2
 
-array (tag) = [
-    (tag) 'item'
+array (tag) = (tag) [       # process({ table: root,       key: 'array', tag: 'tag' }) x2
+    (tag) 'item',           # process({ array: root.array, index: 0,     tag: 'tag' })
+    'item' (tag),           # process({ array: root.array, index: 1,     tag: 'tag' })
 ]
+
+[[list (tag)]] (tag)
+# process({ table: root, key: 'list', array: root.list, index: 0, tag:'tag' }) x2
 ```
 
-Or:
-
-```
-[table] (tag)
-
-[[list]] (tag)
-
-key = (tag) 'value'
-
-array = (tag) [
-    (tag) 'item'
-]
-```
-
-Tags are processed from after to before.
+Do not write tags on both side of a value; for inline arrays and inline tables, tags may only be placed before them, not after them.
 
 Tag content could include any character rather than `(` `)` <code>&#92;</code> `"` `'` <code>&#96;</code> CR LF U+2028 U+2029.
+
+Tags are processed from after to before.
 
 Note: This option requires `xOptions.mix` enabled at the same time, because the custom returned value could not be properly classified.
