@@ -121,20 +121,19 @@ keyB = ``
 *   默认值：`null`
 
 ```
-[table.a (tag)]          # 处理({ table: root.table, key: 'a',     tag: 'tag' })
+[sec.a (tag)]            # 处理({ table: root.sec, key: 'a',                                tag: 'tag' })
 
-[table.b] (tag)          # 处理({ table: root.table, key: 'b',     tag: 'tag' })
+[sec.b] (tag)            # 处理({ table: root.sec, key: 'b',                                tag: 'tag' })
 
-key.a (tag) = '值' (tag) # 处理({ table: root.key,   key: 'a',     tag: 'tag' }) x2
-key.b (tag) = (tag) '值' # 处理({ table: root.key,   key: 'b',     tag: 'tag' }) x2
+key.a (tag) = '值' (tag) # 处理({ table: root.key, key: 'a',                                tag: 'tag' }) x2
+key.b (tag) = (tag) '值' # 处理({ table: root.key, key: 'b',                                tag: 'tag' }) x2
 
-array (tag) = (tag) [    # 处理({ table: root,       key: 'array', tag: 'tag' }) x2
-    (tag) '条目',        # 处理({ array: root.array, index: 0,     tag: 'tag' })
-    '条目' (tag),        # 处理({ array: root.array, index: 1,     tag: 'tag' })
+arr (tag) = (tag) [      # 处理({ table: root,     key: 'arr',                              tag: 'tag' }) x2
+    (tag) '条目',        # 处理({                               array: root.arr,  index: 0, tag: 'tag' })
+    '条目' (tag),        # 处理({                               array: root.arr,  index: 1, tag: 'tag' })
 ]
 
-[[list (tag)]] (tag)
-# 处理({ table: root, key: 'list', array: root.list, index: 0, tag:'tag' }) x2
+[[list (tag)]] (tag)     # 处理({ table: root,     key: 'list', array: root.list, index: 0, tag: 'tag' }) x2
 ```
 
 不要在值的两侧同时使用标签；对于行内数组、行内表，标签只能在它们的前面，而不能在后面。

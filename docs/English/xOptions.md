@@ -120,20 +120,19 @@ The original parsed result of interpolation string always use `\n` as newline, n
 *   default: `null`
 
 ```
-[table.a (tag)]             # process({ table: root.table, key: 'a',     tag: 'tag' })
+[sec.a (tag)]             # process({ table: root.sec, key: 'a',                                tag: 'tag' })
 
-[table.b] (tag)             # process({ table: root.table, key: 'b',     tag: 'tag' })
+[sec.b] (tag)             # process({ table: root.sec, key: 'b',                                tag: 'tag' })
 
-key.a (tag) = 'value' (tag) # process({ table: root.key,   key: 'a',     tag: 'tag' }) x2
-key.b (tag) = (tag) 'value' # process({ table: root.key,   key: 'b',     tag: 'tag' }) x2
+key.a (tag) = 'val' (tag) # process({ table: root.key, key: 'a',                                tag: 'tag' }) x2
+key.b (tag) = (tag) 'val' # process({ table: root.key, key: 'b',                                tag: 'tag' }) x2
 
-array (tag) = (tag) [       # process({ table: root,       key: 'array', tag: 'tag' }) x2
-    (tag) 'item',           # process({ array: root.array, index: 0,     tag: 'tag' })
-    'item' (tag),           # process({ array: root.array, index: 1,     tag: 'tag' })
+arr (tag) = (tag) [       # process({ table: root,     key: 'arr',                              tag: 'tag' }) x2
+    (tag) 'item',         # process({                               array: root.arr,  index: 0, tag: 'tag' })
+    'item' (tag),         # process({                               array: root.arr,  index: 1, tag: 'tag' })
 ]
 
-[[list (tag)]] (tag)
-# process({ table: root, key: 'list', array: root.list, index: 0, tag:'tag' }) x2
+[[list (tag)]] (tag)      # process({ table: root,     key: 'list', array: root.list, index: 0, tag: 'tag' }) x2
 ```
 
 Do not write tags on both side of a value; for inline arrays and inline tables, tags may only be placed before them, not after them.
