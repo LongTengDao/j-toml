@@ -16,8 +16,8 @@ export function MULTI_LINE_BASIC_STRING_exec_0 (_ :string) :string {
 	}
 }
 
-const ESCAPED_EXCLUDE_CONTROL_CHARACTER :RegExp = /[^\\\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\ \n]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
-const ESCAPED_EXCLUDE_CONTROL_CHARACTER_LESSER :RegExp = /[^\\\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\ \n]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
+const ESCAPED_EXCLUDE_CONTROL_CHARACTER :RegExp = /[^\\\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]| *\n[ \n]*|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
+const ESCAPED_EXCLUDE_CONTROL_CHARACTER_LESSER :RegExp = /[^\\\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\]| *\n[ \n]*|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
 export function ESCAPED_EXCLUDE_CONTROL_CHARACTER_test (_ :string) :boolean {
 	return _.replace(options.ctrl7F ? ESCAPED_EXCLUDE_CONTROL_CHARACTER : ESCAPED_EXCLUDE_CONTROL_CHARACTER_LESSER, '')==='';
 }

@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.72';
+const version = '0.5.73';
 
 const isBuffer = Buffer.isBuffer;
 
@@ -433,8 +433,8 @@ function MULTI_LINE_BASIC_STRING_exec_0(_) {
         _ = _.slice($[0].length);
     }
 }
-const ESCAPED_EXCLUDE_CONTROL_CHARACTER = /[^\\\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\ \n]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
-const ESCAPED_EXCLUDE_CONTROL_CHARACTER_LESSER = /[^\\\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\ \n]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
+const ESCAPED_EXCLUDE_CONTROL_CHARACTER = /[^\\\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]| *\n[ \n]*|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
+const ESCAPED_EXCLUDE_CONTROL_CHARACTER_LESSER = /[^\\\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\]| *\n[ \n]*|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
 function ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(_) {
     return _.replace(ctrl7F ? ESCAPED_EXCLUDE_CONTROL_CHARACTER : ESCAPED_EXCLUDE_CONTROL_CHARACTER_LESSER, '') === '';
 }
@@ -596,12 +596,24 @@ const isArray = Array.isArray;
 
 const fromCodePoint = String.fromCodePoint;
 
-const ESCAPE_ALIAS = { b: '\b', t: '\t', n: '\n', f: '\f', r: '\r' };
-const ESCAPED_IN_SINGLE_LINE = /\\(?:([\\"])|([btnfr])|u(.{4})|U(.{8}))/g;
-const ESCAPED_IN_MULTI_LINE = /\n|\\(?:([ \t\n]+)|([\\"])|([btnfr])|u([^]{4})|U([^]{8}))/g;
-const unEscapeSingleLine = (match, p1, p2, p3, p4) => {
+const ESCAPE_ALIAS = { '\\': '\\', '"': '"', b: '\b', t: '\t', n: '\n', f: '\f', r: '\r' };
+const ESCAPED_IN_SINGLE_LINE = /\\(?:([\\"btnfr])|u(.{4})|U(.{8}))/g;
+const ESCAPED_IN_MULTI_LINE = /\n|\\(?: *(\n)[ \n]*|([\\"btnfr])|u([^]{4})|U([^]{8}))/g;
+const unEscapeSingleLine = (match, p1, p2, p3) => {
     if (p1) {
-        return p1;
+        return ESCAPE_ALIAS[p1];
+    }
+    const codePoint = parseInt(p2 || p3, 16);
+    (0xD7FF < codePoint && codePoint < 0xE000 || 0x10FFFF < codePoint)
+        && throws(RangeError('Invalid Unicode Scalar ' + (p2 ? '\\u' + p2 : '\\U' + p3) + ' at ' + where()));
+    return fromCodePoint(codePoint);
+};
+const unEscapeMultiLine = (match, p1, p2, p3, p4) => {
+    if (match === '\n') {
+        return useWhatToJoinMultiLineString;
+    }
+    if (p1) {
+        return '';
     }
     if (p2) {
         return ESCAPE_ALIAS[p2];
@@ -609,26 +621,6 @@ const unEscapeSingleLine = (match, p1, p2, p3, p4) => {
     const codePoint = parseInt(p3 || p4, 16);
     (0xD7FF < codePoint && codePoint < 0xE000 || 0x10FFFF < codePoint)
         && throws(RangeError('Invalid Unicode Scalar ' + (p3 ? '\\u' + p3 : '\\U' + p4) + ' at ' + where()));
-    return fromCodePoint(codePoint);
-};
-const unEscapeMultiLine = (match, p1, p2, p3, p4, p5) => {
-    if (match === '\n') {
-        return useWhatToJoinMultiLineString;
-    }
-    if (p1) {
-        p1.includes('\n')
-            || throws(SyntaxError('Back slash leading whitespaces can only appear at the end of a line, but see ' + where()));
-        return '';
-    }
-    if (p2) {
-        return p2;
-    }
-    if (p3) {
-        return ESCAPE_ALIAS[p3];
-    }
-    const codePoint = parseInt(p4 || p5, 16);
-    (0xD7FF < codePoint && codePoint < 0xE000 || 0x10FFFF < codePoint)
-        && throws(RangeError('Invalid Unicode Scalar ' + (p4 ? '\\u' + p4 : '\\U' + p5) + ' at ' + where()));
     return fromCodePoint(codePoint);
 };
 const BasicString = (literal) => literal.replace(ESCAPED_IN_SINGLE_LINE, unEscapeSingleLine);
