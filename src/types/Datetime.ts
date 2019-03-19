@@ -37,7 +37,7 @@ export class LocalDateTime extends Datetime {
 	constructor (literal :string) {
 		RE.LOCAL_DATETIME.test(literal)
 		|| iterator.throws(SyntaxError('Invalid Local Date-Time '+literal+' at '+iterator.where()));
-		super(literal.replace(' ', 'T'), literal);
+		super(literal.replace(' ', 'T')+'Z', literal);
 	}
 	get '.' () {
 		const index :number = literal_cache.get(this).indexOf('.')+1;
@@ -49,7 +49,7 @@ export class LocalDate extends Datetime {
 	constructor (literal :string) {
 		RE.LOCAL_DATE.test(literal)
 		|| iterator.throws(SyntaxError('Invalid Local Date '+literal+' at '+iterator.where()));
-		super(literal+'T00:00:00.000', literal);
+		super(literal+'T00:00:00.000Z', literal);
 	}
 	get '.' () { return ''; }
 }
@@ -58,7 +58,7 @@ export class LocalTime extends Datetime {
 	constructor (literal :string) {
 		RE.LOCAL_TIME.test(literal)
 		|| iterator.throws(SyntaxError('Invalid Local Time '+literal+' at '+iterator.where()));
-		super('1970-01-01T'+literal, literal);
+		super('1970-01-01T'+literal+'Z', literal);
 	}
 	get '.' () {
 		const index :number = literal_cache.get(this).indexOf('.')+1;

@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.74';
+const version = '0.5.75';
 
 const isBuffer = Buffer.isBuffer;
 
@@ -543,7 +543,7 @@ class LocalDateTime extends Datetime$1 {
     constructor(literal) {
         LOCAL_DATETIME.test(literal)
             || throws(SyntaxError('Invalid Local Date-Time ' + literal + ' at ' + where()));
-        super(literal.replace(' ', 'T'), literal);
+        super(literal.replace(' ', 'T') + 'Z', literal);
     }
     get '.'() {
         const index = literal_cache.get(this).indexOf('.') + 1;
@@ -554,7 +554,7 @@ class LocalDate extends Datetime$1 {
     constructor(literal) {
         LOCAL_DATE.test(literal)
             || throws(SyntaxError('Invalid Local Date ' + literal + ' at ' + where()));
-        super(literal + 'T00:00:00.000', literal);
+        super(literal + 'T00:00:00.000Z', literal);
     }
     get '.'() { return ''; }
 }
@@ -562,7 +562,7 @@ class LocalTime extends Datetime$1 {
     constructor(literal) {
         LOCAL_TIME.test(literal)
             || throws(SyntaxError('Invalid Local Time ' + literal + ' at ' + where()));
-        super('1970-01-01T' + literal, literal);
+        super('1970-01-01T' + literal + 'Z', literal);
     }
     get '.'() {
         const index = literal_cache.get(this).indexOf('.') + 1;
