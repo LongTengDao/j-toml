@@ -1,7 +1,7 @@
 import Error from '.Error';
 import TypeError from '.TypeError';
 import isBuffer from '.Buffer.isBuffer';
-import from from ".Buffer.from";
+import from from '.Buffer.from';
 import * as iterator from './share/iterator';
 import * as options from './share/options';
 import Root from './parse/level-loop';
@@ -13,9 +13,9 @@ const NON_SCALAR = /[\uD800-\uDFFF]/u;// \u{10FFFF}- > \uFFFD
 export default function parse (
 	sourceContent :Buffer | string,
 	specificationVersion :0.5 | 0.4,
-	useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines :string,
-	useBigInt_forInteger :boolean | number = true,
-	extensionOptions                       = null
+	multiLineJoiner :string,
+	useBigInt :boolean | number = true,
+	xOptions                    = null
 ) :object {
 	iterator.could();
 	if ( isBuffer(sourceContent) ) {
@@ -27,7 +27,7 @@ export default function parse (
 	if ( typeof sourceContent!=='string' ) { throw new TypeError('TOML.parse(sourceContent)'); }
 	if ( NON_SCALAR.test(sourceContent) ) { throw Error('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any uncoupled UCS-4 character code.'); }
 	try {
-		options.use(specificationVersion, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger, extensionOptions);
+		options.use(specificationVersion, multiLineJoiner, useBigInt, xOptions);
 		iterator.todo(sourceContent);
 		try {
 			const rootTable = Root();

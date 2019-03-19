@@ -111,10 +111,8 @@ keyB = ``
 *   类型：
     ```typescript
     function 逐个调用的处理器 (每个 :
-        { table :Table, key :string,                                tag :string }
-        |
-        {                            array :any[],   index :number, tag :string }
-        |
+        { table :Table, key :string,                                tag :string } |
+        {                            array :any[],   index :number, tag :string } |
         { table :Table, key :string, array :Table[], index :number, tag :string }
     ) :void
     ```

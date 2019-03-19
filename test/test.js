@@ -6,10 +6,13 @@ module.exports = require('@ltd/j-dev')(__dirname+'/..')(async ({ import_default,
 		require: moduleName => {
 			if ( moduleName==='@ltd/j-orderify' ) { return require(__dirname+'/../../../LongTengDao/j-orderify/dist/NPM/index.js'); }
 			if ( moduleName==='@ltd/j-regexp' ) { return require(__dirname+'/../../../LongTengDao/j-regexp/dist/NPM/index.js'); }
+			if ( moduleName==='fs' ) { return { readFileSync: require('fs').readFileSync }; }
 			throw new Error(moduleName);
 		},
 		__filename: 'test/built.js',
 	});
+	
+	TOML.parse('', 0.5, '\n');
 	
 	TOML.parse([
 		`["${'bt\\b\\t'.repeat(10000)}${'\\b\\t'.repeat(10000)}"]`,

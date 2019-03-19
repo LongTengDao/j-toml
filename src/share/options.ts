@@ -85,42 +85,42 @@ export function clear () :void {
 	collection.length = 0;
 }
 
-export function use (specificationVersion, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines :string, useBigInt_forInteger :boolean | number, extensionOptions) :void {
+export function use (specificationVersion, multiLineJoiner :string, useBigInt :boolean | number, xOptions) :void {
 	if ( specificationVersion!==0.5 && specificationVersion!==0.4 ) { throw new Error('TOML.parse(,specificationVersion)'); }
-	if ( typeof <unknown>useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines!=='string' ) { throw new TypeError('TOML.parse(,,multiLineJoiner)'); }
-	if ( useBigInt_forInteger===true ) { IntegerDepends = BigIntInteger; }
-	else if ( useBigInt_forInteger===false ) { IntegerDepends = NumberInteger; }
+	if ( typeof <unknown>multiLineJoiner!=='string' ) { throw new TypeError('TOML.parse(,,multiLineJoiner)'); }
+	if ( useBigInt===true ) { IntegerDepends = BigIntInteger; }
+	else if ( useBigInt===false ) { IntegerDepends = NumberInteger; }
 	else {
-		if ( typeof useBigInt_forInteger!=='number' ) { throw new TypeError('TOML.parse(,,,useBigInt)'); }
-		if ( !isSafeInteger(useBigInt_forInteger) ) { throw new RangeError('TOML.parse(...useBigInt)'); }
+		if ( typeof useBigInt!=='number' ) { throw new TypeError('TOML.parse(,,,useBigInt)'); }
+		if ( !isSafeInteger(useBigInt) ) { throw new RangeError('TOML.parse(...useBigInt)'); }
 		IntegerDepends = DependInteger;
-		if ( useBigInt_forInteger>=0 ) {
-			IntegerMax = useBigInt_forInteger;
-			IntegerMin = -useBigInt_forInteger;
+		if ( useBigInt>=0 ) {
+			IntegerMax = useBigInt;
+			IntegerMin = -useBigInt;
 		}
 		else {
-			IntegerMin = useBigInt_forInteger;
-			IntegerMax = -useBigInt_forInteger-1;
+			IntegerMin = useBigInt;
+			IntegerMax = -useBigInt-1;
 		}
 	}
-	useWhatToJoinMultiLineString = useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines;
+	useWhatToJoinMultiLineString = multiLineJoiner;
 	moreDatetime = ctrl7F = xob = sFloat = specificationVersion===0.5;
 	nonEmptyKey = openable = specificationVersion===0.4;
 	let typify :boolean;
-	if ( extensionOptions===null ) {
+	if ( xOptions===null ) {
 		TableDepends = Table;
 		allowLonger = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = enableInterpolationString = false;
 		processor = null;
 		typify = true;
 	}
 	else {
-		TableDepends = extensionOptions.order ? OrderedTable : Table;
-		allowLonger = !!extensionOptions.longer;
-		enableNull = !!extensionOptions.null;
-		allowInlineTableMultiLineAndTrailingCommaEvenNoComma = !!extensionOptions.multi;
-		enableInterpolationString = !!extensionOptions.ins;
-		typify = !extensionOptions.mix;
-		processor = extensionOptions.new || null;
+		TableDepends = xOptions.order ? OrderedTable : Table;
+		allowLonger = !!xOptions.longer;
+		enableNull = !!xOptions.null;
+		allowInlineTableMultiLineAndTrailingCommaEvenNoComma = !!xOptions.multi;
+		enableInterpolationString = !!xOptions.ins;
+		typify = !xOptions.mix;
+		processor = xOptions.new || null;
 		if ( processor ) {
 			if ( typeof processor!=='function' ) { throw new TypeError('TOML.parse(,,,,xOptions.tag)'); }
 			if ( typify ) { throw new Error('TOML.parse(,,,,xOptions) xOptions.tag needs xOptions.mix to be true'); }

@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.73';
+const version = '0.5.74';
 
 const isBuffer = Buffer.isBuffer;
 
@@ -212,54 +212,54 @@ function clear() {
     processor = null;
     collection.length = 0;
 }
-function use(specificationVersion, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger, extensionOptions) {
+function use(specificationVersion, multiLineJoiner, useBigInt, xOptions) {
     if (specificationVersion !== 0.5 && specificationVersion !== 0.4) {
         throw new Error('TOML.parse(,specificationVersion)');
     }
-    if (typeof useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines !== 'string') {
+    if (typeof multiLineJoiner !== 'string') {
         throw new TypeError('TOML.parse(,,multiLineJoiner)');
     }
-    if (useBigInt_forInteger === true) {
+    if (useBigInt === true) {
         IntegerDepends = BigIntInteger;
     }
-    else if (useBigInt_forInteger === false) {
+    else if (useBigInt === false) {
         IntegerDepends = NumberInteger;
     }
     else {
-        if (typeof useBigInt_forInteger !== 'number') {
+        if (typeof useBigInt !== 'number') {
             throw new TypeError('TOML.parse(,,,useBigInt)');
         }
-        if (!isSafeInteger(useBigInt_forInteger)) {
+        if (!isSafeInteger(useBigInt)) {
             throw new RangeError('TOML.parse(...useBigInt)');
         }
         IntegerDepends = DependInteger;
-        if (useBigInt_forInteger >= 0) {
-            IntegerMax = useBigInt_forInteger;
-            IntegerMin = -useBigInt_forInteger;
+        if (useBigInt >= 0) {
+            IntegerMax = useBigInt;
+            IntegerMin = -useBigInt;
         }
         else {
-            IntegerMin = useBigInt_forInteger;
-            IntegerMax = -useBigInt_forInteger - 1;
+            IntegerMin = useBigInt;
+            IntegerMax = -useBigInt - 1;
         }
     }
-    useWhatToJoinMultiLineString = useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines;
+    useWhatToJoinMultiLineString = multiLineJoiner;
     moreDatetime = ctrl7F = xob = sFloat = specificationVersion === 0.5;
     nonEmptyKey = openable = specificationVersion === 0.4;
     let typify;
-    if (extensionOptions === null) {
+    if (xOptions === null) {
         TableDepends = Table;
         allowLonger = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = enableInterpolationString = false;
         processor = null;
         typify = true;
     }
     else {
-        TableDepends = extensionOptions.order ? OrderedTable : Table;
-        allowLonger = !!extensionOptions.longer;
-        enableNull = !!extensionOptions.null;
-        allowInlineTableMultiLineAndTrailingCommaEvenNoComma = !!extensionOptions.multi;
-        enableInterpolationString = !!extensionOptions.ins;
-        typify = !extensionOptions.mix;
-        processor = extensionOptions.new || null;
+        TableDepends = xOptions.order ? OrderedTable : Table;
+        allowLonger = !!xOptions.longer;
+        enableNull = !!xOptions.null;
+        allowInlineTableMultiLineAndTrailingCommaEvenNoComma = !!xOptions.multi;
+        enableInterpolationString = !!xOptions.ins;
+        typify = !xOptions.mix;
+        processor = xOptions.new || null;
         if (processor) {
             if (typeof processor !== 'function') {
                 throw new TypeError('TOML.parse(,,,,xOptions.tag)');
@@ -1170,7 +1170,7 @@ function equalInlineArray(table, finalKey, lineRest) {
 
 const BOM = /^\uFEFF/;
 const NON_SCALAR = /[\uD800-\uDFFF]/u; // \u{10FFFF}- > \uFFFD
-function parse(sourceContent, specificationVersion, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger = true, extensionOptions = null) {
+function parse(sourceContent, specificationVersion, multiLineJoiner, useBigInt = true, xOptions = null) {
     could();
     if (isBuffer(sourceContent)) {
         const buffer = sourceContent;
@@ -1187,7 +1187,7 @@ function parse(sourceContent, specificationVersion, useWhatToJoinMultiLineString
         throw Error('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any uncoupled UCS-4 character code.');
     }
     try {
-        use(specificationVersion, useWhatToJoinMultiLineString_notUsingForSplitTheSourceLines, useBigInt_forInteger, extensionOptions);
+        use(specificationVersion, multiLineJoiner, useBigInt, xOptions);
         todo(sourceContent);
         try {
             const rootTable = Root();
@@ -1203,8 +1203,19 @@ function parse(sourceContent, specificationVersion, useWhatToJoinMultiLineString
     }
 }
 
+function install(readFileSync, specificationVersion, multiLineJoiner, useBigInt = true, xOptions = null) {
+    if (typeof readFileSync !== 'function') {
+        throw new TypeError('TOML.install(readFileSync)');
+    }
+    parse('', specificationVersion, multiLineJoiner, useBigInt, xOptions);
+    require.extensions['.toml'] = function (module, filename) {
+        module.exports = parse(readFileSync(filename), specificationVersion, multiLineJoiner, useBigInt, xOptions);
+    };
+}
+
 const TOML = {
     parse,
+    install,
     version,
     get default() { return this; }
 };
