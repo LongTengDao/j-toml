@@ -1,7 +1,7 @@
 import SyntaxError from '.SyntaxError';
 import * as options from '../options';
 import * as iterator from '../iterator';
-import * as RE from './nested (readable)';
+import * as RE from './nested -- readable';
 
 /* parser */
 
