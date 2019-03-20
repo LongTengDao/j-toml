@@ -8,9 +8,9 @@ export default function install (
 	useBigInt :boolean | number = true,
 	xOptions                    = null
 ) {
-	if ( typeof readFileSync!=='function' ) { throw new TypeError('TOML.install(readFileSync)'); }
+	if ( typeof readFileSync!=='function' ) { throw TypeError('TOML.install(readFileSync)'); }
 	parse('', specificationVersion, multiLineJoiner, useBigInt, xOptions);
-	require.extensions['.toml'] = function (module, filename) {
+	require.extensions['.toml'] = function require_toml (module, filename) {
 		module.exports = parse(readFileSync(filename), specificationVersion, multiLineJoiner, useBigInt, xOptions);
 	};
 };

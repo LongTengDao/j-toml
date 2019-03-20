@@ -36,7 +36,7 @@ export const mark = () :number => lineIndex;
 
 export function must (message :string, startIndex :number) :string {
 	lineIndex===lastLineIndex
-	&& throws(new SyntaxError(message+' is not close until the end of the file, which started from line '+( startIndex+1 )+': '+sourceLines[startIndex]));
+	&& throws(SyntaxError(message+' is not close until the end of the file, which started from line '+( startIndex+1 )+': '+sourceLines[startIndex]));
 	return sourceLines[++lineIndex];
 }
 

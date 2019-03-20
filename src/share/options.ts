@@ -86,13 +86,13 @@ export function clear () :void {
 }
 
 export function use (specificationVersion, multiLineJoiner :string, useBigInt :boolean | number, xOptions) :void {
-	if ( specificationVersion!==0.5 && specificationVersion!==0.4 ) { throw new Error('TOML.parse(,specificationVersion)'); }
-	if ( typeof <unknown>multiLineJoiner!=='string' ) { throw new TypeError('TOML.parse(,,multiLineJoiner)'); }
+	if ( specificationVersion!==0.5 && specificationVersion!==0.4 ) { throw Error('TOML.parse(,specificationVersion)'); }
+	if ( typeof <unknown>multiLineJoiner!=='string' ) { throw TypeError('TOML.parse(,,multiLineJoiner)'); }
 	if ( useBigInt===true ) { IntegerDepends = BigIntInteger; }
 	else if ( useBigInt===false ) { IntegerDepends = NumberInteger; }
 	else {
-		if ( typeof useBigInt!=='number' ) { throw new TypeError('TOML.parse(,,,useBigInt)'); }
-		if ( !isSafeInteger(useBigInt) ) { throw new RangeError('TOML.parse(...useBigInt)'); }
+		if ( typeof useBigInt!=='number' ) { throw TypeError('TOML.parse(,,,useBigInt)'); }
+		if ( !isSafeInteger(useBigInt) ) { throw RangeError('TOML.parse(...useBigInt)'); }
 		IntegerDepends = DependInteger;
 		if ( useBigInt>=0 ) {
 			IntegerMax = useBigInt;
@@ -122,8 +122,8 @@ export function use (specificationVersion, multiLineJoiner :string, useBigInt :b
 		typify = !xOptions.mix;
 		processor = xOptions.new || null;
 		if ( processor ) {
-			if ( typeof processor!=='function' ) { throw new TypeError('TOML.parse(,,,,xOptions.tag)'); }
-			if ( typify ) { throw new Error('TOML.parse(,,,,xOptions) xOptions.tag needs xOptions.mix to be true'); }
+			if ( typeof processor!=='function' ) { throw TypeError('TOML.parse(,,,,xOptions.tag)'); }
+			if ( typify ) { throw Error('TOML.parse(,,,,xOptions) xOptions.tag needs xOptions.mix to be true'); }
 			collect = collect_on;
 		}
 		else { collect = collect_off; }

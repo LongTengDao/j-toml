@@ -17,7 +17,7 @@ class Datetime extends Date {
 	// Date.prototype.toJSON => toISOString
 	toISOString (this :Datetime) :string {
 		if ( this.getTime()===value_cache.get(this) ) { return literal_cache.get(this); }
-		throw new Error('Datetime value has been modified.');
+		throw Error('Datetime value has been modified.');
 	}
 }
 

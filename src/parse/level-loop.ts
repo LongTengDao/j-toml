@@ -10,8 +10,6 @@ import * as RE from '../share/RE';
 import { sealedInline, appendTable, parseKeys, prepareInlineTable, assignLiteralString, assignBasicString } from './on-the-spot';
 import { assignInterpolationString } from './x-feature';
 
-const OFFSET = /(?:[+-]\d\d:\d\d|Z)$/;
-
 export default function Root () {
 	const rootTable :object = new options.TableDepends;
 	let lastSectionTable :object = rootTable;
@@ -100,7 +98,7 @@ function assign (lastInlineTable_array :object | any[], lineRest :string) :strin
 	}
 	if ( literal.includes(':') ) {
 		if ( literal.includes('-') ) {
-			if ( OFFSET.test(literal) ) {
+			if ( RE.OFFSET.test(literal) ) {
 				table[finalKey] = new OffsetDateTime(literal);
 			}
 			else {
@@ -121,7 +119,6 @@ function assign (lastInlineTable_array :object | any[], lineRest :string) :strin
 	}
 	table[finalKey] =
 		literal==='true' ? true : literal==='false' ? false :
-			literal.includes(':') || literal.indexOf('-')!==literal.lastIndexOf('-') && !literal.startsWith('-') ? new Datetime(literal) :
 				literal.includes('.') || ( literal.includes('e') || literal.includes('E') ) && !literal.startsWith('0x') ? Float(literal) :
 					options.enableNull && literal==='null' ? null :
 						options.IntegerDepends(literal);
@@ -191,7 +188,7 @@ function push (lastInlineTable_array :object | any[], lineRest :string) :string 
 	}
 	if ( literal.includes(':') ) {
 		if ( literal.includes('-') ) {
-			if ( OFFSET.test(literal) ) {
+			if ( RE.OFFSET.test(literal) ) {
 				options.asOffsetDateTimes(lastInlineTable_array).push(new OffsetDateTime(literal));
 			}
 			else {
