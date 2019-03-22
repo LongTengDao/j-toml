@@ -1,5 +1,8 @@
 import SyntaxError from '.SyntaxError';
-//import Infinity, NaN from '.Infinity'+'.NaN';
+import RangeError from '.RangeError';
+import isFinite from '.isFinite';
+//import Infinity from '.Infinity';
+//import NaN from '.NaN';
 import * as options from '../share/options';
 import * as iterator from '../share/iterator';
 

@@ -1,13 +1,13 @@
 
-@ltd/j-toml
-===========
+`@ltd/j-toml`
+=============
 
-@ltd/j-toml is an implementation of [TOML](https://GitHub.com/toml-lang/toml/) ("Tom's Obvious, Minimal Language") written by LongTengDao,  
+`@ltd/j-toml` is an implementation of [TOML](https://GitHub.com/toml-lang/toml/) ("Tom's Obvious, Minimal Language") written by LongTengDao,  
 which is the best config format he had ever seen.  
 (Obviously for exhausted people who tried to design that.)
 
-`Node.js`
----------
+Node.js
+-------
 
 ```shell
 npm install @ltd/j-toml

@@ -1,15 +1,15 @@
 
 [English](https://GitHub.com/LongTengDao/j-toml/tree/master/docs/English/) | [简体中文](https://GitHub.com/LongTengDao/j-toml/tree/master/docs/简体中文/)
 ___
-@ltd/j-toml
-===========
+`@ltd/j-toml`
+=============
 
-@ltd/j-toml is an implementation of [TOML](https://GitHub.com/toml-lang/toml/) ("Tom's Obvious, Minimal Language") written by LongTengDao,  
+`@ltd/j-toml` is an implementation of [TOML](https://GitHub.com/toml-lang/toml/) ("Tom's Obvious, Minimal Language") written by LongTengDao,  
 which is the best config format he had ever seen.  
 (Obviously for exhausted people who tried to design that.)
 
-`Node.js`
----------
+Node.js
+-------
 
 ```
 npm install @ltd/j-toml
