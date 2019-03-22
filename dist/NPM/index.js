@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.76';
+const version = '0.5.77';
 
 const isBuffer = Buffer.isBuffer;
 
@@ -142,9 +142,9 @@ const orderify = (object        )         => {
 
 function Table ()       { }
 const OrderedTable = function Table (            )         { return orderify(this); };
-                                                       
+                                          OrderedTable 
 
-OrderedTable.prototype = Table.prototype = create(null);
+            .prototype = Table.prototype = create(null);
 
 const isTable = (value     )          => value instanceof Table;
 
@@ -1214,17 +1214,23 @@ function parse (
 }
 
 function install (
-	readFileSync                  ,
+	readFile                                    ,
 	specificationVersion           ,
 	multiLineJoiner        ,
 	useBigInt                   = true,
 	xOptions                    = null
 ) {
-	if ( typeof readFileSync!=='function' ) { throw TypeError('TOML.install(readFileSync)'); }
+	if ( typeof readFile!=='function' ) { throw TypeError('TOML.install(readFile)'); }
 	parse('', specificationVersion, multiLineJoiner, useBigInt, xOptions);
-	require.extensions['.toml'] = function require_toml (module, filename) {
-		module.exports = parse(readFileSync(filename), specificationVersion, multiLineJoiner, useBigInt, xOptions);
+	require.extensions['.toml'] = function require_toml (module, filename        )       {
+		const data = readFile(filename);
+		module.exports = data instanceof Promise
+			? data.then(onFulfilled)
+			: parse(data, specificationVersion, multiLineJoiner, useBigInt, xOptions);
 	};
+	function onFulfilled (data        )         {
+		return parse(data, specificationVersion, multiLineJoiner, useBigInt, xOptions);
+	}
 }
 
 const TOML = {

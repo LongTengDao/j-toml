@@ -38,7 +38,7 @@ declare module '@ltd/j-toml' {
 	) :Table;
 	
 	export function install (
-		readFileSync :(path) => Buffer,
+		readFileSync :(path) => Buffer | Promise<Buffer>,
 		specificationVersion :0.5 | 0.4,
 		multiLineJoiner :string,
 		useBigInt? :true | false | number,

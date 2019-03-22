@@ -28,3 +28,4 @@ declare module '.WeakMap' { export default WeakMap; }
 declare module '.parseInt' { export default parseInt; }
 declare module '.String.fromCodePoint' { export default String.fromCodePoint; }
 declare module '.Date' { export default Date; }
+declare module '.Promise' { export default Promise; }
