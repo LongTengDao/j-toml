@@ -1,6 +1,6 @@
 'use strict';
 
-require('../test/test.js')(async ({ build, get, map, ful }) => {
+module.exports = require('../test/test.js')(async ({ build, get, map, ful }) => {
 	
 	await build({
 		name: 'j-toml',
