@@ -8,7 +8,7 @@ require('../test/test.js')(async ({ build, get, map, ful }) => {
 		ES: 6,
 		NPM: {
 			meta_: {
-				description: 'An implementation of TOML v0.5 written by LongTengDao.／龙腾道为汤小明语 v0.5 写的实现。',
+				description: 'An implementation of TOML written by LongTengDao. Belong to "Plan J".／龙腾道为汤小明语写的实现。从属于“简计划”。',
 				keywords: ['TOML'],
 			},
 		},
