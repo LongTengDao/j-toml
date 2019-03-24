@@ -1,4 +1,5 @@
 import { orderify } from '@ltd/j-orderify';
+
 import create from '.Object.create';
 
 export function Table () :void { }

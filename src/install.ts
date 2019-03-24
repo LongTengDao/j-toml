@@ -1,6 +1,6 @@
 import TypeError from '.TypeError';
 import Promise from '.Promise';
-import parse from './parse';
+import parse from './parse/';
 
 export default function install (
 	readFile :(path :string) => Buffer | Promise<Buffer>,

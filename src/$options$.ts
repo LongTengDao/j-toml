@@ -5,9 +5,9 @@ import Error from '.Error';
 import isSafeInteger from '.Number.isSafeInteger';
 import Proxy from '.Proxy';
 import WeakMap from '.WeakMap';
-import { Table, OrderedTable } from '../types/Table';
-import { BigIntInteger, NumberInteger, DependInteger } from '../types/Integer';
-import * as iterator from './iterator';
+import { Table, OrderedTable } from './types/Table';
+import { BigIntInteger, NumberInteger, DependInteger } from './types/Integer';
+import * as $iterator$ from './$iterator$';
 
 /* options */
 
@@ -52,7 +52,7 @@ export const {
 	get: (arrayTypes) => function typify (array :any[]) :any[] {
 		if ( arrayTypes.has(array) ) {
 			arrayTypes.get(array)===typify
-			|| iterator.throws(TypeError('Types in array must be same. Check '+iterator.where()));
+			|| $iterator$.throws(TypeError('Types in array must be same. Check '+$iterator$.where()));
 		}
 		else { arrayTypes.set(array, typify); }
 		return array;
@@ -64,12 +64,12 @@ export const {
 type each = { table :object, key :string, tag :string } | { array :any[], index :number, tag :string } | { table :object, key :string, array :object[], index :number, tag :string };
 let collection :each[] = [];
 function collect_on (each :each) :void { collection.push(each); }
-function collect_off (each :each) :never { throw iterator.throws(SyntaxError(iterator.where())); }
+function collect_off (each :each) :never { throw $iterator$.throws(SyntaxError($iterator$.where())); }
 export let collect :typeof collect_off | typeof collect_on = collect_off;
 export function process () {
 	let index = collection.length;
 	if ( index ) {
-		iterator.done();
+		$iterator$.done();
 		const process = <Function>processor;
 		const queue = collection;
 		processor = null;

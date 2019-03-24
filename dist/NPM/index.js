@@ -1,12 +1,12 @@
 ﻿'use strict';
 
-const version = '0.5.79';
+const version = '0.5.80';
 
 const isBuffer = Buffer.isBuffer;
 
 const from = Buffer.from;
 
-//import * as options from './options';
+//import * as $options$ from './$options$';
 const NONE = [];
 let sourceLines = NONE;
 let lastLineIndex = -1;
@@ -62,7 +62,7 @@ function throws(error) {
         error.lineIndex = lineIndex;
         error.lineNumber = lineIndex + 1;
         //done();
-        //options.clear();
+        //$options$.clear();
     }
     throw error;
 }
@@ -319,7 +319,6 @@ function newRegExp(template) {
 
 /*¡ @ltd/j-regexp */
 
-/* types */
 const _29_ = /(?:0[1-9]|1\d|2[0-9])/;
 const _30_ = /(?:0[1-9]|[12]\d|30)/;
 const _31_ = /(?:0[1-9]|[12]\d|3[01])/;
@@ -357,11 +356,90 @@ const LOCAL_TIME = newRegExp `
 	^
 	${HMS_}
 	$`;
-/* parse */
+const literal_cache = new WeakMap;
+const value_cache = new WeakMap;
+class Datetime extends Date {
+    constructor(expression, literal) {
+        super(expression);
+        literal_cache.set(this, literal);
+        value_cache.set(this, this.getTime());
+    }
+    // Date.prototype.toJSON => toISOString
+    toISOString() {
+        if (this.getTime() === value_cache.get(this)) {
+            return literal_cache.get(this);
+        }
+        throw Error('Datetime value has been modified.');
+    }
+}
+class OffsetDateTime extends Datetime {
+    constructor(literal) {
+        OFFSET_DATETIME.test(literal)
+            || throws(SyntaxError('Invalid Offset Date-Time ' + literal + ' at ' + where()));
+        super(literal.replace(' ', 'T'), literal);
+    }
+    get '.'() {
+        const index = literal_cache.get(this).indexOf('.') + 1;
+        return index ? literal_cache.get(this).slice(index).replace(OFFSET, '') : '';
+    }
+}
+class LocalDateTime extends Datetime {
+    constructor(literal) {
+        LOCAL_DATETIME.test(literal)
+            || throws(SyntaxError('Invalid Local Date-Time ' + literal + ' at ' + where()));
+        super(literal.replace(' ', 'T') + 'Z', literal);
+    }
+    get '.'() {
+        const index = literal_cache.get(this).indexOf('.') + 1;
+        return index ? literal_cache.get(this).slice(index) : '';
+    }
+}
+class LocalDate extends Datetime {
+    constructor(literal) {
+        LOCAL_DATE.test(literal)
+            || throws(SyntaxError('Invalid Local Date ' + literal + ' at ' + where()));
+        super(literal + 'T00:00:00.000Z', literal);
+    }
+    get '.'() { return ''; }
+}
+class LocalTime extends Datetime {
+    constructor(literal) {
+        LOCAL_TIME.test(literal)
+            || throws(SyntaxError('Invalid Local Time ' + literal + ' at ' + where()));
+        super('1970-01-01T' + literal + 'Z', literal);
+    }
+    get '.'() {
+        const index = literal_cache.get(this).indexOf('.') + 1;
+        return index ? literal_cache.get(this).slice(index) : '';
+    }
+}
+
+const FLOAT = /^[-+]?(?:0|[1-9]\d*(?:_\d+)*)(?:\.\d+(?:_\d+)*)?(?:[eE][-+]?\d+(?:_\d+)*)?$/;
+const FLOAT_NOT_INTEGER = /[.eE]/;
+const UNDERSCORES = /_/g;
+const Float = (literal) => {
+    if (FLOAT.test(literal) && FLOAT_NOT_INTEGER.test(literal)) {
+        if (sFloat) {
+            return +literal.replace(UNDERSCORES, '');
+        }
+        else {
+            const number = +literal.replace(UNDERSCORES, '');
+            isFinite(number) || throws(RangeError('Float can not be as big as Infinity before TOML v0.5, like ' + literal + ' at ' + where()));
+            return number;
+        }
+    }
+    //if ( $options$.sFloat ) {
+    //	if ( literal==='inf' || literal==='+inf' ) { return Infinity; }
+    //	if ( literal==='-inf' ) { return -Infinity; }
+    //	if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) { return NaN; }
+    //}
+    throw throws(SyntaxError('Invalid Float ' + literal + ' at ' + where()));
+};
+
+/* nested (readable) */
 const Whitespace = /[ \t]/;
 const PRE_WHITESPACE = newRegExp `
 	^${Whitespace}+`;
-const KEYS = /[\w-]+|"(?:[^\\"]+|\\[^])*"|'[^']*'/g;
 const VALUE_REST = newRegExp `
 	^
 	(
@@ -417,8 +495,7 @@ const TAG_REST = newRegExp `
 	${Whitespace}*
 	([^]*)
 	$`;
-
-/* parser */
+/* optimized (avoid overflow or lost) */
 const MULTI_LINE_BASIC_STRING = /^(?:[^\\"]+|\\[^]|""?(?!"))/;
 function MULTI_LINE_BASIC_STRING_exec_0(_) {
     for (let _0 = '';;) {
@@ -512,86 +589,6 @@ function getKeys(_) {
     }
 }
 
-const literal_cache = new WeakMap;
-const value_cache = new WeakMap;
-class Datetime extends Date {
-    constructor(expression, literal) {
-        super(expression);
-        literal_cache.set(this, literal);
-        value_cache.set(this, this.getTime());
-    }
-    // Date.prototype.toJSON => toISOString
-    toISOString() {
-        if (this.getTime() === value_cache.get(this)) {
-            return literal_cache.get(this);
-        }
-        throw Error('Datetime value has been modified.');
-    }
-}
-class OffsetDateTime extends Datetime {
-    constructor(literal) {
-        OFFSET_DATETIME.test(literal)
-            || throws(SyntaxError('Invalid Offset Date-Time ' + literal + ' at ' + where()));
-        super(literal.replace(' ', 'T'), literal);
-    }
-    get '.'() {
-        const index = literal_cache.get(this).indexOf('.') + 1;
-        return index ? literal_cache.get(this).slice(index).replace(OFFSET, '') : '';
-    }
-}
-class LocalDateTime extends Datetime {
-    constructor(literal) {
-        LOCAL_DATETIME.test(literal)
-            || throws(SyntaxError('Invalid Local Date-Time ' + literal + ' at ' + where()));
-        super(literal.replace(' ', 'T') + 'Z', literal);
-    }
-    get '.'() {
-        const index = literal_cache.get(this).indexOf('.') + 1;
-        return index ? literal_cache.get(this).slice(index) : '';
-    }
-}
-class LocalDate extends Datetime {
-    constructor(literal) {
-        LOCAL_DATE.test(literal)
-            || throws(SyntaxError('Invalid Local Date ' + literal + ' at ' + where()));
-        super(literal + 'T00:00:00.000Z', literal);
-    }
-    get '.'() { return ''; }
-}
-class LocalTime extends Datetime {
-    constructor(literal) {
-        LOCAL_TIME.test(literal)
-            || throws(SyntaxError('Invalid Local Time ' + literal + ' at ' + where()));
-        super('1970-01-01T' + literal + 'Z', literal);
-    }
-    get '.'() {
-        const index = literal_cache.get(this).indexOf('.') + 1;
-        return index ? literal_cache.get(this).slice(index) : '';
-    }
-}
-
-const FLOAT = /^[-+]?(?:0|[1-9]\d*(?:_\d+)*)(?:\.\d+(?:_\d+)*)?(?:[eE][-+]?\d+(?:_\d+)*)?$/;
-const FLOAT_NOT_INTEGER = /[.eE]/;
-const UNDERSCORES = /_/g;
-const Float = (literal) => {
-    if (FLOAT.test(literal) && FLOAT_NOT_INTEGER.test(literal)) {
-        if (sFloat) {
-            return +literal.replace(UNDERSCORES, '');
-        }
-        else {
-            const number = +literal.replace(UNDERSCORES, '');
-            isFinite(number) || throws(RangeError('Float can not be as big as Infinity before TOML v0.5, like ' + literal + ' at ' + where()));
-            return number;
-        }
-    }
-    //if ( options.sFloat ) {
-    //	if ( literal==='inf' || literal==='+inf' ) { return Infinity; }
-    //	if ( literal==='-inf' ) { return -Infinity; }
-    //	if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) { return NaN; }
-    //}
-    throw throws(SyntaxError('Invalid Float ' + literal + ' at ' + where()));
-};
-
 const isArray = Array.isArray;
 
 const fromCodePoint = String.fromCodePoint;
@@ -629,6 +626,7 @@ const MultiLineBasicString = (literal) => literal.replace(ESCAPED_IN_MULTI_LINE,
 const sealedInline = new WeakSet;
 const openTables = new WeakSet;
 const openedTables = new WeakSet;
+const KEYS = /[\w-]+|"(?:[^\\"]+|\\[^])*"|'[^']*'/g;
 function appendTable(table, key_key, asArrayItem, tag) {
     const leadingKeys = parseKeys(key_key);
     const finalKey = leadingKeys.pop();

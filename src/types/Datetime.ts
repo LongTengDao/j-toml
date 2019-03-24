@@ -1,9 +1,56 @@
+import { newRegExp } from '@ltd/j-regexp';
+
 import SyntaxError from '.SyntaxError';
 import Error from '.Error';
 import WeakMap from '.WeakMap';
 import Date from '.Date';
-import * as RE from '../share/RE';
-import * as iterator from '../share/iterator';
+
+import * as $iterator$ from '../$iterator$';
+
+const _29_ = /(?:0[1-9]|1\d|2[0-9])/;
+const _30_ = /(?:0[1-9]|[12]\d|30)/;
+const _31_ = /(?:0[1-9]|[12]\d|3[01])/;
+const _23_ = /(?:[01]\d|2[0-3])/;
+const _59_ = /[0-5]\d/;
+
+const YMD = newRegExp`
+	\d\d\d\d-
+	(?:
+		(?:0[13578]|1[02])-${_31_}
+	|
+		(?:0[469]|11)-${_30_}
+	|
+		02-${_29_}
+	)`;
+
+const HMS_ = newRegExp`
+	${_23_}:${_59_}:${_59_}(?:\.\d+)?`;
+
+export const OFFSET = /(?:Z|[+-]\d\d:\d\d)$/;
+
+export const OFFSET_DATETIME = newRegExp`
+	^
+	${YMD}
+	[T ]
+	${HMS_}
+	${OFFSET}`;
+
+export const LOCAL_DATETIME = newRegExp`
+	^
+	${YMD}
+	[T ]
+	${HMS_}
+	$`;
+
+export const LOCAL_DATE = newRegExp`
+	^
+	${YMD}
+	$`;
+
+export const LOCAL_TIME = newRegExp`
+	^
+	${HMS_}
+	$`;
 
 const literal_cache = new WeakMap;
 const value_cache = new WeakMap;
@@ -23,20 +70,20 @@ class Datetime extends Date {
 
 export class OffsetDateTime extends Datetime {
 	constructor (literal :string) {
-		RE.OFFSET_DATETIME.test(literal)
-		|| iterator.throws(SyntaxError('Invalid Offset Date-Time '+literal+' at '+iterator.where()));
+		OFFSET_DATETIME.test(literal)
+		|| $iterator$.throws(SyntaxError('Invalid Offset Date-Time '+literal+' at '+$iterator$.where()));
 		super(literal.replace(' ', 'T'), literal);
 	}
 	get '.' () {
 		const index :number = literal_cache.get(this).indexOf('.')+1;
-		return index ? literal_cache.get(this).slice(index).replace(RE.OFFSET, '') : '';
+		return index ? literal_cache.get(this).slice(index).replace(OFFSET, '') : '';
 	}
 }
 
 export class LocalDateTime extends Datetime {
 	constructor (literal :string) {
-		RE.LOCAL_DATETIME.test(literal)
-		|| iterator.throws(SyntaxError('Invalid Local Date-Time '+literal+' at '+iterator.where()));
+		LOCAL_DATETIME.test(literal)
+		|| $iterator$.throws(SyntaxError('Invalid Local Date-Time '+literal+' at '+$iterator$.where()));
 		super(literal.replace(' ', 'T')+'Z', literal);
 	}
 	get '.' () {
@@ -47,8 +94,8 @@ export class LocalDateTime extends Datetime {
 
 export class LocalDate extends Datetime {
 	constructor (literal :string) {
-		RE.LOCAL_DATE.test(literal)
-		|| iterator.throws(SyntaxError('Invalid Local Date '+literal+' at '+iterator.where()));
+		LOCAL_DATE.test(literal)
+		|| $iterator$.throws(SyntaxError('Invalid Local Date '+literal+' at '+$iterator$.where()));
 		super(literal+'T00:00:00.000Z', literal);
 	}
 	get '.' () { return ''; }
@@ -56,8 +103,8 @@ export class LocalDate extends Datetime {
 
 export class LocalTime extends Datetime {
 	constructor (literal :string) {
-		RE.LOCAL_TIME.test(literal)
-		|| iterator.throws(SyntaxError('Invalid Local Time '+literal+' at '+iterator.where()));
+		LOCAL_TIME.test(literal)
+		|| $iterator$.throws(SyntaxError('Invalid Local Time '+literal+' at '+$iterator$.where()));
 		super('1970-01-01T'+literal+'Z', literal);
 	}
 	get '.' () {

@@ -1,6 +1,6 @@
 import SyntaxError from '.SyntaxError';
 import Error from '.Error';
-//import * as options from './options';
+//import * as $options$ from './$options$';
 
 
 const NONE :string[] = [];
@@ -73,7 +73,7 @@ export function throws (error :FriendlyError) :never {
 		error.lineIndex = lineIndex;
 		error.lineNumber = lineIndex+1;
 		//done();
-		//options.clear();
+		//$options$.clear();
 	}
 	throw error;
 }
