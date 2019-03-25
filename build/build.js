@@ -18,10 +18,7 @@ module.exports = require('../test/test.js')(async ({ build, get, map, ful }) => 
 		},
 	});
 	
-	await map(
-		['docs/English/README.md', ReadMe(['English', '简体中文']), 'dist/NPM/README.md'],
-		['src/d.ts', 'dist/TSD/j-toml.d.ts'],
-	);
+	await map('docs/English/README.md', ReadMe(['English', '简体中文']), 'dist/NPM/README.md');
 	
 });
 

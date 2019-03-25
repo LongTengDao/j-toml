@@ -1,5 +1,5 @@
 declare module '*?text' {
-	const text = '';
+	const text :string;
 	export default text;
 }
 
