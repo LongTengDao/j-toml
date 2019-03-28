@@ -2,8 +2,8 @@ import RangeError from '.RangeError';
 import parseInt from '.parseInt';
 import fromCodePoint from '.String.fromCodePoint';
 
-import * as $iterator$ from '../$iterator$';
-import * as $options$ from '../$options$';
+import * as iterator$0 from '../iterator$0';
+import * as options$0 from '../options$0';
 
 const ESCAPE_ALIAS = { '\\': '\\', '"': '"', b: '\b', t: '\t', n: '\n', f: '\f', r: '\r' };
 
@@ -16,17 +16,17 @@ const unEscapeSingleLine = (match :string, p1 :__btnfr, p2 :string | undefined, 
 	if ( p1 ) { return ESCAPE_ALIAS[p1]; }
 	const codePoint :number = parseInt(p2 || <string>p3, 16);
 	( 0xD7FF<codePoint && codePoint<0xE000 || 0x10FFFF<codePoint )
-	&& $iterator$.throws(RangeError('Invalid Unicode Scalar '+( p2 ? '\\u'+p2 : '\\U'+p3 )+' at '+$iterator$.where()));
+	&& iterator$0.throws(RangeError('Invalid Unicode Scalar '+( p2 ? '\\u'+p2 : '\\U'+p3 )+' at '+iterator$0.where()));
 	return fromCodePoint(codePoint);
 };
 
 const unEscapeMultiLine = (match :string, p1 :'\n' | undefined, p2 :__btnfr, p3 :string | undefined, p4 :string | undefined) :string => {
-	if ( match==='\n' ) { return $options$.useWhatToJoinMultiLineString; }
+	if ( match==='\n' ) { return options$0.useWhatToJoinMultiLineString; }
 	if ( p1 ) { return ''; }
 	if ( p2 ) { return ESCAPE_ALIAS[p2]; }
 	const codePoint :number = parseInt(p3 || <string>p4, 16);
 	( 0xD7FF<codePoint && codePoint<0xE000 || 0x10FFFF<codePoint )
-	&& $iterator$.throws(RangeError('Invalid Unicode Scalar '+( p3 ? '\\u'+p3 : '\\U'+p4 )+' at '+$iterator$.where()));
+	&& iterator$0.throws(RangeError('Invalid Unicode Scalar '+( p3 ? '\\u'+p3 : '\\U'+p4 )+' at '+iterator$0.where()));
 	return fromCodePoint(codePoint);
 };
 
