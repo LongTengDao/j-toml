@@ -1,12 +1,12 @@
 ﻿'use strict';
 
-const version = '0.5.81';
+const version = '0.5.82';
 
 const isBuffer = Buffer.isBuffer;
 
 const from = Buffer.from;
 
-//import * as $options$ from './$options$';
+//import * as options\$0 from './options\$0';
 const NONE = [];
 let sourceLines = NONE;
 let lastLineIndex = -1;
@@ -62,7 +62,7 @@ function throws(error) {
         error.lineIndex = lineIndex;
         error.lineNumber = lineIndex + 1;
         //done();
-        //$options$.clear();
+        //options\$0.clear();
     }
     throw error;
 }
@@ -428,7 +428,7 @@ const Float = (literal) => {
             return number;
         }
     }
-    //if ( $options$.sFloat ) {
+    //if ( options\$0.sFloat ) {
     //	if ( literal==='inf' || literal==='+inf' ) { return Infinity; }
     //	if ( literal==='-inf' ) { return -Infinity; }
     //	if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) { return NaN; }
@@ -1166,6 +1166,7 @@ function equalInlineArray(table, finalKey, lineRest) {
 
 const BOM = /^\uFEFF/;
 const NON_SCALAR = /[\uD800-\uDFFF]/u; // \u{10FFFF}- > \uFFFD
+const REGEXP = /^/;
 function parse(sourceContent, specificationVersion, multiLineJoiner, useBigInt = true, xOptions = null) {
     could();
     if (isBuffer(sourceContent)) {
@@ -1179,23 +1180,28 @@ function parse(sourceContent, specificationVersion, multiLineJoiner, useBigInt =
     if (typeof sourceContent !== 'string') {
         throw TypeError('TOML.parse(sourceContent)');
     }
-    if (NON_SCALAR.test(sourceContent)) {
-        throw Error('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any uncoupled UCS-4 character code.');
-    }
     try {
-        use(specificationVersion, multiLineJoiner, useBigInt, xOptions);
-        todo(sourceContent);
+        if (NON_SCALAR.test(sourceContent)) {
+            throw Error('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any uncoupled UCS-4 character code.');
+        }
         try {
-            const rootTable = Root();
-            process();
-            return rootTable;
+            use(specificationVersion, multiLineJoiner, useBigInt, xOptions);
+            todo(sourceContent);
+            try {
+                const rootTable = Root();
+                process();
+                return rootTable;
+            }
+            finally {
+                done();
+            }
         }
         finally {
-            done();
+            clear();
         }
     }
     finally {
-        clear();
+        REGEXP.test('');
     }
 }
 
