@@ -6,7 +6,7 @@ import * as iterator$0 from '../iterator$0';
 import * as options$0 from '../options$0';
 import Root from '../parse/level-loop';
 
-const BOM = /^\uFEFF/;
+const BOM = '\uFEFF';
 const NON_SCALAR = /[\uD800-\uDFFF]/u;// \u{10FFFF}- > \uFFFD
 const REGEXP = /^/;
 
@@ -22,7 +22,7 @@ export default function parse (
 		const buffer :Buffer = sourceContent;
 		sourceContent = buffer.toString();
 		if ( !from(buffer).equals(buffer) ) { throw Error('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any unknown code point.'); }
-		sourceContent = sourceContent.replace(BOM, '');
+		if ( sourceContent.startsWith(BOM) ) { sourceContent = sourceContent.slice(1); }
 	}
 	if ( typeof sourceContent!=='string' ) { throw TypeError('TOML.parse(sourceContent)'); }
 	try {
