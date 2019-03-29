@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.82';
+const version = '0.5.83';
 
 const isBuffer = Buffer.isBuffer;
 
@@ -1164,7 +1164,7 @@ function equalInlineArray(table, finalKey, lineRest) {
     }(lineRest);
 }
 
-const BOM = /^\uFEFF/;
+const BOM = '\uFEFF';
 const NON_SCALAR = /[\uD800-\uDFFF]/u; // \u{10FFFF}- > \uFFFD
 const REGEXP = /^/;
 function parse(sourceContent, specificationVersion, multiLineJoiner, useBigInt = true, xOptions = null) {
@@ -1175,7 +1175,9 @@ function parse(sourceContent, specificationVersion, multiLineJoiner, useBigInt =
         if (!from(buffer).equals(buffer)) {
             throw Error('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any unknown code point.');
         }
-        sourceContent = sourceContent.replace(BOM, '');
+        if (sourceContent.startsWith(BOM)) {
+            sourceContent = sourceContent.slice(1);
+        }
     }
     if (typeof sourceContent !== 'string') {
         throw TypeError('TOML.parse(sourceContent)');
