@@ -3,24 +3,24 @@ import Error from '.Error';
 import isArray from '.Array.isArray';
 import WeakSet from '.WeakSet';
 import * as iterator$0 from '../iterator$0';
-import { isTable } from '../types/Table';
+import { Table, isTable } from '../types/Table';
 import { BasicString, MultiLineBasicString } from '../types/String';
 import * as options$0 from '../options$0';
 import * as regexps$0 from '../regexps$0';
 
 export const sealedInline = new WeakSet;
 const openTables = new WeakSet;
-const openedTables = new WeakSet;
+const reopenedTables = new WeakSet;
 
 const KEYS = /[\w-]+|"(?:[^\\"]+|\\[^])*"|'[^']*'/g;
 
-export function appendTable (table :object, key_key :string, asArrayItem :boolean, tag :string) :object {
+export function appendTable (table :Table, key_key :string, asArrayItem :boolean, tag :string) :Table {
 	const leadingKeys :string[] = parseKeys(key_key);
-	const finalKey :string = leadingKeys.pop();
+	const finalKey :string = <string>leadingKeys.pop();
 	table = prepareTable(table, leadingKeys);
-	let lastTable :object;
+	let lastTable :Table;
 	if ( asArrayItem ) {
-		let arrayOfTables :object[];
+		let arrayOfTables :Table[];
 		if ( finalKey in table ) { sealedInline.has(arrayOfTables = table[finalKey]) && iterator$0.throws(Error('Trying to push Table to non-ArrayOfTables value at '+iterator$0.where())); }
 		else { arrayOfTables = table[finalKey] = []; }
 		tag && options$0.collect({ table, key: finalKey, array: arrayOfTables, index: arrayOfTables.length, tag });
@@ -28,12 +28,12 @@ export function appendTable (table :object, key_key :string, asArrayItem :boolea
 	}
 	else {
 		if ( finalKey in table ) {
-			options$0.openable && openTables.has(lastTable = table[finalKey]) && !openedTables.has(lastTable) || iterator$0.throws(Error('Duplicate Table definition at '+iterator$0.where()));
+			if ( options$0.unreopenable || !openTables.has(lastTable = table[finalKey]) || reopenedTables.has(lastTable) ) { throw iterator$0.throws(Error('Duplicate Table definition at '+iterator$0.where())); }
 			openTables.delete(lastTable);
 		}
 		else {
 			table[finalKey] = lastTable = new options$0.TableDepends;
-			options$0.openable && openedTables.add(lastTable);
+			options$0.unreopenable || reopenedTables.add(lastTable);
 		}
 		tag && options$0.collect({ table, key: finalKey, tag });
 	}
@@ -41,7 +41,7 @@ export function appendTable (table :object, key_key :string, asArrayItem :boolea
 }
 
 export function parseKeys (key_key :string) :string[] {
-	const keys :RegExpMatchArray = key_key.match(KEYS);
+	const keys :RegExpMatchArray = <RegExpMatchArray>key_key.match(KEYS);
 	for ( let index :number = keys.length; index--; ) {
 		const key :string = keys[index];
 		if ( key.startsWith('\'') ) { keys[index] = key.slice(1, -1); }
@@ -55,7 +55,7 @@ export function parseKeys (key_key :string) :string[] {
 	return keys;
 }
 
-function prepareTable (table :object, keys :string[]) :object {
+function prepareTable (table :Table, keys :string[]) :Table {
 	const { length } :string[] = keys;
 	let index :number = 0;
 	while ( index<length ) {
@@ -81,7 +81,7 @@ function prepareTable (table :object, keys :string[]) :object {
 	return table;
 }
 
-export function prepareInlineTable (table :object, keys :string[]) :object {
+export function prepareInlineTable (table :Table, keys :string[]) :Table {
 	const { length } :string[] = keys;
 	let index :number = 0;
 	while ( index<length ) {
@@ -100,8 +100,8 @@ export function prepareInlineTable (table :object, keys :string[]) :object {
 	return table;
 }
 
-export function assignLiteralString (table :object, finalKey :string, literal :string) :string {
-	let $ :RegExpExecArray;
+export function assignLiteralString (table :Table, finalKey :string, literal :string) :string {
+	let $ :RegExpExecArray | null;
 	if ( literal.charAt(1)!=='\'' || literal.charAt(2)!=='\'' ) {
 		$ = regexps$0.LITERAL_STRING.exec(literal) || iterator$0.throws(SyntaxError(iterator$0.where()));
 		table[finalKey] = checkLiteralString($[1]);
@@ -136,7 +136,7 @@ function checkLiteralString (literal :string) :string {
 	return literal;
 }
 
-export function assignBasicString (table :object, finalKey :string, literal :string) :string {
+export function assignBasicString (table :Table, finalKey :string, literal :string) :string {
 	if ( literal.charAt(1)!=='"' || literal.charAt(2)!=='"' ) {
 		const $ = regexps$0.BASIC_STRING_exec(literal);
 		table[finalKey] = BasicString($[1]);

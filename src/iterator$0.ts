@@ -8,11 +8,15 @@ let sourceLines :string[] = NONE;
 let lastLineIndex :number = -1;
 let lineIndex :number = -1;
 
+type noop = {
+	(lineRest :string) :string
+	previous? :noop
+};
 function noop (lineRest :string) :string { return ''; }
 noop.previous = noop;
 
 export let stacks_length = 0;
-let last :typeof noop = noop;
+let last :noop = noop;
 
 
 export function could () :void {
@@ -48,20 +52,20 @@ export function done () :void {
 }
 
 
-export function stacks_pop () :typeof noop {
-	const item :typeof noop = last;
-	last = last.previous;
+export function stacks_pop () :noop {
+	const item :noop = last;
+	last = <noop>last.previous;
 	--stacks_length;
 	return item;
 }
 
-export function stacks_push (item :typeof noop) :void {
+export function stacks_push (item :noop) :void {
 	item.previous = last;
 	last = item;
 	++stacks_length;
 }
 
-export function stacks_insertBeforeLast (item :typeof noop) {
+export function stacks_insertBeforeLast (item :noop) {
 	item.previous = last.previous;
 	last.previous = item;
 	++stacks_length;

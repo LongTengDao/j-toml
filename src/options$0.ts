@@ -3,7 +3,6 @@ import RangeError from '.RangeError';
 import TypeError from '.TypeError';
 import Error from '.Error';
 import isSafeInteger from '.Number.isSafeInteger';
-import Proxy from '.Proxy';
 import WeakMap from '.WeakMap';
 import { Table, OrderedTable } from './types/Table';
 import { BigIntInteger, NumberInteger, DependInteger } from './types/Integer';
@@ -12,56 +11,91 @@ import * as iterator$0 from './iterator$0';
 /* options */
 
 export let useWhatToJoinMultiLineString :string;
-export let IntegerDepends :Function, IntegerMin :number, IntegerMax :number;
+export let IntegerDepends :typeof BigIntInteger | typeof NumberInteger | typeof DependInteger;
+export let IntegerMin :number;
+export let IntegerMax :number;
 
 /* xOptions */
 
-type as = (array :any[]) => any[];
-
+export type xOptions = null | {
+	order? :boolean,
+	longer? :boolean,
+	null? :boolean,
+	multi? :boolean,
+	ins? :boolean,
+	close? :boolean,
+	mix? :boolean,
+	tag? :null,
+} | {
+	order? :boolean,
+	longer? :boolean,
+	null? :boolean,
+	multi? :boolean,
+	ins? :boolean,
+	close? :boolean,
+	mix :true,
+	tag :tag,
+};
 export let moreDatetime :boolean;
 export let ctrl7F :boolean;
 export let nonEmptyKey :boolean;
 export let xob :boolean;
 export let sFloat :boolean;
-export let TableDepends :Table;
-export let openable :boolean;
+export let TableDepends :typeof Table | typeof OrderedTable;
+export let unreopenable :boolean;
 export let allowLonger :boolean;
 export let enableNull :boolean;
 export let allowInlineTableMultiLineAndTrailingCommaEvenNoComma :boolean;
 export let enableInterpolationString :boolean;
-export let asNulls :as, asStrings :as, asTables :as, asArrays :as, asBooleans :as, asFloats :as, asIntegers :as;
-export let asOffsetDateTimes :as, asLocalDateTimes :as, asLocalDates :as, asLocalTimes :as;
-let processor :Function | null;
+type as = (array :any[]) => any[];
+export let
+	asNulls :as,
+	asStrings :as,
+	asTables :as,
+	asArrays :as,
+	asBooleans :as,
+	asFloats :as,
+	asIntegers :as,
+	asOffsetDateTimes :as,
+	asLocalDateTimes :as,
+	asLocalDates :as,
+	asLocalTimes :as;
+const arrayTypes :WeakMap<any[], as> = new WeakMap;
+let As :( () => as ) | null = () => function as (array :any[]) :any[] {
+	if ( arrayTypes.has(array) ) {
+		arrayTypes.get(array)===as
+		|| iterator$0.throws(TypeError('Types in array must be same. Check '+iterator$0.where()));
+	}
+	else { arrayTypes.set(array, as); }
+	return array;
+};
+export const
+	asInlineArrayOfNulls :as = As(),
+	asInlineArrayOfStrings :as = As(),
+	asInlineArrayOfTables :as = As(),
+	asInlineArrayOfArrays :as = As(),
+	asInlineArrayOfBooleans :as = As(),
+	asInlineArrayOfFloats :as = As(),
+	asInlineArrayOfIntegers :as = As(),
+	asInlineArrayOfOffsetDateTimes :as = As(),
+	asInlineArrayOfLocalDateTimes :as = As(),
+	asInlineArrayOfLocalDates :as = As(),
+	asInlineArrayOfLocalTimes :as = As();
+As = null;
 
 /* xOptions.mix */
 
-export const unType = (array :any[]) :any[] => array;
-export const {
-	asInlineArrayOfNulls,
-	asInlineArrayOfStrings,
-	asInlineArrayOfTables,
-	asInlineArrayOfArrays,
-	asInlineArrayOfBooleans,
-	asInlineArrayOfFloats,
-	asInlineArrayOfIntegers,
-	asInlineArrayOfOffsetDateTimes,
-	asInlineArrayOfLocalDateTimes,
-	asInlineArrayOfLocalDates,
-	asInlineArrayOfLocalTimes,
-} = <{ [each :string] :as }><object>new Proxy(new WeakMap, {
-	get: (arrayTypes) => function typify (array :any[]) :any[] {
-		if ( arrayTypes.has(array) ) {
-			arrayTypes.get(array)===typify
-			|| iterator$0.throws(TypeError('Types in array must be same. Check '+iterator$0.where()));
-		}
-		else { arrayTypes.set(array, typify); }
-		return array;
-	}
-});
+export const unType :as = (array :any[]) :any[] => array;
 
-/* xOptions.new */
+/* xOptions.tag */
 
-type each = { table :object, key :string, tag :string } | { array :any[], index :number, tag :string } | { table :object, key :string, array :object[], index :number, tag :string };
+let processor :tag | null;
+
+type tag = (each :each) => any;
+type each =
+	{ table :Table, key :string, tag :string } |
+	{ array :any[], index :number, tag :string } |
+	{ table :Table, key :string, array :Table[], index :number, tag :string };
 let collection :each[] = [];
 function collect_on (each :each) :void { collection.push(each); }
 function collect_off (each :each) :never { throw iterator$0.throws(SyntaxError(iterator$0.where())); }
@@ -70,7 +104,7 @@ export function process () {
 	let index = collection.length;
 	if ( index ) {
 		iterator$0.done();
-		const process = <Function>processor;
+		const process = <tag>processor;
 		const queue = collection;
 		processor = null;
 		collection = [];
@@ -85,14 +119,14 @@ export function clear () :void {
 	collection.length = 0;
 }
 
-export function use (specificationVersion, multiLineJoiner :string, useBigInt :boolean | number, xOptions) :void {
+export function use (specificationVersion :unknown, multiLineJoiner :unknown, useBigInt :unknown, xOptions :Exclude<any, undefined>) :void {
 	if ( specificationVersion!==0.5 && specificationVersion!==0.4 ) { throw Error('TOML.parse(,specificationVersion)'); }
-	if ( typeof <unknown>multiLineJoiner!=='string' ) { throw TypeError('TOML.parse(,,multiLineJoiner)'); }
+	if ( typeof multiLineJoiner!=='string' ) { throw TypeError('TOML.parse(,,multiLineJoiner)'); }
 	if ( useBigInt===true ) { IntegerDepends = BigIntInteger; }
 	else if ( useBigInt===false ) { IntegerDepends = NumberInteger; }
 	else {
 		if ( typeof useBigInt!=='number' ) { throw TypeError('TOML.parse(,,,useBigInt)'); }
-		if ( !isSafeInteger(useBigInt) ) { throw RangeError('TOML.parse(...useBigInt)'); }
+		if ( !isSafeInteger(useBigInt) ) { throw RangeError('TOML.parse(,,,useBigInt)'); }
 		IntegerDepends = DependInteger;
 		if ( useBigInt>=0 ) {
 			IntegerMax = useBigInt;
@@ -105,11 +139,11 @@ export function use (specificationVersion, multiLineJoiner :string, useBigInt :b
 	}
 	useWhatToJoinMultiLineString = multiLineJoiner;
 	moreDatetime = ctrl7F = xob = sFloat = specificationVersion===0.5;
-	nonEmptyKey = openable = specificationVersion===0.4;
+	nonEmptyKey = specificationVersion===0.4;
 	let typify :boolean;
 	if ( xOptions===null ) {
 		TableDepends = Table;
-		allowLonger = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = enableInterpolationString = false;
+		allowLonger = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = enableInterpolationString = unreopenable = false;
 		processor = null;
 		typify = true;
 	}
@@ -119,8 +153,9 @@ export function use (specificationVersion, multiLineJoiner :string, useBigInt :b
 		enableNull = !!xOptions.null;
 		allowInlineTableMultiLineAndTrailingCommaEvenNoComma = !!xOptions.multi;
 		enableInterpolationString = !!xOptions.ins;
+		unreopenable = !!xOptions.close;
 		typify = !xOptions.mix;
-		processor = xOptions.new || null;
+		processor = xOptions.tag || null;
 		if ( processor ) {
 			if ( typeof processor!=='function' ) { throw TypeError('TOML.parse(,,,,xOptions.tag)'); }
 			if ( typify ) { throw Error('TOML.parse(,,,,xOptions) xOptions.tag needs xOptions.mix to be true'); }

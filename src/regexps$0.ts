@@ -41,19 +41,19 @@ export const SYM_WHITESPACE = newRegExp`
 	${Whitespace}*`;
 
 
-const Tag = /[^()\\"'`\r\n\u2028\u2029]+/;
+const Tag = /[^<>\\"'`\r\n\u2028\u2029]+/;
 
 export const KEY_VALUE_PAIR = newRegExp`
 	^
 	${Whitespace}*
 	(?:
-		\((${Tag})\)
+		<(${Tag})>
 		${Whitespace}*
 	)?
 	=
 	${Whitespace}*
 	(?:
-		\((${Tag})\)
+		<(${Tag})>
 		${Whitespace}*
 	)?
 	(
@@ -64,14 +64,14 @@ export const KEY_VALUE_PAIR = newRegExp`
 
 export const _VALUE_PAIR = newRegExp`
 	^
-	\((${Tag})\)
+	<(${Tag})>
 	${Whitespace}*
 	([^ \t#][^]*)
 	$`;
 
 export const TAG_REST = newRegExp`
 	^
-	\((${Tag})\)
+	<(${Tag})>
 	${Whitespace}*
 	([^]*)
 	$`;
@@ -122,12 +122,12 @@ export function TABLE_DEFINITION_exec_groups (_ :string) :{ $_asArrayItem$$ :boo
 	const keys :string = getKeys(_);
 	_ = _.slice(keys.length).replace(PRE_WHITESPACE, '');
 	let tagInner :string = '';
-	if ( _.startsWith('(') ) { ( { 1: tagInner, 2: _ } = TAG_REST.exec(_) || iterator$0.throws(SyntaxError(iterator$0.where())) ); }
+	if ( _.startsWith('<') ) { ( { 1: tagInner, 2: _ } = TAG_REST.exec(_) || iterator$0.throws(SyntaxError(iterator$0.where())) ); }
 	_.startsWith(']') || iterator$0.throws(SyntaxError(iterator$0.where()));
 	const $$asArrayItem$_ :boolean = _.charAt(1)===']';
 	_ = _.slice($$asArrayItem$_ ? 2 : 1).replace(PRE_WHITESPACE, '');
 	let tagOuter :string = '';
-	if ( _.startsWith('(') ) { ( { 1: tagOuter, 2: _ } = TAG_REST.exec(_) || iterator$0.throws(SyntaxError(iterator$0.where())) ); }
+	if ( _.startsWith('<') ) { ( { 1: tagOuter, 2: _ } = TAG_REST.exec(_) || iterator$0.throws(SyntaxError(iterator$0.where())) ); }
 	_==='' || _.startsWith('#') || iterator$0.throws(SyntaxError(iterator$0.where()));
 	return { $_asArrayItem$$, keys, tagInner, $$asArrayItem$_, tagOuter };
 }

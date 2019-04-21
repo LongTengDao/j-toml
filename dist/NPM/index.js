@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.83';
+const version = '0.5.84';
 
 const isBuffer = Buffer.isBuffer;
 
@@ -89,29 +89,25 @@ const deleteProperty = Reflect.deleteProperty;
 const ownKeys = Reflect.ownKeys;
 
 const ownKeysKeepers = new WeakMap;
-const handlers = create(null, {
-    defineProperty: {
-        value(target, key, descriptor) {
-            if (defineProperty(target, key, descriptor)) {
-                ownKeysKeepers.get(target).add(key);
-                return true;
-            }
-            return false;
+const handlers = 
+/*#__PURE__*/
+Object.assign(create(null), {
+    defineProperty(target, key, descriptor) {
+        if (defineProperty(target, key, descriptor)) {
+            ownKeysKeepers.get(target).add(key);
+            return true;
         }
+        return false;
     },
-    deleteProperty: {
-        value(target, key) {
-            if (deleteProperty(target, key)) {
-                ownKeysKeepers.get(target).delete(key);
-                return true;
-            }
-            return false;
+    deleteProperty(target, key) {
+        if (deleteProperty(target, key)) {
+            ownKeysKeepers.get(target).delete(key);
+            return true;
         }
+        return false;
     },
-    ownKeys: {
-        value(target) {
-            return [...ownKeysKeepers.get(target)];
-        }
+    ownKeys(target) {
+        return [...ownKeysKeepers.get(target)];
     },
 });
 const orderify = (object) => {
@@ -121,10 +117,10 @@ const orderify = (object) => {
 
 /*¡ @ltd/j-orderify */
 
-function Table() { }
+const Table = function Table() { };
 const OrderedTable = function Table() { return orderify(this); };
 OrderedTable.prototype = Table.prototype = create(null);
-const isTable = (value) => value instanceof Table;
+function isTable(value) { return value instanceof Table; }
 
 const INTEGER = /^[-+]?(?:0|[1-9]\d*(?:_\d+)*)$/;
 const XOB_INTEGER = /^\+?0(?:x[0-9A-Fa-f]+(?:_[0-9A-Fa-f]+)*|o[0-7]+(?:_[0-7]+)*|b[01]+(?:_[01]+)*)$/;
@@ -161,35 +157,38 @@ const DependInteger = (literal) => {
 
 /* options */
 let useWhatToJoinMultiLineString;
-let IntegerDepends, IntegerMin, IntegerMax;
+let IntegerDepends;
+let IntegerMin;
+let IntegerMax;
 let moreDatetime;
 let ctrl7F;
 let nonEmptyKey;
 let xob;
 let sFloat;
 let TableDepends;
-let openable;
+let unreopenable;
 let allowLonger;
 let enableNull;
 let allowInlineTableMultiLineAndTrailingCommaEvenNoComma;
 let enableInterpolationString;
-let asNulls, asStrings, asTables, asArrays, asBooleans, asFloats, asIntegers;
-let asOffsetDateTimes, asLocalDateTimes, asLocalDates, asLocalTimes;
-let processor;
+let asNulls, asStrings, asTables, asArrays, asBooleans, asFloats, asIntegers, asOffsetDateTimes, asLocalDateTimes, asLocalDates, asLocalTimes;
+const arrayTypes = new WeakMap;
+let As = () => function as(array) {
+    if (arrayTypes.has(array)) {
+        arrayTypes.get(array) === as
+            || throws(TypeError('Types in array must be same. Check ' + where()));
+    }
+    else {
+        arrayTypes.set(array, as);
+    }
+    return array;
+};
+const asInlineArrayOfNulls = As(), asInlineArrayOfStrings = As(), asInlineArrayOfTables = As(), asInlineArrayOfArrays = As(), asInlineArrayOfBooleans = As(), asInlineArrayOfFloats = As(), asInlineArrayOfIntegers = As(), asInlineArrayOfOffsetDateTimes = As(), asInlineArrayOfLocalDateTimes = As(), asInlineArrayOfLocalDates = As(), asInlineArrayOfLocalTimes = As();
+As = null;
 /* xOptions.mix */
 const unType = (array) => array;
-const { asInlineArrayOfNulls, asInlineArrayOfStrings, asInlineArrayOfTables, asInlineArrayOfArrays, asInlineArrayOfBooleans, asInlineArrayOfFloats, asInlineArrayOfIntegers, asInlineArrayOfOffsetDateTimes, asInlineArrayOfLocalDateTimes, asInlineArrayOfLocalDates, asInlineArrayOfLocalTimes, } = new Proxy(new WeakMap, {
-    get: (arrayTypes) => function typify(array) {
-        if (arrayTypes.has(array)) {
-            arrayTypes.get(array) === typify
-                || throws(TypeError('Types in array must be same. Check ' + where()));
-        }
-        else {
-            arrayTypes.set(array, typify);
-        }
-        return array;
-    }
-});
+/* xOptions.tag */
+let processor;
 let collection = [];
 function collect_on(each) { collection.push(each); }
 function collect_off(each) { throw throws(SyntaxError(where())); }
@@ -230,7 +229,7 @@ function use(specificationVersion, multiLineJoiner, useBigInt, xOptions) {
             throw TypeError('TOML.parse(,,,useBigInt)');
         }
         if (!isSafeInteger(useBigInt)) {
-            throw RangeError('TOML.parse(...useBigInt)');
+            throw RangeError('TOML.parse(,,,useBigInt)');
         }
         IntegerDepends = DependInteger;
         if (useBigInt >= 0) {
@@ -244,11 +243,11 @@ function use(specificationVersion, multiLineJoiner, useBigInt, xOptions) {
     }
     useWhatToJoinMultiLineString = multiLineJoiner;
     moreDatetime = ctrl7F = xob = sFloat = specificationVersion === 0.5;
-    nonEmptyKey = openable = specificationVersion === 0.4;
+    nonEmptyKey = specificationVersion === 0.4;
     let typify;
     if (xOptions === null) {
         TableDepends = Table;
-        allowLonger = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = enableInterpolationString = false;
+        allowLonger = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = enableInterpolationString = unreopenable = false;
         processor = null;
         typify = true;
     }
@@ -258,8 +257,9 @@ function use(specificationVersion, multiLineJoiner, useBigInt, xOptions) {
         enableNull = !!xOptions.null;
         allowInlineTableMultiLineAndTrailingCommaEvenNoComma = !!xOptions.multi;
         enableInterpolationString = !!xOptions.ins;
+        unreopenable = !!xOptions.close;
         typify = !xOptions.mix;
-        processor = xOptions.new || null;
+        processor = xOptions.tag || null;
         if (processor) {
             if (typeof processor !== 'function') {
                 throw TypeError('TOML.parse(,,,,xOptions.tag)');
@@ -291,6 +291,10 @@ function use(specificationVersion, multiLineJoiner, useBigInt, xOptions) {
     }
 }
 
+const Infinity = 1/0;
+
+const NaN = 0/0;
+
 /*!
  * 模块名称：@ltd/j-regexp
  * 模块功能：可读性更好的正则表达式创建方式。
@@ -309,7 +313,7 @@ function Source(raw, substitutions) {
     var source = raw[0];
     for (var length = substitutions.length, index = 0; index < length;) {
         var substitution = substitutions[index];
-        source += (typeof substitution === 'string' ? substitution : substitution.source) + raw[++index];
+        source += (substitution instanceof RegExp ? substitution.source : substitution) + raw[++index];
     }
     return source.replace(NT, '');
 }
@@ -464,18 +468,18 @@ const SYM_WHITESPACE = newRegExp `
 	^
 	[^]
 	${Whitespace}*`;
-const Tag = /[^()\\"'`\r\n\u2028\u2029]+/;
+const Tag = /[^<>\\"'`\r\n\u2028\u2029]+/;
 const KEY_VALUE_PAIR = newRegExp `
 	^
 	${Whitespace}*
 	(?:
-		\((${Tag})\)
+		<(${Tag})>
 		${Whitespace}*
 	)?
 	=
 	${Whitespace}*
 	(?:
-		\((${Tag})\)
+		<(${Tag})>
 		${Whitespace}*
 	)?
 	(
@@ -485,13 +489,13 @@ const KEY_VALUE_PAIR = newRegExp `
 	$`;
 const _VALUE_PAIR = newRegExp `
 	^
-	\((${Tag})\)
+	<(${Tag})>
 	${Whitespace}*
 	([^ \t#][^]*)
 	$`;
 const TAG_REST = newRegExp `
 	^
-	\((${Tag})\)
+	<(${Tag})>
 	${Whitespace}*
 	([^]*)
 	$`;
@@ -540,14 +544,14 @@ function TABLE_DEFINITION_exec_groups(_) {
     const keys = getKeys(_);
     _ = _.slice(keys.length).replace(PRE_WHITESPACE, '');
     let tagInner = '';
-    if (_.startsWith('(')) {
+    if (_.startsWith('<')) {
         ({ 1: tagInner, 2: _ } = TAG_REST.exec(_) || throws(SyntaxError(where())));
     }
     _.startsWith(']') || throws(SyntaxError(where()));
     const $$asArrayItem$_ = _.charAt(1) === ']';
     _ = _.slice($$asArrayItem$_ ? 2 : 1).replace(PRE_WHITESPACE, '');
     let tagOuter = '';
-    if (_.startsWith('(')) {
+    if (_.startsWith('<')) {
         ({ 1: tagOuter, 2: _ } = TAG_REST.exec(_) || throws(SyntaxError(where())));
     }
     _ === '' || _.startsWith('#') || throws(SyntaxError(where()));
@@ -625,7 +629,7 @@ const MultiLineBasicString = (literal) => literal.replace(ESCAPED_IN_MULTI_LINE,
 
 const sealedInline = new WeakSet;
 const openTables = new WeakSet;
-const openedTables = new WeakSet;
+const reopenedTables = new WeakSet;
 const KEYS = /[\w-]+|"(?:[^\\"]+|\\[^])*"|'[^']*'/g;
 function appendTable(table, key_key, asArrayItem, tag) {
     const leadingKeys = parseKeys(key_key);
@@ -645,12 +649,14 @@ function appendTable(table, key_key, asArrayItem, tag) {
     }
     else {
         if (finalKey in table) {
-            openable && openTables.has(lastTable = table[finalKey]) && !openedTables.has(lastTable) || throws(Error('Duplicate Table definition at ' + where()));
+            if (unreopenable || !openTables.has(lastTable = table[finalKey]) || reopenedTables.has(lastTable)) {
+                throw throws(Error('Duplicate Table definition at ' + where()));
+            }
             openTables.delete(lastTable);
         }
         else {
             table[finalKey] = lastTable = new TableDepends;
-            openable && openedTables.add(lastTable);
+            unreopenable || reopenedTables.add(lastTable);
         }
         tag && collect({ table, key: finalKey, tag });
     }
@@ -834,21 +840,21 @@ function Root() {
     }
     return rootTable;
 }
-function assign(lastInlineTable_array, lineRest) {
+function assign(lastInlineTable, lineRest) {
     let left;
     let tagLeft;
     let tagRight;
     ({ left, tagLeft, tagRight, right: lineRest } = KEY_VALUE_PAIR_exec_groups(lineRest));
     const leadingKeys = parseKeys(left);
     const finalKey = leadingKeys.pop();
-    const table = prepareInlineTable(lastInlineTable_array, leadingKeys);
+    const table = prepareInlineTable(lastInlineTable, leadingKeys);
     finalKey in table && throws(Error('Duplicate property definition at ' + where()));
     tagLeft && collect({ table, key: finalKey, tag: tagLeft });
     tagRight && collect({ table, key: finalKey, tag: tagRight });
     switch (lineRest[0]) {
         case '\'':
             lineRest = assignLiteralString(table, finalKey, lineRest);
-            if (lineRest.startsWith('(')) {
+            if (lineRest.startsWith('<')) {
                 tagRight && throws(SyntaxError('Tag can not be placed at both side of a value, which at ' + where()));
                 ({ 1: tagRight, 2: lineRest } = TAG_REST.exec(lineRest) || throws(SyntaxError(where())));
                 collect({ table, key: finalKey, tag: tagRight });
@@ -856,7 +862,7 @@ function assign(lastInlineTable_array, lineRest) {
             return lineRest;
         case '"':
             lineRest = assignBasicString(table, finalKey, lineRest);
-            if (lineRest.startsWith('(')) {
+            if (lineRest.startsWith('<')) {
                 tagRight && throws(SyntaxError('Tag can not be placed at both side of a value, which at ' + where()));
                 ({ 1: tagRight, 2: lineRest } = TAG_REST.exec(lineRest) || throws(SyntaxError(where())));
                 collect({ table, key: finalKey, tag: tagRight });
@@ -864,22 +870,22 @@ function assign(lastInlineTable_array, lineRest) {
             return lineRest;
         case '`':
             lineRest = assignInterpolationString(table, finalKey, lineRest);
-            if (lineRest.startsWith('(')) {
+            if (lineRest.startsWith('<')) {
                 tagRight && throws(SyntaxError('Tag can not be placed at both side of a value, which at ' + where()));
                 ({ 1: tagRight, 2: lineRest } = TAG_REST.exec(lineRest) || throws(SyntaxError(where())));
                 collect({ table, key: finalKey, tag: tagRight });
             }
             return lineRest;
         case '{':
-            stacks_push(lineRest => equalInlineTable(table, finalKey, lineRest));
+            stacks_push((lineRest) => equalInlineTable(table, finalKey, lineRest));
             return lineRest;
         case '[':
-            stacks_push(lineRest => equalInlineArray(table, finalKey, lineRest));
+            stacks_push((lineRest) => equalInlineArray(table, finalKey, lineRest));
             return lineRest;
     }
     let literal;
     ({ 1: literal, 2: lineRest } = VALUE_REST.exec(lineRest) || throws(SyntaxError(where())));
-    if (lineRest.startsWith('(')) {
+    if (lineRest.startsWith('<')) {
         tagRight && throws(SyntaxError('Tag can not be placed at both side of a value, which at ' + where()));
         ({ 1: tagRight, 2: lineRest } = TAG_REST.exec(lineRest) || throws(SyntaxError(where())));
         collect({ table, key: finalKey, tag: tagRight });
@@ -926,102 +932,102 @@ function assign(lastInlineTable_array, lineRest) {
                     IntegerDepends(literal);
     return lineRest;
 }
-function push(lastInlineTable_array, lineRest) {
-    let alreadyBefore = lineRest.startsWith('(');
+function push(lastArray, lineRest) {
+    let alreadyBefore = lineRest.startsWith('<');
     let tag;
     if (alreadyBefore) {
         ({ 1: tag, 2: lineRest } = _VALUE_PAIR.exec(lineRest) || throws(SyntaxError(where())));
-        collect({ array: lastInlineTable_array, index: lastInlineTable_array.length, tag });
+        collect({ array: lastArray, index: lastArray.length, tag });
     }
-    const lastIndex = '' + lastInlineTable_array.length;
+    const lastIndex = '' + lastArray.length;
     switch (lineRest[0]) {
         case '\'':
-            lineRest = assignLiteralString(asStrings(lastInlineTable_array), lastIndex, lineRest);
-            if (lineRest.startsWith('(')) {
+            lineRest = assignLiteralString(asStrings(lastArray), lastIndex, lineRest);
+            if (lineRest.startsWith('<')) {
                 alreadyBefore && throws(SyntaxError('Tag can not be placed at both side of a value, which at ' + where()));
                 ({ 1: tag, 2: lineRest } = TAG_REST.exec(lineRest) || throws(SyntaxError(where())));
-                collect({ array: lastInlineTable_array, index: lastInlineTable_array.length - 1, tag });
+                collect({ array: lastArray, index: lastArray.length - 1, tag });
             }
             return lineRest;
         case '"':
-            lineRest = assignBasicString(asStrings(lastInlineTable_array), lastIndex, lineRest);
-            if (lineRest.startsWith('(')) {
+            lineRest = assignBasicString(asStrings(lastArray), lastIndex, lineRest);
+            if (lineRest.startsWith('<')) {
                 alreadyBefore && throws(SyntaxError('Tag can not be placed at both side of a value, which at ' + where()));
                 ({ 1: tag, 2: lineRest } = TAG_REST.exec(lineRest) || throws(SyntaxError(where())));
-                collect({ array: lastInlineTable_array, index: lastInlineTable_array.length - 1, tag });
+                collect({ array: lastArray, index: lastArray.length - 1, tag });
             }
             return lineRest;
         case '`':
-            lineRest = assignInterpolationString(asStrings(lastInlineTable_array), lastIndex, lineRest);
-            if (lineRest.startsWith('(')) {
+            lineRest = assignInterpolationString(asStrings(lastArray), lastIndex, lineRest);
+            if (lineRest.startsWith('<')) {
                 alreadyBefore && throws(SyntaxError('Tag can not be placed at both side of a value, which at ' + where()));
                 ({ 1: tag, 2: lineRest } = TAG_REST.exec(lineRest) || throws(SyntaxError(where())));
-                collect({ array: lastInlineTable_array, index: lastInlineTable_array.length - 1, tag });
+                collect({ array: lastArray, index: lastArray.length - 1, tag });
             }
             return lineRest;
         case '{':
-            stacks_push(lineRest => equalInlineTable(asTables(lastInlineTable_array), lastIndex, lineRest));
+            stacks_push(lineRest => equalInlineTable(asTables(lastArray), lastIndex, lineRest));
             return lineRest;
         case '[':
-            stacks_push(lineRest => equalInlineArray(asArrays(lastInlineTable_array), lastIndex, lineRest));
+            stacks_push(lineRest => equalInlineArray(asArrays(lastArray), lastIndex, lineRest));
             return lineRest;
     }
     let literal;
     ({ 1: literal, 2: lineRest } = VALUE_REST.exec(lineRest) || throws(SyntaxError(where())));
-    if (lineRest.startsWith('(')) {
+    if (lineRest.startsWith('<')) {
         alreadyBefore && throws(SyntaxError('Tag can not be placed at both side of a value, which at ' + where()));
         ({ 1: tag, 2: lineRest } = TAG_REST.exec(lineRest) || throws(SyntaxError(where())));
-        collect({ array: lastInlineTable_array, index: lastInlineTable_array.length, tag });
+        collect({ array: lastArray, index: lastArray.length, tag });
     }
     if (sFloat) {
         if (literal === 'inf' || literal === '+inf') {
-            asFloats(lastInlineTable_array).push(Infinity);
+            asFloats(lastArray).push(Infinity);
             return lineRest;
         }
         if (literal === '-inf') {
-            asFloats(lastInlineTable_array).push(-Infinity);
+            asFloats(lastArray).push(-Infinity);
             return lineRest;
         }
         if (literal === 'nan' || literal === '+nan' || literal === '-nan') {
-            asFloats(lastInlineTable_array).push(NaN);
+            asFloats(lastArray).push(NaN);
             return lineRest;
         }
     }
     if (literal.includes(':')) {
         if (literal.includes('-')) {
             if (OFFSET.test(literal)) {
-                asOffsetDateTimes(lastInlineTable_array).push(new OffsetDateTime(literal));
+                asOffsetDateTimes(lastArray).push(new OffsetDateTime(literal));
             }
             else {
                 moreDatetime || throws(SyntaxError(where()));
-                asLocalDateTimes(lastInlineTable_array).push(new LocalDateTime(literal));
+                asLocalDateTimes(lastArray).push(new LocalDateTime(literal));
             }
         }
         else {
             moreDatetime || throws(SyntaxError(where()));
-            asLocalTimes(lastInlineTable_array).push(new LocalTime(literal));
+            asLocalTimes(lastArray).push(new LocalTime(literal));
         }
         return lineRest;
     }
     if (literal.indexOf('-') !== literal.lastIndexOf('-') && !literal.startsWith('-')) {
         moreDatetime || throws(SyntaxError(where()));
-        asLocalDates(lastInlineTable_array).push(new LocalDate(literal));
+        asLocalDates(lastArray).push(new LocalDate(literal));
         return lineRest;
     }
     if (literal === 'true') {
-        asBooleans(lastInlineTable_array).push(true);
+        asBooleans(lastArray).push(true);
     }
     else if (literal === 'false') {
-        asBooleans(lastInlineTable_array).push(false);
+        asBooleans(lastArray).push(false);
     }
     else if (literal.includes('.') || (literal.includes('e') || literal.includes('E')) && !literal.startsWith('0x')) {
-        asFloats(lastInlineTable_array).push(Float(literal));
+        asFloats(lastArray).push(Float(literal));
     }
     else if (enableNull && literal === 'null') {
-        asNulls(lastInlineTable_array).push(null);
+        asNulls(lastArray).push(null);
     }
     else {
-        asIntegers(lastInlineTable_array).push(IntegerDepends(literal));
+        asIntegers(lastArray).push(IntegerDepends(literal));
     }
     return lineRest;
 }

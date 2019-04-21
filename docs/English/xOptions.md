@@ -75,6 +75,53 @@ y = 2
 key = null
 ```
 
+`xOptions.close`
+----------------
+
+*   type: `boolean`
+*   default: `false`
+
+Whether to disallow defining a table (like below) which itself has not been defined directly:
+
+```
+[a.b]
+
+[a]
+```
+
+`xOptions.tag`
+--------------
+
+*   type:
+    ```typescript
+    function processorForEach (each :
+        { table :Table, key :string,                                tag :string } |
+        {                            array :any[],   index :number, tag :string } |
+        { table :Table, key :string, array :Table[], index :number, tag :string }
+    ) :void
+    ```
+*   default: `null`
+
+```
+KV_Pair = <tag> 'value'  # process({ table: root, key: 'KV_Pair',                                tag: 'tag' })
+
+ArrayOf = <tag> [        # process({ table: root, key: 'arrayOf',                                tag: 'tag' })
+          <tag> 'value', # process({                              array: root.arrayOf, index: 0, tag: 'tag' })
+]
+
+[Section] <tag>          # process({ table: root, key: 'section',                                tag: 'tag' })
+
+[[Items]] <tag>          # process({ table: root, key: 'items',   array: root.items,   index: 0, tag: 'tag' })
+```
+
+Do not write tags on both side of a value; for inline arrays and inline tables, tags may only be placed before them, not after them.
+
+Tag content could include any character rather than `<` `>` <code>&#92;</code> `"` `'` <code>&#96;</code> CR LF U+2028 U+2029.
+
+Tags are processed from after to before.
+
+Note: This option requires `xOptions.mix` enabled at the same time, because the custom returned value could not be properly classified.
+
 `xOptions.ins`
 --------------
 
@@ -103,40 +150,3 @@ In JSON land, that would give you the following structure:
 ```
 
 The original parsed result of interpolation string always use `\n` as newline, not the value set by parameter `multiLineJoiner`.
-
-`xOptions.tag`
---------------
-
-*   type:
-    ```typescript
-    function processorForEach (each :
-        { table :Table, key :string,                                tag :string } |
-        {                            array :any[],   index :number, tag :string } |
-        { table :Table, key :string, array :Table[], index :number, tag :string }
-    ) :void
-    ```
-*   default: `null`
-
-```
-[sec.a (tag)]             # process({ table: root.sec, key: 'a',                                tag: 'tag' })
-
-[sec.b] (tag)             # process({ table: root.sec, key: 'b',                                tag: 'tag' })
-
-key.a (tag) = 'val' (tag) # process({ table: root.key, key: 'a',                                tag: 'tag' }) x2
-key.b (tag) = (tag) 'val' # process({ table: root.key, key: 'b',                                tag: 'tag' }) x2
-
-arr (tag) = (tag) [       # process({ table: root,     key: 'arr',                              tag: 'tag' }) x2
-    'item' (tag),         # process({                               array: root.arr,  index: 0, tag: 'tag' })
-    (tag) 'item',         # process({                               array: root.arr,  index: 1, tag: 'tag' })
-]
-
-[[list (tag)]] (tag)      # process({ table: root,     key: 'list', array: root.list, index: 0, tag: 'tag' }) x2
-```
-
-Do not write tags on both side of a value; for inline arrays and inline tables, tags may only be placed before them, not after them.
-
-Tag content could include any character rather than `(` `)` <code>&#92;</code> `"` `'` <code>&#96;</code> CR LF U+2028 U+2029.
-
-Tags are processed from after to before.
-
-Note: This option requires `xOptions.mix` enabled at the same time, because the custom returned value could not be properly classified.

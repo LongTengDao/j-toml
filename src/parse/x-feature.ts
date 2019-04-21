@@ -2,10 +2,11 @@ import SyntaxError from '.SyntaxError';
 import * as iterator$0 from '../iterator$0';
 import * as options$0 from '../options$0';
 import * as regexps$0 from '../regexps$0';
+import { Table } from '../types/Table';
 
 const DELIMITER_CHECK = /[^`]/;
 
-export function assignInterpolationString (table :object, finalKey :string, delimiter :string) :string {
+export function assignInterpolationString (table :Table, finalKey :string, delimiter :string) :string {
 	options$0.enableInterpolationString || iterator$0.throws(SyntaxError(iterator$0.where()));
 	DELIMITER_CHECK.test(delimiter) && iterator$0.throws(SyntaxError('Interpolation String opening tag incorrect at '+iterator$0.where()));
 	let string :string;

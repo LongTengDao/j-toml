@@ -75,6 +75,53 @@ y = 2
 key = null
 ```
 
+`超级选项.close`
+----------------
+
+*   类型：`boolean`
+*   默认值：`false`
+
+是否禁止（如下所示地）定义一个本身没有被直接定义过的表：
+
+```
+[a.b]
+
+[a]
+```
+
+`超级选项.tag`
+--------------
+
+*   类型：
+    ```typescript
+    function 逐个调用的处理器 (每个 :
+        { table :Table, key :string,                                tag :string } |
+        {                            array :any[],   index :number, tag :string } |
+        { table :Table, key :string, array :Table[], index :number, tag :string }
+    ) :void
+    ```
+*   默认值：`null`
+
+```
+KV_Pair = <tag> '值'  # 处理({ table: root, key: 'KV_Pair',                                tag: 'tag' })
+
+ArrayOf = <tag> [     # 处理({ table: root, key: 'arrayOf',                                tag: 'tag' })
+          <tag> '值', # 处理({                              array: root.arrayOf, index: 0, tag: 'tag' })
+]
+
+[Section] <tag>       # 处理({ table: root, key: 'section',                                tag: 'tag' })
+
+[[Items]] <tag>       # 处理({ table: root, key: 'items',   array: root.items,   index: 0, tag: 'tag' })
+```
+
+不要在值的两侧同时使用标签；对于行内数组、行内表，标签只能在它们的前面，而不能在后面。
+
+标签内容可以是除 `<` `>` <code>&#92;</code> `"` `'` <code>&#96;</code> CR LF U+2028 U+2029 以外的任何字符。
+
+标签是从后往前处理的。
+
+注意：如果开启此选项，要求同时开启 `超级选项.mix`，因为无法妥善归类自定义返回值。
+
 `超级选项.ins`
 --------------
 
@@ -104,40 +151,3 @@ keyB = ``
 ```
 
 插值字符串原始解析结果总是以 `\n` 换行，而不会理睬 `multiLineJoiner` 参数。
-
-`超级选项.tag`
---------------
-
-*   类型：
-    ```typescript
-    function 逐个调用的处理器 (每个 :
-        { table :Table, key :string,                                tag :string } |
-        {                            array :any[],   index :number, tag :string } |
-        { table :Table, key :string, array :Table[], index :number, tag :string }
-    ) :void
-    ```
-*   默认值：`null`
-
-```
-[sec.a (tag)]            # 处理({ table: root.sec, key: 'a',                                tag: 'tag' })
-
-[sec.b] (tag)            # 处理({ table: root.sec, key: 'b',                                tag: 'tag' })
-
-key.a (tag) = '值' (tag) # 处理({ table: root.key, key: 'a',                                tag: 'tag' }) x2
-key.b (tag) = (tag) '值' # 处理({ table: root.key, key: 'b',                                tag: 'tag' }) x2
-
-arr (tag) = (tag) [      # 处理({ table: root,     key: 'arr',                              tag: 'tag' }) x2
-    '条目' (tag),        # 处理({                               array: root.arr,  index: 0, tag: 'tag' })
-    (tag) '条目',        # 处理({                               array: root.arr,  index: 1, tag: 'tag' })
-]
-
-[[list (tag)]] (tag)     # 处理({ table: root,     key: 'list', array: root.list, index: 0, tag: 'tag' }) x2
-```
-
-不要在值的两侧同时使用标签；对于行内数组、行内表，标签只能在它们的前面，而不能在后面。
-
-标签内容可以是除 `(` `)` <code>&#92;</code> `"` `'` <code>&#96;</code> CR LF U+2028 U+2029 以外的任何字符。
-
-标签是从后往前处理的。
-
-注意：如果开启此选项，要求同时开启 `超级选项.mix`，因为无法妥善归类自定义返回值。

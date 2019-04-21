@@ -3,6 +3,7 @@ import Error from '.Error';
 import Infinity from '.Infinity';
 import NaN from '.NaN';
 import * as iterator$0 from '../iterator$0';
+import { Table } from '../types/Table';
 import { OffsetDateTime, LocalDateTime, LocalDate, LocalTime, OFFSET } from '../types/Datetime';
 import { Float } from '../types/Float';
 import * as options$0 from '../options$0';
@@ -11,8 +12,8 @@ import { sealedInline, appendTable, parseKeys, prepareInlineTable, assignLiteral
 import { assignInterpolationString } from './x-feature';
 
 export default function Root () {
-	const rootTable :object = new options$0.TableDepends;
-	let lastSectionTable :object = rootTable;
+	const rootTable :Table = new options$0.TableDepends;
+	let lastSectionTable :Table = rootTable;
 	while ( iterator$0.rest() ) {
 		const line :string = iterator$0.next().replace(regexps$0.PRE_WHITESPACE, '');
 		if ( line==='' ) { }
@@ -32,21 +33,21 @@ export default function Root () {
 	return rootTable;
 };
 
-function assign (lastInlineTable_array :object | any[], lineRest :string) :string {
+function assign (lastInlineTable :Table, lineRest :string) :string {
 	let left :string;
 	let tagLeft :string;
 	let tagRight :string;
 	( { left, tagLeft, tagRight, right: lineRest } = regexps$0.KEY_VALUE_PAIR_exec_groups(lineRest) );
 	const leadingKeys :string[] = parseKeys(left);
-	const finalKey :string = leadingKeys.pop();
-	const table :object = prepareInlineTable(lastInlineTable_array, leadingKeys);
+	const finalKey :string = <string>leadingKeys.pop();
+	const table :Table = prepareInlineTable(lastInlineTable, leadingKeys);
 	finalKey in table && iterator$0.throws(Error('Duplicate property definition at '+iterator$0.where()));
 	tagLeft && options$0.collect({ table, key: finalKey, tag: tagLeft });
 	tagRight && options$0.collect({ table, key: finalKey, tag: tagRight });
 	switch ( lineRest[0] ) {
 		case '\'':
 			lineRest = assignLiteralString(table, finalKey, lineRest);
-			if ( lineRest.startsWith('(') ) {
+			if ( lineRest.startsWith('<') ) {
 				tagRight && iterator$0.throws(SyntaxError('Tag can not be placed at both side of a value, which at '+iterator$0.where()));
 				( { 1: tagRight, 2: lineRest } = regexps$0.TAG_REST.exec(lineRest) || iterator$0.throws(SyntaxError(iterator$0.where())) );
 				options$0.collect({ table, key: finalKey, tag: tagRight });
@@ -54,7 +55,7 @@ function assign (lastInlineTable_array :object | any[], lineRest :string) :strin
 			return lineRest;
 		case '"':
 			lineRest = assignBasicString(table, finalKey, lineRest);
-			if ( lineRest.startsWith('(') ) {
+			if ( lineRest.startsWith('<') ) {
 				tagRight && iterator$0.throws(SyntaxError('Tag can not be placed at both side of a value, which at '+iterator$0.where()));
 				( { 1: tagRight, 2: lineRest } = regexps$0.TAG_REST.exec(lineRest) || iterator$0.throws(SyntaxError(iterator$0.where())) );
 				options$0.collect({ table, key: finalKey, tag: tagRight });
@@ -62,22 +63,22 @@ function assign (lastInlineTable_array :object | any[], lineRest :string) :strin
 			return lineRest;
 		case '`':
 			lineRest = assignInterpolationString(table, finalKey, lineRest);
-			if ( lineRest.startsWith('(') ) {
+			if ( lineRest.startsWith('<') ) {
 				tagRight && iterator$0.throws(SyntaxError('Tag can not be placed at both side of a value, which at '+iterator$0.where()));
 				( { 1: tagRight, 2: lineRest } = regexps$0.TAG_REST.exec(lineRest) || iterator$0.throws(SyntaxError(iterator$0.where())) );
 				options$0.collect({ table, key: finalKey, tag: tagRight });
 			}
 			return lineRest;
 		case '{':
-			iterator$0.stacks_push(lineRest => equalInlineTable(table, finalKey, lineRest));
+			iterator$0.stacks_push((lineRest :string) :string => equalInlineTable(table, finalKey, lineRest));
 			return lineRest;
 		case '[':
-			iterator$0.stacks_push(lineRest => equalInlineArray(table, finalKey, lineRest));
+			iterator$0.stacks_push((lineRest :string) :string => equalInlineArray(table, finalKey, lineRest));
 			return lineRest;
 	}
 	let literal :string;
 	( { 1: literal, 2: lineRest } = regexps$0.VALUE_REST.exec(lineRest) || iterator$0.throws(SyntaxError(iterator$0.where())) );
-	if ( lineRest.startsWith('(') ) {
+	if ( lineRest.startsWith('<') ) {
 		tagRight && iterator$0.throws(SyntaxError('Tag can not be placed at both side of a value, which at '+iterator$0.where()));
 		( { 1: tagRight, 2: lineRest } = regexps$0.TAG_REST.exec(lineRest) || iterator$0.throws(SyntaxError(iterator$0.where())) );
 		options$0.collect({ table, key: finalKey, tag: tagRight });
@@ -125,100 +126,100 @@ function assign (lastInlineTable_array :object | any[], lineRest :string) :strin
 	return lineRest;
 }
 
-function push (lastInlineTable_array :object | any[], lineRest :string) :string {
-	let alreadyBefore = lineRest.startsWith('(');
+function push (lastArray :any[], lineRest :string) :string {
+	let alreadyBefore = lineRest.startsWith('<');
 	let tag :string;
 	if ( alreadyBefore ) {
 		( { 1: tag, 2: lineRest } = regexps$0._VALUE_PAIR.exec(lineRest) || iterator$0.throws(SyntaxError(iterator$0.where())) );
-		options$0.collect({ array: lastInlineTable_array, index: lastInlineTable_array.length, tag });
+		options$0.collect({ array: lastArray, index: lastArray.length, tag });
 	}
-	const lastIndex :string = ''+lastInlineTable_array.length;
+	const lastIndex :string = ''+lastArray.length;
 	switch ( lineRest[0] ) {
 		case '\'':
-			lineRest = assignLiteralString(options$0.asStrings(lastInlineTable_array), lastIndex, lineRest);
-			if ( lineRest.startsWith('(') ) {
+			lineRest = assignLiteralString(options$0.asStrings(lastArray), lastIndex, lineRest);
+			if ( lineRest.startsWith('<') ) {
 				alreadyBefore && iterator$0.throws(SyntaxError('Tag can not be placed at both side of a value, which at '+iterator$0.where()));
 				( { 1: tag, 2: lineRest } = regexps$0.TAG_REST.exec(lineRest) || iterator$0.throws(SyntaxError(iterator$0.where())) );
-				options$0.collect({ array: lastInlineTable_array, index: lastInlineTable_array.length-1, tag });
+				options$0.collect({ array: lastArray, index: lastArray.length-1, tag });
 			}
 			return lineRest;
 		case '"':
-			lineRest = assignBasicString(options$0.asStrings(lastInlineTable_array), lastIndex, lineRest);
-			if ( lineRest.startsWith('(') ) {
+			lineRest = assignBasicString(options$0.asStrings(lastArray), lastIndex, lineRest);
+			if ( lineRest.startsWith('<') ) {
 				alreadyBefore && iterator$0.throws(SyntaxError('Tag can not be placed at both side of a value, which at '+iterator$0.where()));
 				( { 1: tag, 2: lineRest } = regexps$0.TAG_REST.exec(lineRest) || iterator$0.throws(SyntaxError(iterator$0.where())) );
-				options$0.collect({ array: lastInlineTable_array, index: lastInlineTable_array.length-1, tag });
+				options$0.collect({ array: lastArray, index: lastArray.length-1, tag });
 			}
 			return lineRest;
 		case '`':
-			lineRest = assignInterpolationString(options$0.asStrings(lastInlineTable_array), lastIndex, lineRest);
-			if ( lineRest.startsWith('(') ) {
+			lineRest = assignInterpolationString(options$0.asStrings(lastArray), lastIndex, lineRest);
+			if ( lineRest.startsWith('<') ) {
 				alreadyBefore && iterator$0.throws(SyntaxError('Tag can not be placed at both side of a value, which at '+iterator$0.where()));
 				( { 1: tag, 2: lineRest } = regexps$0.TAG_REST.exec(lineRest) || iterator$0.throws(SyntaxError(iterator$0.where())) );
-				options$0.collect({ array: lastInlineTable_array, index: lastInlineTable_array.length-1, tag });
+				options$0.collect({ array: lastArray, index: lastArray.length-1, tag });
 			}
 			return lineRest;
 		case '{':
-			iterator$0.stacks_push(lineRest => equalInlineTable(options$0.asTables(lastInlineTable_array), lastIndex, lineRest));
+			iterator$0.stacks_push(lineRest => equalInlineTable(options$0.asTables(lastArray), lastIndex, lineRest));
 			return lineRest;
 		case '[':
-			iterator$0.stacks_push(lineRest => equalInlineArray(options$0.asArrays(lastInlineTable_array), lastIndex, lineRest));
+			iterator$0.stacks_push(lineRest => equalInlineArray(options$0.asArrays(lastArray), lastIndex, lineRest));
 			return lineRest;
 	}
 	let literal :string;
 	( { 1: literal, 2: lineRest } = regexps$0.VALUE_REST.exec(lineRest) || iterator$0.throws(SyntaxError(iterator$0.where())) );
-	if ( lineRest.startsWith('(') ) {
+	if ( lineRest.startsWith('<') ) {
 		alreadyBefore && iterator$0.throws(SyntaxError('Tag can not be placed at both side of a value, which at '+iterator$0.where()));
 		( { 1: tag, 2: lineRest } = regexps$0.TAG_REST.exec(lineRest) || iterator$0.throws(SyntaxError(iterator$0.where())) );
-		options$0.collect({ array: lastInlineTable_array, index: lastInlineTable_array.length, tag });
+		options$0.collect({ array: lastArray, index: lastArray.length, tag });
 	}
 	if ( options$0.sFloat ) {
 		if ( literal==='inf' || literal==='+inf' ) {
-			options$0.asFloats(lastInlineTable_array).push(Infinity);
+			options$0.asFloats(lastArray).push(Infinity);
 			return lineRest;
 		}
 		if ( literal==='-inf' ) {
-			options$0.asFloats(lastInlineTable_array).push(-Infinity);
+			options$0.asFloats(lastArray).push(-Infinity);
 			return lineRest;
 		}
 		if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) {
-			options$0.asFloats(lastInlineTable_array).push(NaN);
+			options$0.asFloats(lastArray).push(NaN);
 			return lineRest;
 		}
 	}
 	if ( literal.includes(':') ) {
 		if ( literal.includes('-') ) {
 			if ( OFFSET.test(literal) ) {
-				options$0.asOffsetDateTimes(lastInlineTable_array).push(new OffsetDateTime(literal));
+				options$0.asOffsetDateTimes(lastArray).push(new OffsetDateTime(literal));
 			}
 			else {
 				options$0.moreDatetime || iterator$0.throws(SyntaxError(iterator$0.where()));
-				options$0.asLocalDateTimes(lastInlineTable_array).push(new LocalDateTime(literal));
+				options$0.asLocalDateTimes(lastArray).push(new LocalDateTime(literal));
 			}
 		}
 		else {
 			options$0.moreDatetime || iterator$0.throws(SyntaxError(iterator$0.where()));
-			options$0.asLocalTimes(lastInlineTable_array).push(new LocalTime(literal));
+			options$0.asLocalTimes(lastArray).push(new LocalTime(literal));
 		}
 		return lineRest;
 	}
 	if ( literal.indexOf('-')!==literal.lastIndexOf('-') && !literal.startsWith('-') ) {
 		options$0.moreDatetime || iterator$0.throws(SyntaxError(iterator$0.where()));
-		options$0.asLocalDates(lastInlineTable_array).push(new LocalDate(literal));
+		options$0.asLocalDates(lastArray).push(new LocalDate(literal));
 		return lineRest;
 	}
-	if ( literal==='true' ) { options$0.asBooleans(lastInlineTable_array).push(true); }
-	else if ( literal==='false' ) { options$0.asBooleans(lastInlineTable_array).push(false); }
+	if ( literal==='true' ) { options$0.asBooleans(lastArray).push(true); }
+	else if ( literal==='false' ) { options$0.asBooleans(lastArray).push(false); }
 	else if ( literal.includes('.') || ( literal.includes('e') || literal.includes('E') ) && !literal.startsWith('0x') ) {
-		options$0.asFloats(lastInlineTable_array).push(Float(literal));
+		options$0.asFloats(lastArray).push(Float(literal));
 	}
-	else if ( options$0.enableNull && literal==='null' ) { options$0.asNulls(lastInlineTable_array).push(null); }
-	else { options$0.asIntegers(lastInlineTable_array).push(options$0.IntegerDepends(literal)); }
+	else if ( options$0.enableNull && literal==='null' ) { options$0.asNulls(lastArray).push(null); }
+	else { options$0.asIntegers(lastArray).push(options$0.IntegerDepends(literal)); }
 	return lineRest;
 }
 
-function equalInlineTable (table :object, finalKey :string, lineRest :string) :string {
-	const inlineTable :object = table[finalKey] = new options$0.TableDepends;
+function equalInlineTable (table :Table, finalKey :string, lineRest :string) :string {
+	const inlineTable :Table = table[finalKey] = new options$0.TableDepends;
 	sealedInline.add(inlineTable);
 	lineRest = lineRest.replace(regexps$0.SYM_WHITESPACE, '');
 	if ( options$0.allowInlineTableMultiLineAndTrailingCommaEvenNoComma ) {
@@ -282,7 +283,7 @@ function equalInlineTable (table :object, finalKey :string, lineRest :string) :s
 	}
 }
 
-function equalInlineArray (table :object, finalKey :string, lineRest :string) :string {
+function equalInlineArray (table :Table, finalKey :string, lineRest :string) :string {
 	const inlineArray :any[] = table[finalKey] = [];
 	sealedInline.add(inlineArray);
 	const start :number = iterator$0.mark();

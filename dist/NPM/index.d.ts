@@ -2,7 +2,7 @@ export = exports;
 
 declare const exports :{
 	
-	version :'0.5.83'
+	version :'0.5.84'
 	
 	parse (
 		sourceContent :string | Buffer,
@@ -27,20 +27,19 @@ declare const exports :{
 type xOptions = {
 	order? :boolean,
 	longer? :boolean,
-	hash? :boolean,
 	null? :boolean,
-	nil? :boolean,
 	multi? :boolean,
 	ins? :boolean,
+	close? :boolean,
 	mix? :boolean,
+	tag? :null,
 } | {
 	order? :boolean,
 	longer? :boolean,
-	hash? :boolean,
 	null? :boolean,
-	nil? :boolean,
 	multi? :boolean,
 	ins? :boolean,
+	close? :boolean,
 	mix :true,
 	tag :(each :
 			  { table :Table, key :string,                                tag :string } |
@@ -49,4 +48,4 @@ type xOptions = {
 	) => any,
 };
 
-type Table = object;
+type Table = { [key :string] :any };

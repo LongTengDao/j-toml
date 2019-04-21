@@ -5,6 +5,7 @@ import from from '.Buffer.from';
 import * as iterator$0 from '../iterator$0';
 import * as options$0 from '../options$0';
 import Root from '../parse/level-loop';
+import { Table } from '../types/Table';
 
 const BOM = '\uFEFF';
 const NON_SCALAR = /[\uD800-\uDFFF]/u;// \u{10FFFF}- > \uFFFD
@@ -15,8 +16,8 @@ export default function parse (
 	specificationVersion :0.5 | 0.4,
 	multiLineJoiner :string,
 	useBigInt :boolean | number = true,
-	xOptions                    = null
-) :object {
+	xOptions :options$0.xOptions = null
+) :Table {
 	iterator$0.could();
 	if ( isBuffer(sourceContent) ) {
 		const buffer :Buffer = sourceContent;

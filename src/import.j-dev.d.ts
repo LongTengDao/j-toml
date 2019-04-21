@@ -23,7 +23,6 @@ declare module '.WeakSet' { export default WeakSet; }
 declare module '.Object.create' { export default Object.create; }
 declare module '.Object.getOwnPropertyNames' { export default Object.getOwnPropertyNames; }
 declare module '.JSON.stringify' { export default JSON.stringify; }
-declare module '.Proxy' { export default Proxy; }
 declare module '.WeakMap' { export default WeakMap; }
 declare module '.parseInt' { export default parseInt; }
 declare module '.String.fromCodePoint' { export default String.fromCodePoint; }

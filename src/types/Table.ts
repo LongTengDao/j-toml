@@ -2,10 +2,12 @@ import { orderify } from '@ltd/j-orderify';
 
 import create from '.Object.create';
 
-export function Table () :void { }
-export const OrderedTable = function Table (this :object) :object { return orderify(this); };
-export type Table = typeof Table | typeof OrderedTable;
+export const Table = function Table () :void { } as unknown as { new () :Table };
+export const OrderedTable = function Table (this :Table) :Table { return orderify(this); } as unknown as { new () :Table };
+export type Table = { [key :string] :any };
 
 OrderedTable.prototype = Table.prototype = create(null);
 
-export const isTable = (value :any) :boolean => value instanceof Table;
+export function isTable (value :Table) :true;
+export function isTable (value :Exclude<any, Table>) :false;
+export function isTable (value :any) :boolean { return value instanceof Table; }
