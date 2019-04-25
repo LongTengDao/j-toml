@@ -1,6 +1,9 @@
 'use strict';
 
-module.exports = require('../test/test.js')(async ({ build, get, map, ful }) => {
+const BOM = '\uFEFF';
+const i18n = ['English', '简体中文'];
+
+module.exports = require('../test/test.js')(async ({ build, get, map, ful, put }) => {
 	
 	await build({
 		name: 'j-toml',
@@ -18,15 +21,14 @@ module.exports = require('../test/test.js')(async ({ build, get, map, ful }) => 
 		},
 	});
 	
-	await map('docs/English/README.md', ReadMe(['English', '简体中文']), 'dist/NPM/README.md');
+	await put('docs/README.md', BOM+i18n.map(lang => `[${lang}](./${lang}/)`).join(' | '));
+	await map('docs/English/README.md', ReadMe, 'dist/NPM/README.md');
 	
 });
 
-function ReadMe (i18n) {
-	return function ReadMe (_English_) {
-		const eol = /\r?\n/.exec(_English_)[0];
-		return eol+
-			i18n.map(lang => `[${lang}](https://GitHub.com/LongTengDao/j-toml/tree/master/docs/${lang}/)`).join(' | ')+eol+
-			'___'+_English_.replace(/(\n```+)[^`\r\n]+/g, '$1').replace(/(\n\d\. {2})#+ +([^\r\n]*)/g, '$1**$2**');
-	};
+function ReadMe (_English_) {
+	const eol = /\r?\n/.exec(_English_)[0];
+	return BOM+eol+
+		i18n.map(lang => `[${lang}](https://GitHub.com/LongTengDao/j-toml/tree/master/docs/${lang}/)`).join(' | ')+eol+
+		'___'+_English_.replace(/(\n```+)[^`\r\n]+/g, '$1').replace(/(\n\d\. {2})#+ +([^\r\n]*)/g, '$1**$2**');
 }
