@@ -90,7 +90,7 @@ function parse (
     *   type: `object`
     
     The extensional features not in the specification.  
-    Include keeping the key/value pairs order of tables, integers larger than `long`, comment information, `null` value, mixed-type array, multi-line inline table with trailing comma even no comma, interpolation string, custom constructor, etc.  
+    Include keeping the key/value pairs order of tables, integers larger than `signed long`, mixed-type array, multi-line inline table with trailing comma even no comma, `null` value, custom constructor, etc.  
     They are private experimental discouraged features.  
     See [xOptions](https://GitHub.com/LongTengDao/j-toml/blob/master/docs/English/xOptions.md).
 
