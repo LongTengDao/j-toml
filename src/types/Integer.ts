@@ -12,7 +12,7 @@ const UNDERSCORES_SIGN = /_|^[-+]/g;
 
 export const NumberInteger = (literal :string) :number => {
 	INTEGER.test(literal)
-	|| options$0.xob && XOB_INTEGER.test(literal)
+	|| /*options\$0.xob && */XOB_INTEGER.test(literal)
 	|| iterator$0.throws(SyntaxError('Invalid Integer '+literal+' at '+iterator$0.where()));
 	const number = literal.startsWith('-')
 		? -literal.replace(UNDERSCORES_SIGN, '')
@@ -25,7 +25,7 @@ export const NumberInteger = (literal :string) :number => {
 
 export const BigIntInteger = (literal :string) :bigint => {
 	INTEGER.test(literal)
-	|| options$0.xob && XOB_INTEGER.test(literal)
+	|| /*options\$0.xob && */XOB_INTEGER.test(literal)
 	|| iterator$0.throws(SyntaxError('Invalid Integer '+literal+' at '+iterator$0.where()));
 	let bigInt :bigint = BigInt(literal.replace(UNDERSCORES_SIGN, ''));
 	if ( literal.startsWith('-') ) { bigInt = -bigInt; }

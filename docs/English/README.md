@@ -68,7 +68,7 @@ function parse (
     *   type: `0.5` / `0.4`
     *   required
     
-    If there is no special reason (e.g. to deal with historical files), the latest version is recommended.
+    If there is no special reason (e.g. the downstream program could not deal with `Infinity`、`NaN`、Local Date-Time、Local Date、Local Time values or empty string key name yet), the latest version is recommended.
     
 2.  #### `multiLineJoiner`
     

@@ -38,8 +38,8 @@ export type xOptions = null | {
 };
 export let moreDatetime :boolean;
 export let ctrl7F :boolean;
-export let nonEmptyKey :boolean;
-export let xob :boolean;
+export let allowEmptyKey :boolean;
+//export const xob :boolean = true;
 export let sFloat :boolean;
 export let TableDepends :typeof Table | typeof OrderedTable;
 export let unreopenable :boolean;
@@ -120,27 +120,26 @@ export function clear () :void {
 }
 
 export function use (specificationVersion :unknown, multiLineJoiner :unknown, useBigInt :unknown, xOptions :Exclude<any, undefined>) :void {
-	if ( specificationVersion!==0.5 && specificationVersion!==0.4 ) { throw Error('TOML.parse(,specificationVersion)'); }
-	if ( typeof multiLineJoiner!=='string' ) { throw TypeError('TOML.parse(,,multiLineJoiner)'); }
+	
+	if ( specificationVersion===0.5 ) { moreDatetime = ctrl7F = sFloat = allowEmptyKey = true; }
+	else if ( specificationVersion===0.4 ) { moreDatetime = ctrl7F = sFloat = allowEmptyKey = false; }
+	else { throw Error('TOML.parse(,specificationVersion)'); }
+	
+	if ( typeof multiLineJoiner==='string' ) { useWhatToJoinMultiLineString = multiLineJoiner; }
+	else { throw TypeError('TOML.parse(,,multiLineJoiner)'); }
+	
 	if ( useBigInt===true ) { IntegerDepends = BigIntInteger; }
 	else if ( useBigInt===false ) { IntegerDepends = NumberInteger; }
 	else {
 		if ( typeof useBigInt!=='number' ) { throw TypeError('TOML.parse(,,,useBigInt)'); }
 		if ( !isSafeInteger(useBigInt) ) { throw RangeError('TOML.parse(,,,useBigInt)'); }
 		IntegerDepends = DependInteger;
-		if ( useBigInt>=0 ) {
-			IntegerMax = useBigInt;
-			IntegerMin = -useBigInt;
-		}
-		else {
-			IntegerMin = useBigInt;
-			IntegerMax = -useBigInt-1;
-		}
+		if ( useBigInt>=0 ) { IntegerMin = -( IntegerMax = useBigInt ); }
+		else { IntegerMax = -( IntegerMin = useBigInt )-1; }
 	}
-	useWhatToJoinMultiLineString = multiLineJoiner;
-	moreDatetime = ctrl7F = xob = sFloat = specificationVersion===0.5;
-	nonEmptyKey = specificationVersion===0.4;
+	
 	let typify :boolean;
+	
 	if ( xOptions===null ) {
 		TableDepends = Table;
 		allowLonger = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = enableInterpolationString = unreopenable = false;
@@ -163,6 +162,7 @@ export function use (specificationVersion :unknown, multiLineJoiner :unknown, us
 		}
 		else { collect = collect_off; }
 	}
+	
 	if ( typify ) {
 		asNulls = asInlineArrayOfNulls;
 		asStrings = asInlineArrayOfStrings;
@@ -179,4 +179,5 @@ export function use (specificationVersion :unknown, multiLineJoiner :unknown, us
 	else {
 		asNulls = asStrings = asTables = asArrays = asBooleans = asFloats = asIntegers = asOffsetDateTimes = asLocalDateTimes = asLocalDates = asLocalTimes = unType;
 	}
+	
 }

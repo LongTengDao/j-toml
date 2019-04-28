@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.84';
+const version = '0.5.85';
 
 const isBuffer = Buffer.isBuffer;
 
@@ -127,7 +127,7 @@ const XOB_INTEGER = /^\+?0(?:x[0-9A-Fa-f]+(?:_[0-9A-Fa-f]+)*|o[0-7]+(?:_[0-7]+)*
 const UNDERSCORES_SIGN = /_|^[-+]/g;
 const NumberInteger = (literal) => {
     INTEGER.test(literal)
-        || xob && XOB_INTEGER.test(literal)
+        || /*options\$0.xob && */ XOB_INTEGER.test(literal)
         || throws(SyntaxError('Invalid Integer ' + literal + ' at ' + where()));
     const number = literal.startsWith('-')
         ? -literal.replace(UNDERSCORES_SIGN, '')
@@ -139,7 +139,7 @@ const NumberInteger = (literal) => {
 };
 const BigIntInteger = (literal) => {
     INTEGER.test(literal)
-        || xob && XOB_INTEGER.test(literal)
+        || /*options\$0.xob && */ XOB_INTEGER.test(literal)
         || throws(SyntaxError('Invalid Integer ' + literal + ' at ' + where()));
     let bigInt = BigInt(literal.replace(UNDERSCORES_SIGN, ''));
     if (literal.startsWith('-')) {
@@ -162,8 +162,8 @@ let IntegerMin;
 let IntegerMax;
 let moreDatetime;
 let ctrl7F;
-let nonEmptyKey;
-let xob;
+let allowEmptyKey;
+//export const xob :boolean = true;
 let sFloat;
 let TableDepends;
 let unreopenable;
@@ -212,10 +212,19 @@ function clear() {
     collection.length = 0;
 }
 function use(specificationVersion, multiLineJoiner, useBigInt, xOptions) {
-    if (specificationVersion !== 0.5 && specificationVersion !== 0.4) {
+    if (specificationVersion === 0.5) {
+        moreDatetime = ctrl7F = sFloat = allowEmptyKey = true;
+    }
+    else if (specificationVersion === 0.4) {
+        moreDatetime = ctrl7F = sFloat = allowEmptyKey = false;
+    }
+    else {
         throw Error('TOML.parse(,specificationVersion)');
     }
-    if (typeof multiLineJoiner !== 'string') {
+    if (typeof multiLineJoiner === 'string') {
+        useWhatToJoinMultiLineString = multiLineJoiner;
+    }
+    else {
         throw TypeError('TOML.parse(,,multiLineJoiner)');
     }
     if (useBigInt === true) {
@@ -233,17 +242,12 @@ function use(specificationVersion, multiLineJoiner, useBigInt, xOptions) {
         }
         IntegerDepends = DependInteger;
         if (useBigInt >= 0) {
-            IntegerMax = useBigInt;
-            IntegerMin = -useBigInt;
+            IntegerMin = -(IntegerMax = useBigInt);
         }
         else {
-            IntegerMin = useBigInt;
-            IntegerMax = -useBigInt - 1;
+            IntegerMax = -(IntegerMin = useBigInt) - 1;
         }
     }
-    useWhatToJoinMultiLineString = multiLineJoiner;
-    moreDatetime = ctrl7F = xob = sFloat = specificationVersion === 0.5;
-    nonEmptyKey = specificationVersion === 0.4;
     let typify;
     if (xOptions === null) {
         TableDepends = Table;
@@ -673,10 +677,11 @@ function parseKeys(key_key) {
             keys[index] = BasicString(key.slice(1, -1));
         }
     }
-    if (nonEmptyKey) {
-        for (let index = keys.length; index--;) {
-            keys[index] || throws(SyntaxError('Empty key is not allowed before TOML v0.4, which at ' + where()));
-        }
+    if (allowEmptyKey) {
+        return keys;
+    }
+    for (let index = keys.length; index--;) {
+        keys[index] || throws(SyntaxError('Empty key is not allowed before TOML v0.5, which at ' + where()));
     }
     return keys;
 }
