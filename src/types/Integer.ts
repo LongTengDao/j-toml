@@ -7,7 +7,7 @@ import * as iterator$0 from '../iterator$0';
 import * as options$0 from '../options$0';
 
 const INTEGER = /^[-+]?(?:0|[1-9]\d*(?:_\d+)*)$/;
-const XOB_INTEGER = /^\+?0(?:x[0-9A-Fa-f]+(?:_[0-9A-Fa-f]+)*|o[0-7]+(?:_[0-7]+)*|b[01]+(?:_[01]+)*)$/;
+const XOB_INTEGER = /^0(?:x[0-9A-Fa-f]+(?:_[0-9A-Fa-f]+)*|o[0-7]+(?:_[0-7]+)*|b[01]+(?:_[01]+)*)$/;
 const UNDERSCORES_SIGN = /_|^[-+]/g;
 
 export const NumberInteger = (literal :string) :number => {

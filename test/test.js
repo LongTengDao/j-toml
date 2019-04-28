@@ -31,7 +31,6 @@ module.exports = require('@ltd/j-dev')(__dirname+'/..')(async ({ import_default,
 		'0xdead_beef': 0xdeadbeefn,
 		'0o755': 0o755n,
 		'0b11010110': 0b11010110n,
-		'+0b0': 0b0n,
 	});
 	
 	compare('float', {
