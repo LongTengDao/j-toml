@@ -1,6 +1,7 @@
 'use strict';
 
 const BOM = '\uFEFF';
+const EOL = '\r\n';
 const i18n = ['English', '简体中文'];
 
 module.exports = require('../test/test.js')(async ({ build, get, map, ful, put }) => {
@@ -27,8 +28,7 @@ module.exports = require('../test/test.js')(async ({ build, get, map, ful, put }
 });
 
 function ReadMe (_English_) {
-	const eol = /\r?\n/.exec(_English_)[0];
-	return BOM+eol+
-		i18n.map(lang => `[${lang}](https://GitHub.com/LongTengDao/j-toml/tree/master/docs/${lang}/)`).join(' | ')+eol+
+	return BOM+EOL+
+		i18n.map(lang => `[${lang}](https://GitHub.com/LongTengDao/j-toml/tree/master/docs/${lang}/)`).join(' | ')+EOL+
 		'___'+_English_.replace(/(\n```+)[^`\r\n]+/g, '$1').replace(/(\n\d\. {2})#+ +([^\r\n]*)/g, '$1**$2**');
 }
