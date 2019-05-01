@@ -65,10 +65,10 @@ function parse (
     
 1.  #### `specificationVersion`
     
-    *   type: `0.5` / `0.4`
+    *   type: `0.5` / `0.4` / `0.3`
     *   required
     
-    If there is no special reason (e.g. the downstream program could not deal with `Infinity`、`NaN`、Local Date-Time、Local Date、Local Time values or empty string key name yet), the latest version is recommended.
+    If there is no special reason (e.g. the downstream program could not deal with `Infinity`、`NaN` values, Local Date-Time / Local Date / Local Time types, empty string key name, even array of arrays of tables structure yet), the latest version is recommended.
     
 2.  #### `multiLineJoiner`
     

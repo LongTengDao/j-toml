@@ -90,15 +90,25 @@ export function MULTI_LINE_BASIC_STRING_exec_0 (_ :string) :string {
 }
 
 const ESCAPED_EXCLUDE_CONTROL_CHARACTER :RegExp = /[^\\\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]| *\n[ \n]*|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
-const ESCAPED_EXCLUDE_CONTROL_CHARACTER_LESSER :RegExp = /[^\\\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\]| *\n[ \n]*|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
+const ESCAPED_EXCLUDE_CONTROL_CHARACTER_LESS :RegExp = /[^\\\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\]| *\n[ \n]*|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
+const ESCAPED_EXCLUDE_CONTROL_CHARACTER_LESSER :RegExp = /[^\\\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\/]| *\n[ \n]*|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
 export function ESCAPED_EXCLUDE_CONTROL_CHARACTER_test (_ :string) :boolean {
-	return _.replace(options$0.ctrl7F ? ESCAPED_EXCLUDE_CONTROL_CHARACTER : ESCAPED_EXCLUDE_CONTROL_CHARACTER_LESSER, '')==='';
+	return _.replace(
+		options$0.ctrl7F ? ESCAPED_EXCLUDE_CONTROL_CHARACTER :
+			options$0.slashEscaping ? ESCAPED_EXCLUDE_CONTROL_CHARACTER_LESSER :
+				ESCAPED_EXCLUDE_CONTROL_CHARACTER_LESS,
+		''
+	)==='';
 }
 
 const BASIC_STRING :RegExp = /^(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/;
-const BASIC_STRING_LESSER :RegExp = /^(?:[^\\"\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/;
+const BASIC_STRING_LESS :RegExp = /^(?:[^\\"\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/;
+const BASIC_STRING_LESSER :RegExp = /^(?:[^\\"\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\/]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/;
 export function BASIC_STRING_exec (_2 :string) :{ 1 :string, 2 :string } {
-	const basic_string = options$0.ctrl7F ? BASIC_STRING : BASIC_STRING_LESSER;
+	const basic_string =
+		options$0.ctrl7F ? BASIC_STRING :
+			options$0.slashEscaping ? BASIC_STRING_LESSER :
+				BASIC_STRING_LESS;
 	_2 = _2.slice(1);
 	for ( let _1 :string = ''; ; ) {
 		const $ :RegExpExecArray | null = basic_string.exec(_2);
@@ -111,7 +121,8 @@ export function BASIC_STRING_exec (_2 :string) :{ 1 :string, 2 :string } {
 	}
 }
 
-const BARE_KEY :RegExp = /^[\w-]+/;
+const BARE_KEY_STRICT :RegExp = /^[\w-]+/;
+const BARE_KEY_FREE :RegExp = /^[^ \t#=[\]'".]+(?:[ \t]+[^ \t#=[\]'".]+)*/;
 const LITERAL_KEY :RegExp = /^'[^'\x00-\x08\x0B-\x1F\x7F]*'/;
 const LITERAL_KEY_LESSER :RegExp = /^'[^'\x00-\x08\x0B-\x1F]*'/;
 const DOT_KEY :RegExp = /^[ \t]*\.[ \t]*/;
@@ -156,7 +167,7 @@ function getKeys (_ :string) :string {
 			}
 		}
 		else {
-			const key :string = ( ( _.startsWith('\'') ? literal_key : BARE_KEY ).exec(_) || iterator$0.throws(SyntaxError(iterator$0.where())) )[0];
+			const key :string = ( ( _.startsWith('\'') ? literal_key : options$0.strictBareKey ? BARE_KEY_STRICT : BARE_KEY_FREE ).exec(_) || iterator$0.throws(SyntaxError(iterator$0.where())) )[0];
 			_ = _.slice(key.length);
 			keys += key;
 		}

@@ -70,6 +70,7 @@ function assign (lastInlineTable :Table, lineRest :string) :string {
 			}
 			return lineRest;
 		case '{':
+			options$0.inlineTable || iterator$0.throws(SyntaxError('Inline table is not allowed before TOML v0.4, which at '+iterator$0.where()));
 			iterator$0.stacks_push((lineRest :string) :string => equalInlineTable(table, finalKey, lineRest));
 			return lineRest;
 		case '[':
@@ -160,6 +161,7 @@ function push (lastArray :any[], lineRest :string) :string {
 			}
 			return lineRest;
 		case '{':
+			options$0.inlineTable || iterator$0.throws(SyntaxError('Inline table is not allowed before TOML v0.4, which at '+iterator$0.where()));
 			iterator$0.stacks_push(lineRest => equalInlineTable(options$0.asTables(lastArray), lastIndex, lineRest));
 			return lineRest;
 		case '[':

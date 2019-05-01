@@ -12,7 +12,8 @@ export const sealedInline = new WeakSet;
 const openTables = new WeakSet;
 const reopenedTables = new WeakSet;
 
-const KEYS = /[\w-]+|"(?:[^\\"]+|\\[^])*"|'[^']*'/g;
+const KEYS_STRICT :RegExp = /[\w-]+|"(?:[^\\"]+|\\[^])*"|'[^']*'/g;
+const KEYS_FREE :RegExp = /[^ \t#=[\]'".]+(?:[ \t]+[^ \t#=[\]'".]+)*|"(?:[^\\"]+|\\[^])*"|'[^']*'/g;
 
 export function appendTable (table :Table, key_key :string, asArrayItem :boolean, tag :string) :Table {
 	const leadingKeys :string[] = parseKeys(key_key);
@@ -41,15 +42,16 @@ export function appendTable (table :Table, key_key :string, asArrayItem :boolean
 }
 
 export function parseKeys (key_key :string) :string[] {
-	const keys :RegExpMatchArray = <RegExpMatchArray>key_key.match(KEYS);
+	const keys :RegExpMatchArray = <RegExpMatchArray>key_key.match(options$0.strictBareKey ? KEYS_STRICT : KEYS_FREE);
 	for ( let index :number = keys.length; index--; ) {
 		const key :string = keys[index];
 		if ( key.startsWith('\'') ) { keys[index] = key.slice(1, -1); }
 		else if ( key.startsWith('"') ) { keys[index] = BasicString(key.slice(1, -1)); }
 	}
-	if ( options$0.allowEmptyKey ) { return keys; }
-	for ( let index :number = keys.length; index--; ) {
-		keys[index] || iterator$0.throws(SyntaxError('Empty key is not allowed before TOML v0.5, which at '+iterator$0.where()));
+	if ( options$0.disallowEmptyKey ) {
+		for ( let index :number = keys.length; index--; ) {
+			keys[index] || iterator$0.throws(SyntaxError('Empty key is not allowed before TOML v0.5, which at '+iterator$0.where()));
+		}
 	}
 	return keys;
 }

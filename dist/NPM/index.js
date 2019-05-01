@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.86';
+const version = '0.5.88';
 
 const isBuffer = Buffer.isBuffer;
 
@@ -160,9 +160,12 @@ let useWhatToJoinMultiLineString;
 let IntegerDepends;
 let IntegerMin;
 let IntegerMax;
+let inlineTable;
+let slashEscaping;
+let strictBareKey;
 let moreDatetime;
 let ctrl7F;
-let allowEmptyKey;
+let disallowEmptyKey;
 //export const xob :boolean = true;
 let sFloat;
 let TableDepends;
@@ -213,10 +216,16 @@ function clear() {
 }
 function use(specificationVersion, multiLineJoiner, useBigInt, xOptions) {
     if (specificationVersion === 0.5) {
-        moreDatetime = ctrl7F = sFloat = allowEmptyKey = true;
+        moreDatetime = ctrl7F = sFloat = strictBareKey = inlineTable = true;
+        disallowEmptyKey = slashEscaping = false;
     }
     else if (specificationVersion === 0.4) {
-        moreDatetime = ctrl7F = sFloat = allowEmptyKey = false;
+        disallowEmptyKey = strictBareKey = inlineTable = true;
+        moreDatetime = ctrl7F = sFloat = slashEscaping = false;
+    }
+    else if (specificationVersion === 0.3) {
+        disallowEmptyKey = slashEscaping = true;
+        moreDatetime = ctrl7F = sFloat = strictBareKey = inlineTable = false;
     }
     else {
         throw Error('TOML.parse(,specificationVersion)');
@@ -519,14 +528,20 @@ function MULTI_LINE_BASIC_STRING_exec_0(_) {
     }
 }
 const ESCAPED_EXCLUDE_CONTROL_CHARACTER = /[^\\\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]| *\n[ \n]*|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
-const ESCAPED_EXCLUDE_CONTROL_CHARACTER_LESSER = /[^\\\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\]| *\n[ \n]*|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
+const ESCAPED_EXCLUDE_CONTROL_CHARACTER_LESS = /[^\\\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\]| *\n[ \n]*|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
+const ESCAPED_EXCLUDE_CONTROL_CHARACTER_LESSER = /[^\\\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\/]| *\n[ \n]*|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
 function ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(_) {
-    return _.replace(ctrl7F ? ESCAPED_EXCLUDE_CONTROL_CHARACTER : ESCAPED_EXCLUDE_CONTROL_CHARACTER_LESSER, '') === '';
+    return _.replace(ctrl7F ? ESCAPED_EXCLUDE_CONTROL_CHARACTER :
+        slashEscaping ? ESCAPED_EXCLUDE_CONTROL_CHARACTER_LESSER :
+            ESCAPED_EXCLUDE_CONTROL_CHARACTER_LESS, '') === '';
 }
 const BASIC_STRING = /^(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/;
-const BASIC_STRING_LESSER = /^(?:[^\\"\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/;
+const BASIC_STRING_LESS = /^(?:[^\\"\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/;
+const BASIC_STRING_LESSER = /^(?:[^\\"\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\/]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/;
 function BASIC_STRING_exec(_2) {
-    const basic_string = ctrl7F ? BASIC_STRING : BASIC_STRING_LESSER;
+    const basic_string = ctrl7F ? BASIC_STRING :
+        slashEscaping ? BASIC_STRING_LESSER :
+            BASIC_STRING_LESS;
     _2 = _2.slice(1);
     for (let _1 = '';;) {
         const $ = basic_string.exec(_2);
@@ -538,7 +553,8 @@ function BASIC_STRING_exec(_2) {
         _2 = _2.slice($[0].length);
     }
 }
-const BARE_KEY = /^[\w-]+/;
+const BARE_KEY_STRICT = /^[\w-]+/;
+const BARE_KEY_FREE = /^[^ \t#=[\]'".]+(?:[ \t]+[^ \t#=[\]'".]+)*/;
 const LITERAL_KEY = /^'[^'\x00-\x08\x0B-\x1F\x7F]*'/;
 const LITERAL_KEY_LESSER = /^'[^'\x00-\x08\x0B-\x1F]*'/;
 const DOT_KEY = /^[ \t]*\.[ \t]*/;
@@ -584,7 +600,7 @@ function getKeys(_) {
             }
         }
         else {
-            const key = ((_.startsWith('\'') ? literal_key : BARE_KEY).exec(_) || throws(SyntaxError(where())))[0];
+            const key = ((_.startsWith('\'') ? literal_key : strictBareKey ? BARE_KEY_STRICT : BARE_KEY_FREE).exec(_) || throws(SyntaxError(where())))[0];
             _ = _.slice(key.length);
             keys += key;
         }
@@ -601,9 +617,9 @@ const isArray = Array.isArray;
 
 const fromCodePoint = String.fromCodePoint;
 
-const ESCAPE_ALIAS = { '\\': '\\', '"': '"', b: '\b', t: '\t', n: '\n', f: '\f', r: '\r' };
-const ESCAPED_IN_SINGLE_LINE = /\\(?:([\\"btnfr])|u(.{4})|U(.{8}))/g;
-const ESCAPED_IN_MULTI_LINE = /\n|\\(?: *(\n)[ \n]*|([\\"btnfr])|u([^]{4})|U([^]{8}))/g;
+const ESCAPE_ALIAS = { b: '\b', t: '\t', n: '\n', f: '\f', r: '\r', '"': '"', '/': '/', '\\': '\\' };
+const ESCAPED_IN_SINGLE_LINE = /\\(?:([\\"btnfr/])|u(.{4})|U(.{8}))/g;
+const ESCAPED_IN_MULTI_LINE = /\n|\\(?: *(\n)[ \n]*|([\\"btnfr/])|u([^]{4})|U([^]{8}))/g;
 const unEscapeSingleLine = (match, p1, p2, p3) => {
     if (p1) {
         return ESCAPE_ALIAS[p1];
@@ -634,7 +650,8 @@ const MultiLineBasicString = (literal) => literal.replace(ESCAPED_IN_MULTI_LINE,
 const sealedInline = new WeakSet;
 const openTables = new WeakSet;
 const reopenedTables = new WeakSet;
-const KEYS = /[\w-]+|"(?:[^\\"]+|\\[^])*"|'[^']*'/g;
+const KEYS_STRICT = /[\w-]+|"(?:[^\\"]+|\\[^])*"|'[^']*'/g;
+const KEYS_FREE = /[^ \t#=[\]'".]+(?:[ \t]+[^ \t#=[\]'".]+)*|"(?:[^\\"]+|\\[^])*"|'[^']*'/g;
 function appendTable(table, key_key, asArrayItem, tag) {
     const leadingKeys = parseKeys(key_key);
     const finalKey = leadingKeys.pop();
@@ -667,7 +684,7 @@ function appendTable(table, key_key, asArrayItem, tag) {
     return lastTable;
 }
 function parseKeys(key_key) {
-    const keys = key_key.match(KEYS);
+    const keys = key_key.match(strictBareKey ? KEYS_STRICT : KEYS_FREE);
     for (let index = keys.length; index--;) {
         const key = keys[index];
         if (key.startsWith('\'')) {
@@ -677,11 +694,10 @@ function parseKeys(key_key) {
             keys[index] = BasicString(key.slice(1, -1));
         }
     }
-    if (allowEmptyKey) {
-        return keys;
-    }
-    for (let index = keys.length; index--;) {
-        keys[index] || throws(SyntaxError('Empty key is not allowed before TOML v0.5, which at ' + where()));
+    if (disallowEmptyKey) {
+        for (let index = keys.length; index--;) {
+            keys[index] || throws(SyntaxError('Empty key is not allowed before TOML v0.5, which at ' + where()));
+        }
     }
     return keys;
 }
@@ -882,6 +898,7 @@ function assign(lastInlineTable, lineRest) {
             }
             return lineRest;
         case '{':
+            inlineTable || throws(SyntaxError('Inline table is not allowed before TOML v0.4, which at ' + where()));
             stacks_push((lineRest) => equalInlineTable(table, finalKey, lineRest));
             return lineRest;
         case '[':
@@ -971,6 +988,7 @@ function push(lastArray, lineRest) {
             }
             return lineRest;
         case '{':
+            inlineTable || throws(SyntaxError('Inline table is not allowed before TOML v0.4, which at ' + where()));
             stacks_push(lineRest => equalInlineTable(asTables(lastArray), lastIndex, lineRest));
             return lineRest;
         case '[':

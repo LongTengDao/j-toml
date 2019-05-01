@@ -36,9 +36,12 @@ export type xOptions = null | {
 	mix :true,
 	tag :tag,
 };
+export let inlineTable :boolean;
+export let slashEscaping :boolean;
+export let strictBareKey :boolean;
 export let moreDatetime :boolean;
 export let ctrl7F :boolean;
-export let allowEmptyKey :boolean;
+export let disallowEmptyKey :boolean;
 //export const xob :boolean = true;
 export let sFloat :boolean;
 export let TableDepends :typeof Table | typeof OrderedTable;
@@ -121,8 +124,18 @@ export function clear () :void {
 
 export function use (specificationVersion :unknown, multiLineJoiner :unknown, useBigInt :unknown, xOptions :Exclude<any, undefined>) :void {
 	
-	if ( specificationVersion===0.5 ) { moreDatetime = ctrl7F = sFloat = allowEmptyKey = true; }
-	else if ( specificationVersion===0.4 ) { moreDatetime = ctrl7F = sFloat = allowEmptyKey = false; }
+	if ( specificationVersion===0.5 ) {
+		moreDatetime = ctrl7F = sFloat = strictBareKey = inlineTable = true;
+		disallowEmptyKey = slashEscaping = false;
+	}
+	else if ( specificationVersion===0.4 ) {
+		disallowEmptyKey = strictBareKey = inlineTable = true;
+		moreDatetime = ctrl7F = sFloat = slashEscaping = false;
+	}
+	else if ( specificationVersion===0.3 ) {
+		disallowEmptyKey = slashEscaping = true;
+		moreDatetime = ctrl7F = sFloat = strictBareKey = inlineTable = false;
+	}
 	else { throw Error('TOML.parse(,specificationVersion)'); }
 	
 	if ( typeof multiLineJoiner==='string' ) { useWhatToJoinMultiLineString = multiLineJoiner; }

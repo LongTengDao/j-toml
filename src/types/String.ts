@@ -5,14 +5,17 @@ import fromCodePoint from '.String.fromCodePoint';
 import * as iterator$0 from '../iterator$0';
 import * as options$0 from '../options$0';
 
-const ESCAPE_ALIAS = { '\\': '\\', '"': '"', b: '\b', t: '\t', n: '\n', f: '\f', r: '\r' };
+const ESCAPE_ALIAS = { b: '\b', t: '\t', n: '\n', f: '\f', r: '\r', '"': '"', '/': '/', '\\': '\\' };
 
-const ESCAPED_IN_SINGLE_LINE = /\\(?:([\\"btnfr])|u(.{4})|U(.{8}))/g;
-const ESCAPED_IN_MULTI_LINE = /\n|\\(?: *(\n)[ \n]*|([\\"btnfr])|u([^]{4})|U([^]{8}))/g;
+const ESCAPED_IN_SINGLE_LINE = /\\(?:([\\"btnfr/])|u(.{4})|U(.{8}))/g;
+const ESCAPED_IN_MULTI_LINE = /\n|\\(?: *(\n)[ \n]*|([\\"btnfr/])|u([^]{4})|U([^]{8}))/g;
 
-type __btnfr = '\\' | '"' | 'b' | 'b' | 'n' | 'f' | 'r' | undefined;
-
-const unEscapeSingleLine = (match :string, p1 :__btnfr, p2 :string | undefined, p3 :string | undefined) :string => {
+const unEscapeSingleLine = (
+	match :string,
+	p1 :keyof typeof ESCAPE_ALIAS | undefined,
+	p2 :string | undefined,
+	p3 :string | undefined
+) :string => {
 	if ( p1 ) { return ESCAPE_ALIAS[p1]; }
 	const codePoint :number = parseInt(p2 || <string>p3, 16);
 	( 0xD7FF<codePoint && codePoint<0xE000 || 0x10FFFF<codePoint )
@@ -20,7 +23,13 @@ const unEscapeSingleLine = (match :string, p1 :__btnfr, p2 :string | undefined, 
 	return fromCodePoint(codePoint);
 };
 
-const unEscapeMultiLine = (match :string, p1 :'\n' | undefined, p2 :__btnfr, p3 :string | undefined, p4 :string | undefined) :string => {
+const unEscapeMultiLine = (
+	match :string,
+	p1 :'\n' | undefined,
+	p2 :keyof typeof ESCAPE_ALIAS | undefined,
+	p3 :string | undefined,
+	p4 :string | undefined
+) :string => {
 	if ( match==='\n' ) { return options$0.useWhatToJoinMultiLineString; }
 	if ( p1 ) { return ''; }
 	if ( p2 ) { return ESCAPE_ALIAS[p2]; }
