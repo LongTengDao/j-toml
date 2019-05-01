@@ -41,7 +41,7 @@ TOML.parse(源内容, 遵循规范版本, 多行拼接字符[, 使用BigInt=true
 ```typescript
 function parse (
          源内容       :string | Buffer,
-         遵循规范版本 :0.5 | 0.4,
+         遵循规范版本 :0.5 | 0.4 | 0.3,
          多行拼接字符 :string,
          使用BigInt?  :boolean | number = true,
          超级选项?    :object

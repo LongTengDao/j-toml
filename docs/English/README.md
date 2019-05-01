@@ -41,7 +41,7 @@ TOML.parse(sourceContent, specificationVersion, multiLineJoiner[, useBigInt=true
 ```typescript
 function parse (
          sourceContent        :string | Buffer,
-         specificationVersion :0.5 | 0.4,
+         specificationVersion :0.5 | 0.4 | 0.3,
          multiLineJoiner      :string,
          useBigInt?           :boolean | number = true,
          xOptions?            :object
