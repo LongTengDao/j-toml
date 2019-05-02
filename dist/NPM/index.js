@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.90';
+const version = '0.5.91';
 
 const isBuffer = Buffer.isBuffer;
 
@@ -1236,20 +1236,15 @@ function parse(sourceContent, specificationVersion, multiLineJoiner, useBigInt =
     }
 }
 
-function install(readFile, specificationVersion, multiLineJoiner, useBigInt = true, xOptions = null) {
-    if (typeof readFile !== 'function') {
-        throw TypeError('TOML.install(readFile)');
+function install(readFileSync, specificationVersion, multiLineJoiner, useBigInt = true, xOptions = null) {
+    if (typeof readFileSync !== 'function') {
+        throw TypeError('TOML.install(readFileSync)');
     }
     parse('', specificationVersion, multiLineJoiner, useBigInt, xOptions);
     require.extensions['.toml'] = function require_toml(module, filename) {
-        const sourceContent = readFile(filename);
-        module.exports = sourceContent instanceof Promise
-            ? sourceContent.then(onFulfilled)
-            : parse(sourceContent, specificationVersion, multiLineJoiner, useBigInt, xOptions);
+        const sourceContent = readFileSync(filename);
+        module.exports = parse(sourceContent, specificationVersion, multiLineJoiner, useBigInt, xOptions);
     };
-    function onFulfilled(sourceContent) {
-        return parse(sourceContent, specificationVersion, multiLineJoiner, useBigInt, xOptions);
-    }
 }
 
 const TOML = {

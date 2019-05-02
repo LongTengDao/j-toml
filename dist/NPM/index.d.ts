@@ -2,7 +2,7 @@ export = exports;
 
 declare const exports :{
 	
-	version :'0.5.90'
+	version :'0.5.91'
 	
 	parse (
 		sourceContent :string | Buffer,
@@ -13,7 +13,7 @@ declare const exports :{
 	) :Table
 	
 	install (
-		readFileSync :(path :string) => Buffer | Promise<Buffer>,
+		readFileSync :(path :string) => Buffer,
 		specificationVersion :0.5 | 0.4 | 0.3,
 		multiLineJoiner :string,
 		useBigInt? :true | false | number,
