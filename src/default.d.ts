@@ -31,21 +31,16 @@ type xOptions = {
 	multi? :boolean,
 	ins? :boolean,
 	close? :boolean,
+} & ( {
 	mix? :boolean,
 	tag? :null,
 } | {
-	order? :boolean,
-	longer? :boolean,
-	null? :boolean,
-	multi? :boolean,
-	ins? :boolean,
-	close? :boolean,
 	mix :true,
 	tag :(each :
-			  { table :Table, key :string,                                tag :string } |
-			  {                            array :any[],   index :number, tag :string } |
-			  { table :Table, key :string, array :Table[], index :number, tag :string }
+		{ table :Table, key :string, array :null,                   tag :string } |
+		{ table :null,               array :any[],   index :number, tag :string } |
+		{ table :Table, key :string, array :Table[], index :number, tag :string }
 	) => any,
-};
+} );
 
 type Table = { [key :string] :any };

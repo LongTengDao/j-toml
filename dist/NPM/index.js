@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.91';
+const version = '0.5.92';
 
 const isBuffer = Buffer.isBuffer;
 
@@ -485,10 +485,6 @@ const Tag = /[^<>\\"'`\r\n\u2028\u2029]+/;
 const KEY_VALUE_PAIR = newRegExp `
 	^
 	${Whitespace}*
-	(?:
-		<(${Tag})>
-		${Whitespace}*
-	)?
 	=
 	${Whitespace}*
 	(?:
@@ -563,24 +559,23 @@ function TABLE_DEFINITION_exec_groups(_) {
     _ = _.slice($_asArrayItem$$ ? 2 : 1).replace(PRE_WHITESPACE, '');
     const keys = getKeys(_);
     _ = _.slice(keys.length).replace(PRE_WHITESPACE, '');
-    let tagInner = '';
-    if (_.startsWith('<')) {
-        ({ 1: tagInner, 2: _ } = TAG_REST.exec(_) || throws(SyntaxError(where())));
-    }
     _.startsWith(']') || throws(SyntaxError(where()));
     const $$asArrayItem$_ = _.charAt(1) === ']';
     _ = _.slice($$asArrayItem$_ ? 2 : 1).replace(PRE_WHITESPACE, '');
-    let tagOuter = '';
+    let tag;
     if (_.startsWith('<')) {
-        ({ 1: tagOuter, 2: _ } = TAG_REST.exec(_) || throws(SyntaxError(where())));
+        ({ 1: tag, 2: _ } = TAG_REST.exec(_) || throws(SyntaxError(where())));
+    }
+    else {
+        tag = '';
     }
     _ === '' || _.startsWith('#') || throws(SyntaxError(where()));
-    return { $_asArrayItem$$, keys, tagInner, $$asArrayItem$_, tagOuter };
+    return { $_asArrayItem$$, keys, $$asArrayItem$_, tag };
 }
 function KEY_VALUE_PAIR_exec_groups(_) {
     const _1 = getKeys(_);
     const $ = KEY_VALUE_PAIR.exec(_.slice(_1.length)) || throws(SyntaxError(where()));
-    return { left: _1, tagLeft: $[1] || '', tagRight: $[2] || '', right: $[3] };
+    return { left: _1, tag: $[1] || '', right: $[2] };
 }
 function getKeys(_) {
     const literal_key = ctrl7F ? LITERAL_KEY : LITERAL_KEY_LESSER;
@@ -679,7 +674,7 @@ function appendTable(table, key_key, asArrayItem, tag) {
             table[finalKey] = lastTable = new TableDepends;
             unreopenable || reopenedTables.add(lastTable);
         }
-        tag && collect({ table, key: finalKey, tag });
+        tag && collect({ table, key: finalKey, array: null, tag });
     }
     return lastTable;
 }
@@ -846,10 +841,9 @@ function Root() {
         if (line === '') ;
         else if (line.startsWith('#')) ;
         else if (line.startsWith('[')) {
-            const { $_asArrayItem$$, keys, tagInner, $$asArrayItem$_, tagOuter } = TABLE_DEFINITION_exec_groups(line);
+            const { $_asArrayItem$$, keys, $$asArrayItem$_, tag } = TABLE_DEFINITION_exec_groups(line);
             $_asArrayItem$$ === $$asArrayItem$_ || throws(SyntaxError('Square brackets of table define statement not match at ' + where()));
-            tagInner && tagOuter && throws(SyntaxError('Tag for table define statement can not both in and out, which at ' + where()));
-            lastSectionTable = appendTable(rootTable, keys, $_asArrayItem$$, tagOuter || tagInner);
+            lastSectionTable = appendTable(rootTable, keys, $_asArrayItem$$, tag);
         }
         else {
             let rest = assign(lastSectionTable, line);
@@ -863,40 +857,20 @@ function Root() {
 }
 function assign(lastInlineTable, lineRest) {
     let left;
-    let tagLeft;
-    let tagRight;
-    ({ left, tagLeft, tagRight, right: lineRest } = KEY_VALUE_PAIR_exec_groups(lineRest));
+    let tag;
+    ({ left, tag, right: lineRest } = KEY_VALUE_PAIR_exec_groups(lineRest));
     const leadingKeys = parseKeys(left);
     const finalKey = leadingKeys.pop();
     const table = prepareInlineTable(lastInlineTable, leadingKeys);
     finalKey in table && throws(Error('Duplicate property definition at ' + where()));
-    tagLeft && collect({ table, key: finalKey, tag: tagLeft });
-    tagRight && collect({ table, key: finalKey, tag: tagRight });
+    tag && collect({ table, key: finalKey, array: null, tag });
     switch (lineRest[0]) {
         case '\'':
-            lineRest = assignLiteralString(table, finalKey, lineRest);
-            if (lineRest.startsWith('<')) {
-                tagRight && throws(SyntaxError('Tag can not be placed at both side of a value, which at ' + where()));
-                ({ 1: tagRight, 2: lineRest } = TAG_REST.exec(lineRest) || throws(SyntaxError(where())));
-                collect({ table, key: finalKey, tag: tagRight });
-            }
-            return lineRest;
+            return assignLiteralString(table, finalKey, lineRest);
         case '"':
-            lineRest = assignBasicString(table, finalKey, lineRest);
-            if (lineRest.startsWith('<')) {
-                tagRight && throws(SyntaxError('Tag can not be placed at both side of a value, which at ' + where()));
-                ({ 1: tagRight, 2: lineRest } = TAG_REST.exec(lineRest) || throws(SyntaxError(where())));
-                collect({ table, key: finalKey, tag: tagRight });
-            }
-            return lineRest;
+            return assignBasicString(table, finalKey, lineRest);
         case '`':
-            lineRest = assignInterpolationString(table, finalKey, lineRest);
-            if (lineRest.startsWith('<')) {
-                tagRight && throws(SyntaxError('Tag can not be placed at both side of a value, which at ' + where()));
-                ({ 1: tagRight, 2: lineRest } = TAG_REST.exec(lineRest) || throws(SyntaxError(where())));
-                collect({ table, key: finalKey, tag: tagRight });
-            }
-            return lineRest;
+            return assignInterpolationString(table, finalKey, lineRest);
         case '{':
             inlineTable || throws(SyntaxError('Inline table is not allowed before TOML v0.4, which at ' + where()));
             stacks_push((lineRest) => equalInlineTable(table, finalKey, lineRest));
@@ -907,11 +881,6 @@ function assign(lastInlineTable, lineRest) {
     }
     let literal;
     ({ 1: literal, 2: lineRest } = VALUE_REST.exec(lineRest) || throws(SyntaxError(where())));
-    if (lineRest.startsWith('<')) {
-        tagRight && throws(SyntaxError('Tag can not be placed at both side of a value, which at ' + where()));
-        ({ 1: tagRight, 2: lineRest } = TAG_REST.exec(lineRest) || throws(SyntaxError(where())));
-        collect({ table, key: finalKey, tag: tagRight });
-    }
     if (sFloat) {
         if (literal === 'inf' || literal === '+inf') {
             table[finalKey] = Infinity;
@@ -955,38 +924,19 @@ function assign(lastInlineTable, lineRest) {
     return lineRest;
 }
 function push(lastArray, lineRest) {
-    let alreadyBefore = lineRest.startsWith('<');
-    let tag;
-    if (alreadyBefore) {
+    if (lineRest.startsWith('<')) {
+        let tag;
         ({ 1: tag, 2: lineRest } = _VALUE_PAIR.exec(lineRest) || throws(SyntaxError(where())));
-        collect({ array: lastArray, index: lastArray.length, tag });
+        collect({ table: null, array: lastArray, index: lastArray.length, tag });
     }
     const lastIndex = '' + lastArray.length;
     switch (lineRest[0]) {
         case '\'':
-            lineRest = assignLiteralString(asStrings(lastArray), lastIndex, lineRest);
-            if (lineRest.startsWith('<')) {
-                alreadyBefore && throws(SyntaxError('Tag can not be placed at both side of a value, which at ' + where()));
-                ({ 1: tag, 2: lineRest } = TAG_REST.exec(lineRest) || throws(SyntaxError(where())));
-                collect({ array: lastArray, index: lastArray.length - 1, tag });
-            }
-            return lineRest;
+            return assignLiteralString(asStrings(lastArray), lastIndex, lineRest);
         case '"':
-            lineRest = assignBasicString(asStrings(lastArray), lastIndex, lineRest);
-            if (lineRest.startsWith('<')) {
-                alreadyBefore && throws(SyntaxError('Tag can not be placed at both side of a value, which at ' + where()));
-                ({ 1: tag, 2: lineRest } = TAG_REST.exec(lineRest) || throws(SyntaxError(where())));
-                collect({ array: lastArray, index: lastArray.length - 1, tag });
-            }
-            return lineRest;
+            return assignBasicString(asStrings(lastArray), lastIndex, lineRest);
         case '`':
-            lineRest = assignInterpolationString(asStrings(lastArray), lastIndex, lineRest);
-            if (lineRest.startsWith('<')) {
-                alreadyBefore && throws(SyntaxError('Tag can not be placed at both side of a value, which at ' + where()));
-                ({ 1: tag, 2: lineRest } = TAG_REST.exec(lineRest) || throws(SyntaxError(where())));
-                collect({ array: lastArray, index: lastArray.length - 1, tag });
-            }
-            return lineRest;
+            return assignInterpolationString(asStrings(lastArray), lastIndex, lineRest);
         case '{':
             inlineTable || throws(SyntaxError('Inline table is not allowed before TOML v0.4, which at ' + where()));
             stacks_push(lineRest => equalInlineTable(asTables(lastArray), lastIndex, lineRest));
@@ -997,11 +947,6 @@ function push(lastArray, lineRest) {
     }
     let literal;
     ({ 1: literal, 2: lineRest } = VALUE_REST.exec(lineRest) || throws(SyntaxError(where())));
-    if (lineRest.startsWith('<')) {
-        alreadyBefore && throws(SyntaxError('Tag can not be placed at both side of a value, which at ' + where()));
-        ({ 1: tag, 2: lineRest } = TAG_REST.exec(lineRest) || throws(SyntaxError(where())));
-        collect({ array: lastArray, index: lastArray.length, tag });
-    }
     if (sFloat) {
         if (literal === 'inf' || literal === '+inf') {
             asFloats(lastArray).push(Infinity);

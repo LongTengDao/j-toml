@@ -72,7 +72,7 @@ export function stacks_insertBeforeLast (item :noop) {
 }
 
 
-export function throws (error :FriendlyError) :never {
+export function throws (error :Error & { lineIndex? :number, lineNumber? :number }) :never {
 	if ( sourceLines!==NONE ) {
 		error.lineIndex = lineIndex;
 		error.lineNumber = lineIndex+1;
@@ -80,9 +80,4 @@ export function throws (error :FriendlyError) :never {
 		//options\$0.clear();
 	}
 	throw error;
-}
-
-declare class FriendlyError extends Error {
-	lineIndex? :number;
-	lineNumber? :number;
 }

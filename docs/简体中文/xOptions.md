@@ -95,26 +95,24 @@ key = null
 *   类型：
     ```typescript
     function 逐个调用的处理器 (每个 :
-        { table :Table, key :string,                                tag :string } |
-        {                            array :any[],   index :number, tag :string } |
+        { table :Table, key :string, array :null,                   tag :string } |
+        { table :null,               array :any[],   index :number, tag :string } |
         { table :Table, key :string, array :Table[], index :number, tag :string }
     ) :void
     ```
 *   默认值：`null`
 
 ```
-KV_Pair = <tag> '值'  # 处理({ table: root, key: 'KV_Pair',                                tag: 'tag' })
+KV_Pair = <tag> '值'  # 处理({ table: root, key: 'KV_Pair', array: null,                   tag: 'tag' })
 
-ArrayOf = <tag> [     # 处理({ table: root, key: 'arrayOf',                                tag: 'tag' })
-          <tag> '值', # 处理({                              array: root.arrayOf, index: 0, tag: 'tag' })
+ArrayOf = <tag> [     # 处理({ table: root, key: 'arrayOf', array: null,                   tag: 'tag' })
+          <tag> '值', # 处理({ table: null,                 array: root.arrayOf, index: 0, tag: 'tag' })
 ]
 
-[Section] <tag>       # 处理({ table: root, key: 'section',                                tag: 'tag' })
+[Section] <tag>       # 处理({ table: root, key: 'section', array: null,                   tag: 'tag' })
 
 [[Items]] <tag>       # 处理({ table: root, key: 'items',   array: root.items,   index: 0, tag: 'tag' })
 ```
-
-不要在值的两侧同时使用标签；对于行内数组、行内表，标签只能在它们的前面，而不能在后面。
 
 标签内容可以是除 `<` `>` <code>&#92;</code> `"` `'` <code>&#96;</code> CR LF U+2028 U+2029 以外的任何字符。
 

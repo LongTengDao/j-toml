@@ -102,6 +102,6 @@ function parse (
 
 ### `throw`
 
-*   类型：`Error`
+*   类型：`Error` / `Error & { lineIndex :number, lineNumber :number }`
 
 如果参数不符合要求，会抛出错误；如果源文本有错误，错误对象会有 `lineIndex` 和 `lineNumber` 两个数值属性来帮助定位。

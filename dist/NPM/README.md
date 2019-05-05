@@ -104,6 +104,6 @@ Return the root table (tables parsed by this implementation are objects without 
 
 ### `throw`
 
-*   type: `Error`
+*   type: `Error` / `Error & { lineIndex :number, lineNumber :number }`
 
 If the arguments not meet the requirement, there will be an error; if there is any error with the source, the error object will has two number properties `lineIndex` and `lineNumber` to help locating that.

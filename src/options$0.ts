@@ -24,18 +24,13 @@ export type xOptions = null | {
 	multi? :boolean,
 	ins? :boolean,
 	close? :boolean,
+} & ({
 	mix? :boolean,
 	tag? :null,
 } | {
-	order? :boolean,
-	longer? :boolean,
-	null? :boolean,
-	multi? :boolean,
-	ins? :boolean,
-	close? :boolean,
 	mix :true,
 	tag :tag,
-};
+});
 export let inlineTable :boolean;
 export let slashEscaping :boolean;
 export let strictBareKey :boolean;
@@ -96,8 +91,8 @@ let processor :tag | null;
 
 type tag = (each :each) => any;
 type each =
-	{ table :Table, key :string, tag :string } |
-	{ array :any[], index :number, tag :string } |
+	{ table :Table, key :string, array :null,                   tag :string } |
+	{ table :null,               array :any[],   index :number, tag :string } |
 	{ table :Table, key :string, array :Table[], index :number, tag :string };
 let collection :each[] = [];
 function collect_on (each :each) :void { collection.push(each); }

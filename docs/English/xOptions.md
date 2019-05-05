@@ -95,26 +95,24 @@ Whether to disallow defining a table (like below) which itself has not been defi
 *   type:
     ```typescript
     function processorForEach (each :
-        { table :Table, key :string,                                tag :string } |
-        {                            array :any[],   index :number, tag :string } |
+        { table :Table, key :string, array :null,                   tag :string } |
+        { table :null,               array :any[],   index :number, tag :string } |
         { table :Table, key :string, array :Table[], index :number, tag :string }
     ) :void
     ```
 *   default: `null`
 
 ```
-KV_Pair = <tag> 'value'  # process({ table: root, key: 'KV_Pair',                                tag: 'tag' })
+KV_Pair = <tag> 'value'  # process({ table: root, key: 'KV_Pair', array: null,                   tag: 'tag' })
 
-ArrayOf = <tag> [        # process({ table: root, key: 'arrayOf',                                tag: 'tag' })
-          <tag> 'value', # process({                              array: root.arrayOf, index: 0, tag: 'tag' })
+ArrayOf = <tag> [        # process({ table: root, key: 'arrayOf', array: null,                   tag: 'tag' })
+          <tag> 'value', # process({ table: null,                 array: root.arrayOf, index: 0, tag: 'tag' })
 ]
 
-[Section] <tag>          # process({ table: root, key: 'section',                                tag: 'tag' })
+[Section] <tag>          # process({ table: root, key: 'section', array: null,                   tag: 'tag' })
 
 [[Items]] <tag>          # process({ table: root, key: 'items',   array: root.items,   index: 0, tag: 'tag' })
 ```
-
-Do not write tags on both side of a value; for inline arrays and inline tables, tags may only be placed before them, not after them.
 
 Tag content could include any character rather than `<` `>` <code>&#92;</code> `"` `'` <code>&#96;</code> CR LF U+2028 U+2029.
 

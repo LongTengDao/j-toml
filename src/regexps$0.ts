@@ -43,13 +43,9 @@ export const SYM_WHITESPACE = newRegExp`
 
 const Tag = /[^<>\\"'`\r\n\u2028\u2029]+/;
 
-export const KEY_VALUE_PAIR = newRegExp`
+const KEY_VALUE_PAIR = newRegExp`
 	^
 	${Whitespace}*
-	(?:
-		<(${Tag})>
-		${Whitespace}*
-	)?
 	=
 	${Whitespace}*
 	(?:
@@ -69,7 +65,7 @@ export const _VALUE_PAIR = newRegExp`
 	([^ \t#][^]*)
 	$`;
 
-export const TAG_REST = newRegExp`
+const TAG_REST = newRegExp`
 	^
 	<(${Tag})>
 	${Whitespace}*
@@ -127,26 +123,25 @@ const LITERAL_KEY :RegExp = /^'[^'\x00-\x08\x0B-\x1F\x7F]*'/;
 const LITERAL_KEY_LESSER :RegExp = /^'[^'\x00-\x08\x0B-\x1F]*'/;
 const DOT_KEY :RegExp = /^[ \t]*\.[ \t]*/;
 
-export function TABLE_DEFINITION_exec_groups (_ :string) :{ $_asArrayItem$$ :boolean, keys :string, tagInner :string, $$asArrayItem$_ :boolean, tagOuter :string } {
+export function TABLE_DEFINITION_exec_groups (_ :string) :{ $_asArrayItem$$ :boolean, keys :string, $$asArrayItem$_ :boolean, tag :string } {
 	const $_asArrayItem$$ :boolean = _.charAt(1)==='[';
 	_ = _.slice($_asArrayItem$$ ? 2 : 1).replace(PRE_WHITESPACE, '');
 	const keys :string = getKeys(_);
 	_ = _.slice(keys.length).replace(PRE_WHITESPACE, '');
-	let tagInner :string = '';
-	if ( _.startsWith('<') ) { ( { 1: tagInner, 2: _ } = TAG_REST.exec(_) || iterator$0.throws(SyntaxError(iterator$0.where())) ); }
 	_.startsWith(']') || iterator$0.throws(SyntaxError(iterator$0.where()));
 	const $$asArrayItem$_ :boolean = _.charAt(1)===']';
 	_ = _.slice($$asArrayItem$_ ? 2 : 1).replace(PRE_WHITESPACE, '');
-	let tagOuter :string = '';
-	if ( _.startsWith('<') ) { ( { 1: tagOuter, 2: _ } = TAG_REST.exec(_) || iterator$0.throws(SyntaxError(iterator$0.where())) ); }
+	let tag :string;
+	if ( _.startsWith('<') ) { ( { 1: tag, 2: _ } = TAG_REST.exec(_) || iterator$0.throws(SyntaxError(iterator$0.where())) ); }
+	else { tag = ''; }
 	_==='' || _.startsWith('#') || iterator$0.throws(SyntaxError(iterator$0.where()));
-	return { $_asArrayItem$$, keys, tagInner, $$asArrayItem$_, tagOuter };
+	return { $_asArrayItem$$, keys, $$asArrayItem$_, tag };
 }
 
-export function KEY_VALUE_PAIR_exec_groups (_ :string) :{ left :string, tagLeft :string, tagRight :string, right :string } {
+export function KEY_VALUE_PAIR_exec_groups (_ :string) :{ left :string, tag :string, right :string } {
 	const _1 :string = getKeys(_);
 	const $ :RegExpExecArray = KEY_VALUE_PAIR.exec(_.slice(_1.length)) || iterator$0.throws(SyntaxError(iterator$0.where()));
-	return { left: _1, tagLeft: $[1] || '', tagRight: $[2] || '', right: $[3] };
+	return { left: _1, tag: $[1] || '', right: $[2] };
 }
 
 function getKeys (_ :string) :string {

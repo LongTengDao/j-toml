@@ -36,7 +36,7 @@ export function appendTable (table :Table, key_key :string, asArrayItem :boolean
 			table[finalKey] = lastTable = new options$0.TableDepends;
 			options$0.unreopenable || reopenedTables.add(lastTable);
 		}
-		tag && options$0.collect({ table, key: finalKey, tag });
+		tag && options$0.collect({ table, key: finalKey, array: null, tag });
 	}
 	return lastTable;
 }
