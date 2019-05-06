@@ -135,8 +135,8 @@ export function use (specificationVersion :unknown, multiLineJoiner :unknown, us
 			zeroDatetime = moreDatetime = ctrl7F = sFloat = strictBareKey = inlineTable = false;
 			break;
 		case 0.2:
-			supportArrayOfTables = disallowEmptyKey = slashEscaping = true;
-			zeroDatetime = moreDatetime = ctrl7F = sFloat = strictBareKey = inlineTable = false;
+			supportArrayOfTables = zeroDatetime = disallowEmptyKey = slashEscaping = true;
+			moreDatetime = ctrl7F = sFloat = strictBareKey = inlineTable = false;
 			break;
 		case 0.1:
 			zeroDatetime = disallowEmptyKey = slashEscaping = true;

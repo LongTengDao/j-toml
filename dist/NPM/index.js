@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.93';
+const version = '0.5.94';
 
 const isBuffer = Buffer.isBuffer;
 
@@ -231,8 +231,8 @@ function use(specificationVersion, multiLineJoiner, useBigInt, xOptions) {
             zeroDatetime = moreDatetime = ctrl7F = sFloat = strictBareKey = inlineTable = false;
             break;
         case 0.2:
-            supportArrayOfTables = disallowEmptyKey = slashEscaping = true;
-            zeroDatetime = moreDatetime = ctrl7F = sFloat = strictBareKey = inlineTable = false;
+            supportArrayOfTables = zeroDatetime = disallowEmptyKey = slashEscaping = true;
+            moreDatetime = ctrl7F = sFloat = strictBareKey = inlineTable = false;
             break;
         case 0.1:
             zeroDatetime = disallowEmptyKey = slashEscaping = true;
