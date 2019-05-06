@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.94';
+const version = '0.5.95';
 
 const isBuffer = Buffer.isBuffer;
 
@@ -69,6 +69,8 @@ function throws(error) {
 
 const isSafeInteger = Number.isSafeInteger;
 
+const ownKeys = Reflect.ownKeys;
+
 /*!
  * 模块名称：@ltd/j-orderify
  * 模块功能：返回一个能保证给定对象的属性按此后添加顺序排列的 proxy，即使键名是 symbol，或整数 string。
@@ -85,8 +87,6 @@ const create = Object.create;
 const defineProperty = Reflect.defineProperty;
 
 const deleteProperty = Reflect.deleteProperty;
-
-const ownKeys = Reflect.ownKeys;
 
 const ownKeysKeepers = new WeakMap;
 const handlers = 
@@ -193,7 +193,7 @@ As = null;
 /* xOptions.mix */
 const unType = (array) => array;
 /* xOptions.tag */
-let processor;
+let processor = null;
 let collection = [];
 function collect_on(each) { collection.push(each); }
 function collect_off(each) { throw throws(SyntaxError(where())); }
@@ -272,25 +272,28 @@ function use(specificationVersion, multiLineJoiner, useBigInt, xOptions) {
     if (xOptions === null) {
         TableDepends = Table;
         allowLonger = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = enableInterpolationString = unreopenable = false;
-        processor = null;
         typify = true;
     }
     else {
-        TableDepends = xOptions.order ? OrderedTable : Table;
-        allowLonger = !!xOptions.longer;
-        enableNull = !!xOptions.null;
-        allowInlineTableMultiLineAndTrailingCommaEvenNoComma = !!xOptions.multi;
-        enableInterpolationString = !!xOptions.ins;
-        unreopenable = !!xOptions.close;
-        typify = !xOptions.mix;
-        processor = xOptions.tag || null;
-        if (processor) {
-            if (typeof processor !== 'function') {
+        const { order, longer, null: _null, multi, ins, close, mix, tag, ...unknown } = xOptions;
+        if (ownKeys(unknown).length) {
+            throw Error('TOML.parse(,,,,xOptions.tag)');
+        }
+        TableDepends = order ? OrderedTable : Table;
+        allowLonger = !!longer;
+        enableNull = !!_null;
+        allowInlineTableMultiLineAndTrailingCommaEvenNoComma = !!multi;
+        enableInterpolationString = !!ins;
+        unreopenable = !!close;
+        typify = !mix;
+        if (tag) {
+            if (typeof tag !== 'function') {
                 throw TypeError('TOML.parse(,,,,xOptions.tag)');
             }
             if (typify) {
                 throw Error('TOML.parse(,,,,xOptions) xOptions.tag needs xOptions.mix to be true');
             }
+            processor = tag;
             collect = collect_on;
         }
         else {
@@ -455,11 +458,10 @@ class LocalTime extends Datetime {
     }
 }
 
-const FLOAT = /^[-+]?(?:0|[1-9]\d*(?:_\d+)*)(?:\.\d+(?:_\d+)*)?(?:[eE][-+]?\d+(?:_\d+)*)?$/;
-const FLOAT_NOT_INTEGER = /[.eE]/;
+const FLOAT = /^[-+]?(?:0|[1-9]\d*(?:_\d+)*)(?=[.eE])(?:\.\d+(?:_\d+)*)?(?:[eE][-+]?\d+(?:_\d+)*)?$/;
 const UNDERSCORES = /_/g;
 const Float = (literal) => {
-    if (FLOAT.test(literal) && FLOAT_NOT_INTEGER.test(literal)) {
+    if (FLOAT.test(literal)) {
         const number = +literal.replace(UNDERSCORES, '');
         isFinite(number) || throws(RangeError('Float has been as big as Infinity, like ' + literal + ' at ' + where()));
         return number;

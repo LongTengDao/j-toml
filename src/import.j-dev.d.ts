@@ -28,3 +28,4 @@ declare module '.parseInt' { export default parseInt; }
 declare module '.String.fromCodePoint' { export default String.fromCodePoint; }
 declare module '.Date' { export default Date; }
 declare module '.isFinite' { export default isFinite; }
+declare module '.Reflect.ownKeys' { export default Reflect.ownKeys; }

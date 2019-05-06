@@ -4,6 +4,7 @@ import TypeError from '.TypeError';
 import Error from '.Error';
 import isSafeInteger from '.Number.isSafeInteger';
 import WeakMap from '.WeakMap';
+import ownKeys from '.Reflect.ownKeys';
 import { Table, OrderedTable } from './types/Table';
 import { BigIntInteger, NumberInteger, DependInteger } from './types/Integer';
 import * as iterator$0 from './iterator$0';
@@ -89,7 +90,7 @@ export const unType :as = (array :any[]) :any[] => array;
 
 /* xOptions.tag */
 
-let processor :tag | null;
+let processor :tag | null = null;
 
 type tag = (each :each) => any;
 type each =
@@ -164,21 +165,22 @@ export function use (specificationVersion :unknown, multiLineJoiner :unknown, us
 	if ( xOptions===null ) {
 		TableDepends = Table;
 		allowLonger = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = enableInterpolationString = unreopenable = false;
-		processor = null;
 		typify = true;
 	}
 	else {
-		TableDepends = xOptions.order ? OrderedTable : Table;
-		allowLonger = !!xOptions.longer;
-		enableNull = !!xOptions.null;
-		allowInlineTableMultiLineAndTrailingCommaEvenNoComma = !!xOptions.multi;
-		enableInterpolationString = !!xOptions.ins;
-		unreopenable = !!xOptions.close;
-		typify = !xOptions.mix;
-		processor = xOptions.tag || null;
-		if ( processor ) {
-			if ( typeof processor!=='function' ) { throw TypeError('TOML.parse(,,,,xOptions.tag)'); }
+		const { order, longer, null: _null, multi, ins, close, mix, tag, ...unknown } = xOptions;
+		if ( ownKeys(unknown).length ) { throw Error('TOML.parse(,,,,xOptions.tag)'); }
+		TableDepends = order ? OrderedTable : Table;
+		allowLonger = !!longer;
+		enableNull = !!_null;
+		allowInlineTableMultiLineAndTrailingCommaEvenNoComma = !!multi;
+		enableInterpolationString = !!ins;
+		unreopenable = !!close;
+		typify = !mix;
+		if ( tag ) {
+			if ( typeof tag!=='function' ) { throw TypeError('TOML.parse(,,,,xOptions.tag)'); }
 			if ( typify ) { throw Error('TOML.parse(,,,,xOptions) xOptions.tag needs xOptions.mix to be true'); }
+			processor = tag;
 			collect = collect_on;
 		}
 		else { collect = collect_off; }
