@@ -13,7 +13,7 @@ const REGEXP = /^/;
 
 export default function parse (
 	sourceContent :Buffer | string,
-	specificationVersion :0.5 | 0.4 | 0.3,
+	specificationVersion :0.5 | 0.4 | 0.3 | 0.2 | 0.1,
 	multiLineJoiner :string,
 	useBigInt :boolean | number = true,
 	xOptions :options$0.xOptions = null

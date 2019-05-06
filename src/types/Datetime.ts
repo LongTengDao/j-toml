@@ -5,6 +5,7 @@ import Error from '.Error';
 import WeakMap from '.WeakMap';
 import Date from '.Date';
 
+import * as options$0 from '../options$0';
 import * as iterator$0 from '../iterator$0';
 
 const _29_ = /(?:0[1-9]|1\d|2[0-9])/;
@@ -17,37 +18,52 @@ const YMD = newRegExp`
 	\d\d\d\d-
 	(?:
 		(?:0[13578]|1[02])-${_31_}
-	|
+		|
 		(?:0[469]|11)-${_30_}
-	|
+		|
 		02-${_29_}
 	)`;
 
+const HMS = newRegExp`
+	${_23_}:${_59_}:${_59_}
+	`;
+
 const HMS_ = newRegExp`
-	${_23_}:${_59_}:${_59_}(?:\.\d+)?`;
+	${HMS}
+	(?:\.\d+)?
+	`;
 
 export const OFFSET = /(?:Z|[+-]\d\d:\d\d)$/;
 
-export const OFFSET_DATETIME = newRegExp`
+const OFFSET_DATETIME = newRegExp`
 	^
 	${YMD}
 	[T ]
 	${HMS_}
-	${OFFSET}`;
+	${OFFSET}
+	$`;
 
-export const LOCAL_DATETIME = newRegExp`
+const OFFSET_DATETIME_ZERO = newRegExp`
+	^
+	${YMD}
+	[T ]
+	${HMS}
+	Z
+	$`;
+
+const LOCAL_DATETIME = newRegExp`
 	^
 	${YMD}
 	[T ]
 	${HMS_}
 	$`;
 
-export const LOCAL_DATE = newRegExp`
+const LOCAL_DATE = newRegExp`
 	^
 	${YMD}
 	$`;
 
-export const LOCAL_TIME = newRegExp`
+const LOCAL_TIME = newRegExp`
 	^
 	${HMS_}
 	$`;
@@ -70,7 +86,7 @@ class Datetime extends Date {
 
 export class OffsetDateTime extends Datetime {
 	constructor (literal :string) {
-		OFFSET_DATETIME.test(literal)
+		( options$0.zeroDatetime ? OFFSET_DATETIME_ZERO : OFFSET_DATETIME ).test(literal)
 		|| iterator$0.throws(SyntaxError('Invalid Offset Date-Time '+literal+' at '+iterator$0.where()));
 		super(literal.replace(' ', 'T'), literal);
 	}

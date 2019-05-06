@@ -43,7 +43,7 @@ TOML.parse(sourceContent, specificationVersion, multiLineJoiner[, useBigInt=true
 ```
 function parse (
          sourceContent        :string | Buffer,
-         specificationVersion :0.5 | 0.4 | 0.3,
+         specificationVersion :0.5 | 0.4 | 0.3 | 0.2 | 0.1,
          multiLineJoiner      :string,
          useBigInt?           :boolean | number = true,
          xOptions?            :object
@@ -67,10 +67,10 @@ function parse (
     
 1.  **`specificationVersion`**
     
-    *   type: `0.5` / `0.4` / `0.3`
+    *   type: `0.5` / `0.4` / `0.3` / `0.2` / `0.1`
     *   required
     
-    If there is no special reason (e.g. the downstream program could not deal with `Infinity`、`NaN` values, Local Date-Time / Local Date / Local Time types, empty string key name, even array of arrays of tables structure yet), the latest version is recommended.
+    If there is no special reason (e.g. the downstream program could not deal with `Infinity`、`NaN`、fractional seconds and edge Datetime values, Local Date-Time / Local Date / Local Time types, empty string key name, even array of (arrays of) tables structure yet), the latest version is recommended.
     
 2.  **`multiLineJoiner`**
     

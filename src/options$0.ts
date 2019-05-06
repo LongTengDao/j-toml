@@ -31,6 +31,8 @@ export type xOptions = null | {
 	mix :true,
 	tag :tag,
 });
+export let zeroDatetime :boolean;
+export let supportArrayOfTables :boolean;
 export let inlineTable :boolean;
 export let slashEscaping :boolean;
 export let strictBareKey :boolean;
@@ -62,7 +64,7 @@ const arrayTypes :WeakMap<any[], as> = new WeakMap;
 let As :( () => as ) | null = () => function as (array :any[]) :any[] {
 	if ( arrayTypes.has(array) ) {
 		arrayTypes.get(array)===as
-		|| iterator$0.throws(TypeError('Types in array must be same. Check '+iterator$0.where()));
+		|| iterator$0.throws(TypeError('Types in Array must be same. Check '+iterator$0.where()));
 	}
 	else { arrayTypes.set(array, as); }
 	return array;
@@ -119,19 +121,30 @@ export function clear () :void {
 
 export function use (specificationVersion :unknown, multiLineJoiner :unknown, useBigInt :unknown, xOptions :Exclude<any, undefined>) :void {
 	
-	if ( specificationVersion===0.5 ) {
-		moreDatetime = ctrl7F = sFloat = strictBareKey = inlineTable = true;
-		disallowEmptyKey = slashEscaping = false;
+	switch ( specificationVersion ) {
+		case 0.5:
+			supportArrayOfTables = moreDatetime = ctrl7F = sFloat = strictBareKey = inlineTable = true;
+			zeroDatetime = disallowEmptyKey = slashEscaping = false;
+			break;
+		case 0.4:
+			supportArrayOfTables = disallowEmptyKey = strictBareKey = inlineTable = true;
+			zeroDatetime = moreDatetime = ctrl7F = sFloat = slashEscaping = false;
+			break;
+		case 0.3:
+			supportArrayOfTables = disallowEmptyKey = slashEscaping = true;
+			zeroDatetime = moreDatetime = ctrl7F = sFloat = strictBareKey = inlineTable = false;
+			break;
+		case 0.2:
+			supportArrayOfTables = disallowEmptyKey = slashEscaping = true;
+			zeroDatetime = moreDatetime = ctrl7F = sFloat = strictBareKey = inlineTable = false;
+			break;
+		case 0.1:
+			zeroDatetime = disallowEmptyKey = slashEscaping = true;
+			supportArrayOfTables = moreDatetime = ctrl7F = sFloat = strictBareKey = inlineTable = false;
+			break;
+		default:
+			throw Error('TOML.parse(,specificationVersion)');
 	}
-	else if ( specificationVersion===0.4 ) {
-		disallowEmptyKey = strictBareKey = inlineTable = true;
-		moreDatetime = ctrl7F = sFloat = slashEscaping = false;
-	}
-	else if ( specificationVersion===0.3 ) {
-		disallowEmptyKey = slashEscaping = true;
-		moreDatetime = ctrl7F = sFloat = strictBareKey = inlineTable = false;
-	}
-	else { throw Error('TOML.parse(,specificationVersion)'); }
 	
 	if ( typeof multiLineJoiner==='string' ) { useWhatToJoinMultiLineString = multiLineJoiner; }
 	else { throw TypeError('TOML.parse(,,multiLineJoiner)'); }

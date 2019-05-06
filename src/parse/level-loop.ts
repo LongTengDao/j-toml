@@ -20,7 +20,7 @@ export default function Root () {
 		else if ( line.startsWith('#') ) { }
 		else if ( line.startsWith('[') ) {
 			const { $_asArrayItem$$, keys, $$asArrayItem$_, tag } = regexps$0.TABLE_DEFINITION_exec_groups(line);
-			$_asArrayItem$$===$$asArrayItem$_ || iterator$0.throws(SyntaxError('Square brackets of table define statement not match at '+iterator$0.where()));
+			$_asArrayItem$$===$$asArrayItem$_ || iterator$0.throws(SyntaxError('Square brackets of Table definition statement not match at '+iterator$0.where()));
 			lastSectionTable = appendTable(rootTable, keys, $_asArrayItem$$, tag);
 		}
 		else {
@@ -49,7 +49,7 @@ function assign (lastInlineTable :Table, lineRest :string) :string {
 		case '`':
 			return assignInterpolationString(table, finalKey, lineRest);
 		case '{':
-			options$0.inlineTable || iterator$0.throws(SyntaxError('Inline table is not allowed before TOML v0.4, which at '+iterator$0.where()));
+			options$0.inlineTable || iterator$0.throws(SyntaxError('Inline Table is not allowed before TOML v0.4, which at '+iterator$0.where()));
 			iterator$0.stacks_push((lineRest :string) :string => equalInlineTable(table, finalKey, lineRest));
 			return lineRest;
 		case '[':
@@ -116,7 +116,7 @@ function push (lastArray :any[], lineRest :string) :string {
 		case '`':
 			return assignInterpolationString(options$0.asStrings(lastArray), lastIndex, lineRest);
 		case '{':
-			options$0.inlineTable || iterator$0.throws(SyntaxError('Inline table is not allowed before TOML v0.4, which at '+iterator$0.where()));
+			options$0.inlineTable || iterator$0.throws(SyntaxError('Inline Table is not allowed before TOML v0.4, which at '+iterator$0.where()));
 			iterator$0.stacks_push(lineRest => equalInlineTable(options$0.asTables(lastArray), lastIndex, lineRest));
 			return lineRest;
 		case '[':

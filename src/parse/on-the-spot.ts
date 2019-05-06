@@ -64,14 +64,14 @@ function prepareTable (table :Table, keys :string[]) :Table {
 		if ( key in table ) {
 			table = table[key];
 			if ( isTable(table) ) {
-				sealedInline.has(table) && iterator$0.throws(Error('Trying to define table through static Inline Object at '+iterator$0.where()));
+				sealedInline.has(table) && iterator$0.throws(Error('Trying to define Table under static Inline Table at '+iterator$0.where()));
 			}
 			else if ( isArray(table) ) {
 				sealedInline.has(table) && iterator$0.throws(Error('Trying to append value to static Inline Array at '+iterator$0.where()));
 				// @ts-ignore
 				table = table[table.length-1];
 			}
-			else { iterator$0.throws(Error('Trying to define table through non-Table value at '+iterator$0.where())); }
+			else { iterator$0.throws(Error('Trying to define Table under non-Table value at '+iterator$0.where())); }
 		}
 		else {
 			openTables.add(table = table[key] = new options$0.TableDepends);
@@ -90,7 +90,7 @@ export function prepareInlineTable (table :Table, keys :string[]) :Table {
 		if ( key in table ) {
 			table = table[key];
 			isTable(table) || iterator$0.throws(Error('Trying to assign property through non-Table value at '+iterator$0.where()));
-			sealedInline.has(table) && iterator$0.throws(Error('Trying to assign property through static Inline Object at '+iterator$0.where()));
+			sealedInline.has(table) && iterator$0.throws(Error('Trying to assign property through static Inline Table at '+iterator$0.where()));
 		}
 		else {
 			table = table[key] = new options$0.TableDepends;
@@ -133,7 +133,7 @@ export function assignLiteralString (table :Table, finalKey :string, literal :st
 const CONTROL_CHARACTER_EXCLUDE_TAB = /[\x00-\x08\x0B-\x1F\x7F]/;
 const CONTROL_CHARACTER_EXCLUDE_TAB_LESSER = /[\x00-\x08\x0B-\x1F]/;
 function checkLiteralString (literal :string) :string {
-	( options$0.ctrl7F ? CONTROL_CHARACTER_EXCLUDE_TAB : CONTROL_CHARACTER_EXCLUDE_TAB_LESSER ).test(literal) && iterator$0.throws(SyntaxError('Control characters other than tab are not permitted in a Literal String, which was found at '+iterator$0.where()));
+	( options$0.ctrl7F ? CONTROL_CHARACTER_EXCLUDE_TAB : CONTROL_CHARACTER_EXCLUDE_TAB_LESSER ).test(literal) && iterator$0.throws(SyntaxError('Control characters other than Tab are not permitted in a Literal String, which was found at '+iterator$0.where()));
 	return literal;
 }
 

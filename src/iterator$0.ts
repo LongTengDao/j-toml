@@ -20,7 +20,7 @@ let last :noop = noop;
 
 
 export function could () :void {
-	if ( sourceLines!==NONE ) { throw Error('Inner error: parsing in parsing.'); }
+	if ( sourceLines!==NONE ) { throw Error('Internal error: parsing during parsing.'); }
 }
 
 const EOL = /\r?\n/;

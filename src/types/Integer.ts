@@ -19,7 +19,7 @@ export const NumberInteger = (literal :string) :number => {
 		: +literal.replace(UNDERSCORES_SIGN, '');
 	options$0.allowLonger
 	|| isSafeInteger(number)
-	|| iterator$0.throws(RangeError('Integer did not use BitInt must be Number.isSafeInteger, not includes '+literal+' meet at '+iterator$0.where()));
+	|| iterator$0.throws(RangeError('Integer did not use BitInt must fit Number.isSafeInteger, not includes '+literal+' meet at '+iterator$0.where()));
 	return number;
 };
 

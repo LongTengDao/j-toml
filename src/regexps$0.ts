@@ -125,7 +125,12 @@ const DOT_KEY :RegExp = /^[ \t]*\.[ \t]*/;
 
 export function TABLE_DEFINITION_exec_groups (_ :string) :{ $_asArrayItem$$ :boolean, keys :string, $$asArrayItem$_ :boolean, tag :string } {
 	const $_asArrayItem$$ :boolean = _.charAt(1)==='[';
-	_ = _.slice($_asArrayItem$$ ? 2 : 1).replace(PRE_WHITESPACE, '');
+	if ( $_asArrayItem$$ ) {
+		options$0.supportArrayOfTables || iterator$0.throws(SyntaxError('Array of Tables is not allowed before TOML v0.2, which at '+iterator$0.where()));
+		_ = _.slice(2);
+	}
+	else { _ = _.slice(1); }
+	_ = _.replace(PRE_WHITESPACE, '');
 	const keys :string = getKeys(_);
 	_ = _.slice(keys.length).replace(PRE_WHITESPACE, '');
 	_.startsWith(']') || iterator$0.throws(SyntaxError(iterator$0.where()));

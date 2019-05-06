@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.92';
+const version = '0.5.93';
 
 const isBuffer = Buffer.isBuffer;
 
@@ -17,7 +17,7 @@ let stacks_length = 0;
 let last = noop;
 function could() {
     if (sourceLines !== NONE) {
-        throw Error('Inner error: parsing in parsing.');
+        throw Error('Internal error: parsing during parsing.');
     }
 }
 const EOL = /\r?\n/;
@@ -134,7 +134,7 @@ const NumberInteger = (literal) => {
         : +literal.replace(UNDERSCORES_SIGN, '');
     allowLonger
         || isSafeInteger(number)
-        || throws(RangeError('Integer did not use BitInt must be Number.isSafeInteger, not includes ' + literal + ' meet at ' + where()));
+        || throws(RangeError('Integer did not use BitInt must fit Number.isSafeInteger, not includes ' + literal + ' meet at ' + where()));
     return number;
 };
 const BigIntInteger = (literal) => {
@@ -160,6 +160,8 @@ let useWhatToJoinMultiLineString;
 let IntegerDepends;
 let IntegerMin;
 let IntegerMax;
+let zeroDatetime;
+let supportArrayOfTables;
 let inlineTable;
 let slashEscaping;
 let strictBareKey;
@@ -179,7 +181,7 @@ const arrayTypes = new WeakMap;
 let As = () => function as(array) {
     if (arrayTypes.has(array)) {
         arrayTypes.get(array) === as
-            || throws(TypeError('Types in array must be same. Check ' + where()));
+            || throws(TypeError('Types in Array must be same. Check ' + where()));
     }
     else {
         arrayTypes.set(array, as);
@@ -215,20 +217,29 @@ function clear() {
     collection.length = 0;
 }
 function use(specificationVersion, multiLineJoiner, useBigInt, xOptions) {
-    if (specificationVersion === 0.5) {
-        moreDatetime = ctrl7F = sFloat = strictBareKey = inlineTable = true;
-        disallowEmptyKey = slashEscaping = false;
-    }
-    else if (specificationVersion === 0.4) {
-        disallowEmptyKey = strictBareKey = inlineTable = true;
-        moreDatetime = ctrl7F = sFloat = slashEscaping = false;
-    }
-    else if (specificationVersion === 0.3) {
-        disallowEmptyKey = slashEscaping = true;
-        moreDatetime = ctrl7F = sFloat = strictBareKey = inlineTable = false;
-    }
-    else {
-        throw Error('TOML.parse(,specificationVersion)');
+    switch (specificationVersion) {
+        case 0.5:
+            supportArrayOfTables = moreDatetime = ctrl7F = sFloat = strictBareKey = inlineTable = true;
+            zeroDatetime = disallowEmptyKey = slashEscaping = false;
+            break;
+        case 0.4:
+            supportArrayOfTables = disallowEmptyKey = strictBareKey = inlineTable = true;
+            zeroDatetime = moreDatetime = ctrl7F = sFloat = slashEscaping = false;
+            break;
+        case 0.3:
+            supportArrayOfTables = disallowEmptyKey = slashEscaping = true;
+            zeroDatetime = moreDatetime = ctrl7F = sFloat = strictBareKey = inlineTable = false;
+            break;
+        case 0.2:
+            supportArrayOfTables = disallowEmptyKey = slashEscaping = true;
+            zeroDatetime = moreDatetime = ctrl7F = sFloat = strictBareKey = inlineTable = false;
+            break;
+        case 0.1:
+            zeroDatetime = disallowEmptyKey = slashEscaping = true;
+            supportArrayOfTables = moreDatetime = ctrl7F = sFloat = strictBareKey = inlineTable = false;
+            break;
+        default:
+            throw Error('TOML.parse(,specificationVersion)');
     }
     if (typeof multiLineJoiner === 'string') {
         useWhatToJoinMultiLineString = multiLineJoiner;
@@ -345,20 +356,33 @@ const YMD = newRegExp `
 	\d\d\d\d-
 	(?:
 		(?:0[13578]|1[02])-${_31_}
-	|
+		|
 		(?:0[469]|11)-${_30_}
-	|
+		|
 		02-${_29_}
 	)`;
+const HMS = newRegExp `
+	${_23_}:${_59_}:${_59_}
+	`;
 const HMS_ = newRegExp `
-	${_23_}:${_59_}:${_59_}(?:\.\d+)?`;
+	${HMS}
+	(?:\.\d+)?
+	`;
 const OFFSET = /(?:Z|[+-]\d\d:\d\d)$/;
 const OFFSET_DATETIME = newRegExp `
 	^
 	${YMD}
 	[T ]
 	${HMS_}
-	${OFFSET}`;
+	${OFFSET}
+	$`;
+const OFFSET_DATETIME_ZERO = newRegExp `
+	^
+	${YMD}
+	[T ]
+	${HMS}
+	Z
+	$`;
 const LOCAL_DATETIME = newRegExp `
 	^
 	${YMD}
@@ -391,7 +415,7 @@ class Datetime extends Date {
 }
 class OffsetDateTime extends Datetime {
     constructor(literal) {
-        OFFSET_DATETIME.test(literal)
+        (zeroDatetime ? OFFSET_DATETIME_ZERO : OFFSET_DATETIME).test(literal)
             || throws(SyntaxError('Invalid Offset Date-Time ' + literal + ' at ' + where()));
         super(literal.replace(' ', 'T'), literal);
     }
@@ -436,14 +460,9 @@ const FLOAT_NOT_INTEGER = /[.eE]/;
 const UNDERSCORES = /_/g;
 const Float = (literal) => {
     if (FLOAT.test(literal) && FLOAT_NOT_INTEGER.test(literal)) {
-        if (sFloat) {
-            return +literal.replace(UNDERSCORES, '');
-        }
-        else {
-            const number = +literal.replace(UNDERSCORES, '');
-            isFinite(number) || throws(RangeError('Float can not be as big as Infinity before TOML v0.5, like ' + literal + ' at ' + where()));
-            return number;
-        }
+        const number = +literal.replace(UNDERSCORES, '');
+        isFinite(number) || throws(RangeError('Float has been as big as Infinity, like ' + literal + ' at ' + where()));
+        return number;
     }
     //if ( options\$0.sFloat ) {
     //	if ( literal==='inf' || literal==='+inf' ) { return Infinity; }
@@ -556,7 +575,14 @@ const LITERAL_KEY_LESSER = /^'[^'\x00-\x08\x0B-\x1F]*'/;
 const DOT_KEY = /^[ \t]*\.[ \t]*/;
 function TABLE_DEFINITION_exec_groups(_) {
     const $_asArrayItem$$ = _.charAt(1) === '[';
-    _ = _.slice($_asArrayItem$$ ? 2 : 1).replace(PRE_WHITESPACE, '');
+    if ($_asArrayItem$$) {
+        supportArrayOfTables || throws(SyntaxError('Array of Tables is not allowed before TOML v0.2, which at ' + where()));
+        _ = _.slice(2);
+    }
+    else {
+        _ = _.slice(1);
+    }
+    _ = _.replace(PRE_WHITESPACE, '');
     const keys = getKeys(_);
     _ = _.slice(keys.length).replace(PRE_WHITESPACE, '');
     _.startsWith(']') || throws(SyntaxError(where()));
@@ -704,7 +730,7 @@ function prepareTable(table, keys) {
         if (key in table) {
             table = table[key];
             if (isTable(table)) {
-                sealedInline.has(table) && throws(Error('Trying to define table through static Inline Object at ' + where()));
+                sealedInline.has(table) && throws(Error('Trying to define Table under static Inline Table at ' + where()));
             }
             else if (isArray(table)) {
                 sealedInline.has(table) && throws(Error('Trying to append value to static Inline Array at ' + where()));
@@ -712,7 +738,7 @@ function prepareTable(table, keys) {
                 table = table[table.length - 1];
             }
             else {
-                throws(Error('Trying to define table through non-Table value at ' + where()));
+                throws(Error('Trying to define Table under non-Table value at ' + where()));
             }
         }
         else {
@@ -733,7 +759,7 @@ function prepareInlineTable(table, keys) {
         if (key in table) {
             table = table[key];
             isTable(table) || throws(Error('Trying to assign property through non-Table value at ' + where()));
-            sealedInline.has(table) && throws(Error('Trying to assign property through static Inline Object at ' + where()));
+            sealedInline.has(table) && throws(Error('Trying to assign property through static Inline Table at ' + where()));
         }
         else {
             table = table[key] = new TableDepends;
@@ -776,7 +802,7 @@ function assignLiteralString(table, finalKey, literal) {
 const CONTROL_CHARACTER_EXCLUDE_TAB = /[\x00-\x08\x0B-\x1F\x7F]/;
 const CONTROL_CHARACTER_EXCLUDE_TAB_LESSER = /[\x00-\x08\x0B-\x1F]/;
 function checkLiteralString(literal) {
-    (ctrl7F ? CONTROL_CHARACTER_EXCLUDE_TAB : CONTROL_CHARACTER_EXCLUDE_TAB_LESSER).test(literal) && throws(SyntaxError('Control characters other than tab are not permitted in a Literal String, which was found at ' + where()));
+    (ctrl7F ? CONTROL_CHARACTER_EXCLUDE_TAB : CONTROL_CHARACTER_EXCLUDE_TAB_LESSER).test(literal) && throws(SyntaxError('Control characters other than Tab are not permitted in a Literal String, which was found at ' + where()));
     return literal;
 }
 function assignBasicString(table, finalKey, literal) {
@@ -842,7 +868,7 @@ function Root() {
         else if (line.startsWith('#')) ;
         else if (line.startsWith('[')) {
             const { $_asArrayItem$$, keys, $$asArrayItem$_, tag } = TABLE_DEFINITION_exec_groups(line);
-            $_asArrayItem$$ === $$asArrayItem$_ || throws(SyntaxError('Square brackets of table define statement not match at ' + where()));
+            $_asArrayItem$$ === $$asArrayItem$_ || throws(SyntaxError('Square brackets of Table definition statement not match at ' + where()));
             lastSectionTable = appendTable(rootTable, keys, $_asArrayItem$$, tag);
         }
         else {
@@ -872,7 +898,7 @@ function assign(lastInlineTable, lineRest) {
         case '`':
             return assignInterpolationString(table, finalKey, lineRest);
         case '{':
-            inlineTable || throws(SyntaxError('Inline table is not allowed before TOML v0.4, which at ' + where()));
+            inlineTable || throws(SyntaxError('Inline Table is not allowed before TOML v0.4, which at ' + where()));
             stacks_push((lineRest) => equalInlineTable(table, finalKey, lineRest));
             return lineRest;
         case '[':
@@ -938,7 +964,7 @@ function push(lastArray, lineRest) {
         case '`':
             return assignInterpolationString(asStrings(lastArray), lastIndex, lineRest);
         case '{':
-            inlineTable || throws(SyntaxError('Inline table is not allowed before TOML v0.4, which at ' + where()));
+            inlineTable || throws(SyntaxError('Inline Table is not allowed before TOML v0.4, which at ' + where()));
             stacks_push(lineRest => equalInlineTable(asTables(lastArray), lastIndex, lineRest));
             return lineRest;
         case '[':

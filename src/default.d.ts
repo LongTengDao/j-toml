@@ -6,7 +6,7 @@ declare const exports :{
 	
 	parse (
 		sourceContent :string | Buffer,
-		specificationVersion :0.5 | 0.4 | 0.3,
+		specificationVersion :0.5 | 0.4 | 0.3 | 0.2 | 0.1,
 		multiLineJoiner :string,
 		useBigInt? :true | false | number,
 		xOptions? :xOptions,
@@ -14,7 +14,7 @@ declare const exports :{
 	
 	install (
 		readFileSync :(path :string) => Buffer,
-		specificationVersion :0.5 | 0.4 | 0.3,
+		specificationVersion :0.5 | 0.4 | 0.3 | 0.2 | 0.1,
 		multiLineJoiner :string,
 		useBigInt? :true | false | number,
 		xOptions? :xOptions,
