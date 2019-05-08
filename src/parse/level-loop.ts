@@ -9,7 +9,6 @@ import { Float } from '../types/Float';
 import * as options$0 from '../options$0';
 import * as regexps$0 from '../regexps$0';
 import { sealedInline, appendTable, parseKeys, prepareInlineTable, assignLiteralString, assignBasicString } from './on-the-spot';
-import { assignInterpolationString } from './x-feature';
 
 export default function Root () {
 	const rootTable :Table = new options$0.TableDepends;
@@ -36,7 +35,7 @@ function assign (lastInlineTable :Table, lineRest :string) :string {
 	let left :string;
 	let tag :string;
 	( { left, tag, right: lineRest } = regexps$0.KEY_VALUE_PAIR_exec_groups(lineRest) );
-	const leadingKeys :string[] = parseKeys(left);
+	const leadingKeys :[string, ...string[]] = parseKeys(left);
 	const finalKey :string = <string>leadingKeys.pop();
 	const table :Table = prepareInlineTable(lastInlineTable, leadingKeys);
 	finalKey in table && iterator$0.throws(Error('Duplicate property definition at '+iterator$0.where()));
@@ -46,8 +45,6 @@ function assign (lastInlineTable :Table, lineRest :string) :string {
 			return assignLiteralString(table, finalKey, lineRest);
 		case '"':
 			return assignBasicString(table, finalKey, lineRest);
-		case '`':
-			return assignInterpolationString(table, finalKey, lineRest);
 		case '{':
 			options$0.inlineTable || iterator$0.throws(SyntaxError('Inline Table is not allowed before TOML v0.4, which at '+iterator$0.where()));
 			iterator$0.stacks_push((lineRest :string) :string => equalInlineTable(table, finalKey, lineRest));
@@ -113,8 +110,6 @@ function push (lastArray :any[], lineRest :string) :string {
 			return assignLiteralString(options$0.asStrings(lastArray), lastIndex, lineRest);
 		case '"':
 			return assignBasicString(options$0.asStrings(lastArray), lastIndex, lineRest);
-		case '`':
-			return assignInterpolationString(options$0.asStrings(lastArray), lastIndex, lineRest);
 		case '{':
 			options$0.inlineTable || iterator$0.throws(SyntaxError('Inline Table is not allowed before TOML v0.4, which at '+iterator$0.where()));
 			iterator$0.stacks_push(lineRest => equalInlineTable(options$0.asTables(lastArray), lastIndex, lineRest));

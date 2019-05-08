@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.95';
+const version = '0.5.96';
 
 const isBuffer = Buffer.isBuffer;
 
@@ -175,7 +175,6 @@ let unreopenable;
 let allowLonger;
 let enableNull;
 let allowInlineTableMultiLineAndTrailingCommaEvenNoComma;
-let enableInterpolationString;
 let asNulls, asStrings, asTables, asArrays, asBooleans, asFloats, asIntegers, asOffsetDateTimes, asLocalDateTimes, asLocalDates, asLocalTimes;
 const arrayTypes = new WeakMap;
 let As = () => function as(array) {
@@ -271,11 +270,11 @@ function use(specificationVersion, multiLineJoiner, useBigInt, xOptions) {
     let typify;
     if (xOptions === null) {
         TableDepends = Table;
-        allowLonger = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = enableInterpolationString = unreopenable = false;
+        allowLonger = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = unreopenable = false;
         typify = true;
     }
     else {
-        const { order, longer, null: _null, multi, ins, close, mix, tag, ...unknown } = xOptions;
+        const { order, longer, null: _null, multi, close, mix, tag, ...unknown } = xOptions;
         if (ownKeys(unknown).length) {
             throw Error('TOML.parse(,,,,xOptions.tag)');
         }
@@ -283,7 +282,6 @@ function use(specificationVersion, multiLineJoiner, useBigInt, xOptions) {
         allowLonger = !!longer;
         enableNull = !!_null;
         allowInlineTableMultiLineAndTrailingCommaEvenNoComma = !!multi;
-        enableInterpolationString = !!ins;
         unreopenable = !!close;
         typify = !mix;
         if (tag) {
@@ -839,28 +837,6 @@ function assignBasicString(table, finalKey, literal) {
     }
 }
 
-const DELIMITER_CHECK = /[^`]/;
-function assignInterpolationString(table, finalKey, delimiter) {
-    enableInterpolationString || throws(SyntaxError(where()));
-    DELIMITER_CHECK.test(delimiter) && throws(SyntaxError('Interpolation String opening tag incorrect at ' + where()));
-    let string;
-    let lineRest;
-    {
-        const literals = [];
-        for (const start = mark();;) {
-            const literal = must('Interpolation String', start);
-            if (literal.startsWith(delimiter)) {
-                lineRest = literal.slice(delimiter.length).replace(PRE_WHITESPACE, '');
-                break;
-            }
-            literals.push(literal);
-        }
-        string = literals.join('\n');
-    }
-    table[finalKey] = string;
-    return lineRest;
-}
-
 function Root() {
     const rootTable = new TableDepends;
     let lastSectionTable = rootTable;
@@ -897,8 +873,6 @@ function assign(lastInlineTable, lineRest) {
             return assignLiteralString(table, finalKey, lineRest);
         case '"':
             return assignBasicString(table, finalKey, lineRest);
-        case '`':
-            return assignInterpolationString(table, finalKey, lineRest);
         case '{':
             inlineTable || throws(SyntaxError('Inline Table is not allowed before TOML v0.4, which at ' + where()));
             stacks_push((lineRest) => equalInlineTable(table, finalKey, lineRest));
@@ -963,8 +937,6 @@ function push(lastArray, lineRest) {
             return assignLiteralString(asStrings(lastArray), lastIndex, lineRest);
         case '"':
             return assignBasicString(asStrings(lastArray), lastIndex, lineRest);
-        case '`':
-            return assignInterpolationString(asStrings(lastArray), lastIndex, lineRest);
         case '{':
             inlineTable || throws(SyntaxError('Inline Table is not allowed before TOML v0.4, which at ' + where()));
             stacks_push(lineRest => equalInlineTable(asTables(lastArray), lastIndex, lineRest));

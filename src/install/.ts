@@ -1,10 +1,10 @@
 import TypeError from '.TypeError';
-import { xOptions } from './options$0';
-import parse from './parse/';
+import { xOptions } from '../options$0';
+import parse from '../parse/';
 
 export default function install (
 	readFileSync :(path :string) => Buffer,
-	specificationVersion :0.5 | 0.4 | 0.3,
+	specificationVersion :0.5 | 0.4 | 0.3 | 0.2 | 0.1,
 	multiLineJoiner :string,
 	useBigInt :boolean | number = true,
 	xOptions :xOptions = null

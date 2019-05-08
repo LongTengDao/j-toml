@@ -1,6 +1,6 @@
 import version from './version?text';
 import parse from './parse/';
-import install from './install';
+import install from './install/';
 
 const TOML = {
 	parse,

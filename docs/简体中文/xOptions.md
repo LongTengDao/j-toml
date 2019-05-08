@@ -119,33 +119,3 @@ ArrayOf = <tag> [     # 处理({ table: root, key: 'arrayOf', array: null,      
 标签是从后往前处理的。
 
 注意：如果开启此选项，要求同时开启 `超级选项.mix`，因为无法妥善归类自定义返回值。
-
-`超级选项.ins`
---------------
-
-*   类型：`boolean`
-*   默认值：`false`
-
-是否开启插值字符串支持。
-
-```
-keyA = `
-value `A`
-`
-
-keyB = ``
-`value` A
-``
-
-```
-
-用 JSON 表示解析出的内容就是：
-
-```json
-{
-    "keyA": "value `A`",
-    "keyB": "`value` A"
-}
-```
-
-插值字符串原始解析结果总是以 `\n` 换行，而不会理睬 `multiLineJoiner` 参数。

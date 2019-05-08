@@ -8,15 +8,15 @@ import { BasicString, MultiLineBasicString } from '../types/String';
 import * as options$0 from '../options$0';
 import * as regexps$0 from '../regexps$0';
 
-export const sealedInline = new WeakSet;
-const openTables = new WeakSet;
-const reopenedTables = new WeakSet;
+export const sealedInline :WeakSet<Table> = new WeakSet;
+const openTables :WeakSet<Table> = new WeakSet;
+const reopenedTables :WeakSet<Table> = new WeakSet;
 
 const KEYS_STRICT :RegExp = /[\w-]+|"(?:[^\\"]+|\\[^])*"|'[^']*'/g;
 const KEYS_FREE :RegExp = /[^ \t#=[\]'".]+(?:[ \t]+[^ \t#=[\]'".]+)*|"(?:[^\\"]+|\\[^])*"|'[^']*'/g;
 
 export function appendTable (table :Table, key_key :string, asArrayItem :boolean, tag :string) :Table {
-	const leadingKeys :string[] = parseKeys(key_key);
+	const leadingKeys :[string, ...string[]] = parseKeys(key_key);
 	const finalKey :string = <string>leadingKeys.pop();
 	table = prepareTable(table, leadingKeys);
 	let lastTable :Table;
@@ -41,8 +41,8 @@ export function appendTable (table :Table, key_key :string, asArrayItem :boolean
 	return lastTable;
 }
 
-export function parseKeys (key_key :string) :string[] {
-	const keys :RegExpMatchArray = <RegExpMatchArray>key_key.match(options$0.strictBareKey ? KEYS_STRICT : KEYS_FREE);
+export function parseKeys (key_key :string) {
+	const keys = <[string, ...string[]]>key_key.match(options$0.strictBareKey ? KEYS_STRICT : KEYS_FREE);
 	for ( let index :number = keys.length; index--; ) {
 		const key :string = keys[index];
 		if ( key.startsWith('\'') ) { keys[index] = key.slice(1, -1); }
@@ -57,7 +57,7 @@ export function parseKeys (key_key :string) :string[] {
 }
 
 function prepareTable (table :Table, keys :string[]) :Table {
-	const { length } :string[] = keys;
+	const { length } = keys;
 	let index :number = 0;
 	while ( index<length ) {
 		const key :string = keys[index++];
@@ -83,7 +83,7 @@ function prepareTable (table :Table, keys :string[]) :Table {
 }
 
 export function prepareInlineTable (table :Table, keys :string[]) :Table {
-	const { length } :string[] = keys;
+	const { length } = keys;
 	let index :number = 0;
 	while ( index<length ) {
 		const key :string = keys[index++];

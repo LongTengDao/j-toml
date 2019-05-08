@@ -29,7 +29,6 @@ type xOptions = {
 	longer? :boolean,
 	null? :boolean,
 	multi? :boolean,
-	ins? :boolean,
 	close? :boolean,
 } & ( {
 	mix? :boolean,

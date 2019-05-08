@@ -119,32 +119,3 @@ Tag content could include any character rather than `<` `>` <code>&#92;</code> `
 Tags are processed from after to before.
 
 Note: This option requires `xOptions.mix` enabled at the same time, because the custom returned value could not be properly classified.
-
-`xOptions.ins`
---------------
-
-*   type: `boolean`
-*   default: `false`
-
-Interpolation string support.
-
-```
-keyA = `
-value `A`
-`
-
-keyB = ``
-`value` A
-``
-```
-
-In JSON land, that would give you the following structure:
-
-```json
-{
-    "keyA": "value `A`",
-    "keyB": "`value` A"
-}
-```
-
-The original parsed result of interpolation string always use `\n` as newline, not the value set by parameter `multiLineJoiner`.

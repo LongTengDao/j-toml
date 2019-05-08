@@ -23,7 +23,6 @@ export type xOptions = null | {
 	longer? :boolean,
 	null? :boolean,
 	multi? :boolean,
-	ins? :boolean,
 	close? :boolean,
 } & ({
 	mix? :boolean,
@@ -47,7 +46,6 @@ export let unreopenable :boolean;
 export let allowLonger :boolean;
 export let enableNull :boolean;
 export let allowInlineTableMultiLineAndTrailingCommaEvenNoComma :boolean;
-export let enableInterpolationString :boolean;
 type as = (array :any[]) => any[];
 export let
 	asNulls :as,
@@ -164,17 +162,16 @@ export function use (specificationVersion :unknown, multiLineJoiner :unknown, us
 	
 	if ( xOptions===null ) {
 		TableDepends = Table;
-		allowLonger = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = enableInterpolationString = unreopenable = false;
+		allowLonger = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = unreopenable = false;
 		typify = true;
 	}
 	else {
-		const { order, longer, null: _null, multi, ins, close, mix, tag, ...unknown } = xOptions;
+		const { order, longer, null: _null, multi, close, mix, tag, ...unknown } = xOptions;
 		if ( ownKeys(unknown).length ) { throw Error('TOML.parse(,,,,xOptions.tag)'); }
 		TableDepends = order ? OrderedTable : Table;
 		allowLonger = !!longer;
 		enableNull = !!_null;
 		allowInlineTableMultiLineAndTrailingCommaEvenNoComma = !!multi;
-		enableInterpolationString = !!ins;
 		unreopenable = !!close;
 		typify = !mix;
 		if ( tag ) {
