@@ -4,9 +4,12 @@ module.exports = require('@ltd/j-dev')(__dirname+'/..')(async ({ import_default,
 	
 	const TOML = await import_default('src/default', {
 		require: moduleName => {
-			if ( moduleName==='@ltd/j-orderify' ) { return require(__dirname+'/../../../LongTengDao/j-orderify/dist/NPM/index.js'); }
-			if ( moduleName==='@ltd/j-regexp' ) { return require(__dirname+'/../../../LongTengDao/j-regexp/dist/NPM/index.js'); }
-			if ( moduleName==='fs' ) { return { readFileSync: require('fs').readFileSync }; }
+			if ( [ '@ltd/j-orderify', '@ltd/j-regexp', '@ltd/j-utf' ].includes(moduleName) ) {
+				return require(`${__dirname}/../../../LongTengDao/${moduleName.replace('@ltd/', '')}/dist/NPM/index.js`);
+			}
+			if ( moduleName==='fs' ) {
+				return { readFileSync: require('fs').readFileSync };
+			}
 			throw new Error(moduleName);
 		},
 		__filename: 'test/built.js',

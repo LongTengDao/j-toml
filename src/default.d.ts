@@ -22,7 +22,7 @@ declare const exports :{
 	
 	default :typeof exports
 	
-};
+}
 
 type xOptions = {
 	order? :boolean,

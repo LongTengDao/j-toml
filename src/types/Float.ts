@@ -4,15 +4,25 @@ import isFinite from '.isFinite';
 //import Infinity from '.Infinity';
 //import NaN from '.NaN';
 
+import { newRegExp } from '@ltd/j-regexp';
+import { INTEGER_D } from './Integer';
+
 import * as iterator$0 from '../iterator$0';
 
-const FLOAT = /^[-+]?(?:0|[1-9]\d*(?:_\d+)*)(?=[.eE])(?:\.\d+(?:_\d+)*)?(?:[eE][-+]?\d+(?:_\d+)*)?$/;
+const FLOAT = newRegExp`
+	^
+	${INTEGER_D}
+	(?=[.eE])
+	(?:\.\d+(?:_\d+)*)?
+	(?:[eE]${INTEGER_D})?
+	$
+`;
 const UNDERSCORES = /_/g;
 
 export const Float = (literal :string) :number => {
 	if ( FLOAT.test(literal) ) {
 		const number = +literal.replace(UNDERSCORES, '');
-		isFinite(number) || iterator$0.throws(RangeError('Float has been as big as Infinity, like '+literal+' at '+iterator$0.where()));
+		/*options\$0.sFloat || */isFinite(number) || iterator$0.throws(RangeError('Float has been as big as Infinity, like '+literal+' at '+iterator$0.where()));
 		return number;
 	}
 	//if ( options\$0.sFloat ) {

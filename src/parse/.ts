@@ -7,9 +7,10 @@ import * as options$0 from '../options$0';
 import Root from '../parse/level-loop';
 import { Table } from '../types/Table';
 
+import { clearRegExp } from '@ltd/j-regexp';
+import { NON_SCALAR } from '@ltd/j-utf';
+
 const BOM = '\uFEFF';
-const NON_SCALAR = /[\uD800-\uDFFF]/u;// \u{10FFFF}- > \uFFFD
-const REGEXP = /^/;
 
 export default function parse (
 	sourceContent :Buffer | string,
@@ -40,5 +41,5 @@ export default function parse (
 		}
 		finally { options$0.clear(); }
 	}
-	finally { REGEXP.test(''); }
+	finally { clearRegExp(); }
 };

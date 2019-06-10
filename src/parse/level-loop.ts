@@ -32,9 +32,7 @@ export default function Root () {
 };
 
 function assign (lastInlineTable :Table, lineRest :string) :string {
-	let left :string;
-	let tag :string;
-	( { left, tag, right: lineRest } = regexps$0.KEY_VALUE_PAIR_exec_groups(lineRest) );
+	const { left, tag } = { right: lineRest } = regexps$0.KEY_VALUE_PAIR_exec_groups(lineRest);
 	const leadingKeys :[string, ...string[]] = parseKeys(left);
 	const finalKey :string = <string>leadingKeys.pop();
 	const table :Table = prepareInlineTable(lastInlineTable, leadingKeys);
@@ -53,8 +51,7 @@ function assign (lastInlineTable :Table, lineRest :string) :string {
 			iterator$0.stacks_push((lineRest :string) :string => equalInlineArray(table, finalKey, lineRest));
 			return lineRest;
 	}
-	let literal :string;
-	( { 1: literal, 2: lineRest } = regexps$0.VALUE_REST.exec(lineRest) || iterator$0.throws(SyntaxError(iterator$0.where())) );
+	const { 1: literal } = { 2: lineRest } = regexps$0.VALUE_REST.exec(lineRest) || iterator$0.throws(SyntaxError(iterator$0.where()));
 	if ( options$0.sFloat ) {
 		if ( literal==='inf' || literal==='+inf' ) {
 			table[finalKey] = Infinity;
@@ -100,8 +97,7 @@ function assign (lastInlineTable :Table, lineRest :string) :string {
 
 function push (lastArray :any[], lineRest :string) :string {
 	if ( lineRest.startsWith('<') ) {
-		let tag :string;
-		( { 1: tag, 2: lineRest } = regexps$0._VALUE_PAIR.exec(lineRest) || iterator$0.throws(SyntaxError(iterator$0.where())) );
+		const { 1: tag } = { 2: lineRest } = regexps$0._VALUE_PAIR.exec(lineRest) || iterator$0.throws(SyntaxError(iterator$0.where()));
 		options$0.collect({ table: null, array: lastArray, index: lastArray.length, tag });
 	}
 	const lastIndex :string = ''+lastArray.length;
@@ -118,8 +114,7 @@ function push (lastArray :any[], lineRest :string) :string {
 			iterator$0.stacks_push(lineRest => equalInlineArray(options$0.asArrays(lastArray), lastIndex, lineRest));
 			return lineRest;
 	}
-	let literal :string;
-	( { 1: literal, 2: lineRest } = regexps$0.VALUE_REST.exec(lineRest) || iterator$0.throws(SyntaxError(iterator$0.where())) );
+	const { 1: literal } = { 2: lineRest } = regexps$0.VALUE_REST.exec(lineRest) || iterator$0.throws(SyntaxError(iterator$0.where()));
 	if ( options$0.sFloat ) {
 		if ( literal==='inf' || literal==='+inf' ) {
 			options$0.asFloats(lastArray).push(Infinity);

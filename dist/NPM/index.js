@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.96';
+const version = '0.5.98';
 
 const isBuffer = Buffer.isBuffer;
 
@@ -71,62 +71,135 @@ const isSafeInteger = Number.isSafeInteger;
 
 const ownKeys = Reflect.ownKeys;
 
+const create = Object.create;
+
+const Object_assign = Object.assign;
+
+const Reflect_defineProperty = Reflect.defineProperty;
+
+const Reflect_deleteProperty = Reflect.deleteProperty;
+
 /*!
- * 模块名称：@ltd/j-orderify
+ * 模块名称：j-orderify
  * 模块功能：返回一个能保证给定对象的属性按此后添加顺序排列的 proxy，即使键名是 symbol，或整数 string。
    　　　　　Return a proxy for given object, which can guarantee own keys are in setting order, even if the key name is symbol or int string.
- * 模块版本：2.7.1
+ * 模块版本：4.0.0
  * 许可条款：LGPL-3.0
  * 所属作者：龙腾道 <LongTengDao@LongTengDao.com> (www.LongTengDao.com)
  * 问题反馈：https://GitHub.com/LongTengDao/j-orderify/issues
  * 项目主页：https://GitHub.com/LongTengDao/j-orderify/
  */
 
-const create = Object.create;
-
-const defineProperty = Reflect.defineProperty;
-
-const deleteProperty = Reflect.deleteProperty;
-
-const ownKeysKeepers = new WeakMap;
+const Keeper = Set;
+const target2keeper = new WeakMap;
+const proxy2target = new WeakMap;
+const target2proxy = new WeakMap;
 const handlers = 
 /*#__PURE__*/
-Object.assign(create(null), {
+Object_assign(create(null), {
     defineProperty(target, key, descriptor) {
-        if (defineProperty(target, key, descriptor)) {
-            ownKeysKeepers.get(target).add(key);
+        if (Reflect_defineProperty(target, key, descriptor)) {
+            target2keeper.get(target).add(key);
             return true;
         }
         return false;
     },
     deleteProperty(target, key) {
-        if (deleteProperty(target, key)) {
-            ownKeysKeepers.get(target).delete(key);
+        if (Reflect_deleteProperty(target, key)) {
+            target2keeper.get(target).delete(key);
             return true;
         }
         return false;
     },
     ownKeys(target) {
-        return [...ownKeysKeepers.get(target)];
+        return [...target2keeper.get(target)];
     },
 });
-const orderify = (object) => {
-    ownKeysKeepers.set(object, new Set(ownKeys(object)));
-    return new Proxy(object, handlers);
-};
+function newProxy(target, keeper) {
+    target2keeper.set(target, keeper);
+    const proxy = new Proxy(target, handlers);
+    proxy2target.set(proxy, target);
+    return proxy;
+}
+const of = {
+    Ordered(object) {
+        if (proxy2target.has(object)) {
+            return object;
+        }
+        let proxy = target2proxy.get(object);
+        if (proxy) {
+            return proxy;
+        }
+        proxy = newProxy(object, new Keeper(ownKeys(object)));
+        target2proxy.set(object, proxy);
+        return proxy;
+    }
+}.Ordered;
 
-/*¡ @ltd/j-orderify */
+/*¡ j-orderify */
 
 const Table = function Table() { };
-const OrderedTable = function Table() { return orderify(this); };
+const OrderedTable = function Table() { return of(this); };
 OrderedTable.prototype = Table.prototype = create(null);
 function isTable(value) { return value instanceof Table; }
 
-const INTEGER = /^[-+]?(?:0|[1-9]\d*(?:_\d+)*)$/;
+const slice = Array.prototype.slice;
+
+/*!
+ * 模块名称：j-regexp
+ * 模块功能：可读性更好的正则表达式创建方式。
+   　　　　　More readable way for creating RegExp.
+ * 模块版本：5.2.0
+ * 许可条款：LGPL-3.0
+ * 所属作者：龙腾道 <LongTengDao@LongTengDao.com> (www.LongTengDao.com)
+ * 问题反馈：https://GitHub.com/LongTengDao/j-regexp/issues
+ * 项目主页：https://GitHub.com/LongTengDao/j-regexp/
+ */
+
+var NT = /[\n\t]/g;
+function Source(raw, substitutions) {
+    var source = raw[0];
+    for (var length = substitutions.length, index = 0; index < length;) {
+        var substitution = substitutions[index];
+        source += (substitution instanceof RegExp ? substitution.source : substitution) + raw[++index];
+    }
+    return source.replace(NT, '');
+}
+var newRegExp = 
+/*#__PURE__*/
+function (newRegExp, createNewRegExpWith) {
+    (function callee(pickedFlags, restFlags) {
+        if (restFlags) {
+            callee(pickedFlags + restFlags.charAt(0), restFlags = restFlags.slice(1));
+            callee(pickedFlags, restFlags);
+        }
+        else if (pickedFlags) {
+            newRegExp[pickedFlags] = createNewRegExpWith(pickedFlags);
+        }
+    })('', 'gimsuy');
+    return newRegExp;
+}(function newRegExp(template) {
+    return new RegExp(Source(template.raw, slice.call(arguments, 1)));
+}, function (flags) {
+    return {}['newRegExp.' + flags] = function (template) {
+        return new RegExp(Source(template.raw, slice.call(arguments, 1)), flags);
+    };
+});
+
+var clearRegExp = '$_' in RegExp
+    ? function (REGEXP) {
+        return function () { REGEXP.test(''); };
+    }(/^/)
+    : function () { };
+
+/*¡ j-regexp */
+
+const INTEGER_D = /[-+]?(?:0|[1-9]\d*(?:_\d+)*)/;
+const D_INTEGER = newRegExp `^${INTEGER_D}$`;
 const XOB_INTEGER = /^0(?:x[0-9A-Fa-f]+(?:_[0-9A-Fa-f]+)*|o[0-7]+(?:_[0-7]+)*|b[01]+(?:_[01]+)*)$/;
 const UNDERSCORES_SIGN = /_|^[-+]/g;
 const NumberInteger = (literal) => {
-    INTEGER.test(literal)
+    D_INTEGER.test(literal)
         || /*options\$0.xob && */ XOB_INTEGER.test(literal)
         || throws(SyntaxError('Invalid Integer ' + literal + ' at ' + where()));
     const number = literal.startsWith('-')
@@ -138,7 +211,7 @@ const NumberInteger = (literal) => {
     return number;
 };
 const BigIntInteger = (literal) => {
-    INTEGER.test(literal)
+    D_INTEGER.test(literal)
         || /*options\$0.xob && */ XOB_INTEGER.test(literal)
         || throws(SyntaxError('Invalid Integer ' + literal + ' at ' + where()));
     let bigInt = BigInt(literal.replace(UNDERSCORES_SIGN, ''));
@@ -320,34 +393,6 @@ const Infinity = 1/0;
 
 const NaN = 0/0;
 
-/*!
- * 模块名称：@ltd/j-regexp
- * 模块功能：可读性更好的正则表达式创建方式。
-   　　　　　More readable way for creating RegExp.
- * 模块版本：1.1.0
- * 许可条款：LGPL-3.0
- * 所属作者：龙腾道 <LongTengDao@LongTengDao.com> (www.LongTengDao.com)
- * 问题反馈：https://GitHub.com/LongTengDao/j-regexp/issues
- * 项目主页：https://GitHub.com/LongTengDao/j-regexp/
- */
-
-const slice = Array.prototype.slice;
-
-var NT = /[\n\t]/g;
-function Source(raw, substitutions) {
-    var source = raw[0];
-    for (var length = substitutions.length, index = 0; index < length;) {
-        var substitution = substitutions[index];
-        source += (substitution instanceof RegExp ? substitution.source : substitution) + raw[++index];
-    }
-    return source.replace(NT, '');
-}
-function newRegExp(template) {
-    return RegExp(Source(template.raw, slice.call(arguments, 1)));
-}
-
-/*¡ @ltd/j-regexp */
-
 const _29_ = /(?:0[1-9]|1\d|2[0-9])/;
 const _30_ = /(?:0[1-9]|[12]\d|30)/;
 const _31_ = /(?:0[1-9]|[12]\d|3[01])/;
@@ -456,12 +501,19 @@ class LocalTime extends Datetime {
     }
 }
 
-const FLOAT = /^[-+]?(?:0|[1-9]\d*(?:_\d+)*)(?=[.eE])(?:\.\d+(?:_\d+)*)?(?:[eE][-+]?\d+(?:_\d+)*)?$/;
+const FLOAT = newRegExp `
+	^
+	${INTEGER_D}
+	(?=[.eE])
+	(?:\.\d+(?:_\d+)*)?
+	(?:[eE]${INTEGER_D})?
+	$
+`;
 const UNDERSCORES = /_/g;
 const Float = (literal) => {
     if (FLOAT.test(literal)) {
         const number = +literal.replace(UNDERSCORES, '');
-        isFinite(number) || throws(RangeError('Float has been as big as Infinity, like ' + literal + ' at ' + where()));
+        /*options\$0.sFloat || */ isFinite(number) || throws(RangeError('Float has been as big as Infinity, like ' + literal + ' at ' + where()));
         return number;
     }
     //if ( options\$0.sFloat ) {
@@ -842,8 +894,8 @@ function Root() {
     let lastSectionTable = rootTable;
     while (rest()) {
         const line = next().replace(PRE_WHITESPACE, '');
-        if (line === '') ;
-        else if (line.startsWith('#')) ;
+        if (line === '') { }
+        else if (line.startsWith('#')) { }
         else if (line.startsWith('[')) {
             const { $_asArrayItem$$, keys, $$asArrayItem$_, tag } = TABLE_DEFINITION_exec_groups(line);
             $_asArrayItem$$ === $$asArrayItem$_ || throws(SyntaxError('Square brackets of Table definition statement not match at ' + where()));
@@ -860,9 +912,7 @@ function Root() {
     return rootTable;
 }
 function assign(lastInlineTable, lineRest) {
-    let left;
-    let tag;
-    ({ left, tag, right: lineRest } = KEY_VALUE_PAIR_exec_groups(lineRest));
+    const { left, tag } = { right: lineRest } = KEY_VALUE_PAIR_exec_groups(lineRest);
     const leadingKeys = parseKeys(left);
     const finalKey = leadingKeys.pop();
     const table = prepareInlineTable(lastInlineTable, leadingKeys);
@@ -881,8 +931,7 @@ function assign(lastInlineTable, lineRest) {
             stacks_push((lineRest) => equalInlineArray(table, finalKey, lineRest));
             return lineRest;
     }
-    let literal;
-    ({ 1: literal, 2: lineRest } = VALUE_REST.exec(lineRest) || throws(SyntaxError(where())));
+    const { 1: literal } = { 2: lineRest } = VALUE_REST.exec(lineRest) || throws(SyntaxError(where()));
     if (sFloat) {
         if (literal === 'inf' || literal === '+inf') {
             table[finalKey] = Infinity;
@@ -927,8 +976,7 @@ function assign(lastInlineTable, lineRest) {
 }
 function push(lastArray, lineRest) {
     if (lineRest.startsWith('<')) {
-        let tag;
-        ({ 1: tag, 2: lineRest } = _VALUE_PAIR.exec(lineRest) || throws(SyntaxError(where())));
+        const { 1: tag } = { 2: lineRest } = _VALUE_PAIR.exec(lineRest) || throws(SyntaxError(where()));
         collect({ table: null, array: lastArray, index: lastArray.length, tag });
     }
     const lastIndex = '' + lastArray.length;
@@ -945,8 +993,7 @@ function push(lastArray, lineRest) {
             stacks_push(lineRest => equalInlineArray(asArrays(lastArray), lastIndex, lineRest));
             return lineRest;
     }
-    let literal;
-    ({ 1: literal, 2: lineRest } = VALUE_REST.exec(lineRest) || throws(SyntaxError(where())));
+    const { 1: literal } = { 2: lineRest } = VALUE_REST.exec(lineRest) || throws(SyntaxError(where()));
     if (sFloat) {
         if (literal === 'inf' || literal === '+inf') {
             asFloats(lastArray).push(Infinity);
@@ -1138,9 +1185,26 @@ function equalInlineArray(table, finalKey, lineRest) {
     }(lineRest);
 }
 
+const RegExp_prototype = RegExp.prototype;
+
+/*!
+ * 模块名称：j-utf
+ * 模块功能：UTF 相关共享实用程序。从属于“简计划”。
+   　　　　　UTF util. Belong to "Plan J".
+ * 模块版本：2.0.0
+ * 许可条款：LGPL-3.0
+ * 所属作者：龙腾道 <LongTengDao@LongTengDao.com> (www.LongTengDao.com)
+ * 问题反馈：https://GitHub.com/LongTengDao/j-utf/issues
+ * 项目主页：https://GitHub.com/LongTengDao/j-utf/
+ */
+
+var NON_SCALAR = ('unicode' in RegExp_prototype
+    ? RegExp('[\\uD800-\\uDFFF]', 'u')
+    : /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]/);
+
+/*¡ j-utf */
+
 const BOM = '\uFEFF';
-const NON_SCALAR = /[\uD800-\uDFFF]/u; // \u{10FFFF}- > \uFFFD
-const REGEXP = /^/;
 function parse(sourceContent, specificationVersion, multiLineJoiner, useBigInt = true, xOptions = null) {
     could();
     if (isBuffer(sourceContent)) {
@@ -1177,7 +1241,7 @@ function parse(sourceContent, specificationVersion, multiLineJoiner, useBigInt =
         }
     }
     finally {
-        REGEXP.test('');
+        clearRegExp();
     }
 }
 

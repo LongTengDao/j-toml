@@ -3,15 +3,18 @@ import RangeError from '.RangeError';
 import isSafeInteger from '.Number.isSafeInteger';
 import BigInt from '.BigInt';
 
+import { newRegExp } from '@ltd/j-regexp';
+
 import * as iterator$0 from '../iterator$0';
 import * as options$0 from '../options$0';
 
-const INTEGER = /^[-+]?(?:0|[1-9]\d*(?:_\d+)*)$/;
+export const INTEGER_D = /[-+]?(?:0|[1-9]\d*(?:_\d+)*)/;
+const D_INTEGER = newRegExp`^${INTEGER_D}$`;
 const XOB_INTEGER = /^0(?:x[0-9A-Fa-f]+(?:_[0-9A-Fa-f]+)*|o[0-7]+(?:_[0-7]+)*|b[01]+(?:_[01]+)*)$/;
 const UNDERSCORES_SIGN = /_|^[-+]/g;
 
 export const NumberInteger = (literal :string) :number => {
-	INTEGER.test(literal)
+	D_INTEGER.test(literal)
 	|| /*options\$0.xob && */XOB_INTEGER.test(literal)
 	|| iterator$0.throws(SyntaxError('Invalid Integer '+literal+' at '+iterator$0.where()));
 	const number = literal.startsWith('-')
@@ -24,7 +27,7 @@ export const NumberInteger = (literal :string) :number => {
 };
 
 export const BigIntInteger = (literal :string) :bigint => {
-	INTEGER.test(literal)
+	D_INTEGER.test(literal)
 	|| /*options\$0.xob && */XOB_INTEGER.test(literal)
 	|| iterator$0.throws(SyntaxError('Invalid Integer '+literal+' at '+iterator$0.where()));
 	let bigInt :bigint = BigInt(literal.replace(UNDERSCORES_SIGN, ''));

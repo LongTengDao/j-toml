@@ -2,7 +2,7 @@ export = exports;
 
 declare const exports :{
 	
-	version :'0.5.96'
+	version :'0.5.98'
 	
 	parse (
 		sourceContent :string | Buffer,
@@ -22,7 +22,7 @@ declare const exports :{
 	
 	default :typeof exports
 	
-};
+}
 
 type xOptions = {
 	order? :boolean,

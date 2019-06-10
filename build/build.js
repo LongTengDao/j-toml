@@ -4,22 +4,25 @@ const BOM = '\uFEFF';
 const EOL = '\r\n';
 const i18n = ['English', '简体中文'];
 
-module.exports = require('../test/test.js')(async ({ build, get, map, ful, put }) => {
+module.exports = require('../test/test.js')(async ({ build, 龙腾道, get, map, ful, put }) => {
 	
 	await build({
 		name: 'j-toml',
+		user: 'LongTengDao@ltd',
+		Auth: 龙腾道,
+		Copy: 'LGPL-3.0',
 		semver: await get('src/version'),
 		ES: 6,
 		NPM: {
-			meta_: {
-				description: 'An implementation of TOML written by LongTengDao. Belong to "Plan J".／龙腾道为汤小明语写的实现。从属于“简计划”。',
-				keywords: ['TOML'],
-			},
+			description: 'An implementation of TOML written by LongTengDao. Belong to "Plan J".／龙腾道为汤小明语写的实现。从属于“简计划”。',
+			keywords: ['TOML'],
 		},
 		locate: {
-			'@ltd/j-orderify': ful('../../LongTengDao/j-orderify/dist/ESM/j-orderify!'),
-			'@ltd/j-regexp': ful('../../LongTengDao/j-regexp/dist/ESM/j-regexp!'),
+			'@ltd/j-orderify': ful('../../LongTengDao/j-orderify/dist/ESM/.j-orderify'),
+			'@ltd/j-regexp': ful('../../LongTengDao/j-regexp/dist/ESM/.j-regexp'),
+			'@ltd/j-utf': ful('../../LongTengDao/j-utf/dist/ESM/.j-utf'),
 		},
+		LICENSE_: true,
 	});
 	
 	await put('docs/README.md', BOM+i18n.map(lang => `[${lang}](./${lang}/)`).join(' | '));
