@@ -22,18 +22,18 @@ export function appendTable (table :Table, key_key :string, asArrayItem :boolean
 	let lastTable :Table;
 	if ( asArrayItem ) {
 		let arrayOfTables :Table[];
-		if ( finalKey in table ) { sealedInline.has(arrayOfTables = table[finalKey]) && iterator$0.throws(Error('Trying to push Table to non-ArrayOfTables value at '+iterator$0.where())); }
+		if ( finalKey in table ) { sealedInline.has(arrayOfTables = table[finalKey]) && iterator$0.throws(Error(`Trying to push Table to non-ArrayOfTables value at ${iterator$0.where()}`)); }
 		else { arrayOfTables = table[finalKey] = []; }
 		tag && options$0.collect({ table, key: finalKey, array: arrayOfTables, index: arrayOfTables.length, tag });
-		arrayOfTables.push(lastTable = new options$0.TableDepends);
+		arrayOfTables.push(lastTable = new Table);
 	}
 	else {
 		if ( finalKey in table ) {
-			if ( options$0.unreopenable || !openTables.has(lastTable = table[finalKey]) || reopenedTables.has(lastTable) ) { throw iterator$0.throws(Error('Duplicate Table definition at '+iterator$0.where())); }
+			if ( options$0.unreopenable || !openTables.has(lastTable = table[finalKey]) || reopenedTables.has(lastTable) ) { throw iterator$0.throws(Error(`Duplicate Table definition at ${iterator$0.where()}`)); }
 			openTables.delete(lastTable);
 		}
 		else {
-			table[finalKey] = lastTable = new options$0.TableDepends;
+			table[finalKey] = lastTable = new Table;
 			options$0.unreopenable || reopenedTables.add(lastTable);
 		}
 		tag && options$0.collect({ table, key: finalKey, array: null, tag });
@@ -50,7 +50,7 @@ export function parseKeys (key_key :string) {
 	}
 	if ( options$0.disallowEmptyKey ) {
 		for ( let index :number = keys.length; index--; ) {
-			keys[index] || iterator$0.throws(SyntaxError('Empty key is not allowed before TOML v0.5, which at '+iterator$0.where()));
+			keys[index] || iterator$0.throws(SyntaxError(`Empty key is not allowed before TOML v0.5, which at ${iterator$0.where()}`));
 		}
 	}
 	return keys;
@@ -64,18 +64,18 @@ function prepareTable (table :Table, keys :string[]) :Table {
 		if ( key in table ) {
 			table = table[key];
 			if ( isTable(table) ) {
-				sealedInline.has(table) && iterator$0.throws(Error('Trying to define Table under static Inline Table at '+iterator$0.where()));
+				sealedInline.has(table) && iterator$0.throws(Error(`Trying to define Table under static Inline Table at ${iterator$0.where()}`));
 			}
 			else if ( isArray(table) ) {
-				sealedInline.has(table) && iterator$0.throws(Error('Trying to append value to static Inline Array at '+iterator$0.where()));
+				sealedInline.has(table) && iterator$0.throws(Error(`Trying to append value to static Inline Array at ${iterator$0.where()}`));
 				// @ts-ignore
 				table = table[table.length-1];
 			}
-			else { iterator$0.throws(Error('Trying to define Table under non-Table value at '+iterator$0.where())); }
+			else { iterator$0.throws(Error(`Trying to define Table under non-Table value at ${iterator$0.where()}`)); }
 		}
 		else {
-			openTables.add(table = table[key] = new options$0.TableDepends);
-			while ( index<length ) { openTables.add(table = table[keys[index++]] = new options$0.TableDepends); }
+			openTables.add(table = table[key] = new Table);
+			while ( index<length ) { openTables.add(table = table[keys[index++]] = new Table); }
 			return table;
 		}
 	}
@@ -89,12 +89,12 @@ export function prepareInlineTable (table :Table, keys :string[]) :Table {
 		const key :string = keys[index++];
 		if ( key in table ) {
 			table = table[key];
-			isTable(table) || iterator$0.throws(Error('Trying to assign property through non-Table value at '+iterator$0.where()));
-			sealedInline.has(table) && iterator$0.throws(Error('Trying to assign property through static Inline Table at '+iterator$0.where()));
+			isTable(table) || iterator$0.throws(Error(`Trying to assign property through non-Table value at ${iterator$0.where()}`));
+			sealedInline.has(table) && iterator$0.throws(Error(`Trying to assign property through static Inline Table at ${iterator$0.where()}`));
 		}
 		else {
-			table = table[key] = new options$0.TableDepends;
-			while ( index<length ) { table = table[keys[index++]] = new options$0.TableDepends; }
+			table = table[key] = new Table;
+			while ( index<length ) { table = table[keys[index++]] = new Table; }
 			return table;
 		}
 	}
@@ -133,7 +133,7 @@ export function assignLiteralString (table :Table, finalKey :string, literal :st
 const CONTROL_CHARACTER_EXCLUDE_TAB = /[\x00-\x08\x0B-\x1F\x7F]/;
 const CONTROL_CHARACTER_EXCLUDE_TAB_LESSER = /[\x00-\x08\x0B-\x1F]/;
 function checkLiteralString (literal :string) :string {
-	( options$0.ctrl7F ? CONTROL_CHARACTER_EXCLUDE_TAB : CONTROL_CHARACTER_EXCLUDE_TAB_LESSER ).test(literal) && iterator$0.throws(SyntaxError('Control characters other than Tab are not permitted in a Literal String, which was found at '+iterator$0.where()));
+	( options$0.ctrl7F ? CONTROL_CHARACTER_EXCLUDE_TAB : CONTROL_CHARACTER_EXCLUDE_TAB_LESSER ).test(literal) && iterator$0.throws(SyntaxError(`Control characters other than Tab are not permitted in a Literal String, which was found at ${iterator$0.where()}`));
 	return literal;
 }
 

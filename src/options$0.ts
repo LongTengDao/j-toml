@@ -5,21 +5,21 @@ import Error from '.Error';
 import isSafeInteger from '.Number.isSafeInteger';
 import WeakMap from '.WeakMap';
 import ownKeys from '.Reflect.ownKeys';
-import { Table, OrderedTable } from './types/Table';
-import { BigIntInteger, NumberInteger, DependInteger } from './types/Integer';
+import MAX_SAFE_INTEGER from '.Number.MAX_SAFE_INTEGER';
+import MIN_SAFE_INTEGER from '.Number.MIN_SAFE_INTEGER';
+import { Table } from './types/Table';
 import * as iterator$0 from './iterator$0';
 
 /* options */
 
 export let useWhatToJoinMultiLineString :string;
-export let IntegerDepends :typeof BigIntInteger | typeof NumberInteger | typeof DependInteger;
+export let usingBigInt :boolean | null;
 export let IntegerMin :number;
 export let IntegerMax :number;
 
 /* xOptions */
 
 export type xOptions = null | {
-	order? :boolean,
 	longer? :boolean,
 	null? :boolean,
 	multi? :boolean,
@@ -41,7 +41,6 @@ export let ctrl7F :boolean;
 export let disallowEmptyKey :boolean;
 //export const xob :boolean = true;
 export let sFloat :boolean;
-export let TableDepends :typeof Table | typeof OrderedTable;
 export let unreopenable :boolean;
 export let allowLonger :boolean;
 export let enableNull :boolean;
@@ -63,7 +62,7 @@ const arrayTypes :WeakMap<any[], as> = new WeakMap;
 let As :( () => as ) | null = () => function as (array :any[]) :any[] {
 	if ( arrayTypes.has(array) ) {
 		arrayTypes.get(array)===as
-		|| iterator$0.throws(TypeError('Types in Array must be same. Check '+iterator$0.where()));
+		|| iterator$0.throws(TypeError(`Types in Array must be same. Check ${iterator$0.where()}`));
 	}
 	else { arrayTypes.set(array, as); }
 	return array;
@@ -148,27 +147,26 @@ export function use (specificationVersion :unknown, multiLineJoiner :unknown, us
 	if ( typeof multiLineJoiner==='string' ) { useWhatToJoinMultiLineString = multiLineJoiner; }
 	else { throw TypeError('TOML.parse(,,multiLineJoiner)'); }
 	
-	if ( useBigInt===true ) { IntegerDepends = BigIntInteger; }
-	else if ( useBigInt===false ) { IntegerDepends = NumberInteger; }
+	if ( useBigInt===true ) { usingBigInt = true; }
+	else if ( useBigInt===false ) { usingBigInt = false; }
 	else {
 		if ( typeof useBigInt!=='number' ) { throw TypeError('TOML.parse(,,,useBigInt)'); }
 		if ( !isSafeInteger(useBigInt) ) { throw RangeError('TOML.parse(,,,useBigInt)'); }
-		IntegerDepends = DependInteger;
+		usingBigInt = null;
 		if ( useBigInt>=0 ) { IntegerMin = -( IntegerMax = useBigInt ); }
 		else { IntegerMax = -( IntegerMin = useBigInt )-1; }
+		if ( IntegerMin < MIN_SAFE_INTEGER || MAX_SAFE_INTEGER < IntegerMax ) { throw RangeError('TOML.parse(,,,useBigInt)'); }
 	}
 	
 	let typify :boolean;
 	
 	if ( xOptions===null ) {
-		TableDepends = Table;
 		allowLonger = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = unreopenable = false;
 		typify = true;
 	}
 	else {
-		const { order, longer, null: _null, multi, close, mix, tag, ...unknown } = xOptions;
+		const { longer, null: _null, multi, close, mix, tag, ...unknown } = xOptions;
 		if ( ownKeys(unknown).length ) { throw Error('TOML.parse(,,,,xOptions.tag)'); }
-		TableDepends = order ? OrderedTable : Table;
 		allowLonger = !!longer;
 		enableNull = !!_null;
 		allowInlineTableMultiLineAndTrailingCommaEvenNoComma = !!multi;

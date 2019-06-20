@@ -23,6 +23,7 @@ const sourceContent  = `
       hasOwnProperty = "..."
       constructor    = "..."
       __proto__      = "..."
+      5              = "..."
 `;
 
 const rootTable = TOML.parse(sourceContent, 0.5, '\n');
@@ -31,6 +32,10 @@ rootTable.I_am_normal    // "..."
 rootTable.hasOwnProperty // "..."
 rootTable.constructor    // "..."
 rootTable.__proto__      // "..."
+
+rootTable.valueOf        // undefined
+
+Object.keys(rootTable)   // [ "I_am_normal", "hasOwnProperty", "constructor", "__proto__", "5" ]
 ```
 
 `TOML.parse`
@@ -92,7 +97,7 @@ function parse (
     *   type: `object`
     
     The extensional features not in the specification.  
-    Include keeping the key/value pairs order of tables, integers larger than `signed long`, mixed-type array, multi-line inline table with trailing comma even no comma, `null` value, custom constructor, etc.  
+    Include integers larger than `signed long`, mixed-type array, multi-line inline table with trailing comma even no comma, `null` value, custom constructor, etc.  
     They are private experimental discouraged features.  
     See [xOptions](https://GitHub.com/LongTengDao/j-toml/blob/master/docs/English/xOptions.md).
 

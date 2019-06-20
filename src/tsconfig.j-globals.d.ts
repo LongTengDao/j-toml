@@ -9,22 +9,33 @@ declare module '.Buffer.from?' { export default Buffer.from; }
 declare module '.Buffer.isBuffer' { export default Buffer.isBuffer; }
 
 declare module '.Date' { export default Date; }
+declare module '.Date.prototype.getTime' { export default Date.prototype.getTime; }
 
 declare module '.Error' { export default Error; }
 
 declare module '.Infinity' { export default Infinity; }
 
+declare module '.Map' { export default Map; }
+
 declare module '.NaN' { export default NaN; }
 
+declare module '.Number.MAX_SAFE_INTEGER' { export default Number.MAX_SAFE_INTEGER; }
+declare module '.Number.MIN_SAFE_INTEGER' { export default Number.MIN_SAFE_INTEGER; }
 declare module '.Number.isSafeInteger' { export default Number.isSafeInteger; }
 
 declare module '.Object.assign' { export default Object.assign; }
 declare module '.Object.create' { export default Object.create; }
 declare module '.Object.defineProperties' { export default Object.defineProperties; }
 declare module '.Object.defineProperty' { export default Object.defineProperty; }
-declare module '.Object.fromEntries' { export default Object.fromEntries; }
+declare module '.Object.freeze' { export default Object.freeze; }
+declare module '.Object.fromEntries' { export default fromEntries;
+	function fromEntries<K extends string | symbol, V extends any> (entries :Iterable<{ readonly 0: K, readonly 1: V }>) :{ [k in K] :V };
+}
 declare module '.Object.getOwnPropertyDescriptor' { export default Object.getOwnPropertyDescriptor; }
 declare module '.Object.getOwnPropertyDescriptors' { export default Object.getOwnPropertyDescriptors; }
+declare module '.Object.is' { export default Object.is; }
+declare module '.Object.prototype.hasOwnProperty' { export default Object.prototype.hasOwnProperty; }
+declare module '.Object.setPrototypeOf' { export default Object.setPrototypeOf; }
 
 declare module '.Proxy' { export default Proxy; }
 

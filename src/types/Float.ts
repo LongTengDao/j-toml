@@ -15,14 +15,17 @@ const FLOAT = newRegExp`
 	(?=[.eE])
 	(?:\.\d+(?:_\d+)*)?
 	(?:[eE]${INTEGER_D})?
-	$
-`;
+	$`;
 const UNDERSCORES = /_/g;
+const ZERO = /^[-+]?0(?:\.[0_]+)?(?:[eE][-+]?0)?$/;
 
 export const Float = (literal :string) :number => {
 	if ( FLOAT.test(literal) ) {
 		const number = +literal.replace(UNDERSCORES, '');
-		/*options\$0.sFloat || */isFinite(number) || iterator$0.throws(RangeError('Float has been as big as Infinity, like '+literal+' at '+iterator$0.where()));
+		/*options\$0.noStrict && options\$0.sFloat || */
+		isFinite(number) || iterator$0.throws(RangeError(`Float has been as big as inf, like ${literal} at ${iterator$0.where()}`));
+		/*options\$0.noStrict || */
+		number || ZERO.test(literal) || iterator$0.throws(RangeError(`Float has been as little as ${literal.startsWith('-') ? '-' : ''}0, like ${literal} at ${iterator$0.where()}`));
 		return number;
 	}
 	//if ( options\$0.sFloat ) {
@@ -30,5 +33,5 @@ export const Float = (literal :string) :number => {
 	//	if ( literal==='-inf' ) { return -Infinity; }
 	//	if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) { return NaN; }
 	//}
-	throw iterator$0.throws(SyntaxError('Invalid Float '+literal+' at '+iterator$0.where()));
+	throw iterator$0.throws(SyntaxError(`Invalid Float ${literal} at ${iterator$0.where()}`));
 };

@@ -25,7 +25,6 @@ declare const exports :{
 }
 
 type xOptions = {
-	order? :boolean,
 	longer? :boolean,
 	null? :boolean,
 	multi? :boolean,

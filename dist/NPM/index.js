@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.98';
+const version = '0.5.99';
 
 const isBuffer = Buffer.isBuffer;
 
@@ -69,168 +69,15 @@ function throws(error) {
 
 const isSafeInteger = Number.isSafeInteger;
 
-const ownKeys = Reflect.ownKeys;
+const Reflect_ownKeys = Reflect.ownKeys;
 
-const create = Object.create;
+const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER;
 
-const Object_assign = Object.assign;
-
-const Reflect_defineProperty = Reflect.defineProperty;
-
-const Reflect_deleteProperty = Reflect.deleteProperty;
-
-/*!
- * 模块名称：j-orderify
- * 模块功能：返回一个能保证给定对象的属性按此后添加顺序排列的 proxy，即使键名是 symbol，或整数 string。
-   　　　　　Return a proxy for given object, which can guarantee own keys are in setting order, even if the key name is symbol or int string.
- * 模块版本：4.0.0
- * 许可条款：LGPL-3.0
- * 所属作者：龙腾道 <LongTengDao@LongTengDao.com> (www.LongTengDao.com)
- * 问题反馈：https://GitHub.com/LongTengDao/j-orderify/issues
- * 项目主页：https://GitHub.com/LongTengDao/j-orderify/
- */
-
-const Keeper = Set;
-const target2keeper = new WeakMap;
-const proxy2target = new WeakMap;
-const target2proxy = new WeakMap;
-const handlers = 
-/*#__PURE__*/
-Object_assign(create(null), {
-    defineProperty(target, key, descriptor) {
-        if (Reflect_defineProperty(target, key, descriptor)) {
-            target2keeper.get(target).add(key);
-            return true;
-        }
-        return false;
-    },
-    deleteProperty(target, key) {
-        if (Reflect_deleteProperty(target, key)) {
-            target2keeper.get(target).delete(key);
-            return true;
-        }
-        return false;
-    },
-    ownKeys(target) {
-        return [...target2keeper.get(target)];
-    },
-});
-function newProxy(target, keeper) {
-    target2keeper.set(target, keeper);
-    const proxy = new Proxy(target, handlers);
-    proxy2target.set(proxy, target);
-    return proxy;
-}
-const of = {
-    Ordered(object) {
-        if (proxy2target.has(object)) {
-            return object;
-        }
-        let proxy = target2proxy.get(object);
-        if (proxy) {
-            return proxy;
-        }
-        proxy = newProxy(object, new Keeper(ownKeys(object)));
-        target2proxy.set(object, proxy);
-        return proxy;
-    }
-}.Ordered;
-
-/*¡ j-orderify */
-
-const Table = function Table() { };
-const OrderedTable = function Table() { return of(this); };
-OrderedTable.prototype = Table.prototype = create(null);
-function isTable(value) { return value instanceof Table; }
-
-const slice = Array.prototype.slice;
-
-/*!
- * 模块名称：j-regexp
- * 模块功能：可读性更好的正则表达式创建方式。
-   　　　　　More readable way for creating RegExp.
- * 模块版本：5.2.0
- * 许可条款：LGPL-3.0
- * 所属作者：龙腾道 <LongTengDao@LongTengDao.com> (www.LongTengDao.com)
- * 问题反馈：https://GitHub.com/LongTengDao/j-regexp/issues
- * 项目主页：https://GitHub.com/LongTengDao/j-regexp/
- */
-
-var NT = /[\n\t]/g;
-function Source(raw, substitutions) {
-    var source = raw[0];
-    for (var length = substitutions.length, index = 0; index < length;) {
-        var substitution = substitutions[index];
-        source += (substitution instanceof RegExp ? substitution.source : substitution) + raw[++index];
-    }
-    return source.replace(NT, '');
-}
-var newRegExp = 
-/*#__PURE__*/
-function (newRegExp, createNewRegExpWith) {
-    (function callee(pickedFlags, restFlags) {
-        if (restFlags) {
-            callee(pickedFlags + restFlags.charAt(0), restFlags = restFlags.slice(1));
-            callee(pickedFlags, restFlags);
-        }
-        else if (pickedFlags) {
-            newRegExp[pickedFlags] = createNewRegExpWith(pickedFlags);
-        }
-    })('', 'gimsuy');
-    return newRegExp;
-}(function newRegExp(template) {
-    return new RegExp(Source(template.raw, slice.call(arguments, 1)));
-}, function (flags) {
-    return {}['newRegExp.' + flags] = function (template) {
-        return new RegExp(Source(template.raw, slice.call(arguments, 1)), flags);
-    };
-});
-
-var clearRegExp = '$_' in RegExp
-    ? function (REGEXP) {
-        return function () { REGEXP.test(''); };
-    }(/^/)
-    : function () { };
-
-/*¡ j-regexp */
-
-const INTEGER_D = /[-+]?(?:0|[1-9]\d*(?:_\d+)*)/;
-const D_INTEGER = newRegExp `^${INTEGER_D}$`;
-const XOB_INTEGER = /^0(?:x[0-9A-Fa-f]+(?:_[0-9A-Fa-f]+)*|o[0-7]+(?:_[0-7]+)*|b[01]+(?:_[01]+)*)$/;
-const UNDERSCORES_SIGN = /_|^[-+]/g;
-const NumberInteger = (literal) => {
-    D_INTEGER.test(literal)
-        || /*options\$0.xob && */ XOB_INTEGER.test(literal)
-        || throws(SyntaxError('Invalid Integer ' + literal + ' at ' + where()));
-    const number = literal.startsWith('-')
-        ? -literal.replace(UNDERSCORES_SIGN, '')
-        : +literal.replace(UNDERSCORES_SIGN, '');
-    allowLonger
-        || isSafeInteger(number)
-        || throws(RangeError('Integer did not use BitInt must fit Number.isSafeInteger, not includes ' + literal + ' meet at ' + where()));
-    return number;
-};
-const BigIntInteger = (literal) => {
-    D_INTEGER.test(literal)
-        || /*options\$0.xob && */ XOB_INTEGER.test(literal)
-        || throws(SyntaxError('Invalid Integer ' + literal + ' at ' + where()));
-    let bigInt = BigInt(literal.replace(UNDERSCORES_SIGN, ''));
-    if (literal.startsWith('-')) {
-        bigInt = -bigInt;
-    }
-    allowLonger
-        || -9223372036854775808n <= bigInt && bigInt <= 9223372036854775807n // ( min = -(2n**(64n-1n)) || ~max ) <= long <= ( max = 2n**(64n-1n)-1n || ~min )
-        || throws(RangeError('Integer expect 64 bit range (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807), not includes ' + literal + ' meet at ' + where()));
-    return bigInt;
-};
-const DependInteger = (literal) => {
-    const bigInt = BigIntInteger(literal);
-    return IntegerMin <= bigInt && bigInt <= IntegerMax ? +(bigInt + '') : bigInt;
-};
+const MIN_SAFE_INTEGER = Number.MIN_SAFE_INTEGER;
 
 /* options */
 let useWhatToJoinMultiLineString;
-let IntegerDepends;
+let usingBigInt;
 let IntegerMin;
 let IntegerMax;
 let zeroDatetime;
@@ -243,7 +90,6 @@ let ctrl7F;
 let disallowEmptyKey;
 //export const xob :boolean = true;
 let sFloat;
-let TableDepends;
 let unreopenable;
 let allowLonger;
 let enableNull;
@@ -253,7 +99,7 @@ const arrayTypes = new WeakMap;
 let As = () => function as(array) {
     if (arrayTypes.has(array)) {
         arrayTypes.get(array) === as
-            || throws(TypeError('Types in Array must be same. Check ' + where()));
+            || throws(TypeError(`Types in Array must be same. Check ${where()}`));
     }
     else {
         arrayTypes.set(array, as);
@@ -320,10 +166,10 @@ function use(specificationVersion, multiLineJoiner, useBigInt, xOptions) {
         throw TypeError('TOML.parse(,,multiLineJoiner)');
     }
     if (useBigInt === true) {
-        IntegerDepends = BigIntInteger;
+        usingBigInt = true;
     }
     else if (useBigInt === false) {
-        IntegerDepends = NumberInteger;
+        usingBigInt = false;
     }
     else {
         if (typeof useBigInt !== 'number') {
@@ -332,26 +178,27 @@ function use(specificationVersion, multiLineJoiner, useBigInt, xOptions) {
         if (!isSafeInteger(useBigInt)) {
             throw RangeError('TOML.parse(,,,useBigInt)');
         }
-        IntegerDepends = DependInteger;
+        usingBigInt = null;
         if (useBigInt >= 0) {
             IntegerMin = -(IntegerMax = useBigInt);
         }
         else {
             IntegerMax = -(IntegerMin = useBigInt) - 1;
         }
+        if (IntegerMin < MIN_SAFE_INTEGER || MAX_SAFE_INTEGER < IntegerMax) {
+            throw RangeError('TOML.parse(,,,useBigInt)');
+        }
     }
     let typify;
     if (xOptions === null) {
-        TableDepends = Table;
         allowLonger = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = unreopenable = false;
         typify = true;
     }
     else {
-        const { order, longer, null: _null, multi, close, mix, tag, ...unknown } = xOptions;
-        if (ownKeys(unknown).length) {
+        const { longer, null: _null, multi, close, mix, tag, ...unknown } = xOptions;
+        if (Reflect_ownKeys(unknown).length) {
             throw Error('TOML.parse(,,,,xOptions.tag)');
         }
-        TableDepends = order ? OrderedTable : Table;
         allowLonger = !!longer;
         enableNull = !!_null;
         allowInlineTableMultiLineAndTrailingCommaEvenNoComma = !!multi;
@@ -393,6 +240,181 @@ const Infinity = 1/0;
 
 const NaN = 0/0;
 
+const create = Object.create;
+
+const assign = Object.assign;
+
+const defineProperty = Object.defineProperty;
+
+const Reflect_apply = Reflect.apply;
+
+const Reflect_construct = Reflect.construct;
+
+const Reflect_defineProperty = Reflect.defineProperty;
+
+const Reflect_deleteProperty = Reflect.deleteProperty;
+
+/*!
+ * 模块名称：j-orderify
+ * 模块功能：返回一个能保证给定对象的属性按此后添加顺序排列的 proxy，即使键名是 symbol，或整数 string。
+   　　　　　Return a proxy for given object, which can guarantee own keys are in setting order, even if the key name is symbol or int string.
+ * 模块版本：5.0.0
+ * 许可条款：LGPL-3.0
+ * 所属作者：龙腾道 <LongTengDao@LongTengDao.com> (www.LongTengDao.com)
+ * 问题反馈：https://GitHub.com/LongTengDao/j-orderify/issues
+ * 项目主页：https://GitHub.com/LongTengDao/j-orderify/
+ */
+
+const Keeper = Set;
+const target2keeper = new WeakMap;
+const proxy2target = new WeakMap;
+const target2proxy = new WeakMap;
+const handlers = 
+/*#__PURE__*/
+assign(create(null), {
+    apply(Function, thisArg, args) {
+        return of(Reflect_apply(Function, thisArg, args));
+    },
+    construct(Class, args, newTarget) {
+        return of(Reflect_construct(Class, args, newTarget));
+    },
+    defineProperty(target, key, descriptor) {
+        if (Reflect_defineProperty(target, key, descriptor)) {
+            target2keeper.get(target).add(key);
+            return true;
+        }
+        return false;
+    },
+    deleteProperty(target, key) {
+        if (Reflect_deleteProperty(target, key)) {
+            target2keeper.get(target).delete(key);
+            return true;
+        }
+        return false;
+    },
+    ownKeys(target) {
+        return [...target2keeper.get(target)];
+    },
+});
+function newProxy(target, keeper) {
+    target2keeper.set(target, keeper);
+    const proxy = new Proxy(target, handlers);
+    proxy2target.set(proxy, target);
+    return proxy;
+}
+const { of } = {
+    of(object) {
+        if (proxy2target.has(object)) {
+            return object;
+        }
+        let proxy = target2proxy.get(object);
+        if (proxy) {
+            return proxy;
+        }
+        proxy = newProxy(object, new Keeper(Reflect_ownKeys(object)));
+        target2proxy.set(object, proxy);
+        return proxy;
+    }
+};
+const prototypeDescriptor = /*#__PURE__*/ assign(create(null), { value: null, writable: false, enumerable: false, configurable: false });
+const { bind } = {
+    bind(prototype) {
+        let Bound;
+        if (prototype === null) {
+            Bound = function () {
+                if (new.target) {
+                    return newProxy(new.target === Bound ? create(null) : this, new Keeper);
+                }
+                throw TypeError(`Bound cannot be invoked without 'new'`);
+            };
+            defineProperty(Bound, 'prototype', prototypeDescriptor);
+        }
+        else if (typeof prototype !== 'object') {
+            throw TypeError;
+        }
+        else {
+            Bound = function () {
+                if (new.target) {
+                    return newProxy(this, new Keeper);
+                }
+                throw TypeError(`Bound cannot be invoked without 'new'`);
+            };
+            prototypeDescriptor.value = prototype;
+            defineProperty(Bound, 'prototype', prototypeDescriptor);
+            prototypeDescriptor.value = null;
+        }
+        //delete Bound.name;
+        //delete Bound.length;
+        return Bound;
+    }
+};
+const PropertyKey = new Proxy({}, {
+    get(target, key) {
+        return key;
+    },
+});
+
+/*¡ j-orderify */
+
+const Table = 
+/*#__PURE__*/ bind(create(null));
+function isTable(value) {
+    return value instanceof Table;
+}
+
+const slice = Array.prototype.slice;
+
+/*!
+ * 模块名称：j-regexp
+ * 模块功能：可读性更好的正则表达式创建方式。
+   　　　　　More readable way for creating RegExp.
+ * 模块版本：5.2.0
+ * 许可条款：LGPL-3.0
+ * 所属作者：龙腾道 <LongTengDao@LongTengDao.com> (www.LongTengDao.com)
+ * 问题反馈：https://GitHub.com/LongTengDao/j-regexp/issues
+ * 项目主页：https://GitHub.com/LongTengDao/j-regexp/
+ */
+
+var NT = /[\n\t]/g;
+function Source(raw, substitutions) {
+    var source = raw[0];
+    for (var length = substitutions.length, index = 0; index < length;) {
+        var substitution = substitutions[index];
+        source += (substitution instanceof RegExp ? substitution.source : substitution) + raw[++index];
+    }
+    return source.replace(NT, '');
+}
+var newRegExp = 
+/*#__PURE__*/
+function (newRegExp, createNewRegExpWith) {
+    (function callee(pickedFlags, restFlags) {
+        if (restFlags) {
+            callee(pickedFlags + restFlags.charAt(0), restFlags = restFlags.slice(1));
+            callee(pickedFlags, restFlags);
+        }
+        else if (pickedFlags) {
+            newRegExp[pickedFlags] = createNewRegExpWith(pickedFlags);
+        }
+    })('', 'gimsuy');
+    return newRegExp;
+}(function newRegExp(template) {
+    return new RegExp(Source(template.raw, slice.call(arguments, 1)));
+}, function createNewRegExpWith(flags) {
+    return {}['newRegExp.' + flags] = function (template) {
+        return new RegExp(Source(template.raw, slice.call(arguments, 1)), flags);
+    };
+});
+
+var clearRegExp = '$_' in RegExp
+    ? function (REGEXP) {
+        return function () { REGEXP.test(''); };
+    }(/^/)
+    : function () { };
+
+/*¡ j-regexp */
+
+const getTime = Date.prototype.getTime;
+
 const _29_ = /(?:0[1-9]|1\d|2[0-9])/;
 const _30_ = /(?:0[1-9]|[12]\d|30)/;
 const _31_ = /(?:0[1-9]|[12]\d|3[01])/;
@@ -410,7 +432,7 @@ const YMD = newRegExp `
 const HMS = newRegExp `
 	${_23_}:${_59_}:${_59_}
 	`;
-const HMS_ = newRegExp `
+const HMS_DOT = newRegExp `
 	${HMS}
 	(?:\.\d+)?
 	`;
@@ -419,21 +441,19 @@ const OFFSET_DATETIME = newRegExp `
 	^
 	${YMD}
 	[T ]
-	${HMS_}
-	${OFFSET}
-	$`;
+	${HMS_DOT}
+	${OFFSET}`;
 const OFFSET_DATETIME_ZERO = newRegExp `
 	^
 	${YMD}
 	[T ]
-	${HMS}
-	Z
-	$`;
+	${HMS_DOT}
+	Z$`;
 const LOCAL_DATETIME = newRegExp `
 	^
 	${YMD}
 	[T ]
-	${HMS_}
+	${HMS_DOT}
 	$`;
 const LOCAL_DATE = newRegExp `
 	^
@@ -441,19 +461,26 @@ const LOCAL_DATE = newRegExp `
 	$`;
 const LOCAL_TIME = newRegExp `
 	^
-	${HMS_}
+	${HMS_DOT}
 	$`;
+const DOT_ZERO = /\.?0+$/;
 const literal_cache = new WeakMap;
-const value_cache = new WeakMap;
+const gotValue_cache = new WeakMap;
+const dotValue_cache = new WeakMap;
+const dotDescriptor = /*#__PURE__*/ assign(create(null), { value: '', writable: true, enumerable: false, configurable: true });
 class Datetime extends Date {
-    constructor(expression, literal) {
+    constructor(expression, literal, dotValue) {
         super(expression);
         literal_cache.set(this, literal);
-        value_cache.set(this, this.getTime());
+        gotValue_cache.set(this, getTime.call(this));
+        dotValue_cache.set(this, dotValue);
+        defineProperty(this, '.', dotDescriptor);
+        if (dotValue) {
+            this['.'] = dotValue;
+        }
     }
-    // Date.prototype.toJSON => toISOString
     toISOString() {
-        if (this.getTime() === value_cache.get(this)) {
+        if (getTime.call(this) === gotValue_cache.get(this) && this['.'] === dotValue_cache.get(this)) {
             return literal_cache.get(this);
         }
         throw Error('Datetime value has been modified.');
@@ -461,44 +488,69 @@ class Datetime extends Date {
 }
 class OffsetDateTime extends Datetime {
     constructor(literal) {
-        (zeroDatetime ? OFFSET_DATETIME_ZERO : OFFSET_DATETIME).test(literal)
-            || throws(SyntaxError('Invalid Offset Date-Time ' + literal + ' at ' + where()));
-        super(literal.replace(' ', 'T'), literal);
-    }
-    get '.'() {
-        const index = literal_cache.get(this).indexOf('.') + 1;
-        return index ? literal_cache.get(this).slice(index).replace(OFFSET, '') : '';
+        (zeroDatetime ? OFFSET_DATETIME_ZERO : OFFSET_DATETIME).test(literal) || throws(SyntaxError(`Invalid Offset Date-Time ${literal} at ${where()}`));
+        const index = literal.lastIndexOf('.');
+        super(literal.replace(' ', 'T'), literal, index < 0 ? '' : literal.slice(index).replace(OFFSET, '').replace(DOT_ZERO, ''));
     }
 }
 class LocalDateTime extends Datetime {
     constructor(literal) {
-        LOCAL_DATETIME.test(literal)
-            || throws(SyntaxError('Invalid Local Date-Time ' + literal + ' at ' + where()));
-        super(literal.replace(' ', 'T') + 'Z', literal);
-    }
-    get '.'() {
-        const index = literal_cache.get(this).indexOf('.') + 1;
-        return index ? literal_cache.get(this).slice(index) : '';
+        LOCAL_DATETIME.test(literal) || throws(SyntaxError(`Invalid Local Date-Time ${literal} at ${where()}`));
+        const index = literal.lastIndexOf('.');
+        super(literal.replace(' ', 'T') + 'Z', literal, index < 0 ? '' : literal.slice(index).replace(DOT_ZERO, ''));
     }
 }
 class LocalDate extends Datetime {
     constructor(literal) {
-        LOCAL_DATE.test(literal)
-            || throws(SyntaxError('Invalid Local Date ' + literal + ' at ' + where()));
-        super(literal + 'T00:00:00.000Z', literal);
+        LOCAL_DATE.test(literal) || throws(SyntaxError(`Invalid Local Date ${literal} at ${where()}`));
+        super(literal + 'T00:00:00.000Z', literal, '');
     }
-    get '.'() { return ''; }
 }
 class LocalTime extends Datetime {
     constructor(literal) {
-        LOCAL_TIME.test(literal)
-            || throws(SyntaxError('Invalid Local Time ' + literal + ' at ' + where()));
-        super('1970-01-01T' + literal + 'Z', literal);
+        LOCAL_TIME.test(literal) || throws(SyntaxError(`Invalid Local Time ${literal} at ${where()}`));
+        const index = literal.lastIndexOf('.');
+        super('1970-01-01T' + literal + 'Z', literal, index < 0 ? '' : literal.slice(index).replace(DOT_ZERO, ''));
     }
-    get '.'() {
-        const index = literal_cache.get(this).indexOf('.') + 1;
-        return index ? literal_cache.get(this).slice(index) : '';
+}
+
+const INTEGER_D = /[-+]?(?:0|[1-9]\d*(?:_\d+)*)/;
+const D_INTEGER = newRegExp `^${INTEGER_D}$`;
+const XOB_INTEGER = /^0(?:x[0-9A-Fa-f]+(?:_[0-9A-Fa-f]+)*|o[0-7]+(?:_[0-7]+)*|b[01]+(?:_[01]+)*)$/;
+const UNDERSCORES_SIGN = /_|^[-+]/g;
+const Integer = (literal) => {
+    if (usingBigInt === true) {
+        return BigIntInteger(literal);
     }
+    if (usingBigInt === false) {
+        return NumberInteger(literal);
+    }
+    const bigInt = BigIntInteger(literal);
+    return IntegerMin <= bigInt && bigInt <= IntegerMax ? +(bigInt + '') : bigInt;
+};
+function BigIntInteger(literal) {
+    D_INTEGER.test(literal)
+        || /*options\$0.xob && */ XOB_INTEGER.test(literal)
+        || throws(SyntaxError(`Invalid Integer ${literal} at ${where()}`));
+    let bigInt = BigInt(literal.replace(UNDERSCORES_SIGN, ''));
+    if (literal.startsWith('-')) {
+        bigInt = -bigInt;
+    }
+    allowLonger
+        || -9223372036854775808n <= bigInt && bigInt <= 9223372036854775807n // ( min = -(2n**(64n-1n)) || ~max ) <= long <= ( max = 2n**(64n-1n)-1n || ~min )
+        || throws(RangeError(`Integer expect 64 bit range (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807), not includes ${literal} meet at ${where()}`));
+    return bigInt;
+}
+function NumberInteger(literal) {
+    D_INTEGER.test(literal)
+        || /*options\$0.xob && */ XOB_INTEGER.test(literal)
+        || throws(SyntaxError(`Invalid Integer ${literal} at ${where()}`));
+    const number = literal.startsWith('-')
+        ? -literal.replace(UNDERSCORES_SIGN, '')
+        : +literal.replace(UNDERSCORES_SIGN, '');
+    isSafeInteger(number)
+        || throws(RangeError(`Integer did not use BitInt must fit Number.isSafeInteger, not includes ${literal} meet at ${where()}`));
+    return number;
 }
 
 const FLOAT = newRegExp `
@@ -507,13 +559,16 @@ const FLOAT = newRegExp `
 	(?=[.eE])
 	(?:\.\d+(?:_\d+)*)?
 	(?:[eE]${INTEGER_D})?
-	$
-`;
+	$`;
 const UNDERSCORES = /_/g;
+const ZERO = /^[-+]?0(?:\.[0_]+)?(?:[eE][-+]?0)?$/;
 const Float = (literal) => {
     if (FLOAT.test(literal)) {
         const number = +literal.replace(UNDERSCORES, '');
-        /*options\$0.sFloat || */ isFinite(number) || throws(RangeError('Float has been as big as Infinity, like ' + literal + ' at ' + where()));
+        /*options\$0.noStrict && options\$0.sFloat || */
+        isFinite(number) || throws(RangeError(`Float has been as big as inf, like ${literal} at ${where()}`));
+        /*options\$0.noStrict || */
+        number || ZERO.test(literal) || throws(RangeError(`Float has been as little as ${literal.startsWith('-') ? '-' : ''}0, like ${literal} at ${where()}`));
         return number;
     }
     //if ( options\$0.sFloat ) {
@@ -521,7 +576,7 @@ const Float = (literal) => {
     //	if ( literal==='-inf' ) { return -Infinity; }
     //	if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) { return NaN; }
     //}
-    throw throws(SyntaxError('Invalid Float ' + literal + ' at ' + where()));
+    throw throws(SyntaxError(`Invalid Float ${literal} at ${where()}`));
 };
 
 /* nested (readable) */
@@ -628,7 +683,7 @@ const DOT_KEY = /^[ \t]*\.[ \t]*/;
 function TABLE_DEFINITION_exec_groups(_) {
     const $_asArrayItem$$ = _.charAt(1) === '[';
     if ($_asArrayItem$$) {
-        supportArrayOfTables || throws(SyntaxError('Array of Tables is not allowed before TOML v0.2, which at ' + where()));
+        supportArrayOfTables || throws(SyntaxError(`Array of Tables is not allowed before TOML v0.2, which at ${where()}`));
         _ = _.slice(2);
     }
     else {
@@ -733,23 +788,23 @@ function appendTable(table, key_key, asArrayItem, tag) {
     if (asArrayItem) {
         let arrayOfTables;
         if (finalKey in table) {
-            sealedInline.has(arrayOfTables = table[finalKey]) && throws(Error('Trying to push Table to non-ArrayOfTables value at ' + where()));
+            sealedInline.has(arrayOfTables = table[finalKey]) && throws(Error(`Trying to push Table to non-ArrayOfTables value at ${where()}`));
         }
         else {
             arrayOfTables = table[finalKey] = [];
         }
         tag && collect({ table, key: finalKey, array: arrayOfTables, index: arrayOfTables.length, tag });
-        arrayOfTables.push(lastTable = new TableDepends);
+        arrayOfTables.push(lastTable = new Table);
     }
     else {
         if (finalKey in table) {
             if (unreopenable || !openTables.has(lastTable = table[finalKey]) || reopenedTables.has(lastTable)) {
-                throw throws(Error('Duplicate Table definition at ' + where()));
+                throw throws(Error(`Duplicate Table definition at ${where()}`));
             }
             openTables.delete(lastTable);
         }
         else {
-            table[finalKey] = lastTable = new TableDepends;
+            table[finalKey] = lastTable = new Table;
             unreopenable || reopenedTables.add(lastTable);
         }
         tag && collect({ table, key: finalKey, array: null, tag });
@@ -769,7 +824,7 @@ function parseKeys(key_key) {
     }
     if (disallowEmptyKey) {
         for (let index = keys.length; index--;) {
-            keys[index] || throws(SyntaxError('Empty key is not allowed before TOML v0.5, which at ' + where()));
+            keys[index] || throws(SyntaxError(`Empty key is not allowed before TOML v0.5, which at ${where()}`));
         }
     }
     return keys;
@@ -782,21 +837,21 @@ function prepareTable(table, keys) {
         if (key in table) {
             table = table[key];
             if (isTable(table)) {
-                sealedInline.has(table) && throws(Error('Trying to define Table under static Inline Table at ' + where()));
+                sealedInline.has(table) && throws(Error(`Trying to define Table under static Inline Table at ${where()}`));
             }
             else if (isArray(table)) {
-                sealedInline.has(table) && throws(Error('Trying to append value to static Inline Array at ' + where()));
+                sealedInline.has(table) && throws(Error(`Trying to append value to static Inline Array at ${where()}`));
                 // @ts-ignore
                 table = table[table.length - 1];
             }
             else {
-                throws(Error('Trying to define Table under non-Table value at ' + where()));
+                throws(Error(`Trying to define Table under non-Table value at ${where()}`));
             }
         }
         else {
-            openTables.add(table = table[key] = new TableDepends);
+            openTables.add(table = table[key] = new Table);
             while (index < length) {
-                openTables.add(table = table[keys[index++]] = new TableDepends);
+                openTables.add(table = table[keys[index++]] = new Table);
             }
             return table;
         }
@@ -810,13 +865,13 @@ function prepareInlineTable(table, keys) {
         const key = keys[index++];
         if (key in table) {
             table = table[key];
-            isTable(table) || throws(Error('Trying to assign property through non-Table value at ' + where()));
-            sealedInline.has(table) && throws(Error('Trying to assign property through static Inline Table at ' + where()));
+            isTable(table) || throws(Error(`Trying to assign property through non-Table value at ${where()}`));
+            sealedInline.has(table) && throws(Error(`Trying to assign property through static Inline Table at ${where()}`));
         }
         else {
-            table = table[key] = new TableDepends;
+            table = table[key] = new Table;
             while (index < length) {
-                table = table[keys[index++]] = new TableDepends;
+                table = table[keys[index++]] = new Table;
             }
             return table;
         }
@@ -854,7 +909,7 @@ function assignLiteralString(table, finalKey, literal) {
 const CONTROL_CHARACTER_EXCLUDE_TAB = /[\x00-\x08\x0B-\x1F\x7F]/;
 const CONTROL_CHARACTER_EXCLUDE_TAB_LESSER = /[\x00-\x08\x0B-\x1F]/;
 function checkLiteralString(literal) {
-    (ctrl7F ? CONTROL_CHARACTER_EXCLUDE_TAB : CONTROL_CHARACTER_EXCLUDE_TAB_LESSER).test(literal) && throws(SyntaxError('Control characters other than Tab are not permitted in a Literal String, which was found at ' + where()));
+    (ctrl7F ? CONTROL_CHARACTER_EXCLUDE_TAB : CONTROL_CHARACTER_EXCLUDE_TAB_LESSER).test(literal) && throws(SyntaxError(`Control characters other than Tab are not permitted in a Literal String, which was found at ${where()}`));
     return literal;
 }
 function assignBasicString(table, finalKey, literal) {
@@ -890,7 +945,7 @@ function assignBasicString(table, finalKey, literal) {
 }
 
 function Root() {
-    const rootTable = new TableDepends;
+    const rootTable = new Table;
     let lastSectionTable = rootTable;
     while (rest()) {
         const line = next().replace(PRE_WHITESPACE, '');
@@ -898,11 +953,11 @@ function Root() {
         else if (line.startsWith('#')) { }
         else if (line.startsWith('[')) {
             const { $_asArrayItem$$, keys, $$asArrayItem$_, tag } = TABLE_DEFINITION_exec_groups(line);
-            $_asArrayItem$$ === $$asArrayItem$_ || throws(SyntaxError('Square brackets of Table definition statement not match at ' + where()));
+            $_asArrayItem$$ === $$asArrayItem$_ || throws(SyntaxError(`Square brackets of Table definition statement not match at ${where()}`));
             lastSectionTable = appendTable(rootTable, keys, $_asArrayItem$$, tag);
         }
         else {
-            let rest = assign(lastSectionTable, line);
+            let rest = assign$1(lastSectionTable, line);
             while (stacks_length) {
                 rest = stacks_pop()(rest);
             }
@@ -911,12 +966,12 @@ function Root() {
     }
     return rootTable;
 }
-function assign(lastInlineTable, lineRest) {
+function assign$1(lastInlineTable, lineRest) {
     const { left, tag } = { right: lineRest } = KEY_VALUE_PAIR_exec_groups(lineRest);
     const leadingKeys = parseKeys(left);
     const finalKey = leadingKeys.pop();
     const table = prepareInlineTable(lastInlineTable, leadingKeys);
-    finalKey in table && throws(Error('Duplicate property definition at ' + where()));
+    finalKey in table && throws(Error(`Duplicate property definition at ${where()}`));
     tag && collect({ table, key: finalKey, array: null, tag });
     switch (lineRest[0]) {
         case '\'':
@@ -924,7 +979,7 @@ function assign(lastInlineTable, lineRest) {
         case '"':
             return assignBasicString(table, finalKey, lineRest);
         case '{':
-            inlineTable || throws(SyntaxError('Inline Table is not allowed before TOML v0.4, which at ' + where()));
+            inlineTable || throws(SyntaxError(`Inline Table is not allowed before TOML v0.4, which at ${where()}`));
             stacks_push((lineRest) => equalInlineTable(table, finalKey, lineRest));
             return lineRest;
         case '[':
@@ -971,7 +1026,7 @@ function assign(lastInlineTable, lineRest) {
         literal === 'true' ? true : literal === 'false' ? false :
             literal.includes('.') || (literal.includes('e') || literal.includes('E')) && !literal.startsWith('0x') ? Float(literal) :
                 enableNull && literal === 'null' ? null :
-                    IntegerDepends(literal);
+                    Integer(literal);
     return lineRest;
 }
 function push(lastArray, lineRest) {
@@ -986,7 +1041,7 @@ function push(lastArray, lineRest) {
         case '"':
             return assignBasicString(asStrings(lastArray), lastIndex, lineRest);
         case '{':
-            inlineTable || throws(SyntaxError('Inline Table is not allowed before TOML v0.4, which at ' + where()));
+            inlineTable || throws(SyntaxError(`Inline Table is not allowed before TOML v0.4, which at ${where()}`));
             stacks_push(lineRest => equalInlineTable(asTables(lastArray), lastIndex, lineRest));
             return lineRest;
         case '[':
@@ -1042,12 +1097,12 @@ function push(lastArray, lineRest) {
         asNulls(lastArray).push(null);
     }
     else {
-        asIntegers(lastArray).push(IntegerDepends(literal));
+        asIntegers(lastArray).push(Integer(literal));
     }
     return lineRest;
 }
 function equalInlineTable(table, finalKey, lineRest) {
-    const inlineTable = table[finalKey] = new TableDepends;
+    const inlineTable = table[finalKey] = new Table;
     sealedInline.add(inlineTable);
     lineRest = lineRest.replace(SYM_WHITESPACE, '');
     if (allowInlineTableMultiLineAndTrailingCommaEvenNoComma) {
@@ -1061,7 +1116,7 @@ function equalInlineTable(table, finalKey, lineRest) {
                 if (lineRest.startsWith('}')) {
                     return lineRest.replace(SYM_WHITESPACE, '');
                 }
-                lineRest = assign(inlineTable, lineRest);
+                lineRest = assign$1(inlineTable, lineRest);
                 if (stacks_length > length) {
                     stacks_insertBeforeLast(function inserted(lineRest) {
                         //
@@ -1089,11 +1144,11 @@ function equalInlineTable(table, finalKey, lineRest) {
         if (lineRest.startsWith('}')) {
             return lineRest.replace(SYM_WHITESPACE, '');
         }
-        (lineRest === '' || lineRest.startsWith('#')) && throws(SyntaxError('Inline Table is intended to appear on a single line, which broken at ' + where()));
+        (lineRest === '' || lineRest.startsWith('#')) && throws(SyntaxError(`Inline Table is intended to appear on a single line, which broken at ${where()}`));
         const length = stacks_length;
         return function callee(lineRest) {
             for (;;) {
-                lineRest = assign(inlineTable, lineRest);
+                lineRest = assign$1(inlineTable, lineRest);
                 if (stacks_length > length) {
                     stacks_insertBeforeLast(function inserted(lineRest) {
                         //
@@ -1102,9 +1157,9 @@ function equalInlineTable(table, finalKey, lineRest) {
                         } //
                         if (lineRest.startsWith(',')) { //
                             lineRest = lineRest.replace(SYM_WHITESPACE, ''); //
-                            lineRest.startsWith('}') && throws(SyntaxError('The last property of an Inline Table can not have a trailing comma, which was found at ' + where())); //
+                            lineRest.startsWith('}') && throws(SyntaxError(`The last property of an Inline Table can not have a trailing comma, which was found at ${where()}`)); //
                         } //
-                        (lineRest === '' || lineRest.startsWith('#')) && throws(SyntaxError('Inline Table is intended to appear on a single line, which broken at ' + where())); //
+                        (lineRest === '' || lineRest.startsWith('#')) && throws(SyntaxError(`Inline Table is intended to appear on a single line, which broken at ${where()}`)); //
                         //
                         return callee(lineRest);
                     });
@@ -1115,9 +1170,9 @@ function equalInlineTable(table, finalKey, lineRest) {
                 }
                 if (lineRest.startsWith(',')) {
                     lineRest = lineRest.replace(SYM_WHITESPACE, '');
-                    lineRest.startsWith('}') && throws(SyntaxError('The last property of an Inline Table can not have a trailing comma, which was found at ' + where()));
+                    lineRest.startsWith('}') && throws(SyntaxError(`The last property of an Inline Table can not have a trailing comma, which was found at ${where()}`));
                 }
-                (lineRest === '' || lineRest.startsWith('#')) && throws(SyntaxError('Inline Table is intended to appear on a single line, which broken at ' + where()));
+                (lineRest === '' || lineRest.startsWith('#')) && throws(SyntaxError(`Inline Table is intended to appear on a single line, which broken at ${where()}`));
             }
         }(lineRest);
     }

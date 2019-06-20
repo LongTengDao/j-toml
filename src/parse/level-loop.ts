@@ -5,13 +5,14 @@ import NaN from '.NaN';
 import * as iterator$0 from '../iterator$0';
 import { Table } from '../types/Table';
 import { OffsetDateTime, LocalDateTime, LocalDate, LocalTime, OFFSET } from '../types/Datetime';
+import { Integer } from '../types/Integer';
 import { Float } from '../types/Float';
 import * as options$0 from '../options$0';
 import * as regexps$0 from '../regexps$0';
 import { sealedInline, appendTable, parseKeys, prepareInlineTable, assignLiteralString, assignBasicString } from './on-the-spot';
 
 export default function Root () {
-	const rootTable :Table = new options$0.TableDepends;
+	const rootTable :Table = new Table;
 	let lastSectionTable :Table = rootTable;
 	while ( iterator$0.rest() ) {
 		const line :string = iterator$0.next().replace(regexps$0.PRE_WHITESPACE, '');
@@ -19,7 +20,7 @@ export default function Root () {
 		else if ( line.startsWith('#') ) { }
 		else if ( line.startsWith('[') ) {
 			const { $_asArrayItem$$, keys, $$asArrayItem$_, tag } = regexps$0.TABLE_DEFINITION_exec_groups(line);
-			$_asArrayItem$$===$$asArrayItem$_ || iterator$0.throws(SyntaxError('Square brackets of Table definition statement not match at '+iterator$0.where()));
+			$_asArrayItem$$===$$asArrayItem$_ || iterator$0.throws(SyntaxError(`Square brackets of Table definition statement not match at ${iterator$0.where()}`));
 			lastSectionTable = appendTable(rootTable, keys, $_asArrayItem$$, tag);
 		}
 		else {
@@ -36,7 +37,7 @@ function assign (lastInlineTable :Table, lineRest :string) :string {
 	const leadingKeys :[string, ...string[]] = parseKeys(left);
 	const finalKey :string = <string>leadingKeys.pop();
 	const table :Table = prepareInlineTable(lastInlineTable, leadingKeys);
-	finalKey in table && iterator$0.throws(Error('Duplicate property definition at '+iterator$0.where()));
+	finalKey in table && iterator$0.throws(Error(`Duplicate property definition at ${iterator$0.where()}`));
 	tag && options$0.collect({ table, key: finalKey, array: null, tag });
 	switch ( lineRest[0] ) {
 		case '\'':
@@ -44,7 +45,7 @@ function assign (lastInlineTable :Table, lineRest :string) :string {
 		case '"':
 			return assignBasicString(table, finalKey, lineRest);
 		case '{':
-			options$0.inlineTable || iterator$0.throws(SyntaxError('Inline Table is not allowed before TOML v0.4, which at '+iterator$0.where()));
+			options$0.inlineTable || iterator$0.throws(SyntaxError(`Inline Table is not allowed before TOML v0.4, which at ${iterator$0.where()}`));
 			iterator$0.stacks_push((lineRest :string) :string => equalInlineTable(table, finalKey, lineRest));
 			return lineRest;
 		case '[':
@@ -91,7 +92,7 @@ function assign (lastInlineTable :Table, lineRest :string) :string {
 		literal==='true' ? true : literal==='false' ? false :
 				literal.includes('.') || ( literal.includes('e') || literal.includes('E') ) && !literal.startsWith('0x') ? Float(literal) :
 					options$0.enableNull && literal==='null' ? null :
-						options$0.IntegerDepends(literal);
+						Integer(literal);
 	return lineRest;
 }
 
@@ -107,7 +108,7 @@ function push (lastArray :any[], lineRest :string) :string {
 		case '"':
 			return assignBasicString(options$0.asStrings(lastArray), lastIndex, lineRest);
 		case '{':
-			options$0.inlineTable || iterator$0.throws(SyntaxError('Inline Table is not allowed before TOML v0.4, which at '+iterator$0.where()));
+			options$0.inlineTable || iterator$0.throws(SyntaxError(`Inline Table is not allowed before TOML v0.4, which at ${iterator$0.where()}`));
 			iterator$0.stacks_push(lineRest => equalInlineTable(options$0.asTables(lastArray), lastIndex, lineRest));
 			return lineRest;
 		case '[':
@@ -156,12 +157,12 @@ function push (lastArray :any[], lineRest :string) :string {
 		options$0.asFloats(lastArray).push(Float(literal));
 	}
 	else if ( options$0.enableNull && literal==='null' ) { options$0.asNulls(lastArray).push(null); }
-	else { options$0.asIntegers(lastArray).push(options$0.IntegerDepends(literal)); }
+	else { options$0.asIntegers(lastArray).push(Integer(literal)); }
 	return lineRest;
 }
 
 function equalInlineTable (table :Table, finalKey :string, lineRest :string) :string {
-	const inlineTable :Table = table[finalKey] = new options$0.TableDepends;
+	const inlineTable :Table = table[finalKey] = new Table;
 	sealedInline.add(inlineTable);
 	lineRest = lineRest.replace(regexps$0.SYM_WHITESPACE, '');
 	if ( options$0.allowInlineTableMultiLineAndTrailingCommaEvenNoComma ) {
@@ -195,7 +196,7 @@ function equalInlineTable (table :Table, finalKey :string, lineRest :string) :st
 	}
 	else {
 		if ( lineRest.startsWith('}') ) { return lineRest.replace(regexps$0.SYM_WHITESPACE, ''); }
-		( lineRest==='' || lineRest.startsWith('#') ) && iterator$0.throws(SyntaxError('Inline Table is intended to appear on a single line, which broken at '+iterator$0.where()));
+		( lineRest==='' || lineRest.startsWith('#') ) && iterator$0.throws(SyntaxError(`Inline Table is intended to appear on a single line, which broken at ${iterator$0.where()}`));
 		const length = iterator$0.stacks_length;
 		return function callee (lineRest) {
 			for ( ; ; ) {
@@ -206,9 +207,9 @@ function equalInlineTable (table :Table, finalKey :string, lineRest :string) :st
 						if ( lineRest.startsWith('}') ) { return lineRest.replace(regexps$0.SYM_WHITESPACE, ''); }//
 						if ( lineRest.startsWith(',') ) {//
 							lineRest = lineRest.replace(regexps$0.SYM_WHITESPACE, '');//
-							lineRest.startsWith('}') && iterator$0.throws(SyntaxError('The last property of an Inline Table can not have a trailing comma, which was found at '+iterator$0.where()));//
+							lineRest.startsWith('}') && iterator$0.throws(SyntaxError(`The last property of an Inline Table can not have a trailing comma, which was found at ${iterator$0.where()}`));//
 						}//
-						( lineRest==='' || lineRest.startsWith('#') ) && iterator$0.throws(SyntaxError('Inline Table is intended to appear on a single line, which broken at '+iterator$0.where()));//
+						( lineRest==='' || lineRest.startsWith('#') ) && iterator$0.throws(SyntaxError(`Inline Table is intended to appear on a single line, which broken at ${iterator$0.where()}`));//
 						//
 						return callee(lineRest);
 					});
@@ -217,9 +218,9 @@ function equalInlineTable (table :Table, finalKey :string, lineRest :string) :st
 				if ( lineRest.startsWith('}') ) { return lineRest.replace(regexps$0.SYM_WHITESPACE, ''); }
 				if ( lineRest.startsWith(',') ) {
 					lineRest = lineRest.replace(regexps$0.SYM_WHITESPACE, '');
-					lineRest.startsWith('}') && iterator$0.throws(SyntaxError('The last property of an Inline Table can not have a trailing comma, which was found at '+iterator$0.where()));
+					lineRest.startsWith('}') && iterator$0.throws(SyntaxError(`The last property of an Inline Table can not have a trailing comma, which was found at ${iterator$0.where()}`));
 				}
-				( lineRest==='' || lineRest.startsWith('#') ) && iterator$0.throws(SyntaxError('Inline Table is intended to appear on a single line, which broken at '+iterator$0.where()));
+				( lineRest==='' || lineRest.startsWith('#') ) && iterator$0.throws(SyntaxError(`Inline Table is intended to appear on a single line, which broken at ${iterator$0.where()}`));
 			}
 		}(lineRest);
 	}

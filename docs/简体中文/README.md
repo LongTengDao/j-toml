@@ -21,6 +21,7 @@ const 源内容           = `
       hasOwnProperty   = "..."
       constructor      = "..."
       __proto__        = "..."
+      5                = "..."
 `;
 
 const 根表 = TOML.parse(源内容, 0.5, '\n');
@@ -29,6 +30,10 @@ const 根表 = TOML.parse(源内容, 0.5, '\n');
 根表.hasOwnProperty // "..."
 根表.constructor    // "..."
 根表.__proto__      // "..."
+
+根表.valueOf        // undefined
+
+Object.keys(根表)   // [ "一个普通的键名", "hasOwnProperty", "constructor", "__proto__", "5" ]
 ```
 
 `TOML.parse`
@@ -90,7 +95,7 @@ function parse (
     *   类型：`object`
     
     标准中所没有的扩展功能。  
-    包括保持表中键值对的顺序、超出有符号长整型的整数、混合类型的数组、跨行行内表及尾逗号甚至省略逗号、`null` 值、自定义构造器等。  
+    包括超出有符号长整型的整数、混合类型的数组、跨行行内表及尾逗号甚至省略逗号、`null` 值、自定义构造器等。  
     私有实验期功能，不建议随意使用。  
     详见 [超级选项](https://GitHub.com/LongTengDao/j-toml/blob/master/docs/简体中文/xOptions.md)。
 

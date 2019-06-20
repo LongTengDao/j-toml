@@ -2,14 +2,6 @@
 `xOptions`
 ==========
 
-`xOptions.order`
-----------------
-
-*   type: `boolean`
-*   default: `false`
-
-Keep the key/value pairs order of tables.
-
 `xOptions.longer`
 -----------------
 
