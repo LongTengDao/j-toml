@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.99';
+const version = '0.5.100';
 
 const isBuffer = Buffer.isBuffer;
 
@@ -69,7 +69,7 @@ function throws(error) {
 
 const isSafeInteger = Number.isSafeInteger;
 
-const Reflect_ownKeys = Reflect.ownKeys;
+const ownKeys = Reflect.ownKeys;
 
 const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER;
 
@@ -196,7 +196,7 @@ function use(specificationVersion, multiLineJoiner, useBigInt, xOptions) {
     }
     else {
         const { longer, null: _null, multi, close, mix, tag, ...unknown } = xOptions;
-        if (Reflect_ownKeys(unknown).length) {
+        if (ownKeys(unknown).length) {
             throw Error('TOML.parse(,,,,xOptions.tag)');
         }
         allowLonger = !!longer;
@@ -240,19 +240,33 @@ const Infinity = 1/0;
 
 const NaN = 0/0;
 
-const create = Object.create;
+const preventExtensions = Object.preventExtensions;
 
 const assign = Object.assign;
 
+const create = Object.create;
+
+const defineProperties$1 = Object.defineProperties;
+
 const defineProperty = Object.defineProperty;
 
-const Reflect_apply = Reflect.apply;
+const freeze = Object.freeze;
 
-const Reflect_construct = Reflect.construct;
+const getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
 
-const Reflect_defineProperty = Reflect.defineProperty;
+const apply = Reflect.apply;
 
-const Reflect_deleteProperty = Reflect.deleteProperty;
+const construct = Reflect.construct;
+
+const defineProperty$1 = Reflect.defineProperty;
+
+const deleteProperty = Reflect.deleteProperty;
+
+const set = Reflect.set;
+
+const undefined$1 = void 0;
+
+const isArray = Array.isArray;
 
 /*!
  * 模块名称：j-orderify
@@ -269,24 +283,32 @@ const Keeper = Set;
 const target2keeper = new WeakMap;
 const proxy2target = new WeakMap;
 const target2proxy = new WeakMap;
+const setDescriptor = /*#__PURE__*/ function () {
+    var setDescriptor = create(null);
+    setDescriptor.value = undefined$1;
+    setDescriptor.writable = true;
+    setDescriptor.enumerable = true;
+    setDescriptor.configurable = true;
+    return setDescriptor;
+}();
 const handlers = 
 /*#__PURE__*/
 assign(create(null), {
     apply(Function, thisArg, args) {
-        return of(Reflect_apply(Function, thisArg, args));
+        return orderify(apply(Function, thisArg, args));
     },
     construct(Class, args, newTarget) {
-        return of(Reflect_construct(Class, args, newTarget));
+        return orderify(construct(Class, args, newTarget));
     },
     defineProperty(target, key, descriptor) {
-        if (Reflect_defineProperty(target, key, descriptor)) {
+        if (defineProperty$1(target, key, PartialDescriptor(descriptor))) {
             target2keeper.get(target).add(key);
             return true;
         }
         return false;
     },
     deleteProperty(target, key) {
-        if (Reflect_deleteProperty(target, key)) {
+        if (deleteProperty(target, key)) {
             target2keeper.get(target).delete(key);
             return true;
         }
@@ -295,6 +317,21 @@ assign(create(null), {
     ownKeys(target) {
         return [...target2keeper.get(target)];
     },
+    set(target, key, value, receiver) {
+        if (key in target) {
+            return set(target, key, value, receiver);
+        }
+        setDescriptor.value = value;
+        if (defineProperty$1(target, key, setDescriptor)) {
+            target2keeper.get(target).add(key);
+            setDescriptor.value = undefined$1;
+            return true;
+        }
+        else {
+            setDescriptor.value = undefined$1;
+            return false;
+        }
+    },
 });
 function newProxy(target, keeper) {
     target2keeper.set(target, keeper);
@@ -302,8 +339,8 @@ function newProxy(target, keeper) {
     proxy2target.set(proxy, target);
     return proxy;
 }
-const { of } = {
-    of(object) {
+const { orderify } = {
+    orderify(object) {
         if (proxy2target.has(object)) {
             return object;
         }
@@ -311,53 +348,132 @@ const { of } = {
         if (proxy) {
             return proxy;
         }
-        proxy = newProxy(object, new Keeper(Reflect_ownKeys(object)));
+        proxy = newProxy(object, new Keeper(ownKeys(object)));
         target2proxy.set(object, proxy);
         return proxy;
     }
 };
-const prototypeDescriptor = /*#__PURE__*/ assign(create(null), { value: null, writable: false, enumerable: false, configurable: false });
-const { bind } = {
-    bind(prototype) {
-        let Bound;
-        if (prototype === null) {
-            Bound = function () {
-                if (new.target) {
-                    return newProxy(new.target === Bound ? create(null) : this, new Keeper);
-                }
-                throw TypeError(`Bound cannot be invoked without 'new'`);
-            };
-            defineProperty(Bound, 'prototype', prototypeDescriptor);
+function PartialDescriptor(source) {
+    const target = create(null);
+    if (source.hasOwnProperty('value')) {
+        target.value = source.value;
+        if (source.hasOwnProperty('writable')) {
+            target.writable = source.writable;
         }
-        else if (typeof prototype !== 'object') {
-            throw TypeError;
+    }
+    else if (source.hasOwnProperty('writable')) {
+        target.writable = source.writable;
+    }
+    else if (source.hasOwnProperty('get')) {
+        target.get = source.get;
+        if (source.hasOwnProperty('set')) {
+            target.set = source.set;
         }
-        else {
-            Bound = function () {
-                if (new.target) {
-                    return newProxy(this, new Keeper);
-                }
-                throw TypeError(`Bound cannot be invoked without 'new'`);
-            };
-            prototypeDescriptor.value = prototype;
-            defineProperty(Bound, 'prototype', prototypeDescriptor);
-            prototypeDescriptor.value = null;
+    }
+    else if (source.hasOwnProperty('set')) {
+        target.set = source.set;
+    }
+    if (source.hasOwnProperty('enumerable')) {
+        target.enumerable = source.enumerable;
+    }
+    if (source.hasOwnProperty('configurable')) {
+        target.configurable = source.configurable;
+    }
+    return target;
+}
+function InternalDescriptor(source) {
+    const target = create(null);
+    if (source.hasOwnProperty('value')) {
+        target.value = source.value;
+        target.writable = source.writable;
+    }
+    else {
+        target.get = source.get;
+        target.set = source.set;
+    }
+    target.enumerable = source.enumerable;
+    target.configurable = source.configurable;
+    return target;
+}
+const { getOwnPropertyDescriptors } = {
+    getOwnPropertyDescriptors(object) {
+        const descriptors = create(null);
+        const keeper = new Keeper;
+        const keys = ownKeys(object);
+        for (let length = keys.length, index = 0; index < length; ++index) {
+            const key = keys[index];
+            descriptors[key] = InternalDescriptor(getOwnPropertyDescriptor(object, key));
+            keeper.add(key);
         }
-        //delete Bound.name;
-        //delete Bound.length;
-        return Bound;
+        return newProxy(descriptors, keeper);
     }
 };
-const PropertyKey = new Proxy({}, {
-    get(target, key) {
-        return key;
-    },
-});
+function keeperAddKeys(keeper, object) {
+    const keys = ownKeys(object);
+    for (let length = keys.length, index = 0; index < length; ++index) {
+        keeper.add(keys[index]);
+    }
+}
+function NULL_from(source, define) {
+    const target = create(null);
+    const keeper = new Keeper;
+    if (define) {
+        if (isArray(source)) {
+            for (let length = source.length, index = 0; index < length; ++index) {
+                const descriptorMap = getOwnPropertyDescriptors(source[index]);
+                defineProperties$1(target, descriptorMap);
+                keeperAddKeys(keeper, descriptorMap);
+            }
+        }
+        else {
+            const descriptorMap = getOwnPropertyDescriptors(source);
+            defineProperties$1(target, descriptorMap);
+            keeperAddKeys(keeper, descriptorMap);
+        }
+    }
+    else {
+        if (isArray(source)) {
+            assign(target, ...source);
+            for (let length = source.length, index = 0; index < length; ++index) {
+                keeperAddKeys(keeper, source[index]);
+            }
+        }
+        else {
+            assign(target, source);
+            keeperAddKeys(keeper, source);
+        }
+    }
+    return newProxy(target, keeper);
+}
+function throwConstructing() { throw TypeError(`NULL cannot be invoked with 'new'`); }
+const NULL = 
+/*#__PURE__*/
+function () {
+    const NULL = function (source, define) {
+        return (new.target)
+            ? new.target === NULL
+                ? /*#__PURE__*/ throwConstructing()
+                : /*#__PURE__*/ newProxy(this, new Keeper)
+            : /*#__PURE__*/ NULL_from(source, define);
+    };
+    NULL.prototype = null;
+    //delete NULL.name;
+    //delete NULL.length;
+    freeze(NULL);
+    return NULL;
+}();
 
 /*¡ j-orderify */
 
 const Table = 
-/*#__PURE__*/ bind(create(null));
+/*#__PURE__*/
+function () {
+    class Table extends NULL {
+    }
+    delete Table.prototype.constructor;
+    preventExtensions(Table.prototype);
+    return Table;
+}();
 function isTable(value) {
     return value instanceof Table;
 }
@@ -740,8 +856,6 @@ function getKeys(_) {
         keys += $[0];
     }
 }
-
-const isArray = Array.isArray;
 
 const fromCodePoint = String.fromCodePoint;
 
@@ -1246,7 +1360,7 @@ const RegExp_prototype = RegExp.prototype;
  * 模块名称：j-utf
  * 模块功能：UTF 相关共享实用程序。从属于“简计划”。
    　　　　　UTF util. Belong to "Plan J".
- * 模块版本：2.0.0
+ * 模块版本：2.0.1
  * 许可条款：LGPL-3.0
  * 所属作者：龙腾道 <LongTengDao@LongTengDao.com> (www.LongTengDao.com)
  * 问题反馈：https://GitHub.com/LongTengDao/j-utf/issues

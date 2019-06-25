@@ -1,13 +1,17 @@
-import create from '.Object.create';
+import preventExtensions from '.Object.preventExtensions';
 
-import { bind, NULL } from '@ltd/j-orderify';
+import { NULL } from '@ltd/j-orderify';
 
-type Table = NULL<any>;
-const Table :{ new () :Table } =
-	/*#__PURE__*/ bind(create(null));
+export type Table = NULL<any>;
+export const Table :{ new () :Table } =
+	/*#__PURE__*/
+	function () {
+		class Table extends NULL<any> {}
+		delete Table.prototype.constructor;
+		preventExtensions(Table.prototype);
+		return Table;
+	}();
 
-function isTable (value :any) :value is Table {
+export function isTable (value :any) :value is Table {
 	return value instanceof Table;
 }
-
-export { Table, isTable };

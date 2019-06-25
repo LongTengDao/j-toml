@@ -2,7 +2,7 @@ export = exports;
 
 declare const exports :{
 	
-	version :'0.5.99'
+	version :'0.5.100'
 	
 	parse (
 		sourceContent :string | Buffer,

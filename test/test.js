@@ -10,7 +10,7 @@ module.exports = require('@ltd/j-dev')(__dirname+'/..')(async ({ import_default,
 			if ( moduleName==='fs' ) {
 				return { readFileSync: require('fs').readFileSync };
 			}
-			throw new Error(moduleName);
+			throw Error(moduleName);
 		},
 		__filename: 'test/built.js',
 	});
@@ -64,21 +64,21 @@ module.exports = require('@ltd/j-dev')(__dirname+'/..')(async ({ import_default,
 	});
 	
 	if ( JSON.stringify(toml)!==JSON.stringify(JSON.parse(await get('./test/expect.json'))) ) {
-		throw new Error(JSON.stringify(toml, null, '\t'));
+		throw Error(JSON.stringify(toml, null, '\t'));
 	}
 	
 	for ( const [name, source] of new Map().set('-base', `bad = -0b0`).set('BS', `bad = "\\ "`).set('MLBS', `bad = """\\ """`) ) {
 		let lackError = true;
 		try { TOML.parse(source, 0.5, '\n'); }
 		catch (error) { lackError = false; }
-		if ( lackError ) { throw new Error(name); }
+		if ( lackError ) { throw Error(name); }
 	}
 	
 	for ( const [name, source] of new Map().set('!0.4', `[a.b]\n[a]\n[a]`) ) {
 		let lackError = true;
 		try { TOML.parse(source, 0.4, '\n'); }
 		catch (error) { lackError = false; }
-		if ( lackError ) { throw new Error(name); }
+		if ( lackError ) { throw Error(name); }
 	}
 	
 	function compare (which, expect) {
@@ -86,12 +86,12 @@ module.exports = require('@ltd/j-dev')(__dirname+'/..')(async ({ import_default,
 		const expect_keys = Object.getOwnPropertyNames(expect).sort();
 		const sample_keys = Object.getOwnPropertyNames(sample).sort();
 		if ( JSON.stringify(sample_keys)!==JSON.stringify(expect_keys) ) {
-			throw new Error(which+' has '+JSON.stringify(sample_keys)+', but expect '+JSON.stringify(expect_keys)+'.');
+			throw Error(which+' has '+JSON.stringify(sample_keys)+', but expect '+JSON.stringify(expect_keys)+'.');
 		}
 		for ( const key of expect_keys ) {
 			if ( typeof sample[key]==='object' ) { sample[key] = sample[key].toISOString(); }
 			if ( !Object.is(sample[key], expect[key]) ) {
-				throw new Error(which+'['+key+'] is '+sample[key]+', but expect '+expect[key]+'.');
+				throw Error(which+'['+key+'] is '+sample[key]+', but expect '+expect[key]+'.');
 			}
 		}
 		toml[which] = null;
