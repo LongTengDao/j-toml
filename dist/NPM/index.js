@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.100';
+const version = '0.5.101';
 
 const isBuffer = Buffer.isBuffer;
 
@@ -75,6 +75,192 @@ const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER;
 
 const MIN_SAFE_INTEGER = Number.MIN_SAFE_INTEGER;
 
+const getPrototypeOf = Object.getPrototypeOf;
+
+const create = Object.create;
+
+const assign = Object.assign;
+
+const defineProperty = Object.defineProperty;
+
+const apply = Reflect.apply;
+
+const construct = Reflect.construct;
+
+const defineProperty$1 = Reflect.defineProperty;
+
+const deleteProperty = Reflect.deleteProperty;
+
+const set = Reflect.set;
+
+const undefined$1 = void 0;
+
+const isArray = Array.isArray;
+
+/*!
+ * 模块名称：j-orderify
+ * 模块功能：返回一个能保证给定对象的属性按此后添加顺序排列的 proxy，即使键名是 symbol，或整数 string。从属于“简计划”。
+   　　　　　Return a proxy for given object, which can guarantee own keys are in setting order, even if the key name is symbol or int string. Belong to "Plan J".
+ * 模块版本：5.2.0
+ * 许可条款：LGPL-3.0
+ * 所属作者：龙腾道 <LongTengDao@LongTengDao.com> (www.LongTengDao.com)
+ * 问题反馈：https://GitHub.com/LongTengDao/j-orderify/issues
+ * 项目主页：https://GitHub.com/LongTengDao/j-orderify/
+ */
+
+const Keeper = Set;
+const target2keeper = new WeakMap;
+const proxy2target = new WeakMap;
+const target2proxy = new WeakMap;
+const setDescriptor = /*#__PURE__*/ assign(create(null), {
+    value: undefined$1,
+    writable: true,
+    enumerable: true,
+    configurable: true,
+});
+const handlers = /*#__PURE__*/ assign(create(null), {
+    apply(Function, thisArg, args) {
+        return orderify(apply(Function, thisArg, args));
+    },
+    construct(Class, args, newTarget) {
+        return orderify(construct(Class, args, newTarget));
+    },
+    defineProperty(target, key, descriptor) {
+        if (defineProperty$1(target, key, PartialDescriptor(descriptor))) {
+            target2keeper.get(target).add(key);
+            return true;
+        }
+        return false;
+    },
+    deleteProperty(target, key) {
+        if (deleteProperty(target, key)) {
+            target2keeper.get(target).delete(key);
+            return true;
+        }
+        return false;
+    },
+    ownKeys(target) {
+        return [...target2keeper.get(target)];
+    },
+    set(target, key, value, receiver) {
+        if (key in target) {
+            return set(target, key, value, receiver);
+        }
+        setDescriptor.value = value;
+        if (defineProperty$1(target, key, setDescriptor)) {
+            target2keeper.get(target).add(key);
+            setDescriptor.value = undefined$1;
+            return true;
+        }
+        else {
+            setDescriptor.value = undefined$1;
+            return false;
+        }
+    },
+});
+function newProxy(target, keeper) {
+    target2keeper.set(target, keeper);
+    const proxy = new Proxy(target, handlers);
+    proxy2target.set(proxy, target);
+    return proxy;
+}
+const { orderify } = {
+    orderify(object) {
+        if (proxy2target.has(object)) {
+            return object;
+        }
+        let proxy = target2proxy.get(object);
+        if (proxy) {
+            return proxy;
+        }
+        proxy = newProxy(object, new Keeper(ownKeys(object)));
+        target2proxy.set(object, proxy);
+        return proxy;
+    }
+};
+function PartialDescriptor(source) {
+    const target = create(null);
+    if (source.hasOwnProperty('value')) {
+        target.value = source.value;
+        if (source.hasOwnProperty('writable')) {
+            target.writable = source.writable;
+        }
+    }
+    else if (source.hasOwnProperty('writable')) {
+        target.writable = source.writable;
+    }
+    else if (source.hasOwnProperty('get')) {
+        target.get = source.get;
+        if (source.hasOwnProperty('set')) {
+            target.set = source.set;
+        }
+    }
+    else if (source.hasOwnProperty('set')) {
+        target.set = source.set;
+    }
+    if (source.hasOwnProperty('enumerable')) {
+        target.enumerable = source.enumerable;
+    }
+    if (source.hasOwnProperty('configurable')) {
+        target.configurable = source.configurable;
+    }
+    return target;
+}
+function ExternalDescriptor(source) {
+    const target = create(null);
+    if (source.hasOwnProperty('value')) {
+        target.value = source.value;
+    }
+    if (source.hasOwnProperty('writable')) {
+        target.writable = source.writable;
+    }
+    if (source.hasOwnProperty('get')) {
+        target.get = source.get;
+    }
+    if (source.hasOwnProperty('set')) {
+        target.set = source.set;
+    }
+    if (source.hasOwnProperty('enumerable')) {
+        target.enumerable = source.enumerable;
+    }
+    if (source.hasOwnProperty('configurable')) {
+        target.configurable = source.configurable;
+    }
+    return target;
+}
+const { create: create$1 } = {
+    create(proto, descriptorMap) {
+        if (descriptorMap === undefined$1) {
+            return newProxy(create(proto), new Keeper);
+        }
+        const target = create(proto);
+        const keeper = new Keeper;
+        for (let lastIndex = arguments.length - 1, index = 1;; descriptorMap = arguments[++index]) {
+            const keys = ownKeys(descriptorMap);
+            for (let length = keys.length, index = 0; index < length; ++index) {
+                const key = keys[index];
+                defineProperty(target, key, ExternalDescriptor(descriptorMap[key]));
+                keeper.add(key);
+            }
+            if (index === lastIndex) {
+                return newProxy(target, keeper);
+            }
+        }
+    }
+};
+
+/*¡ j-orderify */
+
+function PlainTable() {
+    return create(null);
+}
+function OrderedTable() {
+    return create$1(null);
+}
+function isTable(value) {
+    return value != null && getPrototypeOf(value) === null;
+}
+
 /* options */
 let useWhatToJoinMultiLineString;
 let usingBigInt;
@@ -91,6 +277,7 @@ let disallowEmptyKey;
 //export const xob :boolean = true;
 let sFloat;
 let unreopenable;
+let Table;
 let allowLonger;
 let enableNull;
 let allowInlineTableMultiLineAndTrailingCommaEvenNoComma;
@@ -191,14 +378,16 @@ function use(specificationVersion, multiLineJoiner, useBigInt, xOptions) {
     }
     let typify;
     if (xOptions === null) {
+        Table = PlainTable;
         allowLonger = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = unreopenable = false;
         typify = true;
     }
     else {
-        const { longer, null: _null, multi, close, mix, tag, ...unknown } = xOptions;
+        const { order, longer, null: _null, multi, close, mix, tag, ...unknown } = xOptions;
         if (ownKeys(unknown).length) {
             throw Error('TOML.parse(,,,,xOptions.tag)');
         }
+        Table = order ? OrderedTable : PlainTable;
         allowLonger = !!longer;
         enableNull = !!_null;
         allowInlineTableMultiLineAndTrailingCommaEvenNoComma = !!multi;
@@ -240,250 +429,12 @@ const Infinity = 1/0;
 
 const NaN = 0/0;
 
-const preventExtensions = Object.preventExtensions;
-
-const assign = Object.assign;
-
-const create = Object.create;
-
-const defineProperties$1 = Object.defineProperties;
-
-const defineProperty = Object.defineProperty;
-
-const freeze = Object.freeze;
-
-const getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
-
-const apply = Reflect.apply;
-
-const construct = Reflect.construct;
-
-const defineProperty$1 = Reflect.defineProperty;
-
-const deleteProperty = Reflect.deleteProperty;
-
-const set = Reflect.set;
-
-const undefined$1 = void 0;
-
-const isArray = Array.isArray;
-
-/*!
- * 模块名称：j-orderify
- * 模块功能：返回一个能保证给定对象的属性按此后添加顺序排列的 proxy，即使键名是 symbol，或整数 string。
-   　　　　　Return a proxy for given object, which can guarantee own keys are in setting order, even if the key name is symbol or int string.
- * 模块版本：5.0.0
- * 许可条款：LGPL-3.0
- * 所属作者：龙腾道 <LongTengDao@LongTengDao.com> (www.LongTengDao.com)
- * 问题反馈：https://GitHub.com/LongTengDao/j-orderify/issues
- * 项目主页：https://GitHub.com/LongTengDao/j-orderify/
- */
-
-const Keeper = Set;
-const target2keeper = new WeakMap;
-const proxy2target = new WeakMap;
-const target2proxy = new WeakMap;
-const setDescriptor = /*#__PURE__*/ function () {
-    var setDescriptor = create(null);
-    setDescriptor.value = undefined$1;
-    setDescriptor.writable = true;
-    setDescriptor.enumerable = true;
-    setDescriptor.configurable = true;
-    return setDescriptor;
-}();
-const handlers = 
-/*#__PURE__*/
-assign(create(null), {
-    apply(Function, thisArg, args) {
-        return orderify(apply(Function, thisArg, args));
-    },
-    construct(Class, args, newTarget) {
-        return orderify(construct(Class, args, newTarget));
-    },
-    defineProperty(target, key, descriptor) {
-        if (defineProperty$1(target, key, PartialDescriptor(descriptor))) {
-            target2keeper.get(target).add(key);
-            return true;
-        }
-        return false;
-    },
-    deleteProperty(target, key) {
-        if (deleteProperty(target, key)) {
-            target2keeper.get(target).delete(key);
-            return true;
-        }
-        return false;
-    },
-    ownKeys(target) {
-        return [...target2keeper.get(target)];
-    },
-    set(target, key, value, receiver) {
-        if (key in target) {
-            return set(target, key, value, receiver);
-        }
-        setDescriptor.value = value;
-        if (defineProperty$1(target, key, setDescriptor)) {
-            target2keeper.get(target).add(key);
-            setDescriptor.value = undefined$1;
-            return true;
-        }
-        else {
-            setDescriptor.value = undefined$1;
-            return false;
-        }
-    },
-});
-function newProxy(target, keeper) {
-    target2keeper.set(target, keeper);
-    const proxy = new Proxy(target, handlers);
-    proxy2target.set(proxy, target);
-    return proxy;
-}
-const { orderify } = {
-    orderify(object) {
-        if (proxy2target.has(object)) {
-            return object;
-        }
-        let proxy = target2proxy.get(object);
-        if (proxy) {
-            return proxy;
-        }
-        proxy = newProxy(object, new Keeper(ownKeys(object)));
-        target2proxy.set(object, proxy);
-        return proxy;
-    }
-};
-function PartialDescriptor(source) {
-    const target = create(null);
-    if (source.hasOwnProperty('value')) {
-        target.value = source.value;
-        if (source.hasOwnProperty('writable')) {
-            target.writable = source.writable;
-        }
-    }
-    else if (source.hasOwnProperty('writable')) {
-        target.writable = source.writable;
-    }
-    else if (source.hasOwnProperty('get')) {
-        target.get = source.get;
-        if (source.hasOwnProperty('set')) {
-            target.set = source.set;
-        }
-    }
-    else if (source.hasOwnProperty('set')) {
-        target.set = source.set;
-    }
-    if (source.hasOwnProperty('enumerable')) {
-        target.enumerable = source.enumerable;
-    }
-    if (source.hasOwnProperty('configurable')) {
-        target.configurable = source.configurable;
-    }
-    return target;
-}
-function InternalDescriptor(source) {
-    const target = create(null);
-    if (source.hasOwnProperty('value')) {
-        target.value = source.value;
-        target.writable = source.writable;
-    }
-    else {
-        target.get = source.get;
-        target.set = source.set;
-    }
-    target.enumerable = source.enumerable;
-    target.configurable = source.configurable;
-    return target;
-}
-const { getOwnPropertyDescriptors } = {
-    getOwnPropertyDescriptors(object) {
-        const descriptors = create(null);
-        const keeper = new Keeper;
-        const keys = ownKeys(object);
-        for (let length = keys.length, index = 0; index < length; ++index) {
-            const key = keys[index];
-            descriptors[key] = InternalDescriptor(getOwnPropertyDescriptor(object, key));
-            keeper.add(key);
-        }
-        return newProxy(descriptors, keeper);
-    }
-};
-function keeperAddKeys(keeper, object) {
-    const keys = ownKeys(object);
-    for (let length = keys.length, index = 0; index < length; ++index) {
-        keeper.add(keys[index]);
-    }
-}
-function NULL_from(source, define) {
-    const target = create(null);
-    const keeper = new Keeper;
-    if (define) {
-        if (isArray(source)) {
-            for (let length = source.length, index = 0; index < length; ++index) {
-                const descriptorMap = getOwnPropertyDescriptors(source[index]);
-                defineProperties$1(target, descriptorMap);
-                keeperAddKeys(keeper, descriptorMap);
-            }
-        }
-        else {
-            const descriptorMap = getOwnPropertyDescriptors(source);
-            defineProperties$1(target, descriptorMap);
-            keeperAddKeys(keeper, descriptorMap);
-        }
-    }
-    else {
-        if (isArray(source)) {
-            assign(target, ...source);
-            for (let length = source.length, index = 0; index < length; ++index) {
-                keeperAddKeys(keeper, source[index]);
-            }
-        }
-        else {
-            assign(target, source);
-            keeperAddKeys(keeper, source);
-        }
-    }
-    return newProxy(target, keeper);
-}
-function throwConstructing() { throw TypeError(`NULL cannot be invoked with 'new'`); }
-const NULL = 
-/*#__PURE__*/
-function () {
-    const NULL = function (source, define) {
-        return (new.target)
-            ? new.target === NULL
-                ? /*#__PURE__*/ throwConstructing()
-                : /*#__PURE__*/ newProxy(this, new Keeper)
-            : /*#__PURE__*/ NULL_from(source, define);
-    };
-    NULL.prototype = null;
-    //delete NULL.name;
-    //delete NULL.length;
-    freeze(NULL);
-    return NULL;
-}();
-
-/*¡ j-orderify */
-
-const Table = 
-/*#__PURE__*/
-function () {
-    class Table extends NULL {
-    }
-    delete Table.prototype.constructor;
-    preventExtensions(Table.prototype);
-    return Table;
-}();
-function isTable(value) {
-    return value instanceof Table;
-}
-
 const slice = Array.prototype.slice;
 
 /*!
  * 模块名称：j-regexp
- * 模块功能：可读性更好的正则表达式创建方式。
-   　　　　　More readable way for creating RegExp.
+ * 模块功能：可读性更好的正则表达式创建方式。从属于“简计划”。
+   　　　　　More readable way for creating RegExp. Belong to "Plan J".
  * 模块版本：5.2.0
  * 许可条款：LGPL-3.0
  * 所属作者：龙腾道 <LongTengDao@LongTengDao.com> (www.LongTengDao.com)
@@ -503,10 +454,10 @@ function Source(raw, substitutions) {
 var newRegExp = 
 /*#__PURE__*/
 function (newRegExp, createNewRegExpWith) {
-    (function callee(pickedFlags, restFlags) {
+    (function recursion(pickedFlags, restFlags) {
         if (restFlags) {
-            callee(pickedFlags + restFlags.charAt(0), restFlags = restFlags.slice(1));
-            callee(pickedFlags, restFlags);
+            recursion(pickedFlags + restFlags.charAt(0), restFlags = restFlags.slice(1));
+            recursion(pickedFlags, restFlags);
         }
         else if (pickedFlags) {
             newRegExp[pickedFlags] = createNewRegExpWith(pickedFlags);
@@ -522,10 +473,16 @@ function (newRegExp, createNewRegExpWith) {
 });
 
 var clearRegExp = '$_' in RegExp
-    ? function (REGEXP) {
-        return function () { REGEXP.test(''); };
-    }(/^/)
-    : function () { };
+    ? function () {
+        var REGEXP = /^/;
+        return function clearRegExp(value) {
+            REGEXP.test('');
+            return value;
+        };
+    }()
+    : function clearRegExp(value) {
+        return value;
+    };
 
 /*¡ j-regexp */
 
@@ -908,7 +865,7 @@ function appendTable(table, key_key, asArrayItem, tag) {
             arrayOfTables = table[finalKey] = [];
         }
         tag && collect({ table, key: finalKey, array: arrayOfTables, index: arrayOfTables.length, tag });
-        arrayOfTables.push(lastTable = new Table);
+        arrayOfTables.push(lastTable = Table());
     }
     else {
         if (finalKey in table) {
@@ -918,7 +875,7 @@ function appendTable(table, key_key, asArrayItem, tag) {
             openTables.delete(lastTable);
         }
         else {
-            table[finalKey] = lastTable = new Table;
+            table[finalKey] = lastTable = Table();
             unreopenable || reopenedTables.add(lastTable);
         }
         tag && collect({ table, key: finalKey, array: null, tag });
@@ -963,9 +920,9 @@ function prepareTable(table, keys) {
             }
         }
         else {
-            openTables.add(table = table[key] = new Table);
+            openTables.add(table = table[key] = Table());
             while (index < length) {
-                openTables.add(table = table[keys[index++]] = new Table);
+                openTables.add(table = table[keys[index++]] = Table());
             }
             return table;
         }
@@ -983,9 +940,9 @@ function prepareInlineTable(table, keys) {
             sealedInline.has(table) && throws(Error(`Trying to assign property through static Inline Table at ${where()}`));
         }
         else {
-            table = table[key] = new Table;
+            table = table[key] = Table();
             while (index < length) {
-                table = table[keys[index++]] = new Table;
+                table = table[keys[index++]] = Table();
             }
             return table;
         }
@@ -1059,7 +1016,7 @@ function assignBasicString(table, finalKey, literal) {
 }
 
 function Root() {
-    const rootTable = new Table;
+    const rootTable = Table();
     let lastSectionTable = rootTable;
     while (rest()) {
         const line = next().replace(PRE_WHITESPACE, '');
@@ -1216,7 +1173,7 @@ function push(lastArray, lineRest) {
     return lineRest;
 }
 function equalInlineTable(table, finalKey, lineRest) {
-    const inlineTable = table[finalKey] = new Table;
+    const inlineTable = table[finalKey] = Table();
     sealedInline.add(inlineTable);
     lineRest = lineRest.replace(SYM_WHITESPACE, '');
     if (allowInlineTableMultiLineAndTrailingCommaEvenNoComma) {
@@ -1360,7 +1317,7 @@ const RegExp_prototype = RegExp.prototype;
  * 模块名称：j-utf
  * 模块功能：UTF 相关共享实用程序。从属于“简计划”。
    　　　　　UTF util. Belong to "Plan J".
- * 模块版本：2.0.1
+ * 模块版本：3.0.0
  * 许可条款：LGPL-3.0
  * 所属作者：龙腾道 <LongTengDao@LongTengDao.com> (www.LongTengDao.com)
  * 问题反馈：https://GitHub.com/LongTengDao/j-utf/issues

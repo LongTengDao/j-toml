@@ -7,7 +7,7 @@ import WeakMap from '.WeakMap';
 import ownKeys from '.Reflect.ownKeys';
 import MAX_SAFE_INTEGER from '.Number.MAX_SAFE_INTEGER';
 import MIN_SAFE_INTEGER from '.Number.MIN_SAFE_INTEGER';
-import { Table } from './types/Table';
+import { Table, PlainTable, OrderedTable } from './types/Table';
 import * as iterator$0 from './iterator$0';
 
 /* options */
@@ -20,6 +20,7 @@ export let IntegerMax :number;
 /* xOptions */
 
 export type xOptions = null | {
+	order? :boolean,
 	longer? :boolean,
 	null? :boolean,
 	multi? :boolean,
@@ -42,6 +43,7 @@ export let disallowEmptyKey :boolean;
 //export const xob :boolean = true;
 export let sFloat :boolean;
 export let unreopenable :boolean;
+let Table :() => Table; export { Table };
 export let allowLonger :boolean;
 export let enableNull :boolean;
 export let allowInlineTableMultiLineAndTrailingCommaEvenNoComma :boolean;
@@ -161,12 +163,14 @@ export function use (specificationVersion :unknown, multiLineJoiner :unknown, us
 	let typify :boolean;
 	
 	if ( xOptions===null ) {
+		Table = PlainTable;
 		allowLonger = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = unreopenable = false;
 		typify = true;
 	}
 	else {
-		const { longer, null: _null, multi, close, mix, tag, ...unknown } = xOptions;
+		const { order, longer, null: _null, multi, close, mix, tag, ...unknown } = xOptions;
 		if ( ownKeys(unknown).length ) { throw Error('TOML.parse(,,,,xOptions.tag)'); }
+		Table = order ? OrderedTable : PlainTable;
 		allowLonger = !!longer;
 		enableNull = !!_null;
 		allowInlineTableMultiLineAndTrailingCommaEvenNoComma = !!multi;

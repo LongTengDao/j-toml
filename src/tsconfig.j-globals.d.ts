@@ -1,5 +1,7 @@
 
-declare module '.Array.isArray' { export default Array.isArray; }
+declare module '.Array.isArray' { export default isArray;
+	function isArray (value :any) :value is any[] | readonly any[];
+}
 declare module '.Array.prototype.slice' { export default Array.prototype.slice; }
 
 declare module '.BigInt' { export default BigInt;
@@ -60,6 +62,7 @@ declare module '.Object' { export default Object;
 }
 declare module '.Object.assign' { export default Object.assign; }
 declare module '.Object.create' { export default Object.create; }
+declare module '.Object.create?=' { export default Object.create; }
 declare module '.Object.defineProperties' { export default Object.defineProperties; }
 declare module '.Object.defineProperty' { export default Object.defineProperty; }
 declare module '.Object.entries' { export default entries;
@@ -145,6 +148,8 @@ declare module '.Set' { export default Set; }
 
 declare module '.String.fromCodePoint' { export default String.fromCodePoint; }
 
+declare module '.Symbol.toStringTag?' { export default Symbol.toStringTag; }
+
 declare module '.SyntaxError' { export default SyntaxError; }
 
 declare module '.TypeError' { export default TypeError; }
@@ -152,6 +157,15 @@ declare module '.TypeError' { export default TypeError; }
 declare module '.WeakMap' { export default WeakMap; }
 
 declare module '.WeakSet' { export default WeakSet; }
+
+declare module '.default' { export default Default;
+	function Default<Exports extends Readonly<{ [key :string] :any, default? :Module<Exports> }>> (exports :Exports) :Module<Exports>;
+	function Default<Statics extends Readonly<{ [key :string] :any, default? :ModuleFunction<Statics, Main> }>, Main extends Callable | Newable | Callable & Newable> (main :Main, statics :Statics) :ModuleFunction<Statics, Main>;
+	type Module<Exports> = Readonly<Exports & { default :Module<Exports> }>;
+	type ModuleFunction<Statics, Main> = Readonly<Statics & { default :ModuleFunction<Statics, Main> } & Main>;
+	type Callable = (...args :any[]) => any;
+	type Newable = { new (...args :any[]) :any };
+}
 
 declare module '.isFinite' { export default isFinite; }
 

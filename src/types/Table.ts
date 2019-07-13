@@ -1,17 +1,18 @@
-import preventExtensions from '.Object.preventExtensions';
+import getPrototypeOf from '.Object.getPrototypeOf';
+import create from '.Object.create';
 
-import { NULL } from '@ltd/j-orderify';
+import { NULL, create as Ordered_create } from '@ltd/j-orderify';
 
 export type Table = NULL<any>;
-export const Table :{ new () :Table } =
-	/*#__PURE__*/
-	function () {
-		class Table extends NULL<any> {}
-		delete Table.prototype.constructor;
-		preventExtensions(Table.prototype);
-		return Table;
-	}();
+
+export function PlainTable () :Table {
+	return create(null);
+}
+
+export function OrderedTable () :Table {
+	return Ordered_create(null);
+}
 
 export function isTable (value :any) :value is Table {
-	return value instanceof Table;
+	return value!=null && getPrototypeOf(value)===null;
 }
