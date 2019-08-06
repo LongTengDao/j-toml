@@ -2,7 +2,7 @@
 
 const BOM = '\uFEFF';
 const EOL = '\r\n';
-const i18n = ['English', '简体中文'];
+const i18n = [ 'English', '简体中文' ];
 
 module.exports = require('../test/test.js')(async ({ build, 龙腾道, get, map, ful, put }) => {
 	
@@ -15,12 +15,12 @@ module.exports = require('../test/test.js')(async ({ build, 龙腾道, get, map,
 		ES: 6,
 		NPM: {
 			description: 'An implementation of TOML written by LongTengDao. Belong to "Plan J".／龙腾道为汤小明语写的实现。从属于“简计划”。',
-			keywords: ['TOML'],
+			keywords: [ 'TOML' ],
 		},
 		locate: {
-			'@ltd/j-orderify': ful('../../LongTengDao/j-orderify/dist/ESM/.j-orderify'),
-			'@ltd/j-regexp': ful('../../LongTengDao/j-regexp/dist/ESM/.j-regexp'),
-			'@ltd/j-utf': ful('../../LongTengDao/j-utf/dist/ESM/.j-utf'),
+			'@ltd/j-orderify': ful('../../LongTengDao/j-orderify/dist/ESM/.j-orderify.js'),
+			'@ltd/j-regexp': ful('../../LongTengDao/j-regexp/dist/ESM/.j-regexp.js'),
+			'@ltd/j-utf': ful('../../LongTengDao/j-utf/dist/ESM/.j-utf.js'),
 		},
 		LICENSE_: true,
 	});

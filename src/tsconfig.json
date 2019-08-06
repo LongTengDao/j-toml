@@ -3,7 +3,7 @@
 		"target": "ESNext",
 		"baseUrl": ".",
 		"paths": {
-			"@ltd/*": ["../../../LongTengDao/*/src/export"]
+			"@ltd/*": [ "../../../LongTengDao/*/src/export" ]
 		},
 		"strict": true,
 		"noImplicitReturns": true,

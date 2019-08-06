@@ -1,6 +1,6 @@
 'use strict';
 
-const Validator = require('@ltd/j-validator');
+const { not } = require('@ltd/j-validator');
 
 module.exports = require('@ltd/j-dev')(__dirname+'/..')(async ({ import_default, get }) => {
 	
@@ -26,9 +26,9 @@ module.exports = require('@ltd/j-dev')(__dirname+'/..')(async ({ import_default,
 	
 	const toml = TOML.parse(await get('./test/sample.toml'), 0.5, '\n', true);
 	const expect = require('./expect');
-	if ( !Validator(expect)(toml) )
+	if ( not(expect)(toml) )
 	for ( const [ key, value ] of Object.entries(expect) ) {
-		if ( !Validator(value)(toml[key]) ) {
+		if ( not(value)(toml[key]) ) {
 			throw Error(JSON.stringify(toml[key], function replacer (key, value) { return typeof value==='bigint' ? ''+value : value; }, '\t'));
 		}
 	}
