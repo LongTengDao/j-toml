@@ -12,9 +12,6 @@ export const sealedInline :WeakSet<Table> = new WeakSet;
 const openTables :WeakSet<Table> = new WeakSet;
 const reopenedTables :WeakSet<Table> = new WeakSet;
 
-const KEYS_STRICT :RegExp = /[\w-]+|"(?:[^\\"]+|\\[^])*"|'[^']*'/g;
-const KEYS_FREE :RegExp = /[^ \t#=[\]'".]+(?:[ \t]+[^ \t#=[\]'".]+)*|"(?:[^\\"]+|\\[^])*"|'[^']*'/g;
-
 export function appendTable (table :Table, key_key :string, asArrayItem :boolean, tag :string) :Table {
 	const leadingKeys :[string, ...string[]] = parseKeys(key_key);
 	const finalKey :string = <string>leadingKeys.pop();
@@ -42,7 +39,7 @@ export function appendTable (table :Table, key_key :string, asArrayItem :boolean
 }
 
 export function parseKeys (key_key :string) {
-	const keys = <[string, ...string[]]>key_key.match(options$0.strictBareKey ? KEYS_STRICT : KEYS_FREE);
+	const keys = <[string, ...string[]]>key_key.match(regexps$0.__KEYS);
 	for ( let index :number = keys.length; index--; ) {
 		const key :string = keys[index];
 		if ( key.startsWith('\'') ) { keys[index] = key.slice(1, -1); }
@@ -130,10 +127,8 @@ export function assignLiteralString (table :Table, finalKey :string, literal :st
 	}
 }
 
-const CONTROL_CHARACTER_EXCLUDE_TAB = /[\x00-\x08\x0B-\x1F\x7F]/;
-const CONTROL_CHARACTER_EXCLUDE_TAB_LESSER = /[\x00-\x08\x0B-\x1F]/;
 function checkLiteralString (literal :string) :string {
-	( options$0.ctrl7F ? CONTROL_CHARACTER_EXCLUDE_TAB : CONTROL_CHARACTER_EXCLUDE_TAB_LESSER ).test(literal) && iterator$0.throws(SyntaxError(`Control characters other than Tab are not permitted in a Literal String, which was found at ${iterator$0.where()}`));
+	regexps$0.__CONTROL_CHARACTER_EXCLUDE.test(literal) && iterator$0.throws(SyntaxError(`Control characters other than Tab are not permitted in a Literal String, which was found at ${iterator$0.where()}`));
 	return literal;
 }
 

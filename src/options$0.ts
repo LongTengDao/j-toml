@@ -7,8 +7,9 @@ import WeakMap from '.WeakMap';
 import ownKeys from '.Reflect.ownKeys';
 import MAX_SAFE_INTEGER from '.Number.MAX_SAFE_INTEGER';
 import MIN_SAFE_INTEGER from '.Number.MIN_SAFE_INTEGER';
-import { Table, PlainTable, OrderedTable } from './types/Table';
+import { Table as typesTable, PlainTable, OrderedTable } from './types/Table';
 import * as iterator$0 from './iterator$0';
+import * as regexps$0 from './regexps$0';
 
 /* options */
 
@@ -19,9 +20,11 @@ export let IntegerMax :number;
 
 /* xOptions */
 
+export var xOptions :never;
 export type xOptions = null | {
 	order? :boolean,
 	longer? :boolean,
+	exact? :boolean,
 	null? :boolean,
 	multi? :boolean,
 	close? :boolean,
@@ -33,17 +36,15 @@ export type xOptions = null | {
 	tag :tag,
 });
 export let zeroDatetime :boolean;
-export let supportArrayOfTables :boolean;
 export let inlineTable :boolean;
-export let slashEscaping :boolean;
-export let strictBareKey :boolean;
 export let moreDatetime :boolean;
-export let ctrl7F :boolean;
 export let disallowEmptyKey :boolean;
 //export const xob :boolean = true;
+export let sError :boolean;
 export let sFloat :boolean;
 export let unreopenable :boolean;
-let Table :() => Table; export { Table };
+export type Table = typesTable;
+export let Table :() => Table;
 export let allowLonger :boolean;
 export let enableNull :boolean;
 export let allowInlineTableMultiLineAndTrailingCommaEvenNoComma :boolean;
@@ -123,28 +124,29 @@ export function use (specificationVersion :unknown, multiLineJoiner :unknown, us
 	
 	switch ( specificationVersion ) {
 		case 0.5:
-			supportArrayOfTables = moreDatetime = ctrl7F = sFloat = strictBareKey = inlineTable = true;
-			zeroDatetime = disallowEmptyKey = slashEscaping = false;
+			moreDatetime = sFloat = inlineTable = true;
+			zeroDatetime = disallowEmptyKey = false;
 			break;
 		case 0.4:
-			supportArrayOfTables = disallowEmptyKey = strictBareKey = inlineTable = true;
-			zeroDatetime = moreDatetime = ctrl7F = sFloat = slashEscaping = false;
+			disallowEmptyKey = inlineTable = true;
+			zeroDatetime = moreDatetime = sFloat = false;
 			break;
 		case 0.3:
-			supportArrayOfTables = disallowEmptyKey = slashEscaping = true;
-			zeroDatetime = moreDatetime = ctrl7F = sFloat = strictBareKey = inlineTable = false;
+			disallowEmptyKey = true;
+			zeroDatetime = moreDatetime = sFloat = inlineTable = false;
 			break;
 		case 0.2:
-			supportArrayOfTables = zeroDatetime = disallowEmptyKey = slashEscaping = true;
-			moreDatetime = ctrl7F = sFloat = strictBareKey = inlineTable = false;
+			zeroDatetime = disallowEmptyKey = true;
+			moreDatetime = sFloat = inlineTable = false;
 			break;
 		case 0.1:
-			zeroDatetime = disallowEmptyKey = slashEscaping = true;
-			supportArrayOfTables = moreDatetime = ctrl7F = sFloat = strictBareKey = inlineTable = false;
+			zeroDatetime = disallowEmptyKey = true;
+			moreDatetime = sFloat = inlineTable = false;
 			break;
 		default:
 			throw Error('TOML.parse(,specificationVersion)');
 	}
+	regexps$0.switchRegExp(specificationVersion);
 	
 	if ( typeof multiLineJoiner==='string' ) { useWhatToJoinMultiLineString = multiLineJoiner; }
 	else { throw TypeError('TOML.parse(,,multiLineJoiner)'); }
@@ -164,14 +166,15 @@ export function use (specificationVersion :unknown, multiLineJoiner :unknown, us
 	
 	if ( xOptions===null ) {
 		Table = PlainTable;
-		allowLonger = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = unreopenable = false;
+		sError = allowLonger = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = unreopenable = false;
 		typify = true;
 	}
 	else {
-		const { order, longer, null: _null, multi, close, mix, tag, ...unknown } = xOptions;
+		const { order, longer, exact, null: _null, multi, close, mix, tag, ...unknown } = xOptions;
 		if ( ownKeys(unknown).length ) { throw Error('TOML.parse(,,,,xOptions.tag)'); }
 		Table = order ? OrderedTable : PlainTable;
 		allowLonger = !!longer;
+		sError = !exact;
 		enableNull = !!_null;
 		allowInlineTableMultiLineAndTrailingCommaEvenNoComma = !!multi;
 		unreopenable = !!close;

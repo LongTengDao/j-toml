@@ -1,7 +1,7 @@
 import Error from '.Error';
 import TypeError from '.TypeError';
 import isBuffer from '.Buffer.isBuffer';
-import from from '.Buffer.from';
+import from from '.Buffer.from?';
 import * as iterator$0 from '../iterator$0';
 import * as options$0 from '../options$0';
 import Root from '../parse/level-loop';

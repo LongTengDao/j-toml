@@ -1,12 +1,8 @@
 import version from './version?text';
 import parse from './parse/';
-import install from './install/';
 
-const TOML = {
-	parse,
-	install,
+import Default from '.default';
+export default Default({
 	version,
-	get default () { return this; }
-};
-
-export default TOML;
+	parse,
+});

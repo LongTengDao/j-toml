@@ -1,37 +1,30 @@
 export = exports;
 
-declare const exports :{
+declare namespace exports {
 	
-	version :'0.5.101'
+	export const version :'0.5.102';
 	
-	parse (
+	export function parse (
 		sourceContent :string | Buffer,
 		specificationVersion :0.5 | 0.4 | 0.3 | 0.2 | 0.1,
 		multiLineJoiner :string,
 		useBigInt? :true | false | number,
 		xOptions? :xOptions,
-	) :Table
+	) :Table;
 	
-	install (
-		readFileSync :(path :string) => Buffer,
-		specificationVersion :0.5 | 0.4 | 0.3 | 0.2 | 0.1,
-		multiLineJoiner :string,
-		useBigInt? :true | false | number,
-		xOptions? :xOptions,
-	) :void
-	
-	default :typeof exports
+	export { exports as default };
 	
 }
 
 type xOptions = {
-	order? :boolean,
-	longer? :boolean,
-	null? :boolean,
-	multi? :boolean,
-	close? :boolean,
+	order? :false | true,
+	longer? :false | true,
+	exact? :false | true,
+	null? :false | true,
+	multi? :false | true,
+	close? :false | true,
 } & ( {
-	mix? :boolean,
+	mix? :false | true,
 	tag? :null,
 } | {
 	mix :true,
