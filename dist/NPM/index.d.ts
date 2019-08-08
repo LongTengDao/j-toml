@@ -2,7 +2,7 @@ export = exports;
 
 declare namespace exports {
 	
-	export const version :'0.5.103';
+	export const version :'0.5.104';
 	
 	export function parse (
 		sourceContent :string | Buffer,

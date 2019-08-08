@@ -16,7 +16,11 @@ declare module '.Error' { export default Error; }
 
 declare module '.Infinity' { export default Infinity; }
 
-declare module '.Map' { export default Map; }
+declare module '.Map' { export default constructor;
+	class constructor<K, V> extends Map<K, V> {
+		constructor (entries? :Iterable<Readonly<{ 0 :K, 1 :V }>>)
+	}
+}
 
 declare module '.NaN' { export default NaN; }
 
@@ -31,7 +35,7 @@ declare module '.Object.defineProperties' { export default Object.defineProperti
 declare module '.Object.defineProperty' { export default Object.defineProperty; }
 declare module '.Object.freeze' { export default Object.freeze; }
 declare module '.Object.fromEntries' { export default fromEntries;
-	function fromEntries<K extends string | symbol, V extends any> (entries :Iterable<{ readonly 0: K, readonly 1: V }>) :{ [k in K] :V };
+	function fromEntries<K extends string | symbol, V extends any> (entries :Iterable<Readonly<{ 0 :K, 1 :V }>>) :{ [k in K] :V };
 }
 declare module '.Object.getOwnPropertyDescriptor' { export default Object.getOwnPropertyDescriptor; }
 declare module '.Object.getPrototypeOf' { export default Object.getPrototypeOf; }
@@ -55,7 +59,11 @@ declare module '.Reflect.set' { export default Reflect.set; }
 declare module '.RegExp' { export default RegExp; }
 declare module '.RegExp.prototype' { export default RegExp.prototype; }
 
-declare module '.Set' { export default Set; }
+declare module '.Set' { export default constructor;
+	class constructor<V> extends Set<V> {
+		constructor (values? :Iterable<V>)
+	}
+}
 
 declare module '.String.fromCodePoint' { export default String.fromCodePoint; }
 
@@ -65,9 +73,17 @@ declare module '.SyntaxError' { export default SyntaxError; }
 
 declare module '.TypeError' { export default TypeError; }
 
-declare module '.WeakMap' { export default WeakMap; }
+declare module '.WeakMap' { export default constructor;
+	class constructor<K extends object, V> extends WeakMap<K, V> {
+		constructor (entries? :Iterable<Readonly<{ 0 :K, 1 :V }>>)
+	}
+}
 
-declare module '.WeakSet' { export default WeakSet; }
+declare module '.WeakSet' { export default constructor;
+	class constructor<V extends object> extends WeakSet<V> {
+		constructor (values? :Iterable<V>)
+	}
+}
 
 declare module '.default' { export default Default;
 	function Default<Exports extends Readonly<{ [key :string] :any, default? :Module<Exports> }>> (exports :Exports) :Module<Exports>;

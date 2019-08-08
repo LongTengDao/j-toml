@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.103';
+const version = '0.5.104';
 
 const isBuffer = Buffer.isBuffer;
 
@@ -1037,8 +1037,7 @@ function prepareTable (table       , keys          )        {
 			}
 			else if ( isArray(table) ) {
 				sealedInline.has(table) && throws(Error(`Trying to append value to static Inline Array at ${where()}`));
-				// @ts-ignore
-				table = table[table.length-1];
+				table = table[( table              ).length-1];
 			}
 			else { throws(Error(`Trying to define Table under non-Table value at ${where()}`)); }
 		}
@@ -1062,8 +1061,8 @@ function prepareInlineTable (table       , keys          )        {
 			sealedInline.has(table) && throws(Error(`Trying to assign property through static Inline Table at ${where()}`));
 		}
 		else {
-			table = table[key] = Table();
-			while ( index<length ) { table = table[keys[index++]] = Table(); }
+			openTables.add(table = table[key] = Table());
+			while ( index<length ) { openTables.add(table = table[keys[index++]] = Table()); }
 			return table;
 		}
 	}

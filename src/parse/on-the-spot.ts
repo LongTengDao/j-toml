@@ -65,8 +65,7 @@ function prepareTable (table :Table, keys :string[]) :Table {
 			}
 			else if ( isArray(table) ) {
 				sealedInline.has(table) && iterator$0.throws(Error(`Trying to append value to static Inline Array at ${iterator$0.where()}`));
-				// @ts-ignore
-				table = table[table.length-1];
+				table = table[( table as unknown[] ).length-1];
 			}
 			else { iterator$0.throws(Error(`Trying to define Table under non-Table value at ${iterator$0.where()}`)); }
 		}
@@ -90,8 +89,8 @@ export function prepareInlineTable (table :Table, keys :string[]) :Table {
 			sealedInline.has(table) && iterator$0.throws(Error(`Trying to assign property through static Inline Table at ${iterator$0.where()}`));
 		}
 		else {
-			table = table[key] = options$0.Table();
-			while ( index<length ) { table = table[keys[index++]] = options$0.Table(); }
+			openTables.add(table = table[key] = options$0.Table());
+			while ( index<length ) { openTables.add(table = table[keys[index++]] = options$0.Table()); }
 			return table;
 		}
 	}

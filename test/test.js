@@ -5,7 +5,7 @@ const { not } = require('@ltd/j-validator');
 module.exports = require('@ltd/j-dev')(__dirname+'/..')(async ({ import_default, get }) => {
 	
 	const TOML = await import_default('src/default', {
-		require: moduleName => {
+		require (moduleName) {
 			if ( [ '@ltd/j-orderify', '@ltd/j-regexp', '@ltd/j-utf' ].includes(moduleName) ) {
 				return require(`${__dirname}/../../../LongTengDao/${moduleName.replace('@ltd/', '')}/dist/NPM/index.js`);
 			}
@@ -13,8 +13,7 @@ module.exports = require('@ltd/j-dev')(__dirname+'/..')(async ({ import_default,
 				return { readFileSync: require('fs').readFileSync };
 			}
 			throw Error(moduleName);
-		},
-		__filename: 'test/built.js',
+		}
 	});
 	
 	TOML.parse('', 0.5, '\n');
