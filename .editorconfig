@@ -1,0 +1,10 @@
+# http://editorconfig.org
+
+[*]
+indent_size = 4
+
+[.*]
+indent_size = 4
+
+[/docs/**/*.md]
+indent_style = space
