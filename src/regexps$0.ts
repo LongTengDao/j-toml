@@ -77,8 +77,8 @@ const MULTI_LINE_BASIC_STRING = /^(?:[^\\"]+|\\[^]|""?(?!"))/;
 export function MULTI_LINE_BASIC_STRING_exec_0 (_ :string) :string {
 	for ( let _0 :string = ''; ; ) {
 		if ( _==='' ) { return _0; }
-		const $ :RegExpExecArray | null = MULTI_LINE_BASIC_STRING.exec(_);
-		if ( $===null ) { return _0; }
+		const $ = MULTI_LINE_BASIC_STRING.exec(_);
+		if ( !$ ) { return _0; }
 		_0 += $[0];
 		_ = _.slice($[0].length);
 	}
@@ -101,8 +101,8 @@ let __BASIC_STRING :RegExp;
 export function BASIC_STRING_exec (_2 :string) :{ 1 :string, 2 :string } {
 	_2 = _2.slice(1);
 	for ( let _1 :string = ''; ; ) {
-		const $ :RegExpExecArray | null = __BASIC_STRING.exec(_2);
-		if ( $===null ) {
+		const $ = __BASIC_STRING.exec(_2);
+		if ( !$ ) {
 			_2.startsWith('"') || iterator$0.throws(SyntaxError(iterator$0.where()));
 			return { 1: _1, 2: _2.replace(SYM_WHITESPACE, '') };
 		}
@@ -151,8 +151,8 @@ function getKeys (_ :string) :string {
 		if ( _.startsWith('"') ) {
 			_ = _.slice(1);
 			for ( let key :string = '"'; ; ) {
-				const $ :RegExpExecArray | null = __BASIC_STRING.exec(_);
-				if ( $===null ) {
+				const $ = __BASIC_STRING.exec(_);
+				if ( !$ ) {
 					_.startsWith('"') || iterator$0.throws(SyntaxError(iterator$0.where()));
 					_ = _.slice(1);
 					keys += key+'"';
@@ -167,8 +167,8 @@ function getKeys (_ :string) :string {
 			_ = _.slice(key.length);
 			keys += key;
 		}
-		const $ :RegExpExecArray | null = DOT_KEY.exec(_);
-		if ( $===null ) { return keys; }
+		const $ = DOT_KEY.exec(_);
+		if ( !$ ) { return keys; }
 		_ = _.slice($[0].length);
 		keys += $[0];
 	}

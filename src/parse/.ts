@@ -17,7 +17,7 @@ export default function parse (
 	specificationVersion :0.5 | 0.4 | 0.3 | 0.2 | 0.1,
 	multiLineJoiner :string,
 	useBigInt :boolean | number = true,
-	xOptions :options$0.xOptions = null
+	xOptions :options$0.xOptions
 ) :Table {
 	iterator$0.could();
 	if ( isBuffer(sourceContent) ) {

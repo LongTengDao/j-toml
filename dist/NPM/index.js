@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.104';
+const version = '0.5.105';
 
 const isBuffer = Buffer.isBuffer;
 
@@ -294,7 +294,7 @@ const slice = Array.prototype.slice;
  * 模块名称：j-regexp
  * 模块功能：可读性更好的正则表达式创建方式。从属于“简计划”。
    　　　　　More readable way for creating RegExp. Belong to "Plan J".
- * 模块版本：5.3.0
+ * 模块版本：6.1.0
  * 许可条款：LGPL-3.0
  * 所属作者：龙腾道 <LongTengDao@LongTengDao.com> (www.LongTengDao.com)
  * 问题反馈：https://GitHub.com/LongTengDao/j-regexp/issues
@@ -312,33 +312,25 @@ function Source (raw                       , substitutions                      
 	return source.replace(NT, '');
 }
 
-var newRegExp            =
-	/*#__PURE__*/
-	function (newRegExp, createNewRegExpWith) {
-		
-		( function recursion (pickedFlags            , restFlags       )       {
-			if ( restFlags ) {
-				recursion(pickedFlags+restFlags.charAt(0)         , restFlags = restFlags.slice(1)         );
-				recursion(pickedFlags, restFlags);
-			}
-			else if ( pickedFlags ) {
-				newRegExp[pickedFlags] = createNewRegExpWith(pickedFlags);
-			}
-		} )('', 'gimsuy');
-		
-		return newRegExp;
-		
-	}(
-		function newRegExp (template                      )         {
-			return new RegExp(Source(template.raw, slice.call(arguments, 1)));
-		}             ,
-		
-		function createNewRegExpWith (flags       ) {
-			return ( {}        )['newRegExp.'+flags] = function (template                      )         {
-				return new RegExp(Source(template.raw, slice.call(arguments, 1)), flags);
-			};
+                                                                                                     
+function newRegExp (flags_template                               )                     {
+	return typeof flags_template==='string'
+		? function newRegExp (template                      )         {
+			return new RegExp(
+				/*#__PURE__*/Source(
+					template.raw,
+					/*#__PURE__*/slice.call(arguments, 1)
+				),
+				flags_template
+			);
 		}
-	);
+		: new RegExp(
+			/*#__PURE__*/Source(
+				flags_template.raw,
+				/*#__PURE__*/slice.call(arguments, 1)
+			)
+		);
+}
 
 var clearRegExp = '$_' in RegExp
 	? function () {
@@ -427,8 +419,8 @@ const MULTI_LINE_BASIC_STRING = /^(?:[^\\"]+|\\[^]|""?(?!"))/;
 function MULTI_LINE_BASIC_STRING_exec_0 (_        )         {
 	for ( let _0         = ''; ; ) {
 		if ( _==='' ) { return _0; }
-		const $                         = MULTI_LINE_BASIC_STRING.exec(_);
-		if ( $===null ) { return _0; }
+		const $ = MULTI_LINE_BASIC_STRING.exec(_);
+		if ( !$ ) { return _0; }
 		_0 += $[0];
 		_ = _.slice($[0].length);
 	}
@@ -447,8 +439,8 @@ let __BASIC_STRING        ;
 function BASIC_STRING_exec (_2        )                           {
 	_2 = _2.slice(1);
 	for ( let _1         = ''; ; ) {
-		const $                         = __BASIC_STRING.exec(_2);
-		if ( $===null ) {
+		const $ = __BASIC_STRING.exec(_2);
+		if ( !$ ) {
 			_2.startsWith('"') || throws(SyntaxError(where()));
 			return { 1: _1, 2: _2.replace(SYM_WHITESPACE, '') };
 		}
@@ -497,8 +489,8 @@ function getKeys (_        )         {
 		if ( _.startsWith('"') ) {
 			_ = _.slice(1);
 			for ( let key         = '"'; ; ) {
-				const $                         = __BASIC_STRING.exec(_);
-				if ( $===null ) {
+				const $ = __BASIC_STRING.exec(_);
+				if ( !$ ) {
 					_.startsWith('"') || throws(SyntaxError(where()));
 					_ = _.slice(1);
 					keys += key+'"';
@@ -513,8 +505,8 @@ function getKeys (_        )         {
 			_ = _.slice(key.length);
 			keys += key;
 		}
-		const $                         = DOT_KEY.exec(_);
-		if ( $===null ) { return keys; }
+		const $ = DOT_KEY.exec(_);
+		if ( !$ ) { return keys; }
 		_ = _.slice($[0].length);
 		keys += $[0];
 	}
@@ -564,7 +556,7 @@ let useWhatToJoinMultiLineString        ;
 let usingBigInt                ;
 let IntegerMin        ;
 let IntegerMax        ;
-                               
+                                                           
 	                
 	                 
 	                
@@ -572,11 +564,11 @@ let IntegerMax        ;
 	                
 	                
       
-	              
-	           
-     
-	          
 	         
+	          
+     
+	           
+	              
    
 let zeroDatetime         ;
 let inlineTable         ;
@@ -605,7 +597,7 @@ let
 	asLocalDates    ,
 	asLocalTimes    ;
 const arrayTypes                     = new WeakMap;
-let As                      = () => function as (array       )        {
+let As                    = () => function as (array       )        {
 	if ( arrayTypes.has(array) ) {
 		arrayTypes.get(array)===as
 		|| throws(TypeError(`Types in Array must be same. Check ${where()}`));
@@ -635,11 +627,11 @@ const unType     = (array       )        => array;
 
 let processor             = null;
 
-                               
+                                            
            
-	                                                                           
-	                                                                           
-	                                                                          
+	                                                                                       
+	                                                                                       
+	                                                                                      
 let collection         = [];
 function collect_on (each      )       { collection.push(each); }
 function collect_off (each      )        { throw throws(SyntaxError(where())); }
@@ -648,11 +640,11 @@ function process () {
 	let index = collection.length;
 	if ( index ) {
 		done();
-		const process =      processor;
+		const process = processor ;
 		const queue = collection;
 		processor = null;
 		collection = [];
-		while ( index-- ) { process(      queue.pop()); }
+		while ( index-- ) { process(queue.pop() ); }
 	}
 }
 
@@ -663,7 +655,7 @@ function clear ()       {
 	collection.length = 0;
 }
 
-function use (specificationVersion         , multiLineJoiner         , useBigInt         , xOptions                         )       {
+function use (specificationVersion         , multiLineJoiner         , useBigInt         , xOptions          )       {
 	
 	switch ( specificationVersion ) {
 		case 0.5:
@@ -707,17 +699,31 @@ function use (specificationVersion         , multiLineJoiner         , useBigInt
 	
 	let typify         ;
 	
-	if ( xOptions===null ) {
+	if ( xOptions==null || xOptions===false ) {
 		Table = PlainTable;
 		sError = allowLonger = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = unreopenable = false;
 		typify = true;
+		collect = collect_off;
+	}
+	else if ( xOptions===true ) {
+		Table = OrderedTable;
+		allowLonger = sError = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = unreopenable = true;
+		typify = false;
+		collect = collect_off;
+	}
+	else if ( typeof xOptions==='function' ) {
+		Table = OrderedTable;
+		allowLonger = sError = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = unreopenable = true;
+		typify = false;
+		processor = xOptions;
+		collect = collect_on;
 	}
 	else {
 		const { order, longer, exact, null: _null, multi, close, mix, tag, ...unknown } = xOptions;
 		if ( ownKeys(unknown).length ) { throw Error('TOML.parse(,,,,xOptions.tag)'); }
 		Table = order ? OrderedTable : PlainTable;
 		allowLonger = !!longer;
-		sError = !exact;
+		sError = !!exact;
 		enableNull = !!_null;
 		allowInlineTableMultiLineAndTrailingCommaEvenNoComma = !!multi;
 		unreopenable = !!close;
@@ -1005,7 +1011,7 @@ function appendTable (table       , key_key        , asArrayItem         , tag  
 			table[finalKey] = lastTable = Table();
 			unreopenable || reopenedTables.add(lastTable);
 		}
-		tag && collect({ table, key: finalKey, array: null, tag });
+		tag && collect({ table, key: finalKey, array: undefined$1, index: undefined$1, tag });
 	}
 	return lastTable;
 }
@@ -1070,7 +1076,7 @@ function prepareInlineTable (table       , keys          )        {
 }
 
 function assignLiteralString (table       , finalKey        , literal        )         {
-	let $                        ;
+	let $;
 	if ( literal.charAt(1)!=='\'' || literal.charAt(2)!=='\'' ) {
 		$ = LITERAL_STRING.exec(literal) || throws(SyntaxError(where()));
 		table[finalKey] = checkLiteralString($[1]);
@@ -1161,7 +1167,7 @@ function assign$1 (lastInlineTable       , lineRest        )         {
 	const finalKey         =         leadingKeys.pop();
 	const table        = prepareInlineTable(lastInlineTable, leadingKeys);
 	finalKey in table && throws(Error(`Duplicate property definition at ${where()}`));
-	tag && collect({ table, key: finalKey, array: null, tag });
+	tag && collect({ table, key: finalKey, array: undefined$1, index: undefined$1, tag });
 	switch ( lineRest[0] ) {
 		case '\'':
 			return assignLiteralString(table, finalKey, lineRest);
@@ -1222,7 +1228,7 @@ function assign$1 (lastInlineTable       , lineRest        )         {
 function push (lastArray       , lineRest        )         {
 	if ( lineRest.startsWith('<') ) {
 		const { 1: tag } = { 2: lineRest } = _VALUE_PAIR.exec(lineRest) || throws(SyntaxError(where()));
-		collect({ table: null, array: lastArray, index: lastArray.length, tag });
+		collect({ table: undefined$1, key: undefined$1, array: lastArray, index: lastArray.length, tag });
 	}
 	const lastIndex         = ''+lastArray.length;
 	switch ( lineRest[0] ) {
@@ -1430,7 +1436,7 @@ function parse (
 	specificationVersion                             ,
 	multiLineJoiner        ,
 	useBigInt                   = true,
-	xOptions                     = null
+	xOptions                    
 )        {
 	could();
 	if ( isBuffer(sourceContent) ) {

@@ -2,6 +2,10 @@
 `超级选项`
 ==========
 
+以下选项默认均不开启。简便起见，直接传递 `true` 值，将开启除 `超级选项.tag` 外的所有功能。
+
+如果传入的不是对象，而是函数，则会将其作为 `超级选项.tag` 对待，同时开启其它所有功能。
+
 `超级选项.order`
 ----------------
 
@@ -102,28 +106,32 @@ key = null
 
 *   类型：
     ```typescript
-    function 逐个调用的处理器 (每个 :
-        { table :Table, key :string, array :null,                   tag :string } |
-        { table :null,               array :any[],   index :number, tag :string } |
-        { table :Table, key :string, array :Table[], index :number, tag :string }
-    ) :void
+    function 逐个处理器 (每个被标记处 :
+        { table :Table,     key :string,    array :undefined, index :undefined, tag :string } |
+        { table :undefined, key :undefined, array :any[],     index :number,    tag :string } |
+        { table :Table,     key :string,    array :Table[],   index :number,    tag :string }
+    ) :void;
     ```
 *   默认值：`null`
 
 ```
-KV_Pair = <tag> '值'  # 处理({ table: root, key: 'KV_Pair', array: null,                   tag: 'tag' })
+'键值对'   = <自定义标记> '值'  # 逐个处理器({ table: 根表, key: '键值对',                               tag: '自定义标记' })
 
-ArrayOf = <tag> [     # 处理({ table: root, key: 'arrayOf', array: null,                   tag: 'tag' })
-          <tag> '值', # 处理({ table: null,                 array: root.arrayOf, index: 0, tag: 'tag' })
+'数组'     = <自定义标记> [     # 逐个处理器({ table: 根表, key: '数组',                                 tag: '自定义标记' })
+             <自定义标记> '值', # 逐个处理器({                             array: 根表.数组,   index: 0, tag: '自定义标记' })
 ]
 
-[Section] <tag>       # 处理({ table: root, key: 'section', array: null,                   tag: 'tag' })
+['小节']     <自定义标记>       # 逐个处理器({ table: 根表, key: '小节',                                 tag: '自定义标记' })
 
-[[Items]] <tag>       # 处理({ table: root, key: 'items',   array: root.items,   index: 0, tag: 'tag' })
+[['表数组']] <自定义标记>       # 逐个处理器({ table: 根表, key: '表数组', array: 根表.表数组, index: 0, tag: '自定义标记' })
 ```
 
-标签内容可以是除 `<` `>` <code>&#92;</code> `"` `'` <code>&#96;</code> CR LF U+2028 U+2029 以外的任何字符。
+标签内容可以是除 `<` `>` <code>&#92;</code> `"` `'` <code>&#96;</code> CR LF U+2028 U+2029 以外的任何字符，只是不得为空。
 
 标签是从后往前处理的。
 
 注意：如果开启此选项，要求同时开启 `超级选项.mix`，因为无法妥善归类自定义返回值。
+
+由于 TOML 本就存在根值只能是表的限制，所以暂时也没有设计能够替换根表的标记写法。  
+反正在整体返回后再行处理，也不是难事。  
+日后可能增加同时取消这两个限制的扩展方法。

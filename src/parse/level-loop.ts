@@ -1,3 +1,4 @@
+import undefined from '.undefined';
 import SyntaxError from '.SyntaxError';
 import Error from '.Error';
 import Infinity from '.Infinity';
@@ -38,7 +39,7 @@ function assign (lastInlineTable :Table, lineRest :string) :string {
 	const finalKey :string = <string>leadingKeys.pop();
 	const table :Table = prepareInlineTable(lastInlineTable, leadingKeys);
 	finalKey in table && iterator$0.throws(Error(`Duplicate property definition at ${iterator$0.where()}`));
-	tag && options$0.collect({ table, key: finalKey, array: null, tag });
+	tag && options$0.collect({ table, key: finalKey, array: undefined, index: undefined, tag });
 	switch ( lineRest[0] ) {
 		case '\'':
 			return assignLiteralString(table, finalKey, lineRest);
@@ -99,7 +100,7 @@ function assign (lastInlineTable :Table, lineRest :string) :string {
 function push (lastArray :any[], lineRest :string) :string {
 	if ( lineRest.startsWith('<') ) {
 		const { 1: tag } = { 2: lineRest } = regexps$0._VALUE_PAIR.exec(lineRest) || iterator$0.throws(SyntaxError(iterator$0.where()));
-		options$0.collect({ table: null, array: lastArray, index: lastArray.length, tag });
+		options$0.collect({ table: undefined, key: undefined, array: lastArray, index: lastArray.length, tag });
 	}
 	const lastIndex :string = ''+lastArray.length;
 	switch ( lineRest[0] ) {

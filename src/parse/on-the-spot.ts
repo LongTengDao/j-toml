@@ -1,3 +1,4 @@
+import undefined from '.undefined';
 import SyntaxError from '.SyntaxError';
 import Error from '.Error';
 import isArray from '.Array.isArray';
@@ -33,7 +34,7 @@ export function appendTable (table :Table, key_key :string, asArrayItem :boolean
 			table[finalKey] = lastTable = options$0.Table();
 			options$0.unreopenable || reopenedTables.add(lastTable);
 		}
-		tag && options$0.collect({ table, key: finalKey, array: null, tag });
+		tag && options$0.collect({ table, key: finalKey, array: undefined, index: undefined, tag });
 	}
 	return lastTable;
 }
@@ -98,7 +99,7 @@ export function prepareInlineTable (table :Table, keys :string[]) :Table {
 }
 
 export function assignLiteralString (table :Table, finalKey :string, literal :string) :string {
-	let $ :RegExpExecArray | null;
+	let $;
 	if ( literal.charAt(1)!=='\'' || literal.charAt(2)!=='\'' ) {
 		$ = regexps$0.LITERAL_STRING.exec(literal) || iterator$0.throws(SyntaxError(iterator$0.where()));
 		table[finalKey] = checkLiteralString($[1]);

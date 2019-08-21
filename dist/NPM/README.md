@@ -50,7 +50,7 @@ function parse (
          sourceContent        :string | Buffer,
          specificationVersion :0.5 | 0.4 | 0.3 | 0.2 | 0.1,
          multiLineJoiner      :string,
-         useBigInt?           :boolean | number = true,
+         useBigInt?           :boolean | number,
          xOptions?            :object
 ) :Table;
 ```
@@ -75,7 +75,7 @@ function parse (
     *   type: `0.5` / `0.4` / `0.3` / `0.2` / `0.1`
     *   required
     
-    If there is no special reason (e.g. the downstream program could not deal with `Infinity`、`NaN`、fractional seconds and edge Datetime values, Local Date-Time / Local Date / Local Time types, empty string key name, even array of (arrays of) tables structure yet), the latest version is recommended.
+    If there is no special reason (e.g. the downstream program could not deal with `Infinity`、`NaN`、fractional seconds and edge Datetime values, Local Date-Time / Local Date / Local Time types, empty string key name, even array of tables / table under array of arrays structure yet), the latest version is recommended.
     
 2.  **`multiLineJoiner`**
     
@@ -94,11 +94,9 @@ function parse (
     
 4.  **`xOptions`**
     
-    *   type: `object`
-    
     The extensional features not in the specification.  
     Include keeping the key/value pairs order of tables, integers larger than `signed long`, mixed-type array, multi-line inline table with trailing comma even no comma, `null` value, custom constructor, etc.  
-    They are private experimental discouraged features.  
+    They are private experimental discouraged features. Only provide TSD support when `specificationVersion` is `0.4` or higher.  
     See [xOptions](https://GitHub.com/LongTengDao/j-toml/blob/master/docs/English/xOptions.md).
 
 ### `return`

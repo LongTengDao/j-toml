@@ -1,6 +1,6 @@
 
 declare module '.Array.isArray' { export default isArray;
-	function isArray (value :any) :value is any[] | readonly any[];
+	function isArray (value :any) :value is any[] | Readonly<any[]>;
 }
 declare module '.Array.prototype.slice' { export default Array.prototype.slice; }
 
@@ -29,8 +29,17 @@ declare module '.Number.MIN_SAFE_INTEGER' { export default Number.MIN_SAFE_INTEG
 declare module '.Number.isSafeInteger' { export default Number.isSafeInteger; }
 
 declare module '.Object.assign' { export default Object.assign; }
-declare module '.Object.create' { export default Object.create; }
-declare module '.Object.create?=' { export default Object.create; }
+declare module '.Object.create' { export default create;
+	function create                                                                 (proto :null                  ) :object                                                                                           ;
+	function create<                  D extends TypedPropertyDescriptorMap<object>> (proto :null, descriptorMap :D) :object & ( D extends TypedPropertyDescriptorMap<infer O> ? O : never )                           ;
+	function create<P extends object                                              > (proto :P                     ) :object &                                                                 { [K in keyof P] :P[K] };
+	function create<P extends object, D extends TypedPropertyDescriptorMap<object>> (proto :P,    descriptorMap :D) :object & ( D extends TypedPropertyDescriptorMap<infer O> ? O : never ) & { [K in keyof P] :P[K] };
+	type TypedPropertyDescriptorMap<O> = { [K in keyof O] :TypedPropertyDescriptor<O[K]> };
+}
+declare module '.Object.create?=' { export default create;
+	function create (proto :null) :object;
+	function create<P extends object> (proto :P) :object & { [K in keyof P] :P[K] };
+}
 declare module '.Object.defineProperties' { export default Object.defineProperties; }
 declare module '.Object.defineProperty' { export default Object.defineProperty; }
 declare module '.Object.freeze' { export default Object.freeze; }
@@ -47,8 +56,12 @@ declare module '.Proxy' { export default Proxy; }
 
 declare module '.RangeError' { export default RangeError; }
 
-declare module '.Reflect.apply' { export default Reflect.apply; }
-declare module '.Reflect.construct' { export default Reflect.construct; }
+declare module '.Reflect.apply' { export default apply;
+	function apply<This extends any, Args extends { length :number, [index :number] :any }, Target extends (this :This, ...args :Args & any[]) => any> (target :Target, thisArg :This, args :Readonly<Args>) :Target extends (this :This, ...args :Args & any[]) => infer R ? R : never;
+}
+declare module '.Reflect.construct' { export default construct;
+	function construct<Args extends { length :number, [index :number] :any }, Target extends new (...args :Args & any[]) => any, NewTarget extends new (...args :any) => any> (target :Target, args :Readonly<Args>, newTarget? :NewTarget) :Target extends new (...args :Args & any[]) => infer R ? R : never;
+}
 declare module '.Reflect.defineProperty' { export default Reflect.defineProperty; }
 declare module '.Reflect.deleteProperty' { export default Reflect.deleteProperty; }
 declare module '.Reflect.ownKeys' { export default ownKeys;
@@ -90,16 +103,16 @@ declare module '.default' { export default Default;
 	function Default<Statics extends Readonly<{ [key :string] :any, default? :ModuleFunction<Statics, Main> }>, Main extends Callable | Newable | Callable & Newable> (main :Main, statics :Statics) :ModuleFunction<Statics, Main>;
 	type Module<Exports> = Readonly<Exports & { default :Module<Exports> }>;
 	type ModuleFunction<Statics, Main> = Readonly<Statics & { default :ModuleFunction<Statics, Main> }> & Main;
-	type Callable = (...args :any[]) => any;
-	type Newable = { new (...args :any[]) :any };
+	type Callable = (...args :any) => any;
+	type Newable = { new (...args :any) :any };
 }
 declare module '.default?=' { export default Default;
 	function Default<Exports extends Readonly<{ [key :string] :any, default? :Module<Exports> }>> (exports :Exports) :Module<Exports>;
 	function Default<Statics extends Readonly<{ [key :string] :any, default? :ModuleFunction<Statics, Main> }>, Main extends Callable | Newable | Callable & Newable> (main :Main, statics :Statics) :ModuleFunction<Statics, Main>;
 	type Module<Exports> = Readonly<Exports & { default :Module<Exports> }>;
 	type ModuleFunction<Statics, Main> = Readonly<Statics & { default :ModuleFunction<Statics, Main> }> & Main;
-	type Callable = (...args :any[]) => any;
-	type Newable = { new (...args :any[]) :any };
+	type Callable = (...args :any) => any;
+	type Newable = { new (...args :any) :any };
 }
 
 declare module '.isFinite' { export default isFinite; }

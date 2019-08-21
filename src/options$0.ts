@@ -21,7 +21,7 @@ export let IntegerMax :number;
 /* xOptions */
 
 export var xOptions :never;
-export type xOptions = null | {
+export type xOptions = undefined | null | boolean | Tag | {
 	order? :boolean,
 	longer? :boolean,
 	exact? :boolean,
@@ -29,11 +29,11 @@ export type xOptions = null | {
 	multi? :boolean,
 	close? :boolean,
 } & ({
-	mix? :boolean,
-	tag? :null,
-} | {
+	tag :Tag,
 	mix :true,
-	tag :tag,
+} | {
+	tag? :null,
+	mix? :boolean,
 });
 export let zeroDatetime :boolean;
 export let inlineTable :boolean;
@@ -62,7 +62,7 @@ export let
 	asLocalDates :as,
 	asLocalTimes :as;
 const arrayTypes :WeakMap<any[], as> = new WeakMap;
-let As :( () => as ) | null = () => function as (array :any[]) :any[] {
+let As :{ () :as } | null = () => function as (array :any[]) :any[] {
 	if ( arrayTypes.has(array) ) {
 		arrayTypes.get(array)===as
 		|| iterator$0.throws(TypeError(`Types in Array must be same. Check ${iterator$0.where()}`));
@@ -90,26 +90,26 @@ export const unType :as = (array :any[]) :any[] => array;
 
 /* xOptions.tag */
 
-let processor :tag | null = null;
+let processor :Tag | null = null;
 
-type tag = (each :each) => any;
-type each =
-	{ table :Table, key :string, array :null,                   tag :string } |
-	{ table :null,               array :any[],   index :number, tag :string } |
-	{ table :Table, key :string, array :Table[], index :number, tag :string };
-let collection :each[] = [];
-function collect_on (each :each) :void { collection.push(each); }
-function collect_off (each :each) :never { throw iterator$0.throws(SyntaxError(iterator$0.where())); }
+type Tag = (this :void, each :Each) => void;
+type Each =
+	{ table :Table,     key :string,    array :undefined, index :undefined, tag :string } |
+	{ table :undefined, key :undefined, array :any[],     index :number,    tag :string } |
+	{ table :Table,     key :string,    array :Table[],   index :number,    tag :string };
+let collection :Each[] = [];
+function collect_on (each :Each) :void { collection.push(each); }
+function collect_off (each :Each) :never { throw iterator$0.throws(SyntaxError(iterator$0.where())); }
 export let collect :typeof collect_off | typeof collect_on = collect_off;
 export function process () {
 	let index = collection.length;
 	if ( index ) {
 		iterator$0.done();
-		const process = <tag>processor;
+		const process = processor!;
 		const queue = collection;
 		processor = null;
 		collection = [];
-		while ( index-- ) { process(<each>queue.pop()); }
+		while ( index-- ) { process(queue.pop()!); }
 	}
 }
 
@@ -120,7 +120,7 @@ export function clear () :void {
 	collection.length = 0;
 }
 
-export function use (specificationVersion :unknown, multiLineJoiner :unknown, useBigInt :unknown, xOptions :Exclude<any, undefined>) :void {
+export function use (specificationVersion :unknown, multiLineJoiner :unknown, useBigInt :unknown, xOptions :xOptions) :void {
 	
 	switch ( specificationVersion ) {
 		case 0.5:
@@ -164,17 +164,31 @@ export function use (specificationVersion :unknown, multiLineJoiner :unknown, us
 	
 	let typify :boolean;
 	
-	if ( xOptions===null ) {
+	if ( xOptions==null || xOptions===false ) {
 		Table = PlainTable;
 		sError = allowLonger = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = unreopenable = false;
 		typify = true;
+		collect = collect_off;
+	}
+	else if ( xOptions===true ) {
+		Table = OrderedTable;
+		allowLonger = sError = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = unreopenable = true;
+		typify = false;
+		collect = collect_off;
+	}
+	else if ( typeof xOptions==='function' ) {
+		Table = OrderedTable;
+		allowLonger = sError = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = unreopenable = true;
+		typify = false;
+		processor = xOptions;
+		collect = collect_on;
 	}
 	else {
 		const { order, longer, exact, null: _null, multi, close, mix, tag, ...unknown } = xOptions;
 		if ( ownKeys(unknown).length ) { throw Error('TOML.parse(,,,,xOptions.tag)'); }
 		Table = order ? OrderedTable : PlainTable;
 		allowLonger = !!longer;
-		sError = !exact;
+		sError = !!exact;
 		enableNull = !!_null;
 		allowInlineTableMultiLineAndTrailingCommaEvenNoComma = !!multi;
 		unreopenable = !!close;

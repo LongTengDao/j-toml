@@ -2,6 +2,10 @@
 `xOptions`
 ==========
 
+All following options are not turned on by default. For simplicity, passing the `true` value directly opens all features except `xOptions.tag`.
+
+If the input is not an object, but a function, it is treated as `xOptions.tag`, and all other features are turned on at the same time.
+
 `xOptions.order`
 ----------------
 
@@ -102,28 +106,32 @@ Whether to disallow defining a table (like below) which itself has not been defi
 
 *   type:
     ```typescript
-    function processorForEach (each :
-        { table :Table, key :string, array :null,                   tag :string } |
-        { table :null,               array :any[],   index :number, tag :string } |
-        { table :Table, key :string, array :Table[], index :number, tag :string }
-    ) :void
+    function processorForEach (eachTaggedPosition :
+        { table :Table,     key :string, array :undefined, index :undefined, tag :string } |
+        { table :undefined, key :string, array :any[],     index :number,    tag :string } |
+        { table :Table,     key :string, array :Table[],   index :number,    tag :string }
+    ) :void;
     ```
 *   default: `null`
 
 ```
-KV_Pair = <tag> 'value'  # process({ table: root, key: 'KV_Pair', array: null,                   tag: 'tag' })
+KV_Pair = <tag> 'value'  # processorForEach({ table: root,      key: 'KV_Pair', array: undefined,    index: undefined, tag: 'tag' })
 
-ArrayOf = <tag> [        # process({ table: root, key: 'arrayOf', array: null,                   tag: 'tag' })
-          <tag> 'value', # process({ table: null,                 array: root.arrayOf, index: 0, tag: 'tag' })
+ArrayOf = <tag> [        # processorForEach({ table: root,      key: 'ArrayOf', array: undefined,    index: undefined, tag: 'tag' })
+          <tag> 'value', # processorForEach({ table: undefined, key: undefined, array: root.ArrayOf, index: 0,         tag: 'tag' })
 ]
 
-[Section] <tag>          # process({ table: root, key: 'section', array: null,                   tag: 'tag' })
+[Section] <tag>          # processorForEach({ table: root,      key: 'Section', array: undefined,    index: undefined, tag: 'tag' })
 
-[[Items]] <tag>          # process({ table: root, key: 'items',   array: root.items,   index: 0, tag: 'tag' })
+[[Items]] <tag>          # processorForEach({ table: root,      key: 'Items',   array: root.Items,   index: 0,         tag: 'tag' })
 ```
 
-Tag content could include any character rather than `<` `>` <code>&#92;</code> `"` `'` <code>&#96;</code> CR LF U+2028 U+2029.
+Tag content could include any character rather than `<` `>` <code>&#92;</code> `"` `'` <code>&#96;</code> CR LF U+2028 U+2029, but it must not be empty.
 
 Tags are processed from after to before.
 
 Note: This option requires `xOptions.mix` enabled at the same time, because the custom returned value could not be properly classified.
+
+Because TOML has the limitation that root value can only be table for the time being, there is no tag representation designed to replace root table.  
+Anyway, it is not difficult to deal with it after whole table returned.  
+In the future, it is possible to add an extension method to remove both restrictions at the same time.
