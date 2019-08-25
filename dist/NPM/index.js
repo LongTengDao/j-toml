@@ -1,12 +1,12 @@
 ﻿'use strict';
 
-const version = '0.5.105';
-
-const isBuffer = Buffer.isBuffer;
-
-const hasOwnProperty = Object.prototype.hasOwnProperty;
+const version = '0.5.106';
 
 const undefined$1 = void 0;
+
+const isBuffer = typeof Buffer!=='undefined' && Buffer.isBuffer!==undefined$1 ? Buffer.isBuffer : /*#__PURE__*/ ()=>false;
+
+const hasOwnProperty = Object.prototype.hasOwnProperty;
 
 const from = (
 	/*! j-globals: Buffer.from (fallback) */
@@ -130,17 +130,25 @@ const toStringTag = typeof Symbol!=='undefined' ? Symbol.toStringTag : undefined
 
 const seal = Object.seal;
 
+const NULL = (
+	/*! j-globals: null.prototype (internal) */
+	Object.create
+		? /*#__PURE__*/ Object.preventExtensions(Object.create(null))
+		: null
+	/*¡ j-globals: null.prototype (internal) */
+);
+
 const Default = (
 	/*! j-globals: default (internal) */
 	function Default (exports, addOnOrigin) {
 		return /*#__PURE__*/ function Module (exports, addOnOrigin) {
-			if ( !addOnOrigin ) { addOnOrigin = exports; exports = create(null); }
+			if ( !addOnOrigin ) { addOnOrigin = exports; exports = create(NULL); }
 			if ( assign ) { assign(exports, addOnOrigin); }
 			else { for ( var key in addOnOrigin ) { if ( hasOwnProperty.call(addOnOrigin, key) ) { exports[key] = addOnOrigin[key]; } } }
 			exports['default'] = exports;
 			typeof exports==='function' && exports.prototype && seal(exports.prototype);
 			if ( toStringTag ) {
-				var descriptor = create(null);
+				var descriptor = create(NULL);
 				descriptor.value = 'Module';
 				defineProperty(exports, toStringTag, descriptor);
 			}
@@ -425,6 +433,8 @@ function MULTI_LINE_BASIC_STRING_exec_0 (_        )         {
 		_ = _.slice($[0].length);
 	}
 }
+
+const ESCAPED_EXCLUDE_CONTROL_CHARACTER_TAB______ = /[^\\\x00-\x08\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|[ \t]*\n[ \t\n]*|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
 const ESCAPED_EXCLUDE_CONTROL_CHARACTER__________ = /[^\\\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]| *\n[ \n]*|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
 const ESCAPED_EXCLUDE_CONTROL_CHARACTER_DEL______ = /[^\\\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\]| *\n[ \n]*|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
 const ESCAPED_EXCLUDE_CONTROL_CHARACTER_DEL_SLASH = /[^\\\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\/]| *\n[ \n]*|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
@@ -432,6 +442,8 @@ let __ESCAPED_EXCLUDE_CONTROL_CHARACTER        ;
 function ESCAPED_EXCLUDE_CONTROL_CHARACTER_test (_        )          {
 	return _.replace(__ESCAPED_EXCLUDE_CONTROL_CHARACTER, '')==='';
 }
+
+const BASIC_STRING_TAB______ = /^(?:[^\\"\x00-\x08\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/;
 const BASIC_STRING__________ = /^(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/;
 const BASIC_STRING_DEL______ = /^(?:[^\\"\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/;
 const BASIC_STRING_DEL_SLASH = /^(?:[^\\"\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\/]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/;
@@ -521,6 +533,15 @@ let __KEYS        ;
 
 function switchRegExp (specificationVersion        )       {
 	switch ( specificationVersion ) {
+		case 1.0:
+			__LITERAL_KEY = LITERAL_KEY____;
+			__CONTROL_CHARACTER_EXCLUDE = CONTROL_CHARACTER_EXCLUDE_TAB____;
+			__ESCAPED_EXCLUDE_CONTROL_CHARACTER = ESCAPED_EXCLUDE_CONTROL_CHARACTER_TAB______;
+			__BASIC_STRING = BASIC_STRING_TAB______;
+			__BARE_KEY = BARE_KEY_STRICT;
+			__KEYS = KEYS_STRICT;
+			supportArrayOfTables = true;
+			break;
 		case 0.5:
 			__LITERAL_KEY = LITERAL_KEY____;
 			__CONTROL_CHARACTER_EXCLUDE = CONTROL_CHARACTER_EXCLUDE_TAB____;
@@ -658,6 +679,7 @@ function clear ()       {
 function use (specificationVersion         , multiLineJoiner         , useBigInt         , xOptions          )       {
 	
 	switch ( specificationVersion ) {
+		case 1.0:
 		case 0.5:
 			moreDatetime = sFloat = inlineTable = true;
 			zeroDatetime = disallowEmptyKey = false;
@@ -1433,7 +1455,7 @@ const BOM = '\uFEFF';
 
 function parse (
 	sourceContent                 ,
-	specificationVersion                             ,
+	specificationVersion                                   ,
 	multiLineJoiner        ,
 	useBigInt                   = true,
 	xOptions                    

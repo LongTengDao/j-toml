@@ -21,7 +21,6 @@ const 源内容           = `
       hasOwnProperty   = "..."
       constructor      = "..."
       __proto__        = "..."
-      5                = "..."
 `;
 
 const 根表 = TOML.parse(源内容, 0.5, '\n');
@@ -30,10 +29,9 @@ const 根表 = TOML.parse(源内容, 0.5, '\n');
 根表.hasOwnProperty // "..."
 根表.constructor    // "..."
 根表.__proto__      // "..."
-
 根表.valueOf        // undefined
 
-Object.keys(根表)   // [ "一个普通的键名", "hasOwnProperty", "constructor", "__proto__", "5" ]
+Object.keys(根表)   // [ "一个普通的键名", "hasOwnProperty", "constructor", "__proto__" ]
 ```
 
 `TOML.parse`

@@ -7,7 +7,7 @@ declare module '.Array.prototype.slice' { export default Array.prototype.slice; 
 declare module '.BigInt' { export default BigInt; }
 
 declare module '.Buffer.from?' { export default Buffer.from; }
-declare module '.Buffer.isBuffer' { export default Buffer.isBuffer; }
+declare module '.Buffer.isBuffer?=()=>false' { export default Buffer.isBuffer; }
 
 declare module '.Date' { export default Date; }
 declare module '.Date.prototype.getTime' { export default Date.prototype.getTime; }
@@ -116,6 +116,10 @@ declare module '.default?=' { export default Default;
 }
 
 declare module '.isFinite' { export default isFinite; }
+
+declare module '.null.prototype' { export default NULL;
+	const NULL :object | null;
+}
 
 declare module '.parseInt' { export default parseInt; }
 

@@ -6,16 +6,24 @@ const i18n = [ 'English', '简体中文' ];
 
 module.exports = require('../test/test.js')(async ({ build, 龙腾道, get, map, ful, put }) => {
 	
+	const zhs = '龙腾道为汤小明语写的实现。从属于“简计划”。';
+	const en = 'An implementation of TOML written by LongTengDao. Belong to "Plan J".';
+	
 	await build({
 		name: 'j-toml',
+		Desc: [ zhs, en ],
 		user: 'LongTengDao@ltd',
 		Auth: 龙腾道,
 		Copy: 'LGPL-3.0',
 		semver: await get('src/version'),
 		ES: 6,
 		NPM: {
-			description: 'An implementation of TOML written by LongTengDao. Belong to "Plan J".／龙腾道为汤小明语写的实现。从属于“简计划”。',
+			description: `${en}／${zhs}`,
 			keywords: [ 'TOML' ],
+		},
+		UMD: {
+			main_global: 'TOML',
+			mini: false,
 		},
 		locate: {
 			'@ltd/j-orderify': ful('../../LongTengDao/j-orderify/dist/ESM/.j-orderify.js'),

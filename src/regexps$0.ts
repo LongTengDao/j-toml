@@ -185,6 +185,15 @@ let __KEYS :RegExp;
 
 export function switchRegExp (specificationVersion :number) :void {
 	switch ( specificationVersion ) {
+		case 1.0:
+			__LITERAL_KEY = LITERAL_KEY____;
+			__CONTROL_CHARACTER_EXCLUDE = CONTROL_CHARACTER_EXCLUDE_TAB____;
+			__ESCAPED_EXCLUDE_CONTROL_CHARACTER = ESCAPED_EXCLUDE_CONTROL_CHARACTER_TAB______;
+			__BASIC_STRING = BASIC_STRING_TAB______;
+			__BARE_KEY = BARE_KEY_STRICT;
+			__KEYS = KEYS_STRICT;
+			supportArrayOfTables = true;
+			break;
 		case 0.5:
 			__LITERAL_KEY = LITERAL_KEY____;
 			__CONTROL_CHARACTER_EXCLUDE = CONTROL_CHARACTER_EXCLUDE_TAB____;

@@ -1,6 +1,6 @@
 import Error from '.Error';
 import TypeError from '.TypeError';
-import isBuffer from '.Buffer.isBuffer';
+import isBuffer from '.Buffer.isBuffer?=()=>false';
 import from from '.Buffer.from?';
 import * as iterator$0 from '../iterator$0';
 import * as options$0 from '../options$0';
@@ -14,7 +14,7 @@ const BOM = '\uFEFF';
 
 export default function parse (
 	sourceContent :Buffer | string,
-	specificationVersion :0.5 | 0.4 | 0.3 | 0.2 | 0.1,
+	specificationVersion :1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1,
 	multiLineJoiner :string,
 	useBigInt :boolean | number = true,
 	xOptions :options$0.xOptions

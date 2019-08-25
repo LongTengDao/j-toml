@@ -123,6 +123,7 @@ export function clear () :void {
 export function use (specificationVersion :unknown, multiLineJoiner :unknown, useBigInt :unknown, xOptions :xOptions) :void {
 	
 	switch ( specificationVersion ) {
+		case 1.0:
 		case 0.5:
 			moreDatetime = sFloat = inlineTable = true;
 			zeroDatetime = disallowEmptyKey = false;

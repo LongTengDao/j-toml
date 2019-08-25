@@ -16,14 +16,14 @@ module.exports = require('@ltd/j-dev')(__dirname+'/..')(async ({ import_default,
 		}
 	});
 	
-	TOML.parse('', 0.5, '\n');
+	TOML.parse('', 1.0, '\n');
 	
 	TOML.parse([
 		`["${'bt\\b\\t'.repeat(10000)}${'\\b\\t'.repeat(10000)}"]`,
 		'k=[{'.repeat(10000)+'}]'.repeat(10000),
-	].join('\n'), 0.5, '\r\n');
+	].join('\n'), 1.0, '\r\n');
 	
-	const toml = TOML.parse(await get('./test/sample.toml'), 0.5, '\n', true);
+	const toml = TOML.parse(await get('./test/sample.toml'), 1.0, '\n', true);
 	const expect = require('./expect');
 	if ( not(expect)(toml) )
 	for ( const [ key, value ] of Object.entries(expect) ) {
@@ -34,7 +34,7 @@ module.exports = require('@ltd/j-dev')(__dirname+'/..')(async ({ import_default,
 	
 	for ( const [name, source] of new Map().set('-base', `bad = -0b0`).set('BS', `bad = "\\ "`).set('MLBS', `bad = """\\ """`) ) {
 		let lackError = true;
-		try { TOML.parse(source, 0.5, '\n'); }
+		try { TOML.parse(source, 1.0, '\n'); }
 		catch (error) { lackError = false; }
 		if ( lackError ) { throw Error(name); }
 	}

@@ -21,7 +21,6 @@ const sourceContent  = `
       hasOwnProperty = "..."
       constructor    = "..."
       __proto__      = "..."
-      5              = "..."
 `;
 
 const rootTable = TOML.parse(sourceContent, 0.5, '\n');
@@ -30,10 +29,9 @@ rootTable.I_am_normal    // "..."
 rootTable.hasOwnProperty // "..."
 rootTable.constructor    // "..."
 rootTable.__proto__      // "..."
-
 rootTable.valueOf        // undefined
 
-Object.keys(rootTable)   // [ "I_am_normal", "hasOwnProperty", "constructor", "__proto__", "5" ]
+Object.keys(rootTable)   // [ "I_am_normal", "hasOwnProperty", "constructor", "__proto__" ]
 ```
 
 `TOML.parse`
