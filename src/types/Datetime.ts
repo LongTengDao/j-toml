@@ -6,8 +6,7 @@ import WeakMap from '.WeakMap';
 import Date from '.Date';
 import getTime from '.Date.prototype.getTime';
 import defineProperty from '.Object.defineProperty';
-import create from '.Object.create';
-import assign from '.Object.assign';
+import Null from '.null';
 
 import * as options$0 from '../options$0';
 import * as iterator$0 from '../iterator$0';
@@ -76,7 +75,7 @@ const literal_cache :WeakMap<Datetime, string> = new WeakMap;
 const gotValue_cache :WeakMap<Datetime, number> = new WeakMap;
 const dotValue_cache :WeakMap<Datetime, string> = new WeakMap;
 
-const dotDescriptor = /*#__PURE__*/ assign(create(null), { value: '', writable: true, enumerable: false, configurable: true });
+const dotDescriptor = Null({ value: '', writable: true, enumerable: false, configurable: true });
 class Datetime extends Date {
 	
 	'.' :string;

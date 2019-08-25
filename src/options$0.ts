@@ -44,7 +44,7 @@ export let sError :boolean;
 export let sFloat :boolean;
 export let unreopenable :boolean;
 export type Table = typesTable;
-export let Table :() => Table;
+export let Table :new () => Table;
 export let allowLonger :boolean;
 export let enableNull :boolean;
 export let allowInlineTableMultiLineAndTrailingCommaEvenNoComma :boolean;

@@ -30,25 +30,20 @@ declare module '.Number.isSafeInteger' { export default Number.isSafeInteger; }
 
 declare module '.Object.assign' { export default Object.assign; }
 declare module '.Object.create' { export default create;
-	function create                                                                 (proto :null                  ) :object                                                                                           ;
-	function create<                  D extends TypedPropertyDescriptorMap<object>> (proto :null, descriptorMap :D) :object & ( D extends TypedPropertyDescriptorMap<infer O> ? O : never )                           ;
-	function create<P extends object                                              > (proto :P                     ) :object &                                                                 { [K in keyof P] :P[K] };
-	function create<P extends object, D extends TypedPropertyDescriptorMap<object>> (proto :P,    descriptorMap :D) :object & ( D extends TypedPropertyDescriptorMap<infer O> ? O : never ) & { [K in keyof P] :P[K] };
+	function create<P extends object | null, D extends TypedPropertyDescriptorMap<object> | void> (proto :P,    descriptorMap? :D) :object & ( D extends TypedPropertyDescriptorMap<infer O> ? O : object ) & ( P extends object ? { [K in keyof P] :P[K] } : object );
 	type TypedPropertyDescriptorMap<O> = { [K in keyof O] :TypedPropertyDescriptor<O[K]> };
 }
 declare module '.Object.create?=' { export default create;
-	function create (proto :null) :object;
-	function create<P extends object> (proto :P) :object & { [K in keyof P] :P[K] };
+	function create<P extends object | null> (proto :P) :P extends object ? object & { [K in keyof P] :P[K] } : object;
 }
-declare module '.Object.defineProperties' { export default Object.defineProperties; }
 declare module '.Object.defineProperty' { export default Object.defineProperty; }
 declare module '.Object.freeze' { export default Object.freeze; }
 declare module '.Object.fromEntries' { export default fromEntries;
 	function fromEntries<K extends string | symbol, V extends any> (entries :Iterable<Readonly<{ 0 :K, 1 :V }>>) :{ [k in K] :V };
 }
 declare module '.Object.getOwnPropertyDescriptor' { export default Object.getOwnPropertyDescriptor; }
-declare module '.Object.getPrototypeOf' { export default Object.getPrototypeOf; }
 declare module '.Object.is' { export default Object.is; }
+declare module '.Object.preventExtensions' { export default Object.preventExtensions; }
 declare module '.Object.prototype.hasOwnProperty' { export default Object.prototype.hasOwnProperty; }
 declare module '.Object.seal' { export default Object.seal; }
 
@@ -117,6 +112,29 @@ declare module '.default?=' { export default Default;
 
 declare module '.isFinite' { export default isFinite; }
 
+declare module '.null' { export default NULL;
+	const NULL :{
+		new<ValueType> () :NULL<ValueType>,
+		new () :object,
+		<_ extends never, ObjectType extends object> (object :ObjectType) :ObjectType,
+		<ValueType> (object :object) :NULL<ValueType>,
+	};
+	type NULL<ValueType> = {
+		[key :string] :undefined | ValueType,
+		toString? :ValueType,
+		toLocaleString? :ValueType,
+		valueOf? :ValueType,
+		hasOwnProperty? :ValueType,
+		isPrototypeOf? :ValueType,
+		propertyIsEnumerable? :ValueType,
+		__defineGetter__? :ValueType,
+		__defineSetter__? :ValueType,
+		__lookupGetter__? :ValueType,
+		__lookupSetter__? :ValueType,
+		__proto__? :ValueType,
+		constructor? :ValueType,
+	};
+}
 declare module '.null.prototype' { export default NULL;
 	const NULL :object | null;
 }

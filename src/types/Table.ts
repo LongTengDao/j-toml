@@ -1,19 +1,38 @@
-import getPrototypeOf from '.Object.getPrototypeOf';
-import create from '.Object.create';
+import WeakSet from '.WeakSet';
+import Null from '.null';
+import preventExtensions from '.Object.preventExtensions';
 
-import * as Ordered from '@ltd/j-orderify';
+import { NULL } from '@ltd/j-orderify';
 
 export var Table :never;
-export type Table = Ordered.NULL<any>;
+export type Table = NULL<any>;
 
-export function PlainTable () :Table {
-	return create(null);
-}
+const tables = new WeakSet;
 
-export function OrderedTable () :Table {
-	return Ordered.create(null);
-}
+export const PlainTable = /*#__PURE__*/ function () {
+	class Table extends Null<any> {
+		constructor () {
+			super();
+			tables.add(this);
+		}
+	}
+	delete Table.prototype.constructor;
+	preventExtensions(Table.prototype);
+	return Table;
+}();
+
+export const OrderedTable = /*#__PURE__*/ function () {
+	class Table extends NULL<any> {
+		constructor () {
+			super();
+			tables.add(this);
+		}
+	}
+	delete Table.prototype.constructor;
+	preventExtensions(Table.prototype);
+	return Table;
+}();
 
 export function isTable (value :any) :value is Table {
-	return value!=null && getPrototypeOf(value)===null;
+	return tables.has(value);
 }

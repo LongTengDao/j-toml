@@ -2,7 +2,7 @@ export = exports;
 
 declare namespace exports {
 	
-	export const version :'0.5.106';
+	export const version :'0.5.107';
 	
 	export function parse<CustomValue extends never, SpecificationVersion extends 0.3 | 0.2 | 0.1, UseBigInt extends boolean | number> (
 		sourceContent :string | Buffer,

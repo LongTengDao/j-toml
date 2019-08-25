@@ -23,7 +23,7 @@ export function appendTable (table :Table, key_key :string, asArrayItem :boolean
 		if ( finalKey in table ) { sealedInline.has(arrayOfTables = table[finalKey]) && iterator$0.throws(Error(`Trying to push Table to non-ArrayOfTables value at ${iterator$0.where()}`)); }
 		else { arrayOfTables = table[finalKey] = []; }
 		tag && options$0.collect({ table, key: finalKey, array: arrayOfTables, index: arrayOfTables.length, tag });
-		arrayOfTables.push(lastTable = options$0.Table());
+		arrayOfTables.push(lastTable = new options$0.Table);
 	}
 	else {
 		if ( finalKey in table ) {
@@ -31,7 +31,7 @@ export function appendTable (table :Table, key_key :string, asArrayItem :boolean
 			openTables.delete(lastTable);
 		}
 		else {
-			table[finalKey] = lastTable = options$0.Table();
+			table[finalKey] = lastTable = new options$0.Table;
 			options$0.unreopenable || reopenedTables.add(lastTable);
 		}
 		tag && options$0.collect({ table, key: finalKey, array: undefined, index: undefined, tag });
@@ -71,8 +71,8 @@ function prepareTable (table :Table, keys :string[]) :Table {
 			else { iterator$0.throws(Error(`Trying to define Table under non-Table value at ${iterator$0.where()}`)); }
 		}
 		else {
-			openTables.add(table = table[key] = options$0.Table());
-			while ( index<length ) { openTables.add(table = table[keys[index++]] = options$0.Table()); }
+			openTables.add(table = table[key] = new options$0.Table);
+			while ( index<length ) { openTables.add(table = table[keys[index++]] = new options$0.Table); }
 			return table;
 		}
 	}
@@ -90,8 +90,8 @@ export function prepareInlineTable (table :Table, keys :string[]) :Table {
 			sealedInline.has(table) && iterator$0.throws(Error(`Trying to assign property through static Inline Table at ${iterator$0.where()}`));
 		}
 		else {
-			openTables.add(table = table[key] = options$0.Table());
-			while ( index<length ) { openTables.add(table = table[keys[index++]] = options$0.Table()); }
+			openTables.add(table = table[key] = new options$0.Table);
+			while ( index<length ) { openTables.add(table = table[keys[index++]] = new options$0.Table); }
 			return table;
 		}
 	}

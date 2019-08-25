@@ -13,7 +13,7 @@ import * as regexps$0 from '../regexps$0';
 import { sealedInline, appendTable, parseKeys, prepareInlineTable, assignLiteralString, assignBasicString } from './on-the-spot';
 
 export default function Root () {
-	const rootTable :Table = options$0.Table();
+	const rootTable :Table = new options$0.Table;
 	let lastSectionTable :Table = rootTable;
 	while ( iterator$0.rest() ) {
 		const line :string = iterator$0.next().replace(regexps$0.PRE_WHITESPACE, '');
@@ -163,7 +163,7 @@ function push (lastArray :any[], lineRest :string) :string {
 }
 
 function equalInlineTable (table :Table, finalKey :string, lineRest :string) :string {
-	const inlineTable :Table = table[finalKey] = options$0.Table();
+	const inlineTable :Table = table[finalKey] = new options$0.Table;
 	sealedInline.add(inlineTable);
 	lineRest = lineRest.replace(regexps$0.SYM_WHITESPACE, '');
 	if ( options$0.allowInlineTableMultiLineAndTrailingCommaEvenNoComma ) {

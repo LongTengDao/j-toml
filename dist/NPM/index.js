@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '0.5.106';
+const version = '0.5.107';
 
 const undefined$1 = void 0;
 
@@ -104,15 +104,46 @@ const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER;
 
 const MIN_SAFE_INTEGER = Number.MIN_SAFE_INTEGER;
 
-const getPrototypeOf = Object.getPrototypeOf;
-
 const create = Object.create;
 
-const assign = Object.assign;
+const Object_freeze = Object.freeze;
+
+const NULL = (
+	/*! j-globals: null.prototype (internal) */
+	Object.create
+		? /*#__PURE__*/ Object.preventExtensions(Object.create(null))
+		: null
+	/*¡ j-globals: null.prototype (internal) */
+);
+
+const Null = (
+	/*! j-globals: null.constructor (internal) */
+	/*#__PURE__*/ function () {
+		var assign = Object.assign || function assign (target, source) {
+			for ( var key in source ) {
+				if ( hasOwnProperty.call(source, key) ) { target[key] = source[key]; }
+			}
+			return target;
+		};
+		var NULL$1 = function (object) {
+			if ( object ) {
+				return /*#__PURE__*/ assign(/*#__PURE__*/ create(NULL), object);
+			}
+		};
+		delete NULL$1.name;
+		//try { delete NULL.length; } catch (error) {}
+		NULL$1.prototype = null;
+		Object_freeze(NULL$1);
+		return NULL$1;
+	}()
+	/*¡ j-globals: null.constructor (internal) */
+);
+
+const preventExtensions = Object.preventExtensions;
+
+const Object_assign = Object.assign;
 
 const defineProperty = Object.defineProperty;
-
-const Object_freeze = Object.freeze;
 
 const Reflect_apply = Reflect.apply;
 
@@ -124,26 +155,16 @@ const Reflect_deleteProperty = Reflect.deleteProperty;
 
 const Reflect_set = Reflect.set;
 
-const isArray = Array.isArray;
-
 const toStringTag = typeof Symbol!=='undefined' ? Symbol.toStringTag : undefined;
 
 const seal = Object.seal;
-
-const NULL = (
-	/*! j-globals: null.prototype (internal) */
-	Object.create
-		? /*#__PURE__*/ Object.preventExtensions(Object.create(null))
-		: null
-	/*¡ j-globals: null.prototype (internal) */
-);
 
 const Default = (
 	/*! j-globals: default (internal) */
 	function Default (exports, addOnOrigin) {
 		return /*#__PURE__*/ function Module (exports, addOnOrigin) {
 			if ( !addOnOrigin ) { addOnOrigin = exports; exports = create(NULL); }
-			if ( assign ) { assign(exports, addOnOrigin); }
+			if ( Object_assign ) { Object_assign(exports, addOnOrigin); }
 			else { for ( var key in addOnOrigin ) { if ( hasOwnProperty.call(addOnOrigin, key) ) { exports[key] = addOnOrigin[key]; } } }
 			exports['default'] = exports;
 			typeof exports==='function' && exports.prototype && seal(exports.prototype);
@@ -162,7 +183,7 @@ const Default = (
  * 模块名称：j-orderify
  * 模块功能：返回一个能保证给定对象的属性按此后添加顺序排列的 proxy，即使键名是 symbol，或整数 string。从属于“简计划”。
    　　　　　Return a proxy for given object, which can guarantee own keys are in setting order, even if the key name is symbol or int string. Belong to "Plan J".
- * 模块版本：5.3.0
+ * 模块版本：6.0.0
  * 许可条款：LGPL-3.0
  * 所属作者：龙腾道 <LongTengDao@LongTengDao.com> (www.LongTengDao.com)
  * 问题反馈：https://GitHub.com/LongTengDao/j-orderify/issues
@@ -174,13 +195,13 @@ const target2keeper                          = new WeakMap;
 const proxy2target                         = new WeakMap;
 const target2proxy                         = new WeakMap;
 
-const setDescriptor = /*#__PURE__*/assign(create(null), {
+const setDescriptor = /*#__PURE__*/ Object_assign(create(NULL), {
 	value: undefined$1,
 	writable: true,
 	enumerable: true,
 	configurable: true,
 });
-const handlers = /*#__PURE__*/assign(create(null), {
+const handlers = /*#__PURE__*/ Object_assign(create(NULL), {
 	apply (Function                           , thisArg     , args       ) {
 		return orderify(Reflect_apply(Function, thisArg, args));
 	},
@@ -221,7 +242,7 @@ const handlers = /*#__PURE__*/assign(create(null), {
 
 function newProxy                   (target   , keeper        )    {
 	target2keeper.set(target, keeper);
-	const proxy    = new Proxy(target, handlers);
+	const proxy = new Proxy   (target, handlers);
 	proxy2target.set(proxy, target);
 	return proxy;
 }
@@ -229,7 +250,7 @@ function newProxy                   (target   , keeper        )    {
 const { orderify } = {
 	orderify                   (object   )    {
 		if ( proxy2target.has(object) ) { return object; }
-		let proxy                = target2proxy.get(object)                 ;
+		let proxy = target2proxy.get(object)                 ;
 		if ( proxy ) { return proxy; }
 		proxy = newProxy(object, new Keeper(ownKeys(object)));
 		target2proxy.set(object, proxy);
@@ -238,7 +259,7 @@ const { orderify } = {
 };
 
 function PartialDescriptor                               (source   )    {
-	const target    = create(null);
+	const target = create(NULL)     ;
 	if ( source.hasOwnProperty('value') ) {
 		target.value = source.value;
 		if ( source.hasOwnProperty('writable') ) { target.writable = source.writable; }
@@ -253,47 +274,54 @@ function PartialDescriptor                               (source   )    {
 	if ( source.hasOwnProperty('configurable') ) { target.configurable = source.configurable; }
 	return target;
 }
-function ExternalDescriptor                               (source   )    {
-	const target    = create(null);
-	if ( source.hasOwnProperty('value') ) { target.value = source.value; }
-	if ( source.hasOwnProperty('writable') ) { target.writable = source.writable; }
-	if ( source.hasOwnProperty('get') ) { target.get = source.get; }
-	if ( source.hasOwnProperty('set') ) { target.set = source.set; }
-	if ( source.hasOwnProperty('enumerable') ) { target.enumerable = source.enumerable; }
-	if ( source.hasOwnProperty('configurable') ) { target.configurable = source.configurable; }
-	return target;
-}
 
-                                                                                       
-const { create: create$1 } = {
-	create                                                          (proto          , descriptorMap     )                                                                  {
-		if ( descriptorMap===undefined$1 ) { return newProxy(create(proto), new Keeper); }
-		const target = create(proto);
-		const keeper         = new Keeper;
-		for ( let lastIndex         = arguments.length-1, index         = 1; ; descriptorMap = arguments[++index] ) {
-			const keys = ownKeys(descriptorMap );
-			for ( let length         = keys.length, index         = 0; index<length; ++index ) {
-				const key = keys[index];
-				defineProperty(target, key, ExternalDescriptor(descriptorMap [key]));
-				keeper.add(key);
-			}
-			if ( index===lastIndex ) { return newProxy(target, keeper); }
-		}
+const NULL$1 = /*#__PURE__*/ function (         ) {
+	function throwConstructing ()        { throw TypeError(`Super constructor NULL cannot be invoked with 'new'`); }
+	function throwApplying ()        { throw TypeError(`Super constructor NULL cannot be invoked without 'new'`); }
+	function NULL$1 (            ) {
+		return new.target
+			? new.target===NULL$1
+				? /*#__PURE__*/ throwConstructing()
+				: /*#__PURE__*/ newProxy(this, new Keeper)
+			: /*#__PURE__*/ throwApplying();
 	}
-};
+	( NULL$1 ).prototype = null;
+	defineProperty(NULL$1, 'name', Object_assign(create(NULL), { value: '' }));
+	//delete NULL.length;
+	Object_freeze(NULL$1);
+	return NULL$1;
+}()                                           ;
 
 /*¡ j-orderify */
 
-function PlainTable ()        {
-	return create(null);
-}
+const tables = new WeakSet;
 
-function OrderedTable ()        {
-	return create$1(null);
-}
+const PlainTable = /*#__PURE__*/ function () {
+	class Table extends Null      {
+		constructor () {
+			super();
+			tables.add(this);
+		}
+	}
+	delete Table.prototype.constructor;
+	preventExtensions(Table.prototype);
+	return Table;
+}();
+
+const OrderedTable = /*#__PURE__*/ function () {
+	class Table extends NULL$1      {
+		constructor () {
+			super();
+			tables.add(this);
+		}
+	}
+	delete Table.prototype.constructor;
+	preventExtensions(Table.prototype);
+	return Table;
+}();
 
 function isTable (value     )                 {
-	return value!=null && getPrototypeOf(value)===null;
+	return tables.has(value);
 }
 
 const slice = Array.prototype.slice;
@@ -302,7 +330,7 @@ const slice = Array.prototype.slice;
  * 模块名称：j-regexp
  * 模块功能：可读性更好的正则表达式创建方式。从属于“简计划”。
    　　　　　More readable way for creating RegExp. Belong to "Plan J".
- * 模块版本：6.1.0
+ * 模块版本：6.2.0
  * 许可条款：LGPL-3.0
  * 所属作者：龙腾道 <LongTengDao@LongTengDao.com> (www.LongTengDao.com)
  * 问题反馈：https://GitHub.com/LongTengDao/j-regexp/issues
@@ -600,7 +628,7 @@ let sError         ;
 let sFloat         ;
 let unreopenable         ;
                                
-let Table             ;
+let Table                 ;
 let allowLonger         ;
 let enableNull         ;
 let allowInlineTableMultiLineAndTrailingCommaEvenNoComma         ;
@@ -848,7 +876,7 @@ const literal_cache                            = new WeakMap;
 const gotValue_cache                            = new WeakMap;
 const dotValue_cache                            = new WeakMap;
 
-const dotDescriptor = /*#__PURE__*/ assign(create(null), { value: '', writable: true, enumerable: false, configurable: true });
+const dotDescriptor = Null({ value: '', writable: true, enumerable: false, configurable: true });
 class Datetime extends Date {
 	
 	'.'        ;
@@ -968,6 +996,8 @@ const Float = (literal        )         => {
 	throw throws(SyntaxError(`Invalid Float ${literal} at ${where()}`));
 };
 
+const isArray = Array.isArray;
+
 const fromCodePoint = String.fromCodePoint;
 
 const ESCAPE_ALIAS = { b: '\b', t: '\t', n: '\n', f: '\f', r: '\r', '"': '"', '/': '/', '\\': '\\' };
@@ -1022,7 +1052,7 @@ function appendTable (table       , key_key        , asArrayItem         , tag  
 		if ( finalKey in table ) { sealedInline.has(arrayOfTables = table[finalKey]) && throws(Error(`Trying to push Table to non-ArrayOfTables value at ${where()}`)); }
 		else { arrayOfTables = table[finalKey] = []; }
 		tag && collect({ table, key: finalKey, array: arrayOfTables, index: arrayOfTables.length, tag });
-		arrayOfTables.push(lastTable = Table());
+		arrayOfTables.push(lastTable = new Table);
 	}
 	else {
 		if ( finalKey in table ) {
@@ -1030,7 +1060,7 @@ function appendTable (table       , key_key        , asArrayItem         , tag  
 			openTables.delete(lastTable);
 		}
 		else {
-			table[finalKey] = lastTable = Table();
+			table[finalKey] = lastTable = new Table;
 			unreopenable || reopenedTables.add(lastTable);
 		}
 		tag && collect({ table, key: finalKey, array: undefined$1, index: undefined$1, tag });
@@ -1070,8 +1100,8 @@ function prepareTable (table       , keys          )        {
 			else { throws(Error(`Trying to define Table under non-Table value at ${where()}`)); }
 		}
 		else {
-			openTables.add(table = table[key] = Table());
-			while ( index<length ) { openTables.add(table = table[keys[index++]] = Table()); }
+			openTables.add(table = table[key] = new Table);
+			while ( index<length ) { openTables.add(table = table[keys[index++]] = new Table); }
 			return table;
 		}
 	}
@@ -1089,8 +1119,8 @@ function prepareInlineTable (table       , keys          )        {
 			sealedInline.has(table) && throws(Error(`Trying to assign property through static Inline Table at ${where()}`));
 		}
 		else {
-			openTables.add(table = table[key] = Table());
-			while ( index<length ) { openTables.add(table = table[keys[index++]] = Table()); }
+			openTables.add(table = table[key] = new Table);
+			while ( index<length ) { openTables.add(table = table[keys[index++]] = new Table); }
 			return table;
 		}
 	}
@@ -1164,7 +1194,7 @@ function assignBasicString (table       , finalKey        , literal        )    
 }
 
 function Root () {
-	const rootTable        = Table();
+	const rootTable        = new Table;
 	let lastSectionTable        = rootTable;
 	while ( rest() ) {
 		const line         = next().replace(PRE_WHITESPACE, '');
@@ -1176,14 +1206,14 @@ function Root () {
 			lastSectionTable = appendTable(rootTable, keys, $_asArrayItem$$, tag);
 		}
 		else {
-			let rest         = assign$1(lastSectionTable, line);
+			let rest         = assign(lastSectionTable, line);
 			while ( stacks_length ) { rest = stacks_pop()(rest); }
 			rest==='' || rest.startsWith('#') || throws(SyntaxError(where()));
 		}
 	}
 	return rootTable;
 }
-function assign$1 (lastInlineTable       , lineRest        )         {
+function assign (lastInlineTable       , lineRest        )         {
 	const { left, tag } = { right: lineRest } = KEY_VALUE_PAIR_exec_groups(lineRest);
 	const leadingKeys                        = parseKeys(left);
 	const finalKey         =         leadingKeys.pop();
@@ -1313,7 +1343,7 @@ function push (lastArray       , lineRest        )         {
 }
 
 function equalInlineTable (table       , finalKey        , lineRest        )         {
-	const inlineTable        = table[finalKey] = Table();
+	const inlineTable        = table[finalKey] = new Table;
 	sealedInline.add(inlineTable);
 	lineRest = lineRest.replace(SYM_WHITESPACE, '');
 	if ( allowInlineTableMultiLineAndTrailingCommaEvenNoComma ) {
@@ -1325,7 +1355,7 @@ function equalInlineTable (table       , finalKey        , lineRest        )    
 					lineRest = must('Inline Table', start).replace(PRE_WHITESPACE, '');
 				}
 				if ( lineRest.startsWith('}') ) { return lineRest.replace(SYM_WHITESPACE, ''); }
-				lineRest = assign$1(inlineTable, lineRest);
+				lineRest = assign(inlineTable, lineRest);
 				if ( stacks_length>length ) {
 					stacks_insertBeforeLast(function inserted (lineRest) {
 						//
@@ -1351,7 +1381,7 @@ function equalInlineTable (table       , finalKey        , lineRest        )    
 		const length = stacks_length;
 		return function callee (lineRest) {
 			for ( ; ; ) {
-				lineRest = assign$1(inlineTable, lineRest);
+				lineRest = assign(inlineTable, lineRest);
 				if ( stacks_length>length ) {
 					stacks_insertBeforeLast(function inserted (lineRest) {
 						//
