@@ -2,10 +2,10 @@ import WeakSet from '.WeakSet';
 import Null from '.null';
 import preventExtensions from '.Object.preventExtensions';
 
-import { NULL } from '@ltd/j-orderify';
+import { Null as orderify_Null } from '@ltd/j-orderify';
 
 export var Table :never;
-export type Table = NULL<any>;
+export type Table = orderify_Null<any>;
 
 const tables = new WeakSet;
 
@@ -22,7 +22,7 @@ export const PlainTable = /*#__PURE__*/ function () {
 }();
 
 export const OrderedTable = /*#__PURE__*/ function () {
-	class Table extends NULL<any> {
+	class Table extends orderify_Null<any> {
 		constructor () {
 			super();
 			tables.add(this);
