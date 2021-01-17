@@ -2,9 +2,9 @@
 `超级选项`
 ==========
 
-以下选项默认均不开启。简便起见，直接传递 `true` 值，将开启除 `超级选项.tag` 外的所有功能。
+以下选项默认均不开启。简便起见，直接传递 `true` 值，将开启除 `超级选项.tag` 外的所有功能。
 
-如果传入的不是对象，而是函数，则会将其作为 `超级选项.tag` 对待，同时开启其它所有功能。
+如果传入的不是对象，而是函数，则会将其作为 `超级选项.tag` 对待，同时开启其它所有功能。
 
 `超级选项.order`
 ----------------
@@ -29,22 +29,6 @@
 *   默认值：`false`
 
 是否禁止太大的浮点数自动变成 `±Infinity`、太小的浮点数自动变成 `±0`。
-
-`超级选项.mix`
---------------
-
-*   类型：`boolean`
-*   默认值：`false`
-
-是否允许混合类型的行内数组。
-
-```
-array = [
-    ['Name', 'Age'],
-    ['Senior Wang', 40],
-    ['Junior Wang', 20],
-]
-```
 
 `超级选项.multi`
 ----------------
@@ -87,29 +71,15 @@ y = 2
 key = null
 ```
 
-`超级选项.close`
-----------------
-
-*   类型：`boolean`
-*   默认值：`false`
-
-是否禁止（如下所示地）定义一个本身没有被直接定义过的表：
-
-```
-[a.b]
-
-[a]
-```
-
 `超级选项.tag`
 --------------
 
 *   类型：
     ```typescript
     function 逐个处理器 (每个被标记处 :
-        { table :Table,     key :string,    array :undefined, index :undefined, tag :string } |
-        { table :undefined, key :undefined, array :any[],     index :number,    tag :string } |
-        { table :Table,     key :string,    array :Table[],   index :number,    tag :string }
+        { table :Table, key :string,                                tag :string } |
+        {                            array :any[],   index :number, tag :string } |
+        { table :Table, key :string, array :Table[], index :number, tag :string }
     ) :void;
     ```
 *   默认值：`null`
@@ -130,8 +100,8 @@ key = null
 
 标签是从后往前处理的。
 
-注意：如果开启此选项，要求同时开启 `超级选项.mix`，因为无法妥善归类自定义返回值。
-
-由于 TOML 本就存在根值只能是表的限制，所以暂时也没有设计能够替换根表的标记写法。  
+由于 TOML 本就存在根值只能是表的限制，所以暂时也没有设计能够替换根表的标记写法。  
 反正在整体返回后再行处理，也不是难事。  
 日后可能增加同时取消这两个限制的扩展方法。
+
+标签必须与其作用目标在同一行；但其后的目标值可以缺省（此时传入值 `undefined`）。

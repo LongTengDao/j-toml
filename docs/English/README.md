@@ -23,7 +23,7 @@ const sourceContent  = `
       __proto__      = "..."
 `;
 
-const rootTable = TOML.parse(sourceContent, 0.5, '\n');
+const rootTable = TOML.parse(sourceContent, 1.0, '\n');
 
 rootTable.I_am_normal    // "..."
 rootTable.hasOwnProperty // "..."
@@ -43,10 +43,10 @@ TOML.parse(sourceContent, specificationVersion, multiLineJoiner[, useBigInt=true
 
 ```typescript
 function parse (
-         sourceContent        :string | Buffer,
-         specificationVersion :0.5 | 0.4 | 0.3 | 0.2 | 0.1,
+         sourceContent        :Buffer | string,
+         specificationVersion :1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1,
          multiLineJoiner      :string,
-         useBigInt?           :boolean | number,
+         useBigInt?           :true | false | number,
          xOptions?            :object
 ) :Table;
 ```
@@ -68,10 +68,10 @@ function parse (
     
 1.  #### `specificationVersion`
     
-    *   type: `0.5` / `0.4` / `0.3` / `0.2` / `0.1`
+    *   type: `1.0` / `0.5` / `0.4` / `0.3` / `0.2` / `0.1`
     *   required
     
-    If there is no special reason (e.g. the downstream program could not deal with `Infinity`、`NaN`、fractional seconds and edge Datetime values, Local Date-Time / Local Date / Local Time types, empty string key name, even array of tables / table under array of arrays structure yet), the latest version is recommended.
+    If there is no special reason (e.g. the downstream program could not deal with `Infinity`、`NaN`、fractional seconds and edge Datetime values, Local Date-Time / Local Date / Local Time types, empty string key name, mixed type array even array of tables / table under array of arrays structure yet), the latest version is recommended.
     
 2.  #### `multiLineJoiner`
     

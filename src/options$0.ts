@@ -1,13 +1,15 @@
 import SyntaxError from '.SyntaxError';
 import RangeError from '.RangeError';
 import TypeError from '.TypeError';
-import Error from '.Error';
-import isSafeInteger from '.Number.isSafeInteger';
 import WeakMap from '.WeakMap';
+import create from '.Object.create';
+import isSafeInteger from '.Number.isSafeInteger';
 import ownKeys from '.Reflect.ownKeys';
 import MAX_SAFE_INTEGER from '.Number.MAX_SAFE_INTEGER';
 import MIN_SAFE_INTEGER from '.Number.MIN_SAFE_INTEGER';
-import { Table as typesTable, PlainTable, OrderedTable } from './types/Table';
+import NULL from '.null.prototype';
+
+import { PlainTable, OrderedTable } from './types/Table';
 import * as iterator$0 from './iterator$0';
 import * as regexps$0 from './regexps$0';
 
@@ -20,21 +22,16 @@ export let IntegerMax :number;
 
 /* xOptions */
 
-export var xOptions :never;
-export type xOptions = undefined | null | boolean | Tag | {
+export type XOptions = undefined | null | boolean | Tag | {
+	tag? :null | Tag,
 	order? :boolean,
 	longer? :boolean,
 	exact? :boolean,
 	null? :boolean,
 	multi? :boolean,
 	close? :boolean,
-} & ({
-	tag :Tag,
-	mix :true,
-} | {
-	tag? :null,
-	mix? :boolean,
-});
+};
+export let endsWithQuote :boolean;
 export let zeroDatetime :boolean;
 export let inlineTable :boolean;
 export let moreDatetime :boolean;
@@ -42,110 +39,128 @@ export let disallowEmptyKey :boolean;
 //export const xob :boolean = true;
 export let sError :boolean;
 export let sFloat :boolean;
-export let unreopenable :boolean;
 export type Table = typesTable;
-export let Table :new () => Table;
+export let Table :TableConstructor;
 export let allowLonger :boolean;
 export let enableNull :boolean;
 export let allowInlineTableMultiLineAndTrailingCommaEvenNoComma :boolean;
-type as = (array :any[]) => any[];
-export let
-	asNulls :as,
-	asStrings :as,
-	asTables :as,
-	asArrays :as,
-	asBooleans :as,
-	asFloats :as,
-	asIntegers :as,
-	asOffsetDateTimes :as,
-	asLocalDateTimes :as,
-	asLocalDates :as,
-	asLocalTimes :as;
-const arrayTypes :WeakMap<any[], as> = new WeakMap;
-let As :{ () :as } | null = () => function as (array :any[]) :any[] {
-	if ( arrayTypes.has(array) ) {
-		arrayTypes.get(array)===as
-		|| iterator$0.throws(TypeError(`Types in Array must be same. Check ${iterator$0.where()}`));
-	}
-	else { arrayTypes.set(array, as); }
-	return array;
+const arrayTypes :WeakMap<Array, As> = new WeakMap;
+type As = (array :Array) => Array;
+let As :{ () :As } | null = () :As => {
+	const as = (array :Array) :Array => {
+		const got = arrayTypes.get(array);
+		got
+			? got===as || iterator$0.throws(TypeError(`Types in Array must be same. Check ${iterator$0.where()}`))
+			: arrayTypes.set(array, as);
+		return array;
+	};
+	return as;
 };
-export const
-	asInlineArrayOfNulls :as = As(),
-	asInlineArrayOfStrings :as = As(),
-	asInlineArrayOfTables :as = As(),
-	asInlineArrayOfArrays :as = As(),
-	asInlineArrayOfBooleans :as = As(),
-	asInlineArrayOfFloats :as = As(),
-	asInlineArrayOfIntegers :as = As(),
-	asInlineArrayOfOffsetDateTimes :as = As(),
-	asInlineArrayOfLocalDateTimes :as = As(),
-	asInlineArrayOfLocalDates :as = As(),
-	asInlineArrayOfLocalTimes :as = As();
+const AS_TYPED = {
+	asNulls: As(),
+	asStrings: As(),
+	asTables: As(),
+	asArrays: As(),
+	asBooleans: As(),
+	asFloats: As(),
+	asIntegers: As(),
+	asOffsetDateTimes: As(),
+	asLocalDateTimes: As(),
+	asLocalDates: As(),
+	asLocalTimes: As(),
+};
 As = null;
-
-/* xOptions.mix */
-
-export const unType :as = (array :any[]) :any[] => array;
+const asMixed :As = (array :Array) :Array => array;
+export let
+	asNulls :As,
+	asStrings :As,
+	asTables :As,
+	asArrays :As,
+	asBooleans :As,
+	asFloats :As,
+	asIntegers :As,
+	asOffsetDateTimes :As,
+	asLocalDateTimes :As,
+	asLocalDates :As,
+	asLocalTimes :As;
 
 /* xOptions.tag */
 
 let processor :Tag | null = null;
-
 type Tag = (this :void, each :Each) => void;
 type Each =
-	{ table :Table,     key :string,    array :undefined, index :undefined, tag :string } |
-	{ table :undefined, key :undefined, array :any[],     index :number,    tag :string } |
-	{ table :Table,     key :string,    array :Table[],   index :number,    tag :string };
-let collection :Each[] = [];
-function collect_on (each :Each) :void { collection.push(each); }
-function collect_off (each :Each) :never { throw iterator$0.throws(SyntaxError(iterator$0.where())); }
-export let collect :typeof collect_off | typeof collect_on = collect_off;
-export function process () {
-	let index = collection.length;
-	if ( index ) {
+	{ table :Table, key :string,                                     tag :string } |
+	{                            array :Array,        index :number, tag :string } |
+	{ table :Table, key :string, array :Array<Table>, index :number, tag :string };
+let collection :Array<Each> = [];
+let collection_length :number = 0;
+const collect_on = (tag :string, array :null | Array, table :null | Table, key? :string) :void => {
+	const each = create(NULL) as { table :Table, key :string, array :Array, index :number, tag :string };
+	each.tag = tag;
+	if ( table ) {
+		each.table = table;
+		each.key = key!;
+	}
+	if ( array ) {
+		each.array = array;
+		each.index = array.length;
+	}
+	collection[collection_length++] = each;
+};
+const collect_off = () :never => { iterator$0.throws(SyntaxError(iterator$0.where())); };
+export let collect :(tag :string, ...rest :[ null, Table, string ] | [ Array, null ] | [ Array<Table>, Table, string ]) => void = collect_off;
+export const process = () :void => {
+	if ( collection_length ) {
 		iterator$0.done();
 		const process = processor!;
 		const queue = collection;
 		processor = null;
 		collection = [];
-		while ( index-- ) { process(queue.pop()!); }
+		while ( collection_length-- ) {
+			process(queue[collection_length]!);
+			queue.length = collection_length;
+		}
 	}
-}
+};
 
 /* use & clear */
 
-export function clear () :void {
+export const clear = () :void => {
 	processor = null;
-	collection.length = 0;
-}
+	collection.length = collection_length = 0;
+	zeroDatetime = false;
+};
 
-export function use (specificationVersion :unknown, multiLineJoiner :unknown, useBigInt :unknown, xOptions :xOptions) :void {
+export const use = (specificationVersion :unknown, multiLineJoiner :unknown, useBigInt :unknown, xOptions :XOptions) :void => {
 	
+	let mixed :boolean;
 	switch ( specificationVersion ) {
 		case 1.0:
+			mixed = endsWithQuote = moreDatetime = sFloat = inlineTable = true;
+			zeroDatetime = disallowEmptyKey = false;
+			break;
 		case 0.5:
 			moreDatetime = sFloat = inlineTable = true;
-			zeroDatetime = disallowEmptyKey = false;
+			mixed = endsWithQuote = zeroDatetime = disallowEmptyKey = false;
 			break;
 		case 0.4:
 			disallowEmptyKey = inlineTable = true;
-			zeroDatetime = moreDatetime = sFloat = false;
+			mixed = endsWithQuote = zeroDatetime = moreDatetime = sFloat = false;
 			break;
 		case 0.3:
 			disallowEmptyKey = true;
-			zeroDatetime = moreDatetime = sFloat = inlineTable = false;
+			mixed = endsWithQuote = zeroDatetime = moreDatetime = sFloat = inlineTable = false;
 			break;
 		case 0.2:
 			zeroDatetime = disallowEmptyKey = true;
-			moreDatetime = sFloat = inlineTable = false;
+			mixed = endsWithQuote = moreDatetime = sFloat = inlineTable = false;
 			break;
 		case 0.1:
 			zeroDatetime = disallowEmptyKey = true;
-			moreDatetime = sFloat = inlineTable = false;
+			mixed = endsWithQuote = moreDatetime = sFloat = inlineTable = false;
 			break;
 		default:
-			throw Error('TOML.parse(,specificationVersion)');
+			throw RangeError('TOML.parse(,specificationVersion)');
 	}
 	regexps$0.switchRegExp(specificationVersion);
 	
@@ -163,61 +178,44 @@ export function use (specificationVersion :unknown, multiLineJoiner :unknown, us
 		if ( IntegerMin < MIN_SAFE_INTEGER || MAX_SAFE_INTEGER < IntegerMax ) { throw RangeError('TOML.parse(,,,useBigInt)'); }
 	}
 	
-	let typify :boolean;
-	
 	if ( xOptions==null || xOptions===false ) {
 		Table = PlainTable;
-		sError = allowLonger = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = unreopenable = false;
-		typify = true;
+		sError = allowLonger = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = false;
 		collect = collect_off;
 	}
 	else if ( xOptions===true ) {
 		Table = OrderedTable;
-		allowLonger = sError = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = unreopenable = true;
-		typify = false;
+		allowLonger = sError = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = true;
 		collect = collect_off;
 	}
 	else if ( typeof xOptions==='function' ) {
 		Table = OrderedTable;
-		allowLonger = sError = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = unreopenable = true;
-		typify = false;
+		allowLonger = sError = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = true;
 		processor = xOptions;
 		collect = collect_on;
 	}
 	else {
-		const { order, longer, exact, null: _null, multi, close, mix, tag, ...unknown } = xOptions;
-		if ( ownKeys(unknown).length ) { throw Error('TOML.parse(,,,,xOptions.tag)'); }
+		const { order, longer, exact, null: _null, multi, tag, ...unknown } = xOptions;
+		if ( ownKeys(unknown).length ) { throw TypeError('TOML.parse(,,,,xOptions)'); }
 		Table = order ? OrderedTable : PlainTable;
 		allowLonger = !!longer;
 		sError = !!exact;
 		enableNull = !!_null;
 		allowInlineTableMultiLineAndTrailingCommaEvenNoComma = !!multi;
-		unreopenable = !!close;
-		typify = !mix;
 		if ( tag ) {
 			if ( typeof tag!=='function' ) { throw TypeError('TOML.parse(,,,,xOptions.tag)'); }
-			if ( typify ) { throw Error('TOML.parse(,,,,xOptions) xOptions.tag needs xOptions.mix to be true'); }
+			if ( !mixed ) { throw TypeError('TOML.parse(,,,,xOptions) xOptions.tag needs TOML 1.0 to support mixed type array'); }
 			processor = tag;
 			collect = collect_on;
 		}
 		else { collect = collect_off; }
 	}
 	
-	if ( typify ) {
-		asNulls = asInlineArrayOfNulls;
-		asStrings = asInlineArrayOfStrings;
-		asTables = asInlineArrayOfTables;
-		asArrays = asInlineArrayOfArrays;
-		asBooleans = asInlineArrayOfBooleans;
-		asFloats = asInlineArrayOfFloats;
-		asIntegers = asInlineArrayOfIntegers;
-		asOffsetDateTimes = asInlineArrayOfOffsetDateTimes;
-		asLocalDateTimes = asInlineArrayOfLocalDateTimes;
-		asLocalDates = asInlineArrayOfLocalDates;
-		asLocalTimes = asInlineArrayOfLocalTimes;
-	}
-	else {
-		asNulls = asStrings = asTables = asArrays = asBooleans = asFloats = asIntegers = asOffsetDateTimes = asLocalDateTimes = asLocalDates = asLocalTimes = unType;
-	}
+	mixed
+		? asNulls = asStrings = asTables = asArrays = asBooleans = asFloats = asIntegers = asOffsetDateTimes = asLocalDateTimes = asLocalDates = asLocalTimes = asMixed
+		: ( { asNulls, asStrings, asTables, asArrays, asBooleans, asFloats, asIntegers, asOffsetDateTimes, asLocalDateTimes, asLocalDates, asLocalTimes } = AS_TYPED );
 	
-}
+};
+
+import type { Array } from './types/Array';
+import type { Table as typesTable, TableConstructor } from './types/Table';

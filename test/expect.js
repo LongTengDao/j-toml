@@ -77,10 +77,17 @@ module.exports = {
 		{ },
 		{ },
 	],
+	table: {
+		x: { },
+		sub: {
+			y: { },
+			z: { },
+		},
+	},
 };
 
 function Datetime (literal) {
 	return function datetime (datetime) {
-		return datetime.toISOString()===literal;
+		return datetime.toISOString()===literal.replace(' ', 'T');
 	};
 }

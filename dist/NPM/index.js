@@ -1,376 +1,163 @@
 ﻿'use strict';
 
-const version = '0.5.107';
+const version = '1.0.0';
+
+const Error$1 = Error;
+
+const TypeError$1 = TypeError;
 
 const undefined$1 = void 0;
 
 const isBuffer = typeof Buffer!=='undefined' && Buffer.isBuffer!==undefined$1 ? Buffer.isBuffer : /*#__PURE__*/ ()=>false;
 
+const Infinity = 1/0;
+
+const Array$1 = Array;
+
 const hasOwnProperty = Object.prototype.hasOwnProperty;
 
-const from = (
-	/*! j-globals: Buffer.from (fallback) */
-	typeof Buffer==='function' && /*#__PURE__*/ hasOwnProperty.call(Buffer, 'from') ? Buffer.from : undefined$1
-	/*¡ j-globals: Buffer.from (fallback) */
-);
-
-//import * as options\$0 from './options\$0';
-
-
-const NONE           = [];
-let sourceLines           = NONE;
-let lastLineIndex         = -1;
-let lineIndex         = -1;
-
-             
-	                          
-	               
-  
-function noop (lineRest        )         { return ''; }
-noop.previous = noop;
-
-let stacks_length = 0;
-let last       = noop;
-
-
-function could ()       {
-	if ( sourceLines!==NONE ) { throw Error('Internal error: parsing during parsing.'); }
-}
-
-const EOL = /\r?\n/;
-function todo (source        )       {
-	sourceLines = source.split(EOL);
-	lastLineIndex = sourceLines.length-1;
-	lineIndex = -1;
-	stacks_length = 0;
-	last = noop;
-}
-
-const next = ()         => sourceLines[++lineIndex];
-
-const rest = ()          => lineIndex!==lastLineIndex;
-
-const mark = ()         => lineIndex;
-
-function must (message        , startIndex        )         {
-	lineIndex===lastLineIndex
-	&& throws(SyntaxError(message+' is not close until the end of the file, which started from line '+( startIndex+1 )+': '+sourceLines[startIndex]));
-	return sourceLines[++lineIndex];
-}
-
-const where = ()         => 'line '+( lineIndex+1 )+': '+sourceLines[lineIndex];
-
-function done ()       {
-	sourceLines = NONE;
-	last = noop;
-}
-
-
-function stacks_pop ()       {
-	const item       = last;
-	last =       last.previous;
-	--stacks_length;
-	return item;
-}
-
-function stacks_push (item      )       {
-	item.previous = last;
-	last = item;
-	++stacks_length;
-}
-
-function stacks_insertBeforeLast (item      ) {
-	item.previous = last.previous;
-	last.previous = item;
-	++stacks_length;
-}
-
-
-function throws (error                                                     )        {
-	if ( sourceLines!==NONE ) {
-		error.lineIndex = lineIndex;
-		error.lineNumber = lineIndex+1;
-		//done();
-		//options\$0.clear();
-	}
-	throw error;
-}
-
-const isSafeInteger = Number.isSafeInteger;
-
-const ownKeys = Reflect.ownKeys;
-
-const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER;
-
-const MIN_SAFE_INTEGER = Number.MIN_SAFE_INTEGER;
-
-const create = Object.create;
-
-const Object_freeze = Object.freeze;
+const propertyIsEnumerable = Object.prototype.propertyIsEnumerable;
 
 const NULL = (
 	/*! j-globals: null.prototype (internal) */
-	Object.create
-		? /*#__PURE__*/ Object.preventExtensions(Object.create(null))
+	Object.seal
+		? /*#__PURE__*/Object.preventExtensions(Object.create(null))
 		: null
 	/*¡ j-globals: null.prototype (internal) */
 );
 
-const Null = (
-	/*! j-globals: null.constructor (internal) */
-	/*#__PURE__*/ function () {
-		var assign = Object.assign || function assign (target, source) {
-			for ( var key in source ) {
-				if ( hasOwnProperty.call(source, key) ) { target[key] = source[key]; }
-			}
-			return target;
-		};
-		var NULL$1 = function (object) {
-			if ( object ) {
-				return /*#__PURE__*/ assign(/*#__PURE__*/ create(NULL), object);
-			}
-		};
-		delete NULL$1.name;
-		//try { delete NULL.length; } catch (error) {}
-		NULL$1.prototype = null;
-		Object_freeze(NULL$1);
-		return NULL$1;
-	}()
-	/*¡ j-globals: null.constructor (internal) */
+var isEnum = /*#__PURE__*/propertyIsEnumerable.call.bind(propertyIsEnumerable);
+var hasOwn = hasOwnProperty.bind
+	? /*#__PURE__*/hasOwnProperty.call.bind(hasOwnProperty)
+	: function (object, key) { return /*#__PURE__*/hasOwnProperty.call(object, key); };// && object!=null
+
+var create = Object.create;
+
+const from = (
+	/*! j-globals: Buffer.from (fallback) */
+	typeof Buffer==='function' && hasOwn(Buffer, 'from') ? Buffer.from : undefined$1
+	/*¡ j-globals: Buffer.from (fallback) */
 );
 
-const preventExtensions = Object.preventExtensions;
+const SyntaxError$1 = SyntaxError;
 
-const Object_assign = Object.assign;
+const RegExp$1 = RegExp;
 
-const defineProperty = Object.defineProperty;
+const test = RegExp.prototype.test;
+
+const exec = RegExp.prototype.exec;
+
+const freeze = Object.freeze;
 
 const Reflect_apply = Reflect.apply;
 
-const Reflect_construct = Reflect.construct;
+const Proxy$1 = Proxy;
 
-const Reflect_defineProperty = Reflect.defineProperty;
-
-const Reflect_deleteProperty = Reflect.deleteProperty;
-
-const Reflect_set = Reflect.set;
+const create$1 = Object.create;
 
 const toStringTag = typeof Symbol!=='undefined' ? Symbol.toStringTag : undefined;
 
-const seal = Object.seal;
+const Object_defineProperty = Object.defineProperty;
+
+const Object_assign = Object.assign;
 
 const Default = (
 	/*! j-globals: default (internal) */
 	function Default (exports, addOnOrigin) {
 		return /*#__PURE__*/ function Module (exports, addOnOrigin) {
-			if ( !addOnOrigin ) { addOnOrigin = exports; exports = create(NULL); }
+			if ( !addOnOrigin ) { addOnOrigin = exports; exports = create$1(NULL); }
 			if ( Object_assign ) { Object_assign(exports, addOnOrigin); }
-			else { for ( var key in addOnOrigin ) { if ( hasOwnProperty.call(addOnOrigin, key) ) { exports[key] = addOnOrigin[key]; } } }
-			exports['default'] = exports;
-			typeof exports==='function' && exports.prototype && seal(exports.prototype);
+			else { for ( var key in addOnOrigin ) { if ( hasOwn(addOnOrigin, key) ) { exports[key] = addOnOrigin[key]; } } }
+			exports.default = exports;
 			if ( toStringTag ) {
-				var descriptor = create(NULL);
+				var descriptor = create$1(NULL);
 				descriptor.value = 'Module';
-				defineProperty(exports, toStringTag, descriptor);
+				Object_defineProperty(exports, toStringTag, descriptor);
 			}
-			return Object_freeze(exports);
+			typeof exports==='function' && exports.prototype && freeze(exports.prototype);
+			return freeze(exports);
 		}(exports, addOnOrigin);
 	}
 	/*¡ j-globals: default (internal) */
 );
 
-/*!
- * 模块名称：j-orderify
- * 模块功能：返回一个能保证给定对象的属性按此后添加顺序排列的 proxy，即使键名是 symbol，或整数 string。从属于“简计划”。
-   　　　　　Return a proxy for given object, which can guarantee own keys are in setting order, even if the key name is symbol or int string. Belong to "Plan J".
- * 模块版本：6.0.0
- * 许可条款：LGPL-3.0
- * 所属作者：龙腾道 <LongTengDao@LongTengDao.com> (www.LongTengDao.com)
- * 问题反馈：https://GitHub.com/LongTengDao/j-orderify/issues
- * 项目主页：https://GitHub.com/LongTengDao/j-orderify/
- */
-
-const Keeper = Set;
-const target2keeper                          = new WeakMap;
-const proxy2target                         = new WeakMap;
-const target2proxy                         = new WeakMap;
-
-const setDescriptor = /*#__PURE__*/ Object_assign(create(NULL), {
-	value: undefined$1,
-	writable: true,
-	enumerable: true,
-	configurable: true,
-});
-const handlers = /*#__PURE__*/ Object_assign(create(NULL), {
-	apply (Function                           , thisArg     , args       ) {
-		return orderify(Reflect_apply(Function, thisArg, args));
-	},
-	construct (Class                               , args       , newTarget     ) {
-		return orderify(Reflect_construct(Class, args, newTarget));
-	},
-	defineProperty (target    , key     , descriptor                    )          {
-		if ( Reflect_defineProperty(target, key, PartialDescriptor(descriptor)) ) {
-			target2keeper.get(target) .add(key);
-			return true;
-		}
-		return false;
-	},
-	deleteProperty (target    , key     )          {
-		if ( Reflect_deleteProperty(target, key) ) {
-			target2keeper.get(target) .delete(key);
-			return true;
-		}
-		return false;
-	},
-	ownKeys (target    )        {
-		return [ ...target2keeper.get(target)  ];
-	},
-	set (target    , key     , value     , receiver    )          {
-		if ( key in target ) { return Reflect_set(target, key, value, receiver); }
-		setDescriptor.value = value;
-		if ( Reflect_defineProperty(target, key, setDescriptor) ) {
-			target2keeper.get(target) .add(key);
-			setDescriptor.value = undefined$1;
-			return true;
-		}
-		else {
-			setDescriptor.value = undefined$1;
-			return false;
-		}
-	},
-});
-
-function newProxy                   (target   , keeper        )    {
-	target2keeper.set(target, keeper);
-	const proxy = new Proxy   (target, handlers);
-	proxy2target.set(proxy, target);
-	return proxy;
-}
-
-const { orderify } = {
-	orderify                   (object   )    {
-		if ( proxy2target.has(object) ) { return object; }
-		let proxy = target2proxy.get(object)                 ;
-		if ( proxy ) { return proxy; }
-		proxy = newProxy(object, new Keeper(ownKeys(object)));
-		target2proxy.set(object, proxy);
-		return proxy;
-	}
-};
-
-function PartialDescriptor                               (source   )    {
-	const target = create(NULL)     ;
-	if ( source.hasOwnProperty('value') ) {
-		target.value = source.value;
-		if ( source.hasOwnProperty('writable') ) { target.writable = source.writable; }
-	}
-	else if ( source.hasOwnProperty('writable') ) { target.writable = source.writable; }
-	else if ( source.hasOwnProperty('get') ) {
-		target.get = source.get;
-		if ( source.hasOwnProperty('set') ) { target.set = source.set; }
-	}
-	else if ( source.hasOwnProperty('set') ) { target.set = source.set; }
-	if ( source.hasOwnProperty('enumerable') ) { target.enumerable = source.enumerable; }
-	if ( source.hasOwnProperty('configurable') ) { target.configurable = source.configurable; }
-	return target;
-}
-
-const NULL$1 = /*#__PURE__*/ function (         ) {
-	function throwConstructing ()        { throw TypeError(`Super constructor NULL cannot be invoked with 'new'`); }
-	function throwApplying ()        { throw TypeError(`Super constructor NULL cannot be invoked without 'new'`); }
-	function NULL$1 (            ) {
-		return new.target
-			? new.target===NULL$1
-				? /*#__PURE__*/ throwConstructing()
-				: /*#__PURE__*/ newProxy(this, new Keeper)
-			: /*#__PURE__*/ throwApplying();
-	}
-	( NULL$1 ).prototype = null;
-	defineProperty(NULL$1, 'name', Object_assign(create(NULL), { value: '' }));
-	//delete NULL.length;
-	Object_freeze(NULL$1);
-	return NULL$1;
-}()                                           ;
-
-/*¡ j-orderify */
-
-const tables = new WeakSet;
-
-const PlainTable = /*#__PURE__*/ function () {
-	class Table extends Null      {
-		constructor () {
-			super();
-			tables.add(this);
-		}
-	}
-	delete Table.prototype.constructor;
-	preventExtensions(Table.prototype);
-	return Table;
-}();
-
-const OrderedTable = /*#__PURE__*/ function () {
-	class Table extends NULL$1      {
-		constructor () {
-			super();
-			tables.add(this);
-		}
-	}
-	delete Table.prototype.constructor;
-	preventExtensions(Table.prototype);
-	return Table;
-}();
-
-function isTable (value     )                 {
-	return tables.has(value);
-}
-
-const slice = Array.prototype.slice;
-
-/*!
+/*!@preserve@license
  * 模块名称：j-regexp
  * 模块功能：可读性更好的正则表达式创建方式。从属于“简计划”。
    　　　　　More readable way for creating RegExp. Belong to "Plan J".
- * 模块版本：6.2.0
+ * 模块版本：8.0.0
  * 许可条款：LGPL-3.0
  * 所属作者：龙腾道 <LongTengDao@LongTengDao.com> (www.LongTengDao.com)
  * 问题反馈：https://GitHub.com/LongTengDao/j-regexp/issues
  * 项目主页：https://GitHub.com/LongTengDao/j-regexp/
  */
 
-var NT = /[\n\t]/g;
+var test_bind                                           = /*#__PURE__*/test.bind.bind(test       )       ;
+var exec_bind                                           = /*#__PURE__*/exec.bind.bind(exec       )       ;
 
-function Source (raw                       , substitutions                       )         {
-	var source         = raw[0];
-	for ( var length         = substitutions.length, index         = 0; index<length; ) {
-		var substitution                  = substitutions[index];
-		source += ( substitution instanceof RegExp ? substitution.source : substitution )+raw[++index];
-	}
-	return source.replace(NT, '');
-}
+var NT = /[\n\t]+/g;
+var ESCAPE = /\\./g;
+function graveAccentReplacer ($$        ) { return $$==='\\`' ? '`' : $$; }
 
-                                                                                                     
-function newRegExp (flags_template                               )                     {
-	return typeof flags_template==='string'
-		? function newRegExp (template                      )         {
-			return new RegExp(
-				/*#__PURE__*/Source(
-					template.raw,
-					/*#__PURE__*/slice.call(arguments, 1)
-				),
-				flags_template
-			);
+function RE (               template                      ) {
+	var U = this.U;
+	var I = this.I;
+	var M = this.M;
+	var S = this.S;
+	var raw = template.raw;
+	var source = raw[0].replace(NT, '');
+	var index = 1;
+	var length = arguments.length;
+	while ( index!==length ) {
+		var value = arguments[index];
+		if ( typeof value==='string' ) { source += value; }
+		else {
+			var value_source = value.source;
+			if ( typeof value_source!=='string' ) { throw TypeError$1(typeof value); }
+			if ( value.unicode===U ) { throw SyntaxError$1('unicode'); }
+			if ( value.ignoreCase===I ) { throw SyntaxError$1('ignoreCase'); }
+			if ( value.multiline===M && ( value_source.indexOf('^')>=0 || value_source.indexOf('$')>=0 ) ) { throw SyntaxError$1('multiline'); }
+			if ( value.dotAll===S && value_source.indexOf('.')>=0 ) { throw SyntaxError$1('dotAll'); }
+			source += value_source;
 		}
-		: new RegExp(
-			/*#__PURE__*/Source(
-				flags_template.raw,
-				/*#__PURE__*/slice.call(arguments, 1)
-			)
-		);
+		source += raw[index++].replace(NT, '');
+	}
+	var re = RegExp$1(U ? source = source.replace(ESCAPE, graveAccentReplacer) : source, this.flags);
+	var test = re.test = test_bind(re);
+	var exec = re.exec = exec_bind(re);
+	test.source = exec.source = source;
+	test.unicode = exec.unicode = U;
+	test.ignoreCase = exec.ignoreCase = I;
+	test.multiline = exec.multiline = source.indexOf('^')<0 && source.indexOf('$')<0 ? null : M;
+	test.dotAll = exec.dotAll = source.indexOf('.')<0 ? null : S;
+	return re;
 }
 
-var clearRegExp = '$_' in RegExp
-	? function () {
+var RE_bind = /*#__PURE__*/RE.bind.bind(RE       );
+
+var newRegExp = /*#__PURE__*/new Proxy$1(RE, /*#__PURE__*/freeze({
+	apply: function (RE, thisArg, args                                   ) { return Reflect_apply(RE, CONTEXT, args); },
+	get: function (RE, flags        ) { return RE_bind(Context(flags)); },
+	defineProperty: function () { return false; },
+	preventExtensions: function () { return false; }
+}));
+
+var CONTEXT          = /*#__PURE__*/Context('');
+
+function Context (flags        )          {
+	return {
+		U: flags.indexOf('u')<0,
+		I: flags.indexOf('i')<0,
+		M: flags.indexOf('m')<0,
+		S: flags.indexOf('s')<0,
+		flags: flags
+	};
+}
+
+var clearRegExp = '$_' in RegExp$1
+	? /*#__PURE__*/function () {
 		var REGEXP = /^/;
+		REGEXP.test = REGEXP.test;
 		return function clearRegExp                (value    )                {
 			REGEXP.test('');
 			return value;
@@ -381,1084 +168,6 @@ var clearRegExp = '$_' in RegExp
 	};
 
 /*¡ j-regexp */
-
-/* nested (readable) */
-
-const Whitespace = /[ \t]/;
-
-const PRE_WHITESPACE = newRegExp`
-	^${Whitespace}+`;
-
-const VALUE_REST = newRegExp`
-	^
-	(
-		(?:\d\d\d\d-\d\d-\d\d \d)?
-		[\w\-+.:]+
-	)
-	${Whitespace}*
-	([^]*)
-	$`;
-
-const LITERAL_STRING = newRegExp`
-	^
-	'([^']*)'
-	${Whitespace}*
-	([^]*)`;
-
-const MULTI_LINE_LITERAL_STRING = newRegExp`
-	^
-	([^]*?)
-	'''
-	${Whitespace}*
-	([^]*)`;
-
-const SYM_WHITESPACE = newRegExp`
-	^
-	[^]
-	${Whitespace}*`;
-
-
-const Tag = /[^<>\\"'`\r\n\u2028\u2029]+/;
-
-const KEY_VALUE_PAIR = newRegExp`
-	^
-	${Whitespace}*
-	=
-	${Whitespace}*
-	(?:
-		<(${Tag})>
-		${Whitespace}*
-	)?
-	(
-		[^ \t#]
-		[^]*
-	)
-	$`;
-
-const _VALUE_PAIR = newRegExp`
-	^
-	<(${Tag})>
-	${Whitespace}*
-	([^ \t#][^]*)
-	$`;
-
-const TAG_REST = newRegExp`
-	^
-	<(${Tag})>
-	${Whitespace}*
-	([^]*)
-	$`;
-
-/* optimized (avoid overflow or lost) */
-
-const MULTI_LINE_BASIC_STRING = /^(?:[^\\"]+|\\[^]|""?(?!"))/;
-function MULTI_LINE_BASIC_STRING_exec_0 (_        )         {
-	for ( let _0         = ''; ; ) {
-		if ( _==='' ) { return _0; }
-		const $ = MULTI_LINE_BASIC_STRING.exec(_);
-		if ( !$ ) { return _0; }
-		_0 += $[0];
-		_ = _.slice($[0].length);
-	}
-}
-
-const ESCAPED_EXCLUDE_CONTROL_CHARACTER_TAB______ = /[^\\\x00-\x08\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|[ \t]*\n[ \t\n]*|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
-const ESCAPED_EXCLUDE_CONTROL_CHARACTER__________ = /[^\\\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]| *\n[ \n]*|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
-const ESCAPED_EXCLUDE_CONTROL_CHARACTER_DEL______ = /[^\\\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\]| *\n[ \n]*|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
-const ESCAPED_EXCLUDE_CONTROL_CHARACTER_DEL_SLASH = /[^\\\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\/]| *\n[ \n]*|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
-let __ESCAPED_EXCLUDE_CONTROL_CHARACTER        ;
-function ESCAPED_EXCLUDE_CONTROL_CHARACTER_test (_        )          {
-	return _.replace(__ESCAPED_EXCLUDE_CONTROL_CHARACTER, '')==='';
-}
-
-const BASIC_STRING_TAB______ = /^(?:[^\\"\x00-\x08\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/;
-const BASIC_STRING__________ = /^(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/;
-const BASIC_STRING_DEL______ = /^(?:[^\\"\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/;
-const BASIC_STRING_DEL_SLASH = /^(?:[^\\"\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\/]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/;
-let __BASIC_STRING        ;
-function BASIC_STRING_exec (_2        )                           {
-	_2 = _2.slice(1);
-	for ( let _1         = ''; ; ) {
-		const $ = __BASIC_STRING.exec(_2);
-		if ( !$ ) {
-			_2.startsWith('"') || throws(SyntaxError(where()));
-			return { 1: _1, 2: _2.replace(SYM_WHITESPACE, '') };
-		}
-		_1 += $[0];
-		_2 = _2.slice($[0].length);
-	}
-}
-
-const DOT_KEY = /^[ \t]*\.[ \t]*/;
-const BARE_KEY_STRICT = /^[\w-]+/;
-const BARE_KEY_FREE = /^[^ \t#=[\]'".]+(?:[ \t]+[^ \t#=[\]'".]+)*/;
-let __BARE_KEY        ;
-const LITERAL_KEY____ = /^'[^'\x00-\x08\x0B-\x1F\x7F]*'/;
-const LITERAL_KEY_DEL = /^'[^'\x00-\x08\x0B-\x1F]*'/;
-let __LITERAL_KEY        ;
-let supportArrayOfTables         ;
-
-function TABLE_DEFINITION_exec_groups (_        )                                                                                    {
-	const $_asArrayItem$$          = _.charAt(1)==='[';
-	if ( $_asArrayItem$$ ) {
-		supportArrayOfTables || throws(SyntaxError(`Array of Tables is not allowed before TOML v0.2, which at ${where()}`));
-		_ = _.slice(2);
-	}
-	else { _ = _.slice(1); }
-	_ = _.replace(PRE_WHITESPACE, '');
-	const keys         = getKeys(_);
-	_ = _.slice(keys.length).replace(PRE_WHITESPACE, '');
-	_.startsWith(']') || throws(SyntaxError(where()));
-	const $$asArrayItem$_          = _.charAt(1)===']';
-	_ = _.slice($$asArrayItem$_ ? 2 : 1).replace(PRE_WHITESPACE, '');
-	let tag        ;
-	if ( _.startsWith('<') ) { ( { 1: tag, 2: _ } = TAG_REST.exec(_) || throws(SyntaxError(where())) ); }
-	else { tag = ''; }
-	_==='' || _.startsWith('#') || throws(SyntaxError(where()));
-	return { $_asArrayItem$$, keys, $$asArrayItem$_, tag };
-}
-
-function KEY_VALUE_PAIR_exec_groups (_        )                                               {
-	const _1         = getKeys(_);
-	const $                  = KEY_VALUE_PAIR.exec(_.slice(_1.length)) || throws(SyntaxError(where()));
-	return { left: _1, tag: $[1] || '', right: $[2] };
-}
-
-function getKeys (_        )         {
-	for ( let keys         = ''; ; ) {
-		if ( _.startsWith('"') ) {
-			_ = _.slice(1);
-			for ( let key         = '"'; ; ) {
-				const $ = __BASIC_STRING.exec(_);
-				if ( !$ ) {
-					_.startsWith('"') || throws(SyntaxError(where()));
-					_ = _.slice(1);
-					keys += key+'"';
-					break;
-				}
-				_ = _.slice($[0].length);
-				key += $[0];
-			}
-		}
-		else {
-			const key         = ( ( _.startsWith('\'') ? __LITERAL_KEY : __BARE_KEY ).exec(_) || throws(SyntaxError(where())) )[0];
-			_ = _.slice(key.length);
-			keys += key;
-		}
-		const $ = DOT_KEY.exec(_);
-		if ( !$ ) { return keys; }
-		_ = _.slice($[0].length);
-		keys += $[0];
-	}
-}
-
-const CONTROL_CHARACTER_EXCLUDE_TAB____ = /[\x00-\x08\x0B-\x1F\x7F]/;
-const CONTROL_CHARACTER_EXCLUDE_TAB_DEL = /[\x00-\x08\x0B-\x1F]/;
-let __CONTROL_CHARACTER_EXCLUDE        ;
-const KEYS_STRICT = /[\w-]+|"(?:[^\\"]+|\\[^])*"|'[^']*'/g;
-const KEYS_FREE = /[^ \t#=[\]'".]+(?:[ \t]+[^ \t#=[\]'".]+)*|"(?:[^\\"]+|\\[^])*"|'[^']*'/g;
-let __KEYS        ;
-
-function switchRegExp (specificationVersion        )       {
-	switch ( specificationVersion ) {
-		case 1.0:
-			__LITERAL_KEY = LITERAL_KEY____;
-			__CONTROL_CHARACTER_EXCLUDE = CONTROL_CHARACTER_EXCLUDE_TAB____;
-			__ESCAPED_EXCLUDE_CONTROL_CHARACTER = ESCAPED_EXCLUDE_CONTROL_CHARACTER_TAB______;
-			__BASIC_STRING = BASIC_STRING_TAB______;
-			__BARE_KEY = BARE_KEY_STRICT;
-			__KEYS = KEYS_STRICT;
-			supportArrayOfTables = true;
-			break;
-		case 0.5:
-			__LITERAL_KEY = LITERAL_KEY____;
-			__CONTROL_CHARACTER_EXCLUDE = CONTROL_CHARACTER_EXCLUDE_TAB____;
-			__ESCAPED_EXCLUDE_CONTROL_CHARACTER = ESCAPED_EXCLUDE_CONTROL_CHARACTER__________;
-			__BASIC_STRING = BASIC_STRING__________;
-			__BARE_KEY = BARE_KEY_STRICT;
-			__KEYS = KEYS_STRICT;
-			supportArrayOfTables = true;
-			break;
-		case 0.4:
-			__LITERAL_KEY = LITERAL_KEY_DEL;
-			__CONTROL_CHARACTER_EXCLUDE = CONTROL_CHARACTER_EXCLUDE_TAB_DEL;
-			__ESCAPED_EXCLUDE_CONTROL_CHARACTER = ESCAPED_EXCLUDE_CONTROL_CHARACTER_DEL______;
-			__BASIC_STRING = BASIC_STRING_DEL______;
-			__BARE_KEY = BARE_KEY_STRICT;
-			__KEYS = KEYS_STRICT;
-			supportArrayOfTables = true;
-			break;
-		default:
-			__LITERAL_KEY = LITERAL_KEY_DEL;
-			__CONTROL_CHARACTER_EXCLUDE = CONTROL_CHARACTER_EXCLUDE_TAB_DEL;
-			__ESCAPED_EXCLUDE_CONTROL_CHARACTER = ESCAPED_EXCLUDE_CONTROL_CHARACTER_DEL_SLASH;
-			__BASIC_STRING = BASIC_STRING_DEL_SLASH;
-			__BARE_KEY = BARE_KEY_FREE;
-			__KEYS = KEYS_FREE;
-			supportArrayOfTables = false;
-	}
-}
-
-/* options */
-
-let useWhatToJoinMultiLineString        ;
-let usingBigInt                ;
-let IntegerMin        ;
-let IntegerMax        ;
-                                                           
-	                
-	                 
-	                
-	               
-	                
-	                
-      
-	         
-	          
-     
-	           
-	              
-   
-let zeroDatetime         ;
-let inlineTable         ;
-let moreDatetime         ;
-let disallowEmptyKey         ;
-//export const xob :boolean = true;
-let sError         ;
-let sFloat         ;
-let unreopenable         ;
-                               
-let Table                 ;
-let allowLonger         ;
-let enableNull         ;
-let allowInlineTableMultiLineAndTrailingCommaEvenNoComma         ;
-                                  
-let
-	asNulls    ,
-	asStrings    ,
-	asTables    ,
-	asArrays    ,
-	asBooleans    ,
-	asFloats    ,
-	asIntegers    ,
-	asOffsetDateTimes    ,
-	asLocalDateTimes    ,
-	asLocalDates    ,
-	asLocalTimes    ;
-const arrayTypes                     = new WeakMap;
-let As                    = () => function as (array       )        {
-	if ( arrayTypes.has(array) ) {
-		arrayTypes.get(array)===as
-		|| throws(TypeError(`Types in Array must be same. Check ${where()}`));
-	}
-	else { arrayTypes.set(array, as); }
-	return array;
-};
-const
-	asInlineArrayOfNulls     = As(),
-	asInlineArrayOfStrings     = As(),
-	asInlineArrayOfTables     = As(),
-	asInlineArrayOfArrays     = As(),
-	asInlineArrayOfBooleans     = As(),
-	asInlineArrayOfFloats     = As(),
-	asInlineArrayOfIntegers     = As(),
-	asInlineArrayOfOffsetDateTimes     = As(),
-	asInlineArrayOfLocalDateTimes     = As(),
-	asInlineArrayOfLocalDates     = As(),
-	asInlineArrayOfLocalTimes     = As();
-As = null;
-
-/* xOptions.mix */
-
-const unType     = (array       )        => array;
-
-/* xOptions.tag */
-
-let processor             = null;
-
-                                            
-           
-	                                                                                       
-	                                                                                       
-	                                                                                      
-let collection         = [];
-function collect_on (each      )       { collection.push(each); }
-function collect_off (each      )        { throw throws(SyntaxError(where())); }
-let collect                                         = collect_off;
-function process () {
-	let index = collection.length;
-	if ( index ) {
-		done();
-		const process = processor ;
-		const queue = collection;
-		processor = null;
-		collection = [];
-		while ( index-- ) { process(queue.pop() ); }
-	}
-}
-
-/* use & clear */
-
-function clear ()       {
-	processor = null;
-	collection.length = 0;
-}
-
-function use (specificationVersion         , multiLineJoiner         , useBigInt         , xOptions          )       {
-	
-	switch ( specificationVersion ) {
-		case 1.0:
-		case 0.5:
-			moreDatetime = sFloat = inlineTable = true;
-			zeroDatetime = disallowEmptyKey = false;
-			break;
-		case 0.4:
-			disallowEmptyKey = inlineTable = true;
-			zeroDatetime = moreDatetime = sFloat = false;
-			break;
-		case 0.3:
-			disallowEmptyKey = true;
-			zeroDatetime = moreDatetime = sFloat = inlineTable = false;
-			break;
-		case 0.2:
-			zeroDatetime = disallowEmptyKey = true;
-			moreDatetime = sFloat = inlineTable = false;
-			break;
-		case 0.1:
-			zeroDatetime = disallowEmptyKey = true;
-			moreDatetime = sFloat = inlineTable = false;
-			break;
-		default:
-			throw Error('TOML.parse(,specificationVersion)');
-	}
-	switchRegExp(specificationVersion);
-	
-	if ( typeof multiLineJoiner==='string' ) { useWhatToJoinMultiLineString = multiLineJoiner; }
-	else { throw TypeError('TOML.parse(,,multiLineJoiner)'); }
-	
-	if ( useBigInt===true ) { usingBigInt = true; }
-	else if ( useBigInt===false ) { usingBigInt = false; }
-	else {
-		if ( typeof useBigInt!=='number' ) { throw TypeError('TOML.parse(,,,useBigInt)'); }
-		if ( !isSafeInteger(useBigInt) ) { throw RangeError('TOML.parse(,,,useBigInt)'); }
-		usingBigInt = null;
-		if ( useBigInt>=0 ) { IntegerMin = -( IntegerMax = useBigInt ); }
-		else { IntegerMax = -( IntegerMin = useBigInt )-1; }
-		if ( IntegerMin < MIN_SAFE_INTEGER || MAX_SAFE_INTEGER < IntegerMax ) { throw RangeError('TOML.parse(,,,useBigInt)'); }
-	}
-	
-	let typify         ;
-	
-	if ( xOptions==null || xOptions===false ) {
-		Table = PlainTable;
-		sError = allowLonger = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = unreopenable = false;
-		typify = true;
-		collect = collect_off;
-	}
-	else if ( xOptions===true ) {
-		Table = OrderedTable;
-		allowLonger = sError = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = unreopenable = true;
-		typify = false;
-		collect = collect_off;
-	}
-	else if ( typeof xOptions==='function' ) {
-		Table = OrderedTable;
-		allowLonger = sError = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = unreopenable = true;
-		typify = false;
-		processor = xOptions;
-		collect = collect_on;
-	}
-	else {
-		const { order, longer, exact, null: _null, multi, close, mix, tag, ...unknown } = xOptions;
-		if ( ownKeys(unknown).length ) { throw Error('TOML.parse(,,,,xOptions.tag)'); }
-		Table = order ? OrderedTable : PlainTable;
-		allowLonger = !!longer;
-		sError = !!exact;
-		enableNull = !!_null;
-		allowInlineTableMultiLineAndTrailingCommaEvenNoComma = !!multi;
-		unreopenable = !!close;
-		typify = !mix;
-		if ( tag ) {
-			if ( typeof tag!=='function' ) { throw TypeError('TOML.parse(,,,,xOptions.tag)'); }
-			if ( typify ) { throw Error('TOML.parse(,,,,xOptions) xOptions.tag needs xOptions.mix to be true'); }
-			processor = tag;
-			collect = collect_on;
-		}
-		else { collect = collect_off; }
-	}
-	
-	if ( typify ) {
-		asNulls = asInlineArrayOfNulls;
-		asStrings = asInlineArrayOfStrings;
-		asTables = asInlineArrayOfTables;
-		asArrays = asInlineArrayOfArrays;
-		asBooleans = asInlineArrayOfBooleans;
-		asFloats = asInlineArrayOfFloats;
-		asIntegers = asInlineArrayOfIntegers;
-		asOffsetDateTimes = asInlineArrayOfOffsetDateTimes;
-		asLocalDateTimes = asInlineArrayOfLocalDateTimes;
-		asLocalDates = asInlineArrayOfLocalDates;
-		asLocalTimes = asInlineArrayOfLocalTimes;
-	}
-	else {
-		asNulls = asStrings = asTables = asArrays = asBooleans = asFloats = asIntegers = asOffsetDateTimes = asLocalDateTimes = asLocalDates = asLocalTimes = unType;
-	}
-	
-}
-
-const Infinity = 1/0;
-
-const NaN = 0/0;
-
-const getTime = Date.prototype.getTime;
-
-const _29_ = /(?:0[1-9]|1\d|2[0-9])/;
-const _30_ = /(?:0[1-9]|[12]\d|30)/;
-const _31_ = /(?:0[1-9]|[12]\d|3[01])/;
-const _23_ = /(?:[01]\d|2[0-3])/;
-const _59_ = /[0-5]\d/;
-
-const YMD = newRegExp`
-	\d\d\d\d-
-	(?:
-		(?:0[13578]|1[02])-${_31_}
-		|
-		(?:0[469]|11)-${_30_}
-		|
-		02-${_29_}
-	)`;
-
-const HMS = newRegExp`
-	${_23_}:${_59_}:${_59_}
-	`;
-
-const HMS_DOT = newRegExp`
-	${HMS}
-	(?:\.\d+)?
-	`;
-
-const OFFSET = /(?:Z|[+-]\d\d:\d\d)$/;
-
-const OFFSET_DATETIME = newRegExp`
-	^
-	${YMD}
-	[T ]
-	${HMS_DOT}
-	${OFFSET}`;
-
-const OFFSET_DATETIME_ZERO = newRegExp`
-	^
-	${YMD}
-	[T ]
-	${HMS_DOT}
-	Z$`;
-
-const LOCAL_DATETIME = newRegExp`
-	^
-	${YMD}
-	[T ]
-	${HMS_DOT}
-	$`;
-
-const LOCAL_DATE = newRegExp`
-	^
-	${YMD}
-	$`;
-
-const LOCAL_TIME = newRegExp`
-	^
-	${HMS_DOT}
-	$`;
-
-const DOT_ZERO = /\.?0+$/;
-
-const literal_cache                            = new WeakMap;
-const gotValue_cache                            = new WeakMap;
-const dotValue_cache                            = new WeakMap;
-
-const dotDescriptor = Null({ value: '', writable: true, enumerable: false, configurable: true });
-class Datetime extends Date {
-	
-	'.'        ;
-	
-	constructor (expression        , literal        , dotValue        ) {
-		super(expression);
-		literal_cache.set(this, literal);
-		gotValue_cache.set(this, getTime.call(this));
-		dotValue_cache.set(this, dotValue);
-		defineProperty(this, '.', dotDescriptor);
-		if ( dotValue ) { this['.'] = dotValue; }
-	}
-	
-	toISOString (              )         {
-		if ( getTime.call(this)===gotValue_cache.get(this) && this['.']===dotValue_cache.get(this) ) { return literal_cache.get(this) ; }
-		throw Error('Datetime value has been modified.');
-	}
-	
-	// toJSON() = toISOString()
-	// getTime(){}
-	// valueOf(){}
-	// [Symbol.toPrimitive]('number') = valueOf()
-	
-}
-
-class OffsetDateTime extends Datetime {
-	constructor (literal        ) {
-		( zeroDatetime ? OFFSET_DATETIME_ZERO : OFFSET_DATETIME ).test(literal) || throws(SyntaxError(`Invalid Offset Date-Time ${literal} at ${where()}`));
-		const index         = literal.lastIndexOf('.');
-		super(literal.replace(' ', 'T'), literal, index<0 ? '' : literal.slice(index).replace(OFFSET, '').replace(DOT_ZERO, ''));
-	}
-}
-
-class LocalDateTime extends Datetime {
-	constructor (literal        ) {
-		LOCAL_DATETIME.test(literal) || throws(SyntaxError(`Invalid Local Date-Time ${literal} at ${where()}`));
-		const index         = literal.lastIndexOf('.');
-		super(literal.replace(' ', 'T')+'Z', literal, index<0 ? '' : literal.slice(index).replace(DOT_ZERO, ''));
-	}
-}
-
-class LocalDate extends Datetime {
-	constructor (literal        ) {
-		LOCAL_DATE.test(literal) || throws(SyntaxError(`Invalid Local Date ${literal} at ${where()}`));
-		super(literal+'T00:00:00.000Z', literal, '');
-	}
-}
-
-class LocalTime extends Datetime {
-	constructor (literal        ) {
-		LOCAL_TIME.test(literal) || throws(SyntaxError(`Invalid Local Time ${literal} at ${where()}`));
-		const index         = literal.lastIndexOf('.');
-		super('1970-01-01T'+literal+'Z', literal, index<0 ? '' : literal.slice(index).replace(DOT_ZERO, ''));
-	}
-}
-
-const INTEGER_D = /[-+]?(?:0|[1-9]\d*(?:_\d+)*)/;
-const D_INTEGER = newRegExp`^${INTEGER_D}$`;
-const XOB_INTEGER = /^0(?:x[0-9A-Fa-f]+(?:_[0-9A-Fa-f]+)*|o[0-7]+(?:_[0-7]+)*|b[01]+(?:_[01]+)*)$/;
-const UNDERSCORES_SIGN = /_|^[-+]/g;
-
-const Integer = (literal        ) => {
-	if ( usingBigInt===true ) { return BigIntInteger(literal); }
-	if ( usingBigInt===false ) { return NumberInteger(literal); }
-	const bigInt         = BigIntInteger(literal);
-	return IntegerMin<=bigInt && bigInt<=IntegerMax ? +( bigInt+'' ) : bigInt;
-};
-
-function BigIntInteger (literal        )         {
-	D_INTEGER.test(literal)
-	|| /*options\$0.xob && */XOB_INTEGER.test(literal)
-	|| throws(SyntaxError(`Invalid Integer ${literal} at ${where()}`));
-	let bigInt         = BigInt(literal.replace(UNDERSCORES_SIGN, ''));
-	if ( literal.startsWith('-') ) { bigInt = -bigInt; }
-	allowLonger
-	|| -9223372036854775808n<=bigInt && bigInt<=9223372036854775807n// ( min = -(2n**(64n-1n)) || ~max ) <= long <= ( max = 2n**(64n-1n)-1n || ~min )
-	|| throws(RangeError(`Integer expect 64 bit range (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807), not includes ${literal} meet at ${where()}`));
-	return bigInt;
-}
-
-function NumberInteger (literal        )         {
-	D_INTEGER.test(literal)
-	|| /*options\$0.xob && */XOB_INTEGER.test(literal)
-	|| throws(SyntaxError(`Invalid Integer ${literal} at ${where()}`));
-	const number = literal.startsWith('-')
-		? -literal.replace(UNDERSCORES_SIGN, '')
-		: +literal.replace(UNDERSCORES_SIGN, '');
-	isSafeInteger(number)
-	|| throws(RangeError(`Integer did not use BitInt must fit Number.isSafeInteger, not includes ${literal} meet at ${where()}`));
-	return number;
-}
-
-const FLOAT = newRegExp`
-	^
-	${INTEGER_D}
-	(?=[.eE])
-	(?:\.\d+(?:_\d+)*)?
-	(?:[eE]${INTEGER_D})?
-	$`;
-const UNDERSCORES = /_/g;
-const ZERO = /^[-+]?0(?:\.[0_]+)?(?:[eE][-+]?0)?$/;
-
-const Float = (literal        )         => {
-	if ( FLOAT.test(literal) ) {
-		const number = +literal.replace(UNDERSCORES, '');
-		if ( sError ) {
-			isFinite(number) || throws(RangeError(`Float has been as big as inf, like ${literal} at ${where()}`));
-			number || ZERO.test(literal) || throws(RangeError(`Float has been as little as ${literal.startsWith('-') ? '-' : ''}0, like ${literal} at ${where()}`));
-		}
-		return number;
-	}
-	//if ( options\$0.sFloat ) {
-	//	if ( literal==='inf' || literal==='+inf' ) { return Infinity; }
-	//	if ( literal==='-inf' ) { return -Infinity; }
-	//	if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) { return NaN; }
-	//}
-	throw throws(SyntaxError(`Invalid Float ${literal} at ${where()}`));
-};
-
-const isArray = Array.isArray;
-
-const fromCodePoint = String.fromCodePoint;
-
-const ESCAPE_ALIAS = { b: '\b', t: '\t', n: '\n', f: '\f', r: '\r', '"': '"', '/': '/', '\\': '\\' };
-
-const ESCAPED_IN_SINGLE_LINE = /\\(?:([\\"btnfr/])|u(.{4})|U(.{8}))/g;
-const ESCAPED_IN_MULTI_LINE = /\n|\\(?: *(\n)[ \n]*|([\\"btnfr/])|u([^]{4})|U([^]{8}))/g;
-
-const unEscapeSingleLine = (
-	match        ,
-	p1                                       ,
-	p2                    ,
-	p3                    
-)         => {
-	if ( p1 ) { return ESCAPE_ALIAS[p1]; }
-	const codePoint         = parseInt(p2 ||         p3, 16);
-	( 0xD7FF<codePoint && codePoint<0xE000 || 0x10FFFF<codePoint )
-	&& throws(RangeError('Invalid Unicode Scalar '+( p2 ? '\\u'+p2 : '\\U'+p3 )+' at '+where()));
-	return fromCodePoint(codePoint);
-};
-
-const unEscapeMultiLine = (
-	match        ,
-	p1                  ,
-	p2                                       ,
-	p3                    ,
-	p4                    
-)         => {
-	if ( match==='\n' ) { return useWhatToJoinMultiLineString; }
-	if ( p1 ) { return ''; }
-	if ( p2 ) { return ESCAPE_ALIAS[p2]; }
-	const codePoint         = parseInt(p3 ||         p4, 16);
-	( 0xD7FF<codePoint && codePoint<0xE000 || 0x10FFFF<codePoint )
-	&& throws(RangeError('Invalid Unicode Scalar '+( p3 ? '\\u'+p3 : '\\U'+p4 )+' at '+where()));
-	return fromCodePoint(codePoint);
-};
-
-const BasicString = (literal        )         => literal.replace(ESCAPED_IN_SINGLE_LINE, unEscapeSingleLine);
-
-const MultiLineBasicString = (literal        )         => literal.replace(ESCAPED_IN_MULTI_LINE, unEscapeMultiLine);
-
-const sealedInline                 = new WeakSet;
-const openTables                 = new WeakSet;
-const reopenedTables                 = new WeakSet;
-
-function appendTable (table       , key_key        , asArrayItem         , tag        )        {
-	const leadingKeys                        = parseKeys(key_key);
-	const finalKey         =         leadingKeys.pop();
-	table = prepareTable(table, leadingKeys);
-	let lastTable       ;
-	if ( asArrayItem ) {
-		let arrayOfTables         ;
-		if ( finalKey in table ) { sealedInline.has(arrayOfTables = table[finalKey]) && throws(Error(`Trying to push Table to non-ArrayOfTables value at ${where()}`)); }
-		else { arrayOfTables = table[finalKey] = []; }
-		tag && collect({ table, key: finalKey, array: arrayOfTables, index: arrayOfTables.length, tag });
-		arrayOfTables.push(lastTable = new Table);
-	}
-	else {
-		if ( finalKey in table ) {
-			if ( unreopenable || !openTables.has(lastTable = table[finalKey]) || reopenedTables.has(lastTable) ) { throw throws(Error(`Duplicate Table definition at ${where()}`)); }
-			openTables.delete(lastTable);
-		}
-		else {
-			table[finalKey] = lastTable = new Table;
-			unreopenable || reopenedTables.add(lastTable);
-		}
-		tag && collect({ table, key: finalKey, array: undefined$1, index: undefined$1, tag });
-	}
-	return lastTable;
-}
-
-function parseKeys (key_key        ) {
-	const keys =                        key_key.match(__KEYS);
-	for ( let index         = keys.length; index--; ) {
-		const key         = keys[index];
-		if ( key.startsWith('\'') ) { keys[index] = key.slice(1, -1); }
-		else if ( key.startsWith('"') ) { keys[index] = BasicString(key.slice(1, -1)); }
-	}
-	if ( disallowEmptyKey ) {
-		for ( let index         = keys.length; index--; ) {
-			keys[index] || throws(SyntaxError(`Empty key is not allowed before TOML v0.5, which at ${where()}`));
-		}
-	}
-	return keys;
-}
-
-function prepareTable (table       , keys          )        {
-	const { length } = keys;
-	let index         = 0;
-	while ( index<length ) {
-		const key         = keys[index++];
-		if ( key in table ) {
-			table = table[key];
-			if ( isTable(table) ) {
-				sealedInline.has(table) && throws(Error(`Trying to define Table under static Inline Table at ${where()}`));
-			}
-			else if ( isArray(table) ) {
-				sealedInline.has(table) && throws(Error(`Trying to append value to static Inline Array at ${where()}`));
-				table = table[( table              ).length-1];
-			}
-			else { throws(Error(`Trying to define Table under non-Table value at ${where()}`)); }
-		}
-		else {
-			openTables.add(table = table[key] = new Table);
-			while ( index<length ) { openTables.add(table = table[keys[index++]] = new Table); }
-			return table;
-		}
-	}
-	return table;
-}
-
-function prepareInlineTable (table       , keys          )        {
-	const { length } = keys;
-	let index         = 0;
-	while ( index<length ) {
-		const key         = keys[index++];
-		if ( key in table ) {
-			table = table[key];
-			isTable(table) || throws(Error(`Trying to assign property through non-Table value at ${where()}`));
-			sealedInline.has(table) && throws(Error(`Trying to assign property through static Inline Table at ${where()}`));
-		}
-		else {
-			openTables.add(table = table[key] = new Table);
-			while ( index<length ) { openTables.add(table = table[keys[index++]] = new Table); }
-			return table;
-		}
-	}
-	return table;
-}
-
-function assignLiteralString (table       , finalKey        , literal        )         {
-	let $;
-	if ( literal.charAt(1)!=='\'' || literal.charAt(2)!=='\'' ) {
-		$ = LITERAL_STRING.exec(literal) || throws(SyntaxError(where()));
-		table[finalKey] = checkLiteralString($[1]);
-		return $[2];
-	}
-	literal = literal.slice(3);
-	$ = MULTI_LINE_LITERAL_STRING.exec(literal);
-	if ( $ ) {
-		table[finalKey] = checkLiteralString($[1]);
-		return $[2];
-	}
-	if ( literal ) {
-		checkLiteralString(literal);
-		literal += useWhatToJoinMultiLineString;
-	}
-	const start         = mark();
-	for ( ; ; ) {
-		const line         = must('Literal String', start);
-		$ = MULTI_LINE_LITERAL_STRING.exec(line);
-		if ( $ ) {
-			table[finalKey] = literal+checkLiteralString($[1]);
-			return $[2];
-		}
-		literal += line+useWhatToJoinMultiLineString;
-	}
-}
-
-function checkLiteralString (literal        )         {
-	__CONTROL_CHARACTER_EXCLUDE.test(literal) && throws(SyntaxError(`Control characters other than Tab are not permitted in a Literal String, which was found at ${where()}`));
-	return literal;
-}
-
-function assignBasicString (table       , finalKey        , literal        )         {
-	if ( literal.charAt(1)!=='"' || literal.charAt(2)!=='"' ) {
-		const $ = BASIC_STRING_exec(literal);
-		table[finalKey] = BasicString($[1]);
-		return $[2];
-	}
-	literal = literal.slice(3);
-	const $ = MULTI_LINE_BASIC_STRING_exec_0(literal);
-	if ( literal.startsWith('"""', $.length) ) {
-		ESCAPED_EXCLUDE_CONTROL_CHARACTER_test($) || throws(SyntaxError(where()));
-		table[finalKey] = MultiLineBasicString($);
-		return literal.slice($.length+3).replace(PRE_WHITESPACE, '');
-	}
-	if ( literal ) {
-		literal += '\n';
-		ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(literal) || throws(SyntaxError(where()));
-	}
-	const start         = mark();
-	for ( ; ; ) {
-		let line         = must('Basic String', start);
-		const $ = MULTI_LINE_BASIC_STRING_exec_0(line);
-		if ( line.startsWith('"""', $.length) ) {
-			ESCAPED_EXCLUDE_CONTROL_CHARACTER_test($) || throws(SyntaxError(where()));
-			table[finalKey] = MultiLineBasicString(literal+$);
-			return line.slice($.length+3).replace(PRE_WHITESPACE, '');
-		}
-		line += '\n';
-		ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(line) || throws(SyntaxError(where()));
-		literal += line;
-	}
-}
-
-function Root () {
-	const rootTable        = new Table;
-	let lastSectionTable        = rootTable;
-	while ( rest() ) {
-		const line         = next().replace(PRE_WHITESPACE, '');
-		if ( line==='' ) ;
-		else if ( line.startsWith('#') ) ;
-		else if ( line.startsWith('[') ) {
-			const { $_asArrayItem$$, keys, $$asArrayItem$_, tag } = TABLE_DEFINITION_exec_groups(line);
-			$_asArrayItem$$===$$asArrayItem$_ || throws(SyntaxError(`Square brackets of Table definition statement not match at ${where()}`));
-			lastSectionTable = appendTable(rootTable, keys, $_asArrayItem$$, tag);
-		}
-		else {
-			let rest         = assign(lastSectionTable, line);
-			while ( stacks_length ) { rest = stacks_pop()(rest); }
-			rest==='' || rest.startsWith('#') || throws(SyntaxError(where()));
-		}
-	}
-	return rootTable;
-}
-function assign (lastInlineTable       , lineRest        )         {
-	const { left, tag } = { right: lineRest } = KEY_VALUE_PAIR_exec_groups(lineRest);
-	const leadingKeys                        = parseKeys(left);
-	const finalKey         =         leadingKeys.pop();
-	const table        = prepareInlineTable(lastInlineTable, leadingKeys);
-	finalKey in table && throws(Error(`Duplicate property definition at ${where()}`));
-	tag && collect({ table, key: finalKey, array: undefined$1, index: undefined$1, tag });
-	switch ( lineRest[0] ) {
-		case '\'':
-			return assignLiteralString(table, finalKey, lineRest);
-		case '"':
-			return assignBasicString(table, finalKey, lineRest);
-		case '{':
-			inlineTable || throws(SyntaxError(`Inline Table is not allowed before TOML v0.4, which at ${where()}`));
-			stacks_push((lineRest        )         => equalInlineTable(table, finalKey, lineRest));
-			return lineRest;
-		case '[':
-			stacks_push((lineRest        )         => equalInlineArray(table, finalKey, lineRest));
-			return lineRest;
-	}
-	const { 1: literal } = { 2: lineRest } = VALUE_REST.exec(lineRest) || throws(SyntaxError(where()));
-	if ( sFloat ) {
-		if ( literal==='inf' || literal==='+inf' ) {
-			table[finalKey] = Infinity;
-			return lineRest;
-		}
-		if ( literal==='-inf' ) {
-			table[finalKey] = -Infinity;
-			return lineRest;
-		}
-		if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) {
-			table[finalKey] = NaN;
-			return lineRest;
-		}
-	}
-	if ( literal.includes(':') ) {
-		if ( literal.includes('-') ) {
-			if ( OFFSET.test(literal) ) {
-				table[finalKey] = new OffsetDateTime(literal);
-			}
-			else {
-				moreDatetime || throws(SyntaxError(where()));
-				table[finalKey] = new LocalDateTime(literal);
-			}
-		}
-		else {
-			moreDatetime || throws(SyntaxError(where()));
-			table[finalKey] = new LocalTime(literal);
-		}
-		return lineRest;
-	}
-	if ( literal.indexOf('-')!==literal.lastIndexOf('-') && !literal.startsWith('-') ) {
-		moreDatetime || throws(SyntaxError(where()));
-		table[finalKey] = new LocalDate(literal);
-		return lineRest;
-	}
-	table[finalKey] =
-		literal==='true' ? true : literal==='false' ? false :
-				literal.includes('.') || ( literal.includes('e') || literal.includes('E') ) && !literal.startsWith('0x') ? Float(literal) :
-					enableNull && literal==='null' ? null :
-						Integer(literal);
-	return lineRest;
-}
-
-function push (lastArray       , lineRest        )         {
-	if ( lineRest.startsWith('<') ) {
-		const { 1: tag } = { 2: lineRest } = _VALUE_PAIR.exec(lineRest) || throws(SyntaxError(where()));
-		collect({ table: undefined$1, key: undefined$1, array: lastArray, index: lastArray.length, tag });
-	}
-	const lastIndex         = ''+lastArray.length;
-	switch ( lineRest[0] ) {
-		case '\'':
-			return assignLiteralString(asStrings(lastArray), lastIndex, lineRest);
-		case '"':
-			return assignBasicString(asStrings(lastArray), lastIndex, lineRest);
-		case '{':
-			inlineTable || throws(SyntaxError(`Inline Table is not allowed before TOML v0.4, which at ${where()}`));
-			stacks_push(lineRest => equalInlineTable(asTables(lastArray), lastIndex, lineRest));
-			return lineRest;
-		case '[':
-			stacks_push(lineRest => equalInlineArray(asArrays(lastArray), lastIndex, lineRest));
-			return lineRest;
-	}
-	const { 1: literal } = { 2: lineRest } = VALUE_REST.exec(lineRest) || throws(SyntaxError(where()));
-	if ( sFloat ) {
-		if ( literal==='inf' || literal==='+inf' ) {
-			asFloats(lastArray).push(Infinity);
-			return lineRest;
-		}
-		if ( literal==='-inf' ) {
-			asFloats(lastArray).push(-Infinity);
-			return lineRest;
-		}
-		if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) {
-			asFloats(lastArray).push(NaN);
-			return lineRest;
-		}
-	}
-	if ( literal.includes(':') ) {
-		if ( literal.includes('-') ) {
-			if ( OFFSET.test(literal) ) {
-				asOffsetDateTimes(lastArray).push(new OffsetDateTime(literal));
-			}
-			else {
-				moreDatetime || throws(SyntaxError(where()));
-				asLocalDateTimes(lastArray).push(new LocalDateTime(literal));
-			}
-		}
-		else {
-			moreDatetime || throws(SyntaxError(where()));
-			asLocalTimes(lastArray).push(new LocalTime(literal));
-		}
-		return lineRest;
-	}
-	if ( literal.indexOf('-')!==literal.lastIndexOf('-') && !literal.startsWith('-') ) {
-		moreDatetime || throws(SyntaxError(where()));
-		asLocalDates(lastArray).push(new LocalDate(literal));
-		return lineRest;
-	}
-	if ( literal==='true' ) { asBooleans(lastArray).push(true); }
-	else if ( literal==='false' ) { asBooleans(lastArray).push(false); }
-	else if ( literal.includes('.') || ( literal.includes('e') || literal.includes('E') ) && !literal.startsWith('0x') ) {
-		asFloats(lastArray).push(Float(literal));
-	}
-	else if ( enableNull && literal==='null' ) { asNulls(lastArray).push(null); }
-	else { asIntegers(lastArray).push(Integer(literal)); }
-	return lineRest;
-}
-
-function equalInlineTable (table       , finalKey        , lineRest        )         {
-	const inlineTable        = table[finalKey] = new Table;
-	sealedInline.add(inlineTable);
-	lineRest = lineRest.replace(SYM_WHITESPACE, '');
-	if ( allowInlineTableMultiLineAndTrailingCommaEvenNoComma ) {
-		const start         = mark();
-		const length = stacks_length;
-		return function callee (lineRest) {
-			for ( ; ; ) {
-				while ( lineRest==='' || lineRest.startsWith('#') ) {
-					lineRest = must('Inline Table', start).replace(PRE_WHITESPACE, '');
-				}
-				if ( lineRest.startsWith('}') ) { return lineRest.replace(SYM_WHITESPACE, ''); }
-				lineRest = assign(inlineTable, lineRest);
-				if ( stacks_length>length ) {
-					stacks_insertBeforeLast(function inserted (lineRest) {
-						//
-						while ( lineRest==='' || lineRest.startsWith('#') ) {//
-							lineRest = must('Inline Table', start).replace(PRE_WHITESPACE, '');//
-						}//
-						if ( lineRest.startsWith(',') ) { lineRest = lineRest.replace(SYM_WHITESPACE, ''); }//
-						//
-						return callee(lineRest);
-					});
-					return lineRest;
-				}
-				while ( lineRest==='' || lineRest.startsWith('#') ) {
-					lineRest = must('Inline Table', start).replace(PRE_WHITESPACE, '');
-				}
-				if ( lineRest.startsWith(',') ) { lineRest = lineRest.replace(SYM_WHITESPACE, ''); }
-			}
-		}(lineRest);
-	}
-	else {
-		if ( lineRest.startsWith('}') ) { return lineRest.replace(SYM_WHITESPACE, ''); }
-		( lineRest==='' || lineRest.startsWith('#') ) && throws(SyntaxError(`Inline Table is intended to appear on a single line, which broken at ${where()}`));
-		const length = stacks_length;
-		return function callee (lineRest) {
-			for ( ; ; ) {
-				lineRest = assign(inlineTable, lineRest);
-				if ( stacks_length>length ) {
-					stacks_insertBeforeLast(function inserted (lineRest) {
-						//
-						if ( lineRest.startsWith('}') ) { return lineRest.replace(SYM_WHITESPACE, ''); }//
-						if ( lineRest.startsWith(',') ) {//
-							lineRest = lineRest.replace(SYM_WHITESPACE, '');//
-							lineRest.startsWith('}') && throws(SyntaxError(`The last property of an Inline Table can not have a trailing comma, which was found at ${where()}`));//
-						}//
-						( lineRest==='' || lineRest.startsWith('#') ) && throws(SyntaxError(`Inline Table is intended to appear on a single line, which broken at ${where()}`));//
-						//
-						return callee(lineRest);
-					});
-					return lineRest;
-				}
-				if ( lineRest.startsWith('}') ) { return lineRest.replace(SYM_WHITESPACE, ''); }
-				if ( lineRest.startsWith(',') ) {
-					lineRest = lineRest.replace(SYM_WHITESPACE, '');
-					lineRest.startsWith('}') && throws(SyntaxError(`The last property of an Inline Table can not have a trailing comma, which was found at ${where()}`));
-				}
-				( lineRest==='' || lineRest.startsWith('#') ) && throws(SyntaxError(`Inline Table is intended to appear on a single line, which broken at ${where()}`));
-			}
-		}(lineRest);
-	}
-}
-
-function equalInlineArray (table       , finalKey        , lineRest        )         {
-	const inlineArray        = table[finalKey] = [];
-	sealedInline.add(inlineArray);
-	const start         = mark();
-	lineRest = lineRest.replace(SYM_WHITESPACE, '');
-	while ( lineRest==='' || lineRest.startsWith('#') ) {
-		lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, '');
-	}
-	if ( lineRest.startsWith(']') ) { return lineRest.replace(SYM_WHITESPACE, ''); }
-	const length = stacks_length;
-	return function callee (lineRest) {
-		for ( ; ; ) {
-			lineRest = push(inlineArray, lineRest);
-			if ( stacks_length>length ) {
-				stacks_insertBeforeLast(function inserted (lineRest) {
-					//
-					while ( lineRest==='' || lineRest.startsWith('#') ) {//
-						lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, '');//
-					}//
-					if ( lineRest.startsWith(',') ) {//
-						lineRest = lineRest.replace(SYM_WHITESPACE, '');//
-						while ( lineRest==='' || lineRest.startsWith('#') ) {//
-							lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, '');//
-						}//
-						if ( lineRest.startsWith(']') ) { return lineRest.replace(SYM_WHITESPACE, ''); }//
-					}//
-					else {//
-						if ( lineRest.startsWith(']') ) { return lineRest.replace(SYM_WHITESPACE, ''); }//
-						throws(SyntaxError(where()));//
-					}//
-					//
-					return callee(lineRest);
-				});
-				return lineRest;
-			}
-			while ( lineRest==='' || lineRest.startsWith('#') ) {
-				lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, '');
-			}
-			if ( lineRest.startsWith(',') ) {
-				lineRest = lineRest.replace(SYM_WHITESPACE, '');
-				while ( lineRest==='' || lineRest.startsWith('#') ) {
-					lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, '');
-				}
-				if ( lineRest.startsWith(']') ) { return lineRest.replace(SYM_WHITESPACE, ''); }
-			}
-			else {
-				if ( lineRest.startsWith(']') ) { return lineRest.replace(SYM_WHITESPACE, ''); }
-				throws(SyntaxError(where()));
-			}
-		}
-	}(lineRest);
-}
 
 const RegExp_prototype = RegExp.prototype;
 
@@ -1475,31 +184,1720 @@ const RegExp_prototype = RegExp.prototype;
 
 var NON_SCALAR = (
 	'unicode' in RegExp_prototype
-		? RegExp('[\\uD800-\\uDFFF]', 'u')
+		? RegExp$1('[\\uD800-\\uDFFF]', 'u')
 		: /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]/
 );
 
 /*¡ j-utf */
 
-const BOM = '\uFEFF';
+//import * as options\$0 from './options\$0';
 
-function parse (
+const NONE                = [];
+let sourceLines                = NONE;
+let lastLineIndex         = -1;
+let lineIndex         = -1;
+
+                                     
+	                  
+	                   
+ 
+const throws                                = (error             )        => {
+	if ( sourceLines!==NONE ) {
+		//done();
+		//options\$0.clear();
+		//error.stack = error.stack!.replace('\n', `\n    at (*.toml:${lineIndex+1}:0)\n@*.toml:${lineIndex+1}\n`);
+		error.lineIndex = lineIndex;
+		error.lineNumber = lineIndex+1;
+	}
+	throw error;
+};
+
+const previous = Symbol('previous');
+             
+	                          
+	                 
+  
+const noop       = ()         => '';
+noop[previous] = noop;
+
+let stacks_length = 0;
+let last       = noop;
+
+const could = ()       => {
+	if ( sourceLines!==NONE ) { throw Error$1('Internal error: parsing during parsing.'); }
+};
+
+const EOL = /\r?\n/;
+const todo = (source        )       => {
+	sourceLines = source.split(EOL);
+	lastLineIndex = sourceLines.length-1;
+	lineIndex = -1;
+	stacks_length = 0;
+	last = noop;
+};
+
+const next = ()         => sourceLines[++lineIndex] ;
+
+const rest = ()          => lineIndex!==lastLineIndex;
+
+const mark = ()         => lineIndex;
+
+const must = (message        , startIndex        )         => {
+	lineIndex===lastLineIndex && throws(SyntaxError$1(message+' is not close until the end of the file, which started from line '+( startIndex+1 )+': '+sourceLines[startIndex]));
+	return sourceLines[++lineIndex] ;
+};
+
+const where = ()         => 'line '+( lineIndex+1 )+': '+sourceLines[lineIndex];
+
+const done = ()       => {
+	sourceLines = NONE;
+	last = noop;
+};
+
+const stacks_pop = ()       => {
+	const item       = last;
+	last = last[previous] ;
+	--stacks_length;
+	return item;
+};
+
+const stacks_push = (item      )       => {
+	item[previous] = last;
+	last = item;
+	++stacks_length;
+};
+
+const stacks_insertBeforeLast = (item      )       => {
+	item[previous] = last[previous];
+	last[previous] = item;
+	++stacks_length;
+};
+
+const RangeError$1 = RangeError;
+
+const WeakMap$1 = WeakMap;
+
+const isSafeInteger = Number.isSafeInteger;
+
+const ownKeys = Reflect.ownKeys;
+
+const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER;
+
+const MIN_SAFE_INTEGER = Number.MIN_SAFE_INTEGER;
+
+const WeakSet$1 = WeakSet;
+
+const Object_keys = Object.keys;
+
+const getOwnPropertySymbols = typeof Object!=='undefined' ? Object.getOwnPropertySymbols : undefined;
+
+const Null = (
+	/*! j-globals: null.constructor (internal) */
+	/*#__PURE__*/function () {
+		var assign = Object.assign || function assign (target, source) {
+			var keys, index, key;
+			for ( keys = Object_keys(source), index = 0; index<keys.length;++index ) {
+				key = keys[index];
+				target[key] = source[key];
+			}
+			if ( getOwnPropertySymbols ) {
+				for ( keys = getOwnPropertySymbols(source), index = 0; index<keys.length;++index ) {
+					key = keys[index];
+					if ( isEnum(source, key) ) { [key] = source[key]; }
+				}
+			}
+			return target;
+		};
+		function Nullify (constructor) {
+			delete constructor.prototype.constructor;
+			freeze(constructor.prototype);
+			return constructor;
+		}
+		var Null = function (origin) {
+			return origin===undefined$1
+				? this
+				: typeof origin==='function'
+					? /*#__PURE__*/Nullify(origin)
+					: /*#__PURE__*/assign(/*#__PURE__*/create(NULL), origin);
+		};
+		delete Null.name;
+		//try { delete Null.length; } catch (error) {}
+		Null.prototype = null;
+		freeze(Null);
+		return Null;
+	}()
+	/*¡ j-globals: null.constructor (internal) */
+);
+
+const is = Object.is;
+
+const Object_getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
+
+const Reflect_construct = Reflect.construct;
+
+const Reflect_defineProperty = Reflect.defineProperty;
+
+const Reflect_deleteProperty = Reflect.deleteProperty;
+
+const setPrototypeOf = Object.setPrototypeOf;
+
+const getPrototypeOf = Object.getPrototypeOf;
+
+const preventExtensions = Object.preventExtensions;
+
+const getOwnPropertyDescriptor = (
+	/*! j-globals: null.getOwnPropertyDescriptor (internal) */
+	function () {
+		function __PURE__ (descriptor) {
+			var propertyDescriptor = create(NULL);
+			if ( descriptor.hasOwnProperty('value') ) {
+				propertyDescriptor.value = descriptor.value;
+				propertyDescriptor.writable = descriptor.writable;
+			}
+			else {
+				propertyDescriptor.get = descriptor.get;
+				propertyDescriptor.set = descriptor.set;
+			}
+			propertyDescriptor.enumerable = descriptor.enumerable;
+			propertyDescriptor.configurable = descriptor.configurable;
+			return propertyDescriptor;
+		}
+		return function getOwnPropertyDescriptor (object, key) {
+			return /*#__PURE__*/__PURE__(/*#__PURE__*/Object_getOwnPropertyDescriptor(object, key));
+		};
+	}()
+	/*¡ j-globals: null.getOwnPropertyDescriptor (internal) */
+);
+
+var ownKeys$1 = typeof Reflect==='object' ? Reflect.ownKeys : Object.getOwnPropertyNames;
+const getOwnPropertyDescriptors = (
+	/*! j-globals: null.getOwnPropertyDescriptors (internal) */
+	function () {
+		function __PURE__ (object) {
+			var descriptorMap = create(NULL);
+			for ( var keys = ownKeys$1(object), length = keys.length, index = 0; index<length; ++index ) {
+				var key = keys[index];
+				descriptorMap[key] = getOwnPropertyDescriptor(object, key);
+			}
+			return descriptorMap;
+		}
+		return function getOwnPropertyDescriptors (object) {
+			return /*#__PURE__*/__PURE__(object);
+		};
+	}()
+	/*¡ j-globals: null.getOwnPropertyDescriptors (internal) */
+);
+
+const Keeper = (
+	/*! j-globals: Array (internal) */
+	/*#__PURE__*/function () {
+		const DELETED = class extends null { set length (value) { while ( value ) { this[--value] = null; } } }.prototype;
+		//new Proxy({}, {
+		//	defineProperty: () => true,// indexes
+		//	set: () => true,// length
+		//});
+		const weak = new WeakMap;
+		weak.get = weak.get;
+		weak.set = weak.set;
+		const properties = getOwnPropertyDescriptors(freeze(freeze(class extends Array$1 {
+			static [Symbol.species] = class extends null { constructor () { return DELETED; } };
+			constructor () { return super(); }
+			get slice () { }
+			get concat () { }
+			get map () { }
+			get filter () { }
+			get flat () { }
+			get flatMap () { }
+			get __proto__ () { return getPrototypeOf(this); }
+			set __proto__ (proto) { setPrototypeOf(this, weak.get(proto) ?? weak.set(proto, preventExtensions(create$1(proto, properties))).get(proto)); }
+		}).prototype));
+		return properties.constructor.value;
+	}()
+	/*¡ j-globals: Array (internal) */
+);
+
+/*!@preserve@license
+ * 模块名称：j-orderify
+ * 模块功能：返回一个能保证给定对象的属性按此后添加顺序排列的 proxy，即使键名是 symbol，或整数 string。从属于“简计划”。
+   　　　　　Return a proxy for given object, which can guarantee own keys are in setting order, even if the key name is symbol or int string. Belong to "Plan J".
+ * 模块版本：7.0.1
+ * 许可条款：LGPL-3.0
+ * 所属作者：龙腾道 <LongTengDao@LongTengDao.com> (www.LongTengDao.com)
+ * 问题反馈：https://GitHub.com/LongTengDao/j-orderify/issues
+ * 项目主页：https://GitHub.com/LongTengDao/j-orderify/
+ */
+
+const hasOwnProperty_call = /*#__PURE__*/hasOwnProperty.call.bind(hasOwnProperty);
+
+const newWeakMap = () => {
+	const weakMap = new WeakMap$1;
+	weakMap.has = weakMap.has;
+	weakMap.get = weakMap.get;
+	weakMap.set = weakMap.set;
+	return weakMap;
+};
+const target2keeper = /*#__PURE__*/newWeakMap()     
+	                                                                      
+	                                                                         
+ ;
+const proxy2target = /*#__PURE__*/newWeakMap()     
+	                             
+	                                                 
+	                                                   
+ ;
+const target2proxy = /*#__PURE__*/newWeakMap()     
+	                                                  
+	                                                   
+ ;
+
+const handlers                       = /*#__PURE__*/Object_assign(create$1(NULL), {
+	defineProperty:                 (target                   , key   , descriptor                    )          => {
+		if ( hasOwnProperty_call(target, key) ) {
+			return Reflect_defineProperty(target, key, Object_assign(create$1(NULL), descriptor));
+		}
+		if ( Reflect_defineProperty(target, key, Object_assign(create$1(NULL), descriptor)) ) {
+			const keeper = target2keeper.get(target) ;
+			keeper[keeper.length] = key;
+			return true;
+		}
+		return false;
+	},
+	deleteProperty:                 (target                   , key   )          => {
+		if ( Reflect_deleteProperty(target, key) ) {
+			const keeper = target2keeper.get(target) ;
+			const index = keeper.indexOf(key);
+			index<0 || keeper.splice(index, 1);
+			return true;
+		}
+		return false;
+	},
+	ownKeys:                    (target   ) => target2keeper.get(target)                         ,
+	construct:                                     (target                         , args   , newTarget     )    => orderify(Reflect_construct(target, args, newTarget)),
+	apply:                                        (target                              , thisArg   , args   )    => orderify(Reflect_apply(target, thisArg, args)),
+});
+
+const newProxy =                                              (target   , keeper           )    => {
+	target2keeper.set(target, keeper);
+	const proxy = new Proxy$1   (target, handlers);
+	proxy2target.set(proxy, target);
+	return proxy;
+};
+
+const orderify =                    (object   )    => {
+	if ( proxy2target.has(object) ) { return object; }
+	let proxy = target2proxy.get(object)                 ;
+	if ( proxy ) { return proxy; }
+	proxy = newProxy(object, Object_assign(new Keeper          (), ownKeys(object)));
+	target2proxy.set(object, proxy);
+	return proxy;
+};
+
+const Null$1 = /*#__PURE__*/function () {
+	function throwConstructing ()        { throw TypeError$1(`Super constructor Null cannot be invoked with 'new'`); }
+	function throwApplying ()        { throw TypeError$1(`Super constructor Null cannot be invoked without 'new'`); }
+	const Nullify = (constructor                             ) => {
+		delete constructor.prototype.constructor;
+		freeze(constructor.prototype);
+		return constructor;
+	};
+	function Null (           constructor                              ) {
+		return new.target
+			? new.target===Null
+				? /*#__PURE__*/throwConstructing()
+				: /*#__PURE__*/newProxy(this, new Keeper     ())
+			: typeof constructor==='function'
+				? /*#__PURE__*/Nullify(constructor)
+				: /*#__PURE__*/throwApplying();
+	}
+	//@ts-ignore
+	Null.prototype = null;
+	Object_defineProperty(Null, 'name', Object_assign(create$1(NULL), { value: '', configurable: false }));
+	//delete Null.length;
+	freeze(Null);
+	return Null;
+}()                                           ;
+
+/*¡ j-orderify */
+
+const tables                 = new WeakSet$1;
+const isTable = (value     )                 => tables.has(value);
+
+const DIRECTLY = true;
+const IMPLICITLY = false;
+const implicitTables                 = new WeakSet$1;
+const wasDirectly = (table       )          => !implicitTables.has(table);
+const directly = (table       )       => { implicitTables.delete(table); };
+
+const INLINE = true;
+const inlineTables                 = new WeakSet$1;
+const isInline = (value       )          => inlineTables.has(value);
+
+const PAIR = true;
+const pairs                 = new WeakSet$1;
+const fromPair = (value       )          => pairs.has(value);
+
+const PlainTable = class Table extends Null      {
+	constructor (isDirect          , isInline          ) {
+		super();
+		tables.add(this);
+		isDirect
+			? isInline && inlineTables.add(this)
+			: ( isInline ? pairs : implicitTables ).add(this);
+		return this;
+	}
+};
+delete PlainTable.prototype.constructor;
+freeze(PlainTable.prototype);
+freeze(PlainTable);
+
+const OrderedTable = class Table extends Null$1      {
+	constructor (isDirect          , isInline          ) {
+		super();
+		tables.add(this);
+		isDirect
+			? isInline && inlineTables.add(this)
+			: ( isInline ? pairs : implicitTables ).add(this);
+		return this;
+	}
+};
+delete OrderedTable.prototype.constructor;
+freeze(OrderedTable.prototype);
+freeze(OrderedTable);
+
+const Exec =                                                                  (regExp        ) => regExp.exec.bind(regExp)           ;
+
+/* nested (readable) */
+
+const Whitespace = /[ \t]/;
+
+const PRE_WHITESPACE = newRegExp`
+	^${Whitespace}+`;
+
+const VALUE_REST_exec = newRegExp.s `
+	^
+	(
+		(?:\d\d\d\d-\d\d-\d\d \d)?
+		[\w\-+.:]+
+	)
+	${Whitespace}*
+	(.*)
+	$`.exec                                    ;
+
+const LITERAL_STRING_exec = newRegExp.s `
+	^
+	'([^']*)'
+	${Whitespace}*
+	(.*)`.exec                                    ;
+
+const MULTI_LINE_LITERAL_STRING_0_1_2 = newRegExp.s `
+	^
+	(.*?)
+	'''('{0,2})
+	${Whitespace}*
+	(.*)`.exec                                            ;
+const MULTI_LINE_LITERAL_STRING_0 = newRegExp.s `
+	^
+	(.*?)
+	'''()
+	${Whitespace}*
+	(.*)`.exec                                            ;
+let MULTI_LINE_LITERAL_STRING_exec                                          ;
+
+const SYM_WHITESPACE = newRegExp.s `
+	^
+	.
+	${Whitespace}*`;
+
+
+const Tag = /[^<>\\"'`\r\n\u2028\u2029]+/;
+
+const KEY_VALUE_PAIR_exec = newRegExp.s `
+	^
+	${Whitespace}*
+	=
+	${Whitespace}*
+	(?:
+		<(${Tag})>
+		${Whitespace}*
+	)?
+	(.*)
+	$`.exec                                                ;
+
+const _VALUE_PAIR_exec = newRegExp.s `
+	^
+	<(${Tag})>
+	${Whitespace}*
+	(.*)
+	$`.exec                                    ;
+
+const TAG_REST_exec = newRegExp.s `
+	^
+	<(${Tag})>
+	${Whitespace}*
+	(.*)
+	$`.exec                                    ;
+
+/* optimized (avoid overflow or lost) */
+
+const MULTI_LINE_BASIC_STRING_exec = Exec(/^(?:[^\\"]+|\\.|""?(?!"))/s);
+const MULTI_LINE_BASIC_STRING_exec_0 = (_        )         => {
+	for ( let _0         = ''; ; ) {
+		if ( !_ ) { return _0; }
+		const $ = MULTI_LINE_BASIC_STRING_exec(_);
+		if ( !$ ) { return _0; }
+		_0 += $[0];
+		_ = _.slice($[0].length);
+	}
+};
+
+const ESCAPED_EXCLUDE_CONTROL_CHARACTER_TAB______ = /[^\\\x00-\x08\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|[ \t]*\n[ \t\n]*|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
+const ESCAPED_EXCLUDE_CONTROL_CHARACTER__________ = /[^\\\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]| *\n[ \n]*|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
+const ESCAPED_EXCLUDE_CONTROL_CHARACTER_DEL______ = /[^\\\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\]| *\n[ \n]*|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
+const ESCAPED_EXCLUDE_CONTROL_CHARACTER_DEL_SLASH = /[^\\\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\/]| *\n[ \n]*|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
+let __ESCAPED_EXCLUDE_CONTROL_CHARACTER        ;
+const ESCAPED_EXCLUDE_CONTROL_CHARACTER_test = (_        )          => !_.replace(__ESCAPED_EXCLUDE_CONTROL_CHARACTER, '');
+
+const BASIC_STRING_TAB______ = Exec(/^(?:[^\\"\x00-\x08\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/);
+const BASIC_STRING__________ = Exec(/^(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/);
+const BASIC_STRING_DEL______ = Exec(/^(?:[^\\"\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/);
+const BASIC_STRING_DEL_SLASH = Exec(/^(?:[^\\"\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\/]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/);
+let __BASIC_STRING_exec      ;
+const BASIC_STRING_exec = (_2        )                           => {
+	_2 = _2.slice(1);
+	for ( let _1         = ''; ; ) {
+		const $ = __BASIC_STRING_exec(_2);
+		if ( !$ ) {
+			_2[0]==='"' || throws(SyntaxError$1(where()));
+			return { 1: _1, 2: _2.replace(SYM_WHITESPACE, '') };
+		}
+		_1 += $[0];
+		_2 = _2.slice($[0].length);
+	}
+};
+
+const DOT_KEY_exec = Exec(/^[ \t]*\.[ \t]*/);
+const BARE_KEY_STRICT = Exec(/^[\w-]+/);
+const BARE_KEY_FREE = Exec(/^[^ \t#=[\]'".]+(?:[ \t]+[^ \t#=[\]'".]+)*/);
+let __BARE_KEY_exec      ;
+const LITERAL_KEY____ = Exec(/^'[^'\x00-\x08\x0B-\x1F\x7F]*'/);
+const LITERAL_KEY_DEL = Exec(/^'[^'\x00-\x08\x0B-\x1F]*'/);
+let __LITERAL_KEY_exec      ;
+let supportArrayOfTables         ;
+
+const getKeys = (_        )         => {
+	let keys         = '';
+	for ( ; ; ) {
+		if ( _[0]==='"' ) {
+			_ = _.slice(1);
+			let key         = '"';
+			let $                   ;
+			while ( ( $ = __BASIC_STRING_exec(_) ) ) {
+				_ = _.slice($[0].length);
+				key += $[0];
+			}
+			_[0]==='"' || throws(SyntaxError$1(where()));
+			_ = _.slice(1);
+			keys += key + '"';
+		}
+		else {
+			const key         = ( ( _.startsWith('\'') ? __LITERAL_KEY_exec : __BARE_KEY_exec )(_) ?? throws(SyntaxError$1(where())) )[0];
+			_ = _.slice(key.length);
+			keys += key;
+		}
+		const $ = DOT_KEY_exec(_);
+		if ( !$ ) { return keys; }
+		_ = _.slice($[0].length);
+		keys += $[0];
+	}
+};
+
+const TABLE_DEFINITION_exec_groups = (_        )                                                                                    => {
+	const $_asArrayItem$$          = _[1]==='[';
+	if ( $_asArrayItem$$ ) {
+		supportArrayOfTables || throws(SyntaxError$1(`Array of Tables is not allowed before TOML v0.2, which at ${where()}`));
+		_ = _.slice(2);
+	}
+	else { _ = _.slice(1); }
+	_ = _.replace(PRE_WHITESPACE, '');
+	const keys         = getKeys(_);
+	_ = _.slice(keys.length).replace(PRE_WHITESPACE, '');
+	_[0]===']' || throws(SyntaxError$1(where()));
+	const $$asArrayItem$_          = _[1]===']';
+	_ = _.slice($$asArrayItem$_ ? 2 : 1).replace(PRE_WHITESPACE, '');
+	let tag        ;
+	if ( _[0]==='<' ) { ( { 1: tag, 2: _ } = TAG_REST_exec(_) ?? throws(SyntaxError$1(where())) ); }
+	else { tag = ''; }
+	!_ || _[0]==='#' || throws(SyntaxError$1(where()));
+	return { $_asArrayItem$$, keys, $$asArrayItem$_, tag };
+};
+
+const KEY_VALUE_PAIR_exec_groups = (_        )                                               => {
+	const left         = getKeys(_);
+	const { 1: tag = '', 2: right } = KEY_VALUE_PAIR_exec(_.slice(left.length)) ?? throws(SyntaxError$1(where()));
+	tag || right && right[0]!=='#' || throws(SyntaxError$1(where()));
+	return { left, tag, right };
+};
+
+const CONTROL_CHARACTER_EXCLUDE_TAB____ = /[\x00-\x08\x0B-\x1F\x7F]/;
+const CONTROL_CHARACTER_EXCLUDE_TAB_DEL = /[\x00-\x08\x0B-\x1F]/;
+let __CONTROL_CHARACTER_EXCLUDE        ;
+const KEYS_STRICT = /[\w-]+|"(?:[^\\"]+|\\.)*"|'[^']*'/gs;
+const KEYS_FREE = /[^ \t#=[\]'".]+(?:[ \t]+[^ \t#=[\]'".]+)*|"(?:[^\\"]+|\\.)*"|'[^']*'/gs;
+let __KEYS        ;
+
+const switchRegExp = (specificationVersion        )       => {
+	switch ( specificationVersion ) {
+		case 1.0:
+			MULTI_LINE_LITERAL_STRING_exec = MULTI_LINE_LITERAL_STRING_0_1_2;
+			__LITERAL_KEY_exec = LITERAL_KEY____;
+			__CONTROL_CHARACTER_EXCLUDE = CONTROL_CHARACTER_EXCLUDE_TAB____;
+			__ESCAPED_EXCLUDE_CONTROL_CHARACTER = ESCAPED_EXCLUDE_CONTROL_CHARACTER_TAB______;
+			__BASIC_STRING_exec = BASIC_STRING_TAB______;
+			__BARE_KEY_exec = BARE_KEY_STRICT;
+			__KEYS = KEYS_STRICT;
+			supportArrayOfTables = true;
+			break;
+		case 0.5:
+			MULTI_LINE_LITERAL_STRING_exec = MULTI_LINE_LITERAL_STRING_0;
+			__LITERAL_KEY_exec = LITERAL_KEY____;
+			__CONTROL_CHARACTER_EXCLUDE = CONTROL_CHARACTER_EXCLUDE_TAB____;
+			__ESCAPED_EXCLUDE_CONTROL_CHARACTER = ESCAPED_EXCLUDE_CONTROL_CHARACTER__________;
+			__BASIC_STRING_exec = BASIC_STRING__________;
+			__BARE_KEY_exec = BARE_KEY_STRICT;
+			__KEYS = KEYS_STRICT;
+			supportArrayOfTables = true;
+			break;
+		case 0.4:
+			MULTI_LINE_LITERAL_STRING_exec = MULTI_LINE_LITERAL_STRING_0;
+			__LITERAL_KEY_exec = LITERAL_KEY_DEL;
+			__CONTROL_CHARACTER_EXCLUDE = CONTROL_CHARACTER_EXCLUDE_TAB_DEL;
+			__ESCAPED_EXCLUDE_CONTROL_CHARACTER = ESCAPED_EXCLUDE_CONTROL_CHARACTER_DEL______;
+			__BASIC_STRING_exec = BASIC_STRING_DEL______;
+			__BARE_KEY_exec = BARE_KEY_STRICT;
+			__KEYS = KEYS_STRICT;
+			supportArrayOfTables = true;
+			break;
+		default:
+			MULTI_LINE_LITERAL_STRING_exec = MULTI_LINE_LITERAL_STRING_0;
+			__LITERAL_KEY_exec = LITERAL_KEY_DEL;
+			__CONTROL_CHARACTER_EXCLUDE = CONTROL_CHARACTER_EXCLUDE_TAB_DEL;
+			__ESCAPED_EXCLUDE_CONTROL_CHARACTER = ESCAPED_EXCLUDE_CONTROL_CHARACTER_DEL_SLASH;
+			__BASIC_STRING_exec = BASIC_STRING_DEL_SLASH;
+			__BARE_KEY_exec = BARE_KEY_FREE;
+			__KEYS = KEYS_FREE;
+			supportArrayOfTables = false;
+	}
+};
+
+/* options */
+
+let useWhatToJoinMultiLineString        ;
+let usingBigInt                ;
+let IntegerMin        ;
+let IntegerMax        ;
+
+              
+
+                                                           
+	                 
+	                
+	                 
+	                
+	               
+	                
+	                
+  
+let endsWithQuote         ;
+let zeroDatetime         ;
+let inlineTable         ;
+let moreDatetime         ;
+let disallowEmptyKey         ;
+//export const xob :boolean = true;
+let sError         ;
+let sFloat         ;
+                               
+let Table                  ;
+let allowLonger         ;
+let enableNull         ;
+let allowInlineTableMultiLineAndTrailingCommaEvenNoComma         ;
+const arrayTypes                     = new WeakMap$1;
+                                  
+let As                    = ()     => {
+	const as = (array       )        => {
+		const got = arrayTypes.get(array);
+		got
+			? got===as || throws(TypeError$1(`Types in Array must be same. Check ${where()}`))
+			: arrayTypes.set(array, as);
+		return array;
+	};
+	return as;
+};
+const AS_TYPED = {
+	asNulls: As(),
+	asStrings: As(),
+	asTables: As(),
+	asArrays: As(),
+	asBooleans: As(),
+	asFloats: As(),
+	asIntegers: As(),
+	asOffsetDateTimes: As(),
+	asLocalDateTimes: As(),
+	asLocalDates: As(),
+	asLocalTimes: As(),
+};
+As = null;
+const asMixed     = (array       )        => array;
+let
+	asNulls    ,
+	asStrings    ,
+	asTables    ,
+	asArrays    ,
+	asBooleans    ,
+	asFloats    ,
+	asIntegers    ,
+	asOffsetDateTimes    ,
+	asLocalDateTimes    ,
+	asLocalDates    ,
+	asLocalTimes    ;
+
+/* xOptions.tag */
+
+let processor             = null;
+                                            
+           
+	                                                                                
+	                                                                                
+	                                                                               
+let collection              = [];
+let collection_length         = 0;
+const collect_on = (tag        , array              , table              , key         )       => {
+	const each = create$1(NULL)                                                                           ;
+	each.tag = tag;
+	if ( table ) {
+		each.table = table;
+		each.key = key ;
+	}
+	if ( array ) {
+		each.array = array;
+		each.index = array.length;
+	}
+	collection[collection_length++] = each;
+};
+const collect_off = ()        => { throws(SyntaxError$1(where())); };
+let collect                                                                                                              = collect_off;
+const process = ()       => {
+	if ( collection_length ) {
+		done();
+		const process = processor ;
+		const queue = collection;
+		processor = null;
+		collection = [];
+		while ( collection_length-- ) {
+			process(queue[collection_length] );
+			queue.length = collection_length;
+		}
+	}
+};
+
+/* use & clear */
+
+const clear = ()       => {
+	processor = null;
+	collection.length = collection_length = 0;
+	zeroDatetime = false;
+};
+
+const use = (specificationVersion         , multiLineJoiner         , useBigInt         , xOptions          )       => {
+	
+	let mixed         ;
+	switch ( specificationVersion ) {
+		case 1.0:
+			mixed = endsWithQuote = moreDatetime = sFloat = inlineTable = true;
+			zeroDatetime = disallowEmptyKey = false;
+			break;
+		case 0.5:
+			moreDatetime = sFloat = inlineTable = true;
+			mixed = endsWithQuote = zeroDatetime = disallowEmptyKey = false;
+			break;
+		case 0.4:
+			disallowEmptyKey = inlineTable = true;
+			mixed = endsWithQuote = zeroDatetime = moreDatetime = sFloat = false;
+			break;
+		case 0.3:
+			disallowEmptyKey = true;
+			mixed = endsWithQuote = zeroDatetime = moreDatetime = sFloat = inlineTable = false;
+			break;
+		case 0.2:
+			zeroDatetime = disallowEmptyKey = true;
+			mixed = endsWithQuote = moreDatetime = sFloat = inlineTable = false;
+			break;
+		case 0.1:
+			zeroDatetime = disallowEmptyKey = true;
+			mixed = endsWithQuote = moreDatetime = sFloat = inlineTable = false;
+			break;
+		default:
+			throw RangeError$1('TOML.parse(,specificationVersion)');
+	}
+	switchRegExp(specificationVersion);
+	
+	if ( typeof multiLineJoiner==='string' ) { useWhatToJoinMultiLineString = multiLineJoiner; }
+	else { throw TypeError$1('TOML.parse(,,multiLineJoiner)'); }
+	
+	if ( useBigInt===true ) { usingBigInt = true; }
+	else if ( useBigInt===false ) { usingBigInt = false; }
+	else {
+		if ( typeof useBigInt!=='number' ) { throw TypeError$1('TOML.parse(,,,useBigInt)'); }
+		if ( !isSafeInteger(useBigInt) ) { throw RangeError$1('TOML.parse(,,,useBigInt)'); }
+		usingBigInt = null;
+		if ( useBigInt>=0 ) { IntegerMin = -( IntegerMax = useBigInt ); }
+		else { IntegerMax = -( IntegerMin = useBigInt )-1; }
+		if ( IntegerMin < MIN_SAFE_INTEGER || MAX_SAFE_INTEGER < IntegerMax ) { throw RangeError$1('TOML.parse(,,,useBigInt)'); }
+	}
+	
+	if ( xOptions==null || xOptions===false ) {
+		Table = PlainTable;
+		sError = allowLonger = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = false;
+		collect = collect_off;
+	}
+	else if ( xOptions===true ) {
+		Table = OrderedTable;
+		allowLonger = sError = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = true;
+		collect = collect_off;
+	}
+	else if ( typeof xOptions==='function' ) {
+		Table = OrderedTable;
+		allowLonger = sError = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = true;
+		processor = xOptions;
+		collect = collect_on;
+	}
+	else {
+		const { order, longer, exact, null: _null, multi, tag, ...unknown } = xOptions;
+		if ( ownKeys(unknown).length ) { throw TypeError$1('TOML.parse(,,,,xOptions)'); }
+		Table = order ? OrderedTable : PlainTable;
+		allowLonger = !!longer;
+		sError = !!exact;
+		enableNull = !!_null;
+		allowInlineTableMultiLineAndTrailingCommaEvenNoComma = !!multi;
+		if ( tag ) {
+			if ( typeof tag!=='function' ) { throw TypeError$1('TOML.parse(,,,,xOptions.tag)'); }
+			if ( !mixed ) { throw TypeError$1('TOML.parse(,,,,xOptions) xOptions.tag needs TOML 1.0 to support mixed type array'); }
+			processor = tag;
+			collect = collect_on;
+		}
+		else { collect = collect_off; }
+	}
+	
+	mixed
+		? asNulls = asStrings = asTables = asArrays = asBooleans = asFloats = asIntegers = asOffsetDateTimes = asLocalDateTimes = asLocalDates = asLocalTimes = asMixed
+		: ( { asNulls, asStrings, asTables, asArrays, asBooleans, asFloats, asIntegers, asOffsetDateTimes, asLocalDateTimes, asLocalDates, asLocalTimes } = AS_TYPED );
+	
+};
+
+const NaN = 0/0;
+
+const arrays                 = new WeakSet$1;
+const isArray = (value     )                 => arrays.has(value);
+
+const OF_TABLES = false;
+const STATICALLY = true;
+const staticalArrays                 = new WeakSet$1;
+const isStatic = (value       )          => staticalArrays.has(value);
+
+const newArray = (isStatic         )        => {
+	const array        = [];
+	arrays.add(array);
+	isStatic && staticalArrays.add(array);
+	return array;
+};
+
+const NativeDate = Date;
+
+const parse = Date.parse;
+
+const _29_ = /(?:0[1-9]|1\d|2[0-9])/;
+const _30_ = /(?:0[1-9]|[12]\d|30)/;
+const _31_ = /(?:0[1-9]|[12]\d|3[01])/;
+const _23_ = /(?:[01]\d|2[0-3])/;
+const _59_ = /[0-5]\d/;
+
+const YMD = newRegExp`
+	\d\d\d\d-
+	(?:
+		0
+		(?:
+			[13578]-${_31_}
+			|
+			[469]-${_30_}
+			|
+			2-${_29_}
+		)
+		|
+		1
+		(?:
+			[02]-${_31_}
+			|
+			1-${_30_}
+		)
+	)`;
+
+const HMS = newRegExp`
+	${_23_}:${_59_}:${_59_}
+	`;
+
+const OFFSET$ = /(?:Z|[+-]\d\d:\d\d)$/;
+
+const Z_exec = Exec                                       (/(([+-])\d\d):(\d\d)$/);
+
+const OFFSET_DATETIME_exec = newRegExp`
+	^
+	${YMD}
+	[T ]
+	${HMS}(?:\.\d{1,3})?
+	(\d*?)0*
+	(?:Z|[+-]${_23_}:${_59_})
+	$`.exec                            ;
+
+const OFFSET_DATETIME_ZERO_exec = newRegExp`
+	^
+	${YMD}
+	[T ]
+	${HMS}
+	()
+	Z
+	$`.exec                        ;
+
+const LOCAL_DATETIME = newRegExp`
+	^
+	${YMD}
+	[T ]
+	${HMS}
+	(?:\.\d+)?
+	$`;
+
+const LOCAL_DATE = newRegExp`
+	^
+	${YMD}
+	$`;
+
+const LOCAL_TIME = newRegExp`
+	^
+	${HMS}
+	(?:\.\d+)?
+	$`;
+
+const DOT_ZERO = /\.?0+$/;
+const DELIMITER_DOT_ZERO = /[-T:.]|0+$/;
+
+const Datetime = function (            ) { return this; }                                 ;//expression? :undefined, literal? :undefined, dotValue? :undefined
+//                                > .setTime()
+//                                > .getTime() : Date.parse('T')
+// [Symbol.toPrimitive]('number') > .valueOf()
+//                                > .toISOString()
+{
+	const descriptors = Null        (null);
+	const descriptor = Null(null);
+	for ( const key of ownKeys(NativeDate.prototype) ) { key==='constructor' || key==='toJSON' || ( descriptors[key] = descriptor ); }
+	Datetime.prototype = create$1(NativeDate.prototype, descriptors);
+	preventExtensions(Datetime.prototype);
+	freeze(Datetime);
+}
+
+                                        
+                                      
+                                      
+                                      
+                                      
+                                      
+                                       
+                                     
+                                            
+                             
+                             
+
+const DATE = new NativeDate(0);
+
+class OffsetDateTime extends Datetime {
+	
+	#dateString        ;
+	#value       ;
+	
+	valueOf (                    )        { return this.#value; }
+	toISOString (                    )         { return this.#dateString; }
+	
+	constructor (dateString        ) {
+		const { 1: more } = ( zeroDatetime ? OFFSET_DATETIME_ZERO_exec : OFFSET_DATETIME_exec )(dateString) ?? throws(SyntaxError$1(`Invalid Offset Date-Time ${dateString} at ${where()}`));
+		super();
+		this.#value = ( '' + parse(this.#dateString = dateString.replace(' ', 'T')) ).padStart(15, '0') + ( more ? '.' + more : '' );
+		return this;
+	}
+	
+	        static set = (that                , start        , end        , value        )         => {
+		if ( end ) { that.#dateString = that.#dateString.slice(0, start) + ( '' + value ).padStart(end - start, '0') + that.#dateString.slice(end); }
+		const time = parse(that.#dateString);
+		that.#value = ( '' + time ).padStart(15, '0') + that.#value.slice(15);
+		return time;
+	};
+	
+	getUTCFullYear (                    )           { DATE.setTime(+this.#value); return DATE.getUTCFullYear(); }
+	getFullYear (                    )           { return +this.#dateString.slice(0, 4); }
+	setFullYear (                      value          ) { return OffsetDateTime.set(this, 0, 4, value); }
+	getUTCMonth (                    )        { DATE.setTime(+this.#value); return DATE.getUTCMonth(); }
+	getMonth (                    )        { return +this.#dateString.slice(5, 7) - 1; }
+	setMonth (                      value       ) { return OffsetDateTime.set(this, 5, 7, value + 1); }
+	getUTCDate (                    )       { DATE.setTime(+this.#value); return DATE.getUTCDate(); }
+	getDate (                    )       { return +this.#dateString.slice(8, 10); }
+	setDate (                      value      ) { return OffsetDateTime.set(this, 8, 10, value); }
+	
+	getUTCHours (                    )        { DATE.setTime(+this.#value); return DATE.getUTCHours(); }
+	getHours (                    )        { return +this.#dateString.slice(11, 13); }
+	setHours (                      value       ) { return OffsetDateTime.set(this, 11, 13, value); }
+	getUTCMinutes (                    )          { DATE.setTime(+this.#value); return DATE.getUTCMinutes(); }
+	getMinutes (                    )          { return +this.#dateString.slice(14, 16); }
+	setMinutes (                      value         ) { return OffsetDateTime.set(this, 14, 16, value); }
+	getUTCSeconds (                    )          { DATE.setTime(+this.#value); return DATE.getUTCSeconds(); }
+	getSeconds (                    )          { return +this.#dateString.slice(17, 19); }
+	setSeconds (                      value         ) { return OffsetDateTime.set(this, 17, 19, value); }
+	getUTCMilliseconds (                    )               { DATE.setTime(+this.#value); return DATE.getUTCMilliseconds(); }///
+	getMilliseconds (                    )               { return +this.#value.slice(12, 15); }///
+	setMilliseconds (                      value              ) {
+		this.#dateString = this.#dateString.slice(0, 19) + ( value ? ( '.' + ( '' + value ).padStart(3, '0') ).replace(DOT_ZERO, '') : '' ) + this.#dateString.slice(this.#dateString.search(OFFSET$));
+		return OffsetDateTime.set(this, 0, 0, 0);
+	}
+	
+	getUTCDay (                    )      { DATE.setTime(+this.#value); return DATE.getUTCDay(); }
+	getDay (                    )      {
+		const z = Z_exec(this.#dateString);
+		DATE.setTime(+this.#value + ( z ? +z[1]*60 + +( z[2] + z[3] ) : 0 )*60000);
+		return DATE.getUTCDay();
+	}
+	getTimezoneOffset (                    )                 {
+		const z = Z_exec(this.#dateString);
+		return z ? +z[1]*60 + +( z[2] + z[3] ) : 0;
+	}
+	setTimezoneOffset (                      value                ) {
+		value = +value;
+		DATE.setTime(+this.#value + value*60000);
+		let string = DATE.toISOString().slice(0, -1);
+		if ( value ) {
+			if ( value>0 ) { string += '+'; }
+			else {
+				string += '-';
+				value = -value;
+			}
+			const m = value%60;
+			const h = ( value - m )/60;
+			this.#dateString = string + ( h>9 ? h : '0' + h ) + ( m>9 ? ':' + m : ':0' + m );
+		}
+		else { this.#dateString = string + ( is(value, 0) ? 'Z' : '-00:00' ); }
+	}
+	getTime (                    )       { return +this.#value.slice(0, 15); }///
+	setTime (                      value      ) {
+		value = DATE.setTime(value);
+		const z = Z_exec(this.#dateString);
+		DATE.setTime(value + ( z ? +z[1]*60 + +( z[2] + z[3] ) : 0 )*60000);
+		this.#dateString = z ? DATE.toISOString().slice(0, -1) + z[0] : DATE.toISOString();
+		this.#value = ( '' + value ).padStart(15, '0');
+		return value;
+	}
+	
+}
+delete OffsetDateTime.prototype.constructor;
+freeze(OffsetDateTime.prototype);
+freeze(OffsetDateTime);
+
+class LocalDateTime extends Datetime {
+	
+	#dateString        ;
+	#value       ;
+	
+	valueOf (                   )        { return this.#value; }
+	toISOString (                   )         { return this.#dateString; }
+	
+	constructor (dateString        ) {
+		LOCAL_DATETIME.test(dateString) || throws(SyntaxError$1(`Invalid Local Date-Time ${dateString} at ${where()}`));
+		super();
+		this.#value = ( this.#dateString = dateString.replace(' ', 'T') ).replace(DELIMITER_DOT_ZERO, '');
+		return this;
+	}
+	
+	        static set = (that               , start        , end        , value        ) => {
+		that.#dateString = that.#dateString.slice(0, start) + ( '' + value ).padStart(end - start, '0') + that.#dateString.slice(end);
+		that.#value = that.#dateString.replace(DELIMITER_DOT_ZERO, '');
+	};
+	
+	getFullYear (                   )           { return +this.#dateString.slice(0, 4); }
+	setFullYear (                     value          ) { LocalDateTime.set(this, 0, 4, value); }
+	getMonth (                   )        { return +this.#dateString.slice(5, 7) - 1; }
+	setMonth (                     value       ) { LocalDateTime.set(this, 5, 7, value + 1); }
+	getDate (                   )       { return +this.#dateString.slice(8, 10); }
+	setDate (                     value      ) { LocalDateTime.set(this, 8, 10, value); }
+	
+	getHours (                   )        { return +this.#dateString.slice(11, 13); }
+	setHours (                     value       ) { LocalDateTime.set(this, 11, 13, value); }
+	getMinutes (                   )          { return +this.#dateString.slice(14, 16); }
+	setMinutes (                     value         ) { LocalDateTime.set(this, 14, 16, value); }
+	getSeconds (                   )          { return +this.#dateString.slice(17, 19); }
+	setSeconds (                     value         ) { LocalDateTime.set(this, 17, 19, value); }
+	getMilliseconds (                   )               { return +this.#value.slice(14, 17).padEnd(3, '0'); }///
+	setMilliseconds (                     value              ) {
+		this.#dateString = this.#dateString.slice(0, 19) + ( value ? ( '.' + ( '' + value ).padStart(3, '0') ).replace(DOT_ZERO, '') : '' );
+		this.#value = this.#dateString.replace(DELIMITER_DOT_ZERO, '');
+	}
+	
+}
+delete LocalDateTime.prototype.constructor;
+freeze(LocalDateTime.prototype);
+freeze(LocalDateTime);
+
+class LocalDate extends Datetime {
+	
+	#dateString        ;
+	#value       ;
+	
+	valueOf (               )        { return this.#value; }
+	toISOString (               )         { return this.#dateString; }
+	
+	constructor (dateString        ) {
+		LOCAL_DATE.test(dateString) || throws(SyntaxError$1(`Invalid Local Date ${dateString} at ${where()}`));
+		super();
+		this.#value = ( this.#dateString = dateString ).replace('-', '').replace('-', '');
+		return this;
+	}
+	
+	        static set = (that           , start        , end        , value        ) => {
+		that.#dateString = that.#dateString.slice(0, start) + ( '' + value ).padStart(end - start, '0') + that.#dateString.slice(end);
+		that.#value = that.#dateString.replace('-', '').replace('-', '');
+	};
+	
+	getFullYear (               )           { return +this.#dateString.slice(0, 4); }
+	setFullYear (                 value          ) { LocalDate.set(this, 0, 4, value); }
+	getMonth (               )        { return +this.#dateString.slice(5, 7) - 1; }
+	setMonth (                 value       ) { LocalDate.set(this, 5, 7, value + 1); }
+	getDate (               )       { return +this.#dateString.slice(8, 10); }
+	setDate (                 value      ) { LocalDate.set(this, 8, 10, value); }
+	
+}
+delete LocalDate.prototype.constructor;
+freeze(LocalDate.prototype);
+freeze(LocalDate);
+
+class LocalTime extends Datetime {
+	
+	#dateString        ;
+	#value       ;
+	
+	valueOf (               )        { return this.#value; }
+	toISOString (               )         { return this.#dateString; }
+	
+	constructor (dateString        ) {
+		LOCAL_TIME.test(dateString) || throws(SyntaxError$1(`Invalid Local Time ${dateString} at ${where()}`));
+		super();
+		this.#value = ( this.#dateString = dateString ).replace(DELIMITER_DOT_ZERO, '');
+		return this;
+	}
+	
+	        static set = (that           , start        , end        , value        ) => {
+		that.#dateString = that.#dateString.slice(0, start) + ( '' + value ).padStart(2, '0') + that.#dateString.slice(end);
+		that.#value = that.#dateString.replace(DELIMITER_DOT_ZERO, '');
+	};
+	
+	getHours (               )        { return +this.#dateString.slice(0, 2); }
+	setHours (                 value       ) { LocalTime.set(this, 0, 2, value); }
+	getMinutes (               )          { return +this.#dateString.slice(3, 5); }
+	setMinutes (                 value         ) { LocalTime.set(this, 3, 5, value); }
+	getSeconds (               )          { return +this.#dateString.slice(6, 8); }
+	setSeconds (                 value         ) { LocalTime.set(this, 6, 8, value); }
+	getMilliseconds (               )               { return +this.#value.slice(6, 9).padEnd(3, '0'); }///
+	setMilliseconds (                 value              ) {
+		this.#dateString = this.#dateString.slice(0, 8) + ( value ? ( '.' + ( '' + value ).padStart(3, '0') ).replace(DOT_ZERO, '') : '' );
+		this.#value = this.#dateString.replace(DELIMITER_DOT_ZERO, '');
+	}
+	
+}
+delete LocalTime.prototype.constructor;
+freeze(LocalTime.prototype);
+freeze(LocalTime);
+
+const BigInt$1 = BigInt;
+
+const INTEGER_D = /[-+]?(?:0|[1-9]\d*(?:_\d+)*)/;
+const D_INTEGER = newRegExp`^${INTEGER_D}$`;
+const XOB_INTEGER = /^0(?:x[0-9A-Fa-f]+(?:_[0-9A-Fa-f]+)*|o[0-7]+(?:_[0-7]+)*|b[01]+(?:_[01]+)*)$/;
+const UNDERSCORES_SIGN = /_|^[-+]/g;
+
+const BigIntInteger = (literal        )         => {
+	D_INTEGER.test(literal)
+	|| /*options\$0.xob && */XOB_INTEGER.test(literal)
+	|| throws(SyntaxError$1(`Invalid Integer ${literal} at ${where()}`));
+	let bigInt         = BigInt$1(literal.replace(UNDERSCORES_SIGN, ''));
+	if ( literal[0]==='-' ) { bigInt = -bigInt; }
+	allowLonger
+	|| -9223372036854775808n<=bigInt && bigInt<=9223372036854775807n// ( min = -(2n**(64n-1n)) || ~max ) <= long <= ( max = 2n**(64n-1n)-1n || ~min )
+	|| throws(RangeError$1(`Integer expect 64 bit range (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807), not includes ${literal} meet at ${where()}`));
+	return bigInt;
+};
+
+const NumberInteger = (literal        )         => {
+	D_INTEGER.test(literal)
+	|| /*options\$0.xob && */XOB_INTEGER.test(literal)
+	|| throws(SyntaxError$1(`Invalid Integer ${literal} at ${where()}`));
+	const number = literal[0]==='-'
+		? -literal.replace(UNDERSCORES_SIGN, '')
+		: +literal.replace(UNDERSCORES_SIGN, '');
+	isSafeInteger(number)
+	|| throws(RangeError$1(`Integer did not use BitInt must fit Number.isSafeInteger, not includes ${literal} meet at ${where()}`));
+	return number;
+};
+
+const Integer = (literal        )                  => {
+	if ( usingBigInt===true ) { return BigIntInteger(literal); }
+	if ( usingBigInt===false ) { return NumberInteger(literal); }
+	const bigInt         = BigIntInteger(literal);
+	return IntegerMin<=bigInt && bigInt<=IntegerMax ? +( bigInt+'' ) : bigInt;
+};
+
+const isFinite$1 = isFinite;
+
+const FLOAT = newRegExp`
+	^
+	${INTEGER_D}
+	(?=[.eE])
+	(?:\.\d+(?:_\d+)*)?
+	(?:[eE][-+]?\d+(?:_\d+)*)?
+	$`;
+const UNDERSCORES = /_/g;
+const ZERO = /^[-+]?0(?:\.[0_]+)?(?:[eE][-+]?0+)?$/;
+
+const Float = (literal        )         => {
+	if ( FLOAT.test(literal) ) {
+		const number = +literal.replace(UNDERSCORES, '');
+		if ( sError ) {
+			isFinite$1(number) || throws(RangeError$1(`Float has been as big as inf, like ${literal} at ${where()}`));
+			number || ZERO.test(literal) || throws(RangeError$1(`Float has been as little as ${literal[0]==='-' ? '-' : ''}0, like ${literal} at ${where()}`));
+		}
+		return number;
+	}
+	//if ( options\$0.sFloat ) {
+	//	if ( literal==='inf' || literal==='+inf' ) { return Infinity; }
+	//	if ( literal==='-inf' ) { return -Infinity; }
+	//	if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) { return NaN; }
+	//}
+	throws(SyntaxError$1(`Invalid Float ${literal} at ${where()}`));
+};
+
+const parseInt$1 = parseInt;
+
+const fromCodePoint = String.fromCodePoint;
+
+const ESCAPE_ALIAS = { b: '\b', t: '\t', n: '\n', f: '\f', r: '\r', '"': '"', '/': '/', '\\': '\\' };
+
+const ESCAPED_IN_SINGLE_LINE = /\\(?:([\\"btnfr/])|u(.{4})|U(.{8}))/gs;
+const ESCAPED_IN_MULTI_LINE = /\n|\\(?: *(\n)[ \n]*|([\\"btnfr/])|u(.{4})|U(.{8}))/gs;
+
+const unEscapeSingleLine = (
+	match        ,
+	p1                            ,
+	p2         ,
+	p3         
+)         => {
+	if ( p1 ) { return ESCAPE_ALIAS[p1]; }
+	const codePoint         = parseInt$1(p2 ?? p3 , 16);
+	( 0xD7FF<codePoint && codePoint<0xE000 || 0x10FFFF<codePoint )
+	&& throws(RangeError$1('Invalid Unicode Scalar '+( p2 ? '\\u'+p2 : '\\U'+p3 )+' at '+where()));
+	return fromCodePoint(codePoint);
+};
+
+const unEscapeMultiLine = (
+	match        ,
+	p1                  ,
+	p2                                       ,
+	p3                    ,
+	p4                    
+)         => {
+	if ( match==='\n' ) { return useWhatToJoinMultiLineString; }
+	if ( p1 ) { return ''; }
+	if ( p2 ) { return ESCAPE_ALIAS[p2]; }
+	const codePoint         = parseInt$1(p3 ?? p4 , 16);
+	( 0xD7FF<codePoint && codePoint<0xE000 || 0x10FFFF<codePoint )
+	&& throws(RangeError$1('Invalid Unicode Scalar '+( p3 ? '\\u'+p3 : '\\U'+p4 )+' at '+where()));
+	return fromCodePoint(codePoint);
+};
+
+const BasicString = (literal        )         => literal.replace(ESCAPED_IN_SINGLE_LINE, unEscapeSingleLine);
+
+const MultiLineBasicString = (literal        )         => literal.replace(ESCAPED_IN_MULTI_LINE, unEscapeMultiLine);
+
+const parseKeys = (key_key        )                          => {
+	const keys = key_key.match(__KEYS)                           ;
+	let index         = keys.length;
+	do {
+		const key         = keys[--index] ;
+		if ( key.startsWith('\'') ) { keys[index] = key.slice(1, -1); }
+		else if ( key[0]==='"' ) { keys[index] = BasicString(key.slice(1, -1)); }
+	}
+	while ( index );
+	if ( disallowEmptyKey ) {
+		let index         = keys.length;
+		do { keys[--index] || throws(SyntaxError$1(`Empty key is not allowed before TOML v0.5, which at ${where()}`)); }
+		while ( index );
+	}
+	return keys;
+};
+
+const prepareTable = (table       , keys               )        => {
+	const { length } = keys;
+	let index         = 0;
+	while ( index<length ) {
+		const key         = keys[index++] ;
+		if ( key in table ) {
+			table = table[key];
+			if ( isTable(table) ) {
+				isInline(table) && throws(Error$1(`Trying to define Table under static Inline Table at ${where()}`));
+			}
+			else if ( isArray(table) ) {
+				isStatic(table) && throws(Error$1(`Trying to append value to static Inline Array at ${where()}`));
+				table = table[( table          ).length - 1];
+			}
+			else { throws(Error$1(`Trying to define Table under non-Table value at ${where()}`)); }
+		}
+		else {
+			table = table[key] = new Table(IMPLICITLY);
+			while ( index<length ) { table = table[keys[index++] ] = new Table(IMPLICITLY); }
+			return table;
+		}
+	}
+	return table;
+};
+
+const appendTable = (table       , key_key        , asArrayItem         , tag        )        => {
+	const leadingKeys           = parseKeys(key_key);
+	const finalKey         = leadingKeys[leadingKeys.length - 1] ;
+	--leadingKeys.length;
+	table = prepareTable(table, leadingKeys);
+	let lastTable       ;
+	if ( asArrayItem ) {
+		let arrayOfTables              ;
+		if ( finalKey in table ) { isArray(arrayOfTables = table[finalKey]) && !isStatic(arrayOfTables) || throws(Error$1(`Trying to push Table to non-ArrayOfTables value at ${where()}`)); }
+		else { arrayOfTables = table[finalKey] = newArray(OF_TABLES); }
+		tag && collect(tag, arrayOfTables, table, finalKey);
+		arrayOfTables[arrayOfTables.length] = lastTable = new Table(DIRECTLY);
+	}
+	else {
+		if ( finalKey in table ) {
+			lastTable = table[finalKey];
+			wasDirectly(lastTable) && throws(Error$1(`Duplicate Table definition at ${where()}`));
+			directly(lastTable);
+			fromPair(lastTable) && throws(Error$1(`A table defined implicitly via key/value pair can not be accessed to via [], which at ${where()}`));
+		}
+		else { table[finalKey] = lastTable = new Table(DIRECTLY); }
+		tag && collect(tag, null, table, finalKey);
+	}
+	return lastTable;
+};
+
+const prepareInlineTable = (table       , keys          )        => {
+	const { length } = keys;
+	let index         = 0;
+	while ( index<length ) {
+		const key         = keys[index++] ;
+		if ( key in table ) {
+			table = table[key];
+			isTable(table) || throws(Error$1(`Trying to assign property through non-Table value at ${where()}`));
+			isInline(table) && throws(Error$1(`Trying to assign property through static Inline Table at ${where()}`));
+			fromPair(table) || throws(Error$1(`A table defined implicitly via [] can not be accessed to via key/value pair, which at ${where()}`));
+		}
+		else {
+			table = table[key] = new Table(IMPLICITLY, PAIR);
+			while ( index<length ) { table = table[keys[index++] ] = new Table(IMPLICITLY, PAIR); }
+			return table;
+		}
+	}
+	return table;
+};
+
+const checkLiteralString = (literal        )         => {
+	__CONTROL_CHARACTER_EXCLUDE.test(literal) && throws(SyntaxError$1(`Control characters other than Tab are not permitted in a Literal String, which was found at ${where()}`));
+	return literal;
+};
+
+const assignLiteralString = ( (table       , finalKey        , literal        )         => {
+	let $;
+	if ( literal[1]!=='\'' || literal[2]!=='\'' ) {
+		$ = LITERAL_STRING_exec(literal) ?? throws(SyntaxError$1(where()));
+		table[finalKey] = checkLiteralString($[1]);
+		return $[2];
+	}
+	literal = literal.slice(3);
+	$ = MULTI_LINE_LITERAL_STRING_exec(literal);
+	if ( $ ) {
+		table[finalKey] = checkLiteralString($[1]) + $[2];
+		return $[3];
+	}
+	if ( literal ) {
+		checkLiteralString(literal);
+		literal += useWhatToJoinMultiLineString;
+	}
+	const start         = mark();
+	for ( ; ; ) {
+		const line         = must('Literal String', start);
+		$ = MULTI_LINE_LITERAL_STRING_exec(line);
+		if ( $ ) {
+			table[finalKey] = literal + checkLiteralString($[1]) + $[2];
+			return $[3];
+		}
+		literal += line + useWhatToJoinMultiLineString;
+	}
+} )     
+	                                                           
+	                                                          
+ ;
+
+const assignBasicString = ( (table       , finalKey        , literal        )         => {
+	if ( literal[1]!=='"' || literal[2]!=='"' ) {
+		const $ = BASIC_STRING_exec(literal);
+		table[finalKey] = BasicString($[1]);
+		return $[2];
+	}
+	literal = literal.slice(3);
+	const $ = MULTI_LINE_BASIC_STRING_exec_0(literal);
+	let { length } = $;
+	if ( literal.startsWith('"""', length) ) {
+		ESCAPED_EXCLUDE_CONTROL_CHARACTER_test($) || throws(SyntaxError$1(where()));
+		length += 3;
+		table[finalKey] = MultiLineBasicString($) + ( endsWithQuote ? literal[length]==='"' ? literal[++length]==='"' ? ( ++length, '""' ) : '"' : '' : '' );
+		return literal.slice(length).replace(PRE_WHITESPACE, '');
+	}
+	if ( literal ) {
+		literal += '\n';
+		ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(literal) || throws(SyntaxError$1(where()));
+	}
+	const start         = mark();
+	for ( ; ; ) {
+		let line         = must('Basic String', start);
+		const $ = MULTI_LINE_BASIC_STRING_exec_0(line);
+		let { length } = $;
+		if ( line.startsWith('"""', length) ) {
+			ESCAPED_EXCLUDE_CONTROL_CHARACTER_test($) || throws(SyntaxError$1(where()));
+			length += 3;
+			table[finalKey] = MultiLineBasicString(literal + $) + ( endsWithQuote ? line[length]==='"' ? line[++length]==='"' ? ( ++length, '""' ) : '"' : '' : '' );
+			return line.slice(length).replace(PRE_WHITESPACE, '');
+		}
+		line += '\n';
+		ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(line) || throws(SyntaxError$1(where()));
+		literal += line;
+	}
+} )     
+	                                                           
+	                                                          
+ ;
+
+const push = (lastArray       , lineRest        )         => {
+	if ( lineRest[0]==='<' ) {
+		const { 1: tag } = { 2: lineRest } = _VALUE_PAIR_exec(lineRest) ?? throws(SyntaxError$1(where()));
+		collect(tag, lastArray, null);
+		switch ( lineRest && lineRest[0] ) {
+			case ',':
+			case ']':
+			case '':
+			case '#':
+				lastArray[lastArray.length] = undefined$1;
+				return lineRest;
+		}
+	}
+	switch ( lineRest[0] ) {
+		case '\'':
+			return assignLiteralString(asStrings(lastArray), lastArray.length, lineRest);
+		case '"':
+			return assignBasicString(asStrings(lastArray), lastArray.length, lineRest);
+		case '{':
+			inlineTable || throws(SyntaxError$1(`Inline Table is not allowed before TOML v0.4, which at ${where()}`));
+			stacks_push(lineRest => equalInlineTable(asTables(lastArray), lastArray.length, lineRest));
+			return lineRest;
+		case '[':
+			stacks_push(lineRest => equalStaticArray(asArrays(lastArray), lastArray.length, lineRest));
+			return lineRest;
+	}
+	const { 1: literal } = { 2: lineRest } = VALUE_REST_exec(lineRest) ?? throws(SyntaxError$1(where()));
+	if ( sFloat ) {
+		if ( literal==='inf' || literal==='+inf' ) {
+			asFloats(lastArray)[lastArray.length] = Infinity;
+			return lineRest;
+		}
+		if ( literal==='-inf' ) {
+			asFloats(lastArray)[lastArray.length] = -Infinity;
+			return lineRest;
+		}
+		if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) {
+			asFloats(lastArray)[lastArray.length] = NaN;
+			return lineRest;
+		}
+	}
+	if ( literal.includes(':') ) {
+		if ( literal.includes('-') ) {
+			if ( OFFSET$.test(literal) ) {
+				asOffsetDateTimes(lastArray)[lastArray.length] = new OffsetDateTime(literal);
+			}
+			else {
+				moreDatetime || throws(SyntaxError$1(where()));
+				asLocalDateTimes(lastArray)[lastArray.length] = new LocalDateTime(literal);
+			}
+		}
+		else {
+			moreDatetime || throws(SyntaxError$1(where()));
+			asLocalTimes(lastArray)[lastArray.length] = new LocalTime(literal);
+		}
+		return lineRest;
+	}
+	if ( literal.indexOf('-')!==literal.lastIndexOf('-') && literal[0]!=='-' ) {
+		moreDatetime || throws(SyntaxError$1(where()));
+		asLocalDates(lastArray)[lastArray.length] = new LocalDate(literal);
+		return lineRest;
+	}
+	literal==='true' ? asBooleans(lastArray)[lastArray.length] = true : literal==='false' ? asBooleans(lastArray)[lastArray.length] = false :
+		literal.includes('.') || ( literal.includes('e') || literal.includes('E') ) && !literal.startsWith('0x') ? asFloats(lastArray)[lastArray.length] = Float(literal) :
+			enableNull && literal==='null' ? asNulls(lastArray)[lastArray.length] = null :
+				asIntegers(lastArray)[lastArray.length] = Integer(literal);
+	return lineRest;
+};
+
+const equalStaticArray = ( (table       , finalKey        , lineRest        )         => {
+	const staticArray        = table[finalKey] = newArray(STATICALLY);
+	const start         = mark();
+	lineRest = lineRest.replace(SYM_WHITESPACE, '');
+	while ( !lineRest || lineRest[0]==='#' ) {
+		lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, '');
+	}
+	if ( lineRest[0]===']' ) { return lineRest.replace(SYM_WHITESPACE, ''); }
+	const length = stacks_length;
+	return function callee (lineRest) {
+		for ( ; ; ) {
+			lineRest = push(staticArray, lineRest);
+			if ( stacks_length>length ) {
+				stacks_insertBeforeLast(function inserted (lineRest) {
+					//
+					while ( !lineRest || lineRest[0]==='#' ) {//
+						lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, '');//
+					}//
+					if ( lineRest[0]===',' ) {//
+						lineRest = lineRest.replace(SYM_WHITESPACE, '');//
+						while ( !lineRest || lineRest[0]==='#' ) {//
+							lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, '');//
+						}//
+						if ( lineRest[0]===']' ) { return lineRest.replace(SYM_WHITESPACE, ''); }//
+					}//
+					else {//
+						if ( lineRest[0]===']' ) { return lineRest.replace(SYM_WHITESPACE, ''); }//
+						throws(SyntaxError$1(where()));//
+					}//
+					//
+					return callee(lineRest);
+				});
+				return lineRest;
+			}
+			while ( !lineRest || lineRest[0]==='#' ) {
+				lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, '');
+			}
+			if ( lineRest[0]===',' ) {
+				lineRest = lineRest.replace(SYM_WHITESPACE, '');
+				while ( !lineRest || lineRest[0]==='#' ) {
+					lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, '');
+				}
+				if ( lineRest[0]===']' ) { return lineRest.replace(SYM_WHITESPACE, ''); }
+			}
+			else {
+				if ( lineRest[0]===']' ) { return lineRest.replace(SYM_WHITESPACE, ''); }
+				throws(SyntaxError$1(where()));
+			}
+		}
+	}(lineRest);
+} )     
+	                                                            
+	                                                           
+ ;
+
+const equalInlineTable = ( (table       , finalKey        , lineRest        )         => {
+	const inlineTable        = table[finalKey] = new Table(DIRECTLY, INLINE);
+	lineRest = lineRest.replace(SYM_WHITESPACE, '');
+	if ( allowInlineTableMultiLineAndTrailingCommaEvenNoComma ) {
+		const start         = mark();
+		const length = stacks_length;
+		return function callee (lineRest) {
+			for ( ; ; ) {
+				while ( !lineRest || lineRest[0]==='#' ) {
+					lineRest = must('Inline Table', start).replace(PRE_WHITESPACE, '');
+				}
+				if ( lineRest[0]==='}' ) { return lineRest.replace(SYM_WHITESPACE, ''); }
+				lineRest = assign(inlineTable, lineRest);
+				if ( stacks_length>length ) {
+					stacks_insertBeforeLast(function inserted (lineRest) {
+						//
+						while ( !lineRest || lineRest[0]==='#' ) {//
+							lineRest = must('Inline Table', start).replace(PRE_WHITESPACE, '');//
+						}//
+						if ( lineRest[0]===',' ) { lineRest = lineRest.replace(SYM_WHITESPACE, ''); }//
+						//
+						return callee(lineRest);
+					});
+					return lineRest;
+				}
+				while ( !lineRest || lineRest[0]==='#' ) {
+					lineRest = must('Inline Table', start).replace(PRE_WHITESPACE, '');
+				}
+				if ( lineRest[0]===',' ) { lineRest = lineRest.replace(SYM_WHITESPACE, ''); }
+			}
+		}(lineRest);
+	}
+	else {
+		if ( lineRest[0]==='}' ) { return lineRest.replace(SYM_WHITESPACE, ''); }
+		lineRest && lineRest[0]!=='#' || throws(SyntaxError$1(`Inline Table is intended to appear on a single line, which broken at ${where()}`));
+		const length = stacks_length;
+		return function callee (lineRest) {
+			for ( ; ; ) {
+				lineRest = assign(inlineTable, lineRest);
+				if ( stacks_length>length ) {
+					stacks_insertBeforeLast(function inserted (lineRest) {
+						//
+						if ( lineRest[0]==='}' ) { return lineRest.replace(SYM_WHITESPACE, ''); }//
+						if ( lineRest[0]===',' ) {//
+							lineRest = lineRest.replace(SYM_WHITESPACE, '');//
+							lineRest[0]==='}' && throws(SyntaxError$1(`The last property of an Inline Table can not have a trailing comma, which was found at ${where()}`));//
+						}//
+						( !lineRest || lineRest[0]==='#' ) && throws(SyntaxError$1(`Inline Table is intended to appear on a single line, which broken at ${where()}`));//
+						//
+						return callee(lineRest);
+					});
+					return lineRest;
+				}
+				if ( lineRest[0]==='}' ) { return lineRest.replace(SYM_WHITESPACE, ''); }
+				if ( lineRest[0]===',' ) {
+					lineRest = lineRest.replace(SYM_WHITESPACE, '');
+					lineRest[0]==='}' && throws(SyntaxError$1(`The last property of an Inline Table can not have a trailing comma, which was found at ${where()}`));
+				}
+				( !lineRest || lineRest[0]==='#' ) && throws(SyntaxError$1(`Inline Table is intended to appear on a single line, which broken at ${where()}`));
+			}
+		}(lineRest);
+	}
+} )     
+	                                                            
+	                                                           
+ ;
+
+const assign = (lastInlineTable       , lineRest        )         => {
+	const { left, tag } = { right: lineRest } = KEY_VALUE_PAIR_exec_groups(lineRest);
+	const leadingKeys           = parseKeys(left);
+	const finalKey         = leadingKeys[leadingKeys.length - 1] ;
+	--leadingKeys.length;
+	const table        = prepareInlineTable(lastInlineTable, leadingKeys);
+	finalKey in table && throws(Error$1(`Duplicate property definition at ${where()}`));
+	if ( tag ) {
+		collect(tag, null, table, finalKey);
+		switch ( lineRest && lineRest[0] ) {
+			case ',':
+			case '}':
+			case '':
+			case '#':
+				table[finalKey] = undefined$1;
+				return lineRest;
+		}
+	}
+	switch ( lineRest && lineRest[0] ) {
+		case '\'':
+			return assignLiteralString(table, finalKey, lineRest);
+		case '"':
+			return assignBasicString(table, finalKey, lineRest);
+		case '{':
+			inlineTable || throws(SyntaxError$1(`Inline Table is not allowed before TOML v0.4, which at ${where()}`));
+			stacks_push((lineRest        )         => equalInlineTable(table, finalKey, lineRest));
+			return lineRest;
+		case '[':
+			stacks_push((lineRest        )         => equalStaticArray(table, finalKey, lineRest));
+			return lineRest;
+	}
+	const { 1: literal } = { 2: lineRest } = VALUE_REST_exec(lineRest) ?? throws(SyntaxError$1(where()));
+	if ( sFloat ) {
+		if ( literal==='inf' || literal==='+inf' ) {
+			table[finalKey] = Infinity;
+			return lineRest;
+		}
+		if ( literal==='-inf' ) {
+			table[finalKey] = -Infinity;
+			return lineRest;
+		}
+		if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) {
+			table[finalKey] = NaN;
+			return lineRest;
+		}
+	}
+	if ( literal.includes(':') ) {
+		if ( literal.includes('-') ) {
+			if ( OFFSET$.test(literal) ) {
+				table[finalKey] = new OffsetDateTime(literal);
+			}
+			else {
+				moreDatetime || throws(SyntaxError$1(where()));
+				table[finalKey] = new LocalDateTime(literal);
+			}
+		}
+		else {
+			moreDatetime || throws(SyntaxError$1(where()));
+			table[finalKey] = new LocalTime(literal);
+		}
+		return lineRest;
+	}
+	if ( literal.indexOf('-')!==literal.lastIndexOf('-') && literal[0]!=='-' ) {
+		moreDatetime || throws(SyntaxError$1(where()));
+		table[finalKey] = new LocalDate(literal);
+		return lineRest;
+	}
+	table[finalKey] =
+		literal==='true' ? true : literal==='false' ? false :
+			literal.includes('.') || ( literal.includes('e') || literal.includes('E') ) && !literal.startsWith('0x') ? Float(literal) :
+				enableNull && literal==='null' ? null :
+					Integer(literal);
+	return lineRest;
+};
+const Root = ()        => {
+	const rootTable        = new Table;
+	let lastSectionTable        = rootTable;
+	while ( rest() ) {
+		const line         = next().replace(PRE_WHITESPACE, '');
+		if ( line ) {
+			if ( line[0]==='[' ) {
+				const { $_asArrayItem$$, keys, $$asArrayItem$_, tag } = TABLE_DEFINITION_exec_groups(line);
+				$_asArrayItem$$===$$asArrayItem$_ || throws(SyntaxError$1(`Square brackets of Table definition statement not match at ${where()}`));
+				lastSectionTable = appendTable(rootTable, keys, $_asArrayItem$$, tag);
+			}
+			else if ( line[0]==='#' ) {
+				__CONTROL_CHARACTER_EXCLUDE.test(line) && throws(SyntaxError$1(`Control characters other than Tab are not permitted in comments, which was found at ${where()}`));
+			}
+			else {
+				let rest         = assign(lastSectionTable, line);
+				while ( stacks_length ) { rest = stacks_pop()(rest); }
+				rest && rest[0]!=='#' && throws(SyntaxError$1(where()));
+			}
+		}
+	}
+	return rootTable;
+};
+
+const BOM = '\uFEFF';
+const parse$1 = (
 	sourceContent                 ,
 	specificationVersion                                   ,
 	multiLineJoiner        ,
 	useBigInt                   = true,
 	xOptions                    
-)        {
+)        => {
 	could();
 	if ( isBuffer(sourceContent) ) {
 		const buffer         = sourceContent;
 		sourceContent = buffer.toString();
-		if ( !from(buffer).equals(buffer) ) { throw Error('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any unknown code point.'); }
-		if ( sourceContent.startsWith(BOM) ) { sourceContent = sourceContent.slice(1); }
+		if ( !from(buffer).equals(buffer) ) { throw Error$1('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any unknown code point.'); }
+		if ( sourceContent[0]===BOM ) { sourceContent = sourceContent.slice(1); }
 	}
-	if ( typeof sourceContent!=='string' ) { throw TypeError('TOML.parse(sourceContent)'); }
+	if ( typeof sourceContent!=='string' ) { throw TypeError$1('TOML.parse(sourceContent)'); }
 	try {
-		if ( NON_SCALAR.test(sourceContent) ) { throw Error('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any uncoupled UCS-4 character code.'); }
+		if ( NON_SCALAR.test(sourceContent) ) { throw Error$1('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any uncoupled UCS-4 character code.'); }
 		try {
 			use(specificationVersion, multiLineJoiner, useBigInt, xOptions);
 			todo(sourceContent);
@@ -1508,16 +1906,19 @@ function parse (
 				process();
 				return rootTable;
 			}
-			finally { done(); }
+			finally {
+				//clearWeakSets();
+				done();
+			}
 		}
 		finally { clear(); }
 	}
 	finally { clearRegExp(); }
-}
+};
 
 const _default = Default({
 	version,
-	parse,
+	parse: parse$1,
 });
 
 module.exports = _default;

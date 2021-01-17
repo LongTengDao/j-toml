@@ -1,4 +1,6 @@
 
+# comment
+
 array = [[],
 [{}],
 [{ k = { }, l = { }, n = { }, o = [ ] },{}],
@@ -6,25 +8,14 @@ array = [[],
 
 inline_table = { 1.1 = 1.1, 1.2 = 1.2, 2.1 = 2.1 }
 
-# comment
+[[array_of_table]]
 
-[string]
-basic = "\b\t\n\f\r\"\\\u0000\U00000000"
-literal = '\b\t\n\f\r\"\\\u0000\U00000000'
-multi-lines_basic.0 = """\
-       那只 敏捷的 棕 \
-       狐狸 跳 过了 \
-       
-       那只 懒 狗。\
-       """
-multi-lines_basic.1 = """\""""
-multi-lines_basic.2 = """\\"""
-multi-lines_literal = '''
-原始字符串中的
-第一个换行被剔除了。
-   所有其它空白
-   都保留了。
-'''
+[[array_of_table]]
+
+[table.x]
+[table]
+sub.y = { }
+[table.sub.z]
 
 [integer]
 1 = 1
@@ -66,6 +57,20 @@ local_date-time = 1970-01-01 00:00:00.9999
 local_date = 1970-01-01
 local_time = 00:00:00.9999
 
-[[array_of_table]]
-
-[[array_of_table]]
+[string]
+basic = "\b\t\n\f\r\"\\\u0000\U00000000"
+literal = '\b\t\n\f\r\"\\\u0000\U00000000'
+multi-lines_basic.0 = """\
+       那只 敏捷的 棕 \
+       狐狸 跳 过了 \
+       
+       那只 懒 狗。\
+       """
+multi-lines_basic.1 = """\""""
+multi-lines_basic.2 = """\\"""
+multi-lines_literal = '''
+原始字符串中的
+第一个换行被剔除了。
+   所有其它空白
+   都保留了。
+'''
