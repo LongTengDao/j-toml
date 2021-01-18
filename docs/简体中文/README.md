@@ -2,7 +2,7 @@
 `@ltd/j-toml`
 =============
 
-`@ltd/j-toml` 是龙腾道为 [汤小明语](https://ZhuanLan.ZhiHu.com/p/50412485)（“汤小明的小巧明晰语言”）写的实现。  
+`@ltd/j-toml` 是龙腾道为 [汤小明语](https://GitHub.com/LongTengDao/TOML/)（“汤小明的小巧明晰语言”）写的实现。  
 ——这 TM 可能是“我”见过最好的配置文件书写格式了。  
 ——对于亲手折腾到爆炸的人而言。
 
@@ -55,7 +55,7 @@ function parse (
 
 0.  #### `源内容`
     
-    *   类型：`string` / `Buffer(UTF-8)`
+    *   类型：`string | Buffer(UTF-8)`
     *   必需
     
     你可以传入 `string`，也可以传入文件原始的二进制 `Buffer`。
@@ -68,7 +68,7 @@ function parse (
     
 1.  #### `遵循规范版本`
     
-    *   类型：`1.0` / `0.5` / `0.4` / `0.3` / `0.2` / `0.1`
+    *   类型：`1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1`
     *   必需
     
     如果没有特殊理由（例如下游程序尚不能妥善处置 `Infinity`、`NaN`、小数秒和极端时间值，各地日期时刻、各地日期、各地时刻类型，空字符串键名，混合类型的数组甚至表数组、数组数组下的表结构），建议使用最新的版本。
@@ -83,7 +83,7 @@ function parse (
     
 3.  #### `使用BigInt`
     
-    *   类型：`boolean` / `number`
+    *   类型：`boolean | number`
     *   默认值：`true`
     
     指定你是否要用 `BigInt` 来实现整数类型的值。`number` 类型的参数允许你精确控制超过多少才使用 `BigInt`，例如 `Number.MAX_SAFE_INTEGER`（自动通过 `-useBigInt` 获取负向界限，如果 `useBigInt>=0`；否则通过 `-useBigInt-1` 获取正向界限）。
@@ -103,6 +103,6 @@ function parse (
 
 ### `throw`
 
-*   类型：`Error` / `Error & { lineIndex :number, lineNumber :number }`
+*   类型：`Error | Error & { lineIndex :number, lineNumber :number }`
 
 如果参数不符合要求，会抛出错误；如果源文本有错误，错误对象会有 `lineIndex` 和 `lineNumber` 两个数值属性来帮助定位。

@@ -2,7 +2,7 @@
 `@ltd/j-toml`
 =============
 
-`@ltd/j-toml` is an implementation of [TOML](https://GitHub.com/toml-lang/toml/) ("Tom's Obvious, Minimal Language") written by LongTengDao,  
+`@ltd/j-toml` is an implementation of [TOML](https://TOML.io/) ("Tom's Obvious, Minimal Language") written by LongTengDao,  
 which is the best config format he had ever seen.  
 (Obviously for exhausted people who tried to design that.)
 
@@ -55,7 +55,7 @@ function parse (
 
 0.  #### `sourceContent`
     
-    *   type: `string` / `Buffer(UTF-8)`
+    *   type: `string | Buffer(UTF-8)`
     *   required
     
     You can pass in `string` or the original binary `Buffer` of the file.
@@ -68,7 +68,7 @@ function parse (
     
 1.  #### `specificationVersion`
     
-    *   type: `1.0` / `0.5` / `0.4` / `0.3` / `0.2` / `0.1`
+    *   type: `1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1`
     *   required
     
     If there is no special reason (e.g. the downstream program could not deal with `Infinity`、`NaN`、fractional seconds and edge Datetime values, Local Date-Time / Local Date / Local Time types, empty string key name, mixed type array even array of tables / table under array of arrays structure yet), the latest version is recommended.
@@ -83,7 +83,7 @@ function parse (
     
 3.  #### `useBigInt`
     
-    *   type: `boolean` / `number`
+    *   type: `boolean | number`
     *   default: `true`
     
     Specify whether you want or not to use `BigInt` for integer type value. A `number` type argument allows you to control it by a max limit, like `Number.MAX_SAFE_INTEGER` (and the min limit from `-useBigInt`, if `useBigInt>=0`; otherwise as the min limit, and the max limit is `-useBigInt-1`).
@@ -103,6 +103,6 @@ Return the root table (tables parsed by this implementation are objects without 
 
 ### `throw`
 
-*   type: `Error` / `Error & { lineIndex :number, lineNumber :number }`
+*   type: `Error | Error & { lineIndex :number, lineNumber :number }`
 
 If the arguments not meet the requirement, there will be an error; if there is any error with the source, the error object will has two number properties `lineIndex` and `lineNumber` to help locating that.
