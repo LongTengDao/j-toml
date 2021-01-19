@@ -38,7 +38,7 @@ Object.keys(rootTable)   // [ "I_am_normal", "hasOwnProperty", "constructor", "_
 ------------
 
 ```
-TOML.parse(sourceContent, specificationVersion, multiLineJoiner[, useBigInt=true[, xOptions]]);
+TOML.parse(sourceContent, specificationVersion, multiLineJoiner[, useBigInt=true[, xOptions[, sourcePath]]]);
 ```
 
 ```typescript
@@ -47,7 +47,8 @@ function parse (
          specificationVersion :1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1,
          multiLineJoiner      :string,
          useBigInt?           :true | false | number,
-         xOptions?            :object
+         xOptions?            :object,
+         sourcePath?          :string,
 ) :Table;
 ```
 
@@ -94,6 +95,12 @@ function parse (
     Include keeping the key/value pairs order of tables, integers larger than `signed long`, mixed-type array, multi-line inline table with trailing comma even no comma, `null` value, custom constructor, etc.  
     They are private experimental discouraged features. Only provide TSD support when `specificationVersion` is `0.4` or higher.  
     See [xOptions](https://GitHub.com/LongTengDao/j-toml/blob/master/docs/English/xOptions.md).
+    
+5.  #### `sourcePath`
+    
+    *   type: `string`
+    
+    If error thrown is caused by source content, passing `sourcePath` will make error position information more console-friendly.
 
 ### `return`
 
@@ -103,6 +110,6 @@ Return the root table (tables parsed by this implementation are objects without 
 
 ### `throw`
 
-*   type: `Error | Error & { lineIndex :number, lineNumber :number }`
+*   type: `Error`
 
-If the arguments not meet the requirement, there will be an error; if there is any error with the source, the error object will has two number properties `lineIndex` and `lineNumber` to help locating that.
+There will be an error thrown, when the arguments not meet the requirement or there is any error within the source.

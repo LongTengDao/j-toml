@@ -38,7 +38,7 @@ Object.keys(根表)   // [ "一个普通的键名", "hasOwnProperty", "construct
 ------------
 
 ```
-TOML.parse(源内容, 遵循规范版本, 多行拼接字符[, 使用BigInt=true[, 超级选项]]);
+TOML.parse(源内容, 遵循规范版本, 多行拼接字符[, 使用BigInt=true[, 超级选项[, 源路径]]]);
 ```
 
 ```typescript
@@ -47,7 +47,8 @@ function parse (
          遵循规范版本 :1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1,
          多行拼接字符 :string,
          使用BigInt?  :true | false | number,
-         超级选项?    :object
+         超级选项?    :object,
+         源路径?      :string,
 ) :Table;
 ```
 
@@ -94,6 +95,12 @@ function parse (
     包括保持表中键值对的顺序、超出有符号长整型的整数、混合类型的数组、跨行行内表及尾逗号甚至省略逗号、`null` 值、自定义构造器等。  
     私有实验期功能，不建议随意使用。只对 `遵循规范版本` `0.4` 以上提供了 TSD 支持。  
     详见 [超级选项](https://GitHub.com/LongTengDao/j-toml/blob/master/docs/简体中文/xOptions.md)。
+    
+5.  #### `源路径`
+    
+    *   类型：`string`
+    
+    如果是因为源文本的问题报错，指定 `源路径` 能让错误位置信息以控制台友好的格式呈现。
 
 ### `return`
 
@@ -103,6 +110,6 @@ function parse (
 
 ### `throw`
 
-*   类型：`Error | Error & { lineIndex :number, lineNumber :number }`
+*   类型：`Error`
 
-如果参数不符合要求，会抛出错误；如果源文本有错误，错误对象会有 `lineIndex` 和 `lineNumber` 两个数值属性来帮助定位。
+参数不符合要求或源文本内有错误，均会抛出错误。

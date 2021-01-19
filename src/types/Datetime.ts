@@ -96,7 +96,12 @@ const Datetime = function (this :object) { return this; } as unknown as { new ()
 {
 	const descriptors = Null<object>(null);
 	const descriptor = Null(null);
-	for ( const key of ownKeys(NativeDate.prototype) ) { key==='constructor' || key==='toJSON' || ( descriptors[key] = descriptor ); }
+	for ( const key of ownKeys(NativeDate.prototype) ) {
+		//@ts-ignore
+		key==='constructor' ||
+		key==='toJSON' ||
+		( descriptors[key] = descriptor );
+	}
 	Datetime.prototype = create(NativeDate.prototype, descriptors);
 	preventExtensions(Datetime.prototype);
 	freeze(Datetime);
@@ -125,7 +130,7 @@ export class OffsetDateTime extends Datetime {
 	toISOString (this :OffsetDateTime) :string { return this.#dateString; }
 	
 	constructor (dateString :string) {
-		const { 1: more } = ( options$0.zeroDatetime ? OFFSET_DATETIME_ZERO_exec : OFFSET_DATETIME_exec )(dateString) ?? iterator$0.throws(SyntaxError(`Invalid Offset Date-Time ${dateString} at ${iterator$0.where()}`));
+		const { 1: more } = ( options$0.zeroDatetime ? OFFSET_DATETIME_ZERO_exec : OFFSET_DATETIME_exec )(dateString) ?? iterator$0.throws(SyntaxError(`Invalid Offset Date-Time ${dateString}` + iterator$0.where(' at ')));
 		super();
 		this.#value = ( '' + parse(this.#dateString = dateString.replace(' ', 'T')) ).padStart(15, '0') + ( more ? '.' + more : '' );
 		return this;
@@ -201,6 +206,7 @@ export class OffsetDateTime extends Datetime {
 	}
 	
 }
+//@ts-ignore
 delete OffsetDateTime.prototype.constructor;
 freeze(OffsetDateTime.prototype);
 freeze(OffsetDateTime);
@@ -214,7 +220,7 @@ export class LocalDateTime extends Datetime {
 	toISOString (this :LocalDateTime) :string { return this.#dateString; }
 	
 	constructor (dateString :string) {
-		LOCAL_DATETIME.test(dateString) || iterator$0.throws(SyntaxError(`Invalid Local Date-Time ${dateString} at ${iterator$0.where()}`));
+		LOCAL_DATETIME.test(dateString) || iterator$0.throws(SyntaxError(`Invalid Local Date-Time ${dateString}` + iterator$0.where(' at ')));
 		super();
 		this.#value = ( this.#dateString = dateString.replace(' ', 'T') ).replace(DELIMITER_DOT_ZERO, '');
 		return this;
@@ -245,6 +251,7 @@ export class LocalDateTime extends Datetime {
 	}
 	
 }
+//@ts-ignore
 delete LocalDateTime.prototype.constructor;
 freeze(LocalDateTime.prototype);
 freeze(LocalDateTime);
@@ -258,7 +265,7 @@ export class LocalDate extends Datetime {
 	toISOString (this :LocalDate) :string { return this.#dateString; }
 	
 	constructor (dateString :string) {
-		LOCAL_DATE.test(dateString) || iterator$0.throws(SyntaxError(`Invalid Local Date ${dateString} at ${iterator$0.where()}`));
+		LOCAL_DATE.test(dateString) || iterator$0.throws(SyntaxError(`Invalid Local Date ${dateString}` + iterator$0.where(' at ')));
 		super();
 		this.#value = ( this.#dateString = dateString ).replace('-', '').replace('-', '');
 		return this;
@@ -277,6 +284,7 @@ export class LocalDate extends Datetime {
 	setDate (this :LocalDate, value :Date) { LocalDate.set(this, 8, 10, value); }
 	
 }
+//@ts-ignore
 delete LocalDate.prototype.constructor;
 freeze(LocalDate.prototype);
 freeze(LocalDate);
@@ -290,7 +298,7 @@ export class LocalTime extends Datetime {
 	toISOString (this :LocalTime) :string { return this.#dateString; }
 	
 	constructor (dateString :string) {
-		LOCAL_TIME.test(dateString) || iterator$0.throws(SyntaxError(`Invalid Local Time ${dateString} at ${iterator$0.where()}`));
+		LOCAL_TIME.test(dateString) || iterator$0.throws(SyntaxError(`Invalid Local Time ${dateString}` + iterator$0.where(' at ')));
 		super();
 		this.#value = ( this.#dateString = dateString ).replace(DELIMITER_DOT_ZERO, '');
 		return this;
@@ -314,6 +322,7 @@ export class LocalTime extends Datetime {
 	}
 	
 }
+//@ts-ignore
 delete LocalTime.prototype.constructor;
 freeze(LocalTime.prototype);
 freeze(LocalTime);

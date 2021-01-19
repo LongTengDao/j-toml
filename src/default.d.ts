@@ -10,6 +10,7 @@ declare namespace exports {
 		multiLineJoiner :string,
 		useBigInt? :UseBigInt,// = true
 		xOptions? :null | false,
+		sourcePath? :string,
 	) :Table<UseBigInt extends false ? BasicValueWithoutBigint_WithoutArrayOfTables : BasicValue_WithoutArrayOfTables>;
 	
 	export function parse<CustomValue extends never, UseBigInt extends boolean | number> (
@@ -18,6 +19,7 @@ declare namespace exports {
 		multiLineJoiner :string,
 		useBigInt? :UseBigInt,// = true
 		xOptions? :null | false,
+		sourcePath? :string,
 	) :Table<UseBigInt extends false ? BasicValueWithoutBigint_WithoutInlineTable : BasicValue_WithoutInlineTable>;
 	
 	export function parse<CustomValue extends never, UseBigInt extends boolean | number> (
@@ -29,6 +31,7 @@ declare namespace exports {
 			readonly tag? :null,
 			readonly null? :false,
 		} & TypeAgnosticOptions,
+		sourcePath? :string,
 	) :Table<UseBigInt extends false ? BasicValueWithoutBigint : BasicValue>;
 	
 	export function parse<CustomValue extends never, UseBigInt extends boolean | number> (
@@ -40,6 +43,7 @@ declare namespace exports {
 			readonly tag? :null,
 			readonly null :true,
 		} & TypeAgnosticOptions,
+		sourcePath? :string,
 	) :Table<UseBigInt extends false ? BasicValueWithoutBigintWithNull : BasicValueWithNull>;
 	
 	export function parse<CustomValue extends never, UseBigInt extends boolean | number> (
@@ -51,6 +55,7 @@ declare namespace exports {
 			readonly tag? :null,
 			readonly null? :false,
 		} & TypeAgnosticOptions,
+		sourcePath? :string,
 	) :Table<Mixed<UseBigInt extends false ? BasicValueWithoutBigint : BasicValue>>;
 	
 	export function parse<CustomValue extends never, UseBigInt extends boolean | number> (
@@ -62,6 +67,7 @@ declare namespace exports {
 			readonly tag? :null,
 			readonly null :true,
 		} & TypeAgnosticOptions,
+		sourcePath? :string,
 	) :Table<Mixed<UseBigInt extends false ? BasicValueWithoutBigintWithNull : BasicValueWithNull>>;
 	
 	export function parse<CustomValue> (
@@ -73,6 +79,7 @@ declare namespace exports {
 			readonly tag :TagProcessor<CustomValue>,
 			readonly null? :boolean,// = false
 		} & TypeAgnosticOptions,
+		sourcePath? :string,
 	) :Table<CustomValue>;
 	
 	export { exports as default };

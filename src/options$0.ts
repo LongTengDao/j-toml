@@ -50,7 +50,7 @@ let As :{ () :As } | null = () :As => {
 	const as = (array :Array) :Array => {
 		const got = arrayTypes.get(array);
 		got
-			? got===as || iterator$0.throws(TypeError(`Types in Array must be same. Check ${iterator$0.where()}`))
+			? got===as || iterator$0.throws(TypeError(`Types in Array must be same` + iterator$0.where('. Check ')))
 			: arrayTypes.set(array, as);
 		return array;
 	};
@@ -107,7 +107,7 @@ const collect_on = (tag :string, array :null | Array, table :null | Table, key? 
 	}
 	collection[collection_length++] = each;
 };
-const collect_off = () :never => { iterator$0.throws(SyntaxError(iterator$0.where())); };
+const collect_off = () :never => { iterator$0.throws(SyntaxError(`xOptions.tag is not enabled, but found tag syntax` + iterator$0.where(' at '))); };
 export let collect :(tag :string, ...rest :[ null, Table, string ] | [ Array, null ] | [ Array<Table>, Table, string ]) => void = collect_off;
 export const process = () :void => {
 	if ( collection_length ) {

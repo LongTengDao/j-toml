@@ -19,9 +19,11 @@ const unEscapeSingleLine = (
 	if ( p1 ) { return ESCAPE_ALIAS[p1]; }
 	const codePoint :number = parseInt(p2 ?? p3!, 16);
 	( 0xD7FF<codePoint && codePoint<0xE000 || 0x10FFFF<codePoint )
-	&& iterator$0.throws(RangeError('Invalid Unicode Scalar '+( p2 ? '\\u'+p2 : '\\U'+p3 )+' at '+iterator$0.where()));
+	&& iterator$0.throws(RangeError(`Invalid Unicode Scalar ${p2 ? '\\u' + p2 : '\\U' + p3}` + iterator$0.where(' at ')));
 	return fromCodePoint(codePoint);
 };
+
+let n = 0;
 
 const unEscapeMultiLine = (
 	match :string,
@@ -30,15 +32,21 @@ const unEscapeMultiLine = (
 	p3 :string | undefined,
 	p4 :string | undefined
 ) :string => {
-	if ( match==='\n' ) { return options$0.useWhatToJoinMultiLineString; }
+	if ( match==='\n' ) {
+		++n;
+		return options$0.useWhatToJoinMultiLineString;
+	}
 	if ( p1 ) { return ''; }
 	if ( p2 ) { return ESCAPE_ALIAS[p2]; }
 	const codePoint :number = parseInt(p3 ?? p4!, 16);
 	( 0xD7FF<codePoint && codePoint<0xE000 || 0x10FFFF<codePoint )
-	&& iterator$0.throws(RangeError('Invalid Unicode Scalar '+( p3 ? '\\u'+p3 : '\\U'+p4 )+' at '+iterator$0.where()));
+	&& iterator$0.throws(RangeError(`Invalid Unicode Scalar ${p3 ? '\\u' + p3 : '\\U' + p4}` + iterator$0.where(' at ', iterator$0.lineIndex + n)));
 	return fromCodePoint(codePoint);
 };
 
 export const BasicString = (literal :string) :string => literal.replace(ESCAPED_IN_SINGLE_LINE, unEscapeSingleLine);
 
-export const MultiLineBasicString = (literal :string) :string => literal.replace(ESCAPED_IN_MULTI_LINE, unEscapeMultiLine);
+export const MultiLineBasicString = (literal :string, skipped :boolean) :string => {
+	n = skipped ? 1 : 0;
+	return literal.replace(ESCAPED_IN_MULTI_LINE, unEscapeMultiLine);
+};

@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '1.0.0';
+const version = '1.1.0';
 
 const Error$1 = Error;
 
@@ -193,6 +193,7 @@ var NON_SCALAR = (
 //import * as options\$0 from './options\$0';
 
 const NONE                = [];
+let sourcePath         = '';
 let sourceLines                = NONE;
 let lastLineIndex         = -1;
 let lineIndex         = -1;
@@ -202,13 +203,7 @@ let lineIndex         = -1;
 	                   
  
 const throws                                = (error             )        => {
-	if ( sourceLines!==NONE ) {
-		//done();
-		//options\$0.clear();
-		//error.stack = error.stack!.replace('\n', `\n    at (*.toml:${lineIndex+1}:0)\n@*.toml:${lineIndex+1}\n`);
-		error.lineIndex = lineIndex;
-		error.lineNumber = lineIndex+1;
-	}
+	//if ( sourceLines!==NONE ) { done(); options\$0.clear(); }
 	throw error;
 };
 
@@ -228,9 +223,11 @@ const could = ()       => {
 };
 
 const EOL = /\r?\n/;
-const todo = (source        )       => {
+const todo = (source        , path        )       => {
+	if ( typeof path!=='string' ) { throw TypeError$1('TOML.parse(,,,,sourcePath)'); }
+	sourcePath = path;
 	sourceLines = source.split(EOL);
-	lastLineIndex = sourceLines.length-1;
+	lastLineIndex = sourceLines.length - 1;
 	lineIndex = -1;
 	stacks_length = 0;
 	last = noop;
@@ -240,16 +237,20 @@ const next = ()         => sourceLines[++lineIndex] ;
 
 const rest = ()          => lineIndex!==lastLineIndex;
 
-const mark = ()         => lineIndex;
+const mark = (type        ) => ( { type, lineIndex } );
 
-const must = (message        , startIndex        )         => {
-	lineIndex===lastLineIndex && throws(SyntaxError$1(message+' is not close until the end of the file, which started from line '+( startIndex+1 )+': '+sourceLines[startIndex]));
+const must = (marker                                     )         => {
+	lineIndex===lastLineIndex && throws(SyntaxError$1(`${marker.type} is not close until the end of the file` + where(', which started from ', marker.lineIndex)));
 	return sourceLines[++lineIndex] ;
 };
 
-const where = ()         => 'line '+( lineIndex+1 )+': '+sourceLines[lineIndex];
+const where = (pre        , index         = lineIndex)         => sourceLines===NONE ? '' :
+	sourcePath
+		? `\n    at (${sourcePath}:${index + 1}:1)`
+		: `${pre}line ${index + 1}: ${sourceLines[index]}`;
 
 const done = ()       => {
+	sourcePath = '';
 	sourceLines = NONE;
 	last = noop;
 };
@@ -641,13 +642,14 @@ const TAG_REST_exec = newRegExp.s `
 
 const MULTI_LINE_BASIC_STRING_exec = Exec(/^(?:[^\\"]+|\\.|""?(?!"))/s);
 const MULTI_LINE_BASIC_STRING_exec_0 = (_        )         => {
-	for ( let _0         = ''; ; ) {
-		if ( !_ ) { return _0; }
+	let _0         = '';
+	while ( _ ) {
 		const $ = MULTI_LINE_BASIC_STRING_exec(_);
-		if ( !$ ) { return _0; }
+		if ( !$ ) { break; }
 		_0 += $[0];
 		_ = _.slice($[0].length);
 	}
+	return _0;
 };
 
 const ESCAPED_EXCLUDE_CONTROL_CHARACTER_TAB______ = /[^\\\x00-\x08\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|[ \t]*\n[ \t\n]*|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
@@ -667,7 +669,7 @@ const BASIC_STRING_exec = (_2        )                           => {
 	for ( let _1         = ''; ; ) {
 		const $ = __BASIC_STRING_exec(_2);
 		if ( !$ ) {
-			_2[0]==='"' || throws(SyntaxError$1(where()));
+			_2[0]==='"' || throws(SyntaxError$1(`Bad basic string` + where(' at ')));
 			return { 1: _1, 2: _2.replace(SYM_WHITESPACE, '') };
 		}
 		_1 += $[0];
@@ -695,12 +697,12 @@ const getKeys = (_        )         => {
 				_ = _.slice($[0].length);
 				key += $[0];
 			}
-			_[0]==='"' || throws(SyntaxError$1(where()));
+			_[0]==='"' || throws(SyntaxError$1(`Bad basic string key` + where(' at ')));
 			_ = _.slice(1);
 			keys += key + '"';
 		}
 		else {
-			const key         = ( ( _.startsWith('\'') ? __LITERAL_KEY_exec : __BARE_KEY_exec )(_) ?? throws(SyntaxError$1(where())) )[0];
+			const key         = ( ( _.startsWith('\'') ? __LITERAL_KEY_exec : __BARE_KEY_exec )(_) ?? throws(SyntaxError$1(`Bad ${_.startsWith('\'') ? 'literal string' : 'bare'} key` + where(' at '))) )[0];
 			_ = _.slice(key.length);
 			keys += key;
 		}
@@ -714,27 +716,27 @@ const getKeys = (_        )         => {
 const TABLE_DEFINITION_exec_groups = (_        )                                                                                    => {
 	const $_asArrayItem$$          = _[1]==='[';
 	if ( $_asArrayItem$$ ) {
-		supportArrayOfTables || throws(SyntaxError$1(`Array of Tables is not allowed before TOML v0.2, which at ${where()}`));
+		supportArrayOfTables || throws(SyntaxError$1(`Array of Tables is not allowed before TOML v0.2` + where(', which at ')));
 		_ = _.slice(2);
 	}
 	else { _ = _.slice(1); }
 	_ = _.replace(PRE_WHITESPACE, '');
 	const keys         = getKeys(_);
 	_ = _.slice(keys.length).replace(PRE_WHITESPACE, '');
-	_[0]===']' || throws(SyntaxError$1(where()));
+	_[0]===']' || throws(SyntaxError$1(`Table header is not closed` + where(', which is found at ')));
 	const $$asArrayItem$_          = _[1]===']';
 	_ = _.slice($$asArrayItem$_ ? 2 : 1).replace(PRE_WHITESPACE, '');
 	let tag        ;
-	if ( _[0]==='<' ) { ( { 1: tag, 2: _ } = TAG_REST_exec(_) ?? throws(SyntaxError$1(where())) ); }
+	if ( _[0]==='<' ) { ( { 1: tag, 2: _ } = TAG_REST_exec(_) ?? throws(SyntaxError$1(`Bad tag` + where(' at '))) ); }
 	else { tag = ''; }
-	!_ || _[0]==='#' || throws(SyntaxError$1(where()));
+	!_ || _[0]==='#' || throws(SyntaxError$1(`Unexpect charachtor after table header` + where(' at ')));
 	return { $_asArrayItem$$, keys, $$asArrayItem$_, tag };
 };
 
 const KEY_VALUE_PAIR_exec_groups = (_        )                                               => {
 	const left         = getKeys(_);
-	const { 1: tag = '', 2: right } = KEY_VALUE_PAIR_exec(_.slice(left.length)) ?? throws(SyntaxError$1(where()));
-	tag || right && right[0]!=='#' || throws(SyntaxError$1(where()));
+	const { 1: tag = '', 2: right } = KEY_VALUE_PAIR_exec(_.slice(left.length)) ?? throws(SyntaxError$1(`Keys must equal something` + where(', but missing at ')));
+	tag || right && right[0]!=='#' || throws(SyntaxError$1(`Value can not be missing after euqal sign` + where(', which is found at ')));
 	return { left, tag, right };
 };
 
@@ -826,7 +828,7 @@ let As                    = ()     => {
 	const as = (array       )        => {
 		const got = arrayTypes.get(array);
 		got
-			? got===as || throws(TypeError$1(`Types in Array must be same. Check ${where()}`))
+			? got===as || throws(TypeError$1(`Types in Array must be same` + where('. Check ')))
 			: arrayTypes.set(array, as);
 		return array;
 	};
@@ -883,7 +885,7 @@ const collect_on = (tag        , array              , table              , key  
 	}
 	collection[collection_length++] = each;
 };
-const collect_off = ()        => { throws(SyntaxError$1(where())); };
+const collect_off = ()        => { throws(SyntaxError$1(`xOptions.tag is not enabled, but found tag syntax` + where(' at '))); };
 let collect                                                                                                              = collect_off;
 const process = ()       => {
 	if ( collection_length ) {
@@ -1096,7 +1098,12 @@ const Datetime = function (            ) { return this; }                       
 {
 	const descriptors = Null        (null);
 	const descriptor = Null(null);
-	for ( const key of ownKeys(NativeDate.prototype) ) { key==='constructor' || key==='toJSON' || ( descriptors[key] = descriptor ); }
+	for ( const key of ownKeys(NativeDate.prototype) ) {
+		//@ts-ignore
+		key==='constructor' ||
+		key==='toJSON' ||
+		( descriptors[key] = descriptor );
+	}
 	Datetime.prototype = create$1(NativeDate.prototype, descriptors);
 	preventExtensions(Datetime.prototype);
 	freeze(Datetime);
@@ -1125,7 +1132,7 @@ class OffsetDateTime extends Datetime {
 	toISOString (                    )         { return this.#dateString; }
 	
 	constructor (dateString        ) {
-		const { 1: more } = ( zeroDatetime ? OFFSET_DATETIME_ZERO_exec : OFFSET_DATETIME_exec )(dateString) ?? throws(SyntaxError$1(`Invalid Offset Date-Time ${dateString} at ${where()}`));
+		const { 1: more } = ( zeroDatetime ? OFFSET_DATETIME_ZERO_exec : OFFSET_DATETIME_exec )(dateString) ?? throws(SyntaxError$1(`Invalid Offset Date-Time ${dateString}` + where(' at ')));
 		super();
 		this.#value = ( '' + parse(this.#dateString = dateString.replace(' ', 'T')) ).padStart(15, '0') + ( more ? '.' + more : '' );
 		return this;
@@ -1201,6 +1208,7 @@ class OffsetDateTime extends Datetime {
 	}
 	
 }
+//@ts-ignore
 delete OffsetDateTime.prototype.constructor;
 freeze(OffsetDateTime.prototype);
 freeze(OffsetDateTime);
@@ -1214,7 +1222,7 @@ class LocalDateTime extends Datetime {
 	toISOString (                   )         { return this.#dateString; }
 	
 	constructor (dateString        ) {
-		LOCAL_DATETIME.test(dateString) || throws(SyntaxError$1(`Invalid Local Date-Time ${dateString} at ${where()}`));
+		LOCAL_DATETIME.test(dateString) || throws(SyntaxError$1(`Invalid Local Date-Time ${dateString}` + where(' at ')));
 		super();
 		this.#value = ( this.#dateString = dateString.replace(' ', 'T') ).replace(DELIMITER_DOT_ZERO, '');
 		return this;
@@ -1245,6 +1253,7 @@ class LocalDateTime extends Datetime {
 	}
 	
 }
+//@ts-ignore
 delete LocalDateTime.prototype.constructor;
 freeze(LocalDateTime.prototype);
 freeze(LocalDateTime);
@@ -1258,7 +1267,7 @@ class LocalDate extends Datetime {
 	toISOString (               )         { return this.#dateString; }
 	
 	constructor (dateString        ) {
-		LOCAL_DATE.test(dateString) || throws(SyntaxError$1(`Invalid Local Date ${dateString} at ${where()}`));
+		LOCAL_DATE.test(dateString) || throws(SyntaxError$1(`Invalid Local Date ${dateString}` + where(' at ')));
 		super();
 		this.#value = ( this.#dateString = dateString ).replace('-', '').replace('-', '');
 		return this;
@@ -1277,6 +1286,7 @@ class LocalDate extends Datetime {
 	setDate (                 value      ) { LocalDate.set(this, 8, 10, value); }
 	
 }
+//@ts-ignore
 delete LocalDate.prototype.constructor;
 freeze(LocalDate.prototype);
 freeze(LocalDate);
@@ -1290,7 +1300,7 @@ class LocalTime extends Datetime {
 	toISOString (               )         { return this.#dateString; }
 	
 	constructor (dateString        ) {
-		LOCAL_TIME.test(dateString) || throws(SyntaxError$1(`Invalid Local Time ${dateString} at ${where()}`));
+		LOCAL_TIME.test(dateString) || throws(SyntaxError$1(`Invalid Local Time ${dateString}` + where(' at ')));
 		super();
 		this.#value = ( this.#dateString = dateString ).replace(DELIMITER_DOT_ZERO, '');
 		return this;
@@ -1314,6 +1324,7 @@ class LocalTime extends Datetime {
 	}
 	
 }
+//@ts-ignore
 delete LocalTime.prototype.constructor;
 freeze(LocalTime.prototype);
 freeze(LocalTime);
@@ -1328,24 +1339,24 @@ const UNDERSCORES_SIGN = /_|^[-+]/g;
 const BigIntInteger = (literal        )         => {
 	D_INTEGER.test(literal)
 	|| /*options\$0.xob && */XOB_INTEGER.test(literal)
-	|| throws(SyntaxError$1(`Invalid Integer ${literal} at ${where()}`));
+	|| throws(SyntaxError$1(`Invalid Integer ${literal}` + where(' at ')));
 	let bigInt         = BigInt$1(literal.replace(UNDERSCORES_SIGN, ''));
 	if ( literal[0]==='-' ) { bigInt = -bigInt; }
 	allowLonger
 	|| -9223372036854775808n<=bigInt && bigInt<=9223372036854775807n// ( min = -(2n**(64n-1n)) || ~max ) <= long <= ( max = 2n**(64n-1n)-1n || ~min )
-	|| throws(RangeError$1(`Integer expect 64 bit range (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807), not includes ${literal} meet at ${where()}`));
+	|| throws(RangeError$1(`Integer expect 64 bit range (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807), not includes ${literal}` + where(' meet at ')));
 	return bigInt;
 };
 
 const NumberInteger = (literal        )         => {
 	D_INTEGER.test(literal)
 	|| /*options\$0.xob && */XOB_INTEGER.test(literal)
-	|| throws(SyntaxError$1(`Invalid Integer ${literal} at ${where()}`));
+	|| throws(SyntaxError$1(`Invalid Integer ${literal}` + where(' at ')));
 	const number = literal[0]==='-'
 		? -literal.replace(UNDERSCORES_SIGN, '')
 		: +literal.replace(UNDERSCORES_SIGN, '');
 	isSafeInteger(number)
-	|| throws(RangeError$1(`Integer did not use BitInt must fit Number.isSafeInteger, not includes ${literal} meet at ${where()}`));
+	|| throws(RangeError$1(`Integer did not use BitInt must fit Number.isSafeInteger, not includes ${literal}` + where(' meet at ')));
 	return number;
 };
 
@@ -1372,8 +1383,8 @@ const Float = (literal        )         => {
 	if ( FLOAT.test(literal) ) {
 		const number = +literal.replace(UNDERSCORES, '');
 		if ( sError ) {
-			isFinite$1(number) || throws(RangeError$1(`Float has been as big as inf, like ${literal} at ${where()}`));
-			number || ZERO.test(literal) || throws(RangeError$1(`Float has been as little as ${literal[0]==='-' ? '-' : ''}0, like ${literal} at ${where()}`));
+			isFinite$1(number) || throws(RangeError$1(`Float has been as big as inf, like ${literal}` + where(' at ')));
+			number || ZERO.test(literal) || throws(RangeError$1(`Float has been as little as ${literal[0]==='-' ? '-' : ''}0, like ${literal}` + where(' at ')));
 		}
 		return number;
 	}
@@ -1382,7 +1393,7 @@ const Float = (literal        )         => {
 	//	if ( literal==='-inf' ) { return -Infinity; }
 	//	if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) { return NaN; }
 	//}
-	throws(SyntaxError$1(`Invalid Float ${literal} at ${where()}`));
+	throws(SyntaxError$1(`Invalid Float ${literal}` + where(' at ')));
 };
 
 const parseInt$1 = parseInt;
@@ -1403,9 +1414,11 @@ const unEscapeSingleLine = (
 	if ( p1 ) { return ESCAPE_ALIAS[p1]; }
 	const codePoint         = parseInt$1(p2 ?? p3 , 16);
 	( 0xD7FF<codePoint && codePoint<0xE000 || 0x10FFFF<codePoint )
-	&& throws(RangeError$1('Invalid Unicode Scalar '+( p2 ? '\\u'+p2 : '\\U'+p3 )+' at '+where()));
+	&& throws(RangeError$1(`Invalid Unicode Scalar ${p2 ? '\\u' + p2 : '\\U' + p3}` + where(' at ')));
 	return fromCodePoint(codePoint);
 };
+
+let n = 0;
 
 const unEscapeMultiLine = (
 	match        ,
@@ -1414,18 +1427,24 @@ const unEscapeMultiLine = (
 	p3                    ,
 	p4                    
 )         => {
-	if ( match==='\n' ) { return useWhatToJoinMultiLineString; }
+	if ( match==='\n' ) {
+		++n;
+		return useWhatToJoinMultiLineString;
+	}
 	if ( p1 ) { return ''; }
 	if ( p2 ) { return ESCAPE_ALIAS[p2]; }
 	const codePoint         = parseInt$1(p3 ?? p4 , 16);
 	( 0xD7FF<codePoint && codePoint<0xE000 || 0x10FFFF<codePoint )
-	&& throws(RangeError$1('Invalid Unicode Scalar '+( p3 ? '\\u'+p3 : '\\U'+p4 )+' at '+where()));
+	&& throws(RangeError$1(`Invalid Unicode Scalar ${p3 ? '\\u' + p3 : '\\U' + p4}` + where(' at ', lineIndex + n)));
 	return fromCodePoint(codePoint);
 };
 
 const BasicString = (literal        )         => literal.replace(ESCAPED_IN_SINGLE_LINE, unEscapeSingleLine);
 
-const MultiLineBasicString = (literal        )         => literal.replace(ESCAPED_IN_MULTI_LINE, unEscapeMultiLine);
+const MultiLineBasicString = (literal        , skipped         )         => {
+	n = skipped ? 1 : 0;
+	return literal.replace(ESCAPED_IN_MULTI_LINE, unEscapeMultiLine);
+};
 
 const parseKeys = (key_key        )                          => {
 	const keys = key_key.match(__KEYS)                           ;
@@ -1438,7 +1457,7 @@ const parseKeys = (key_key        )                          => {
 	while ( index );
 	if ( disallowEmptyKey ) {
 		let index         = keys.length;
-		do { keys[--index] || throws(SyntaxError$1(`Empty key is not allowed before TOML v0.5, which at ${where()}`)); }
+		do { keys[--index] || throws(SyntaxError$1(`Empty key is not allowed before TOML v0.5` + where(', which at '))); }
 		while ( index );
 	}
 	return keys;
@@ -1452,13 +1471,13 @@ const prepareTable = (table       , keys               )        => {
 		if ( key in table ) {
 			table = table[key];
 			if ( isTable(table) ) {
-				isInline(table) && throws(Error$1(`Trying to define Table under static Inline Table at ${where()}`));
+				isInline(table) && throws(Error$1(`Trying to define Table under static Inline Table` + where(' at ')));
 			}
 			else if ( isArray(table) ) {
-				isStatic(table) && throws(Error$1(`Trying to append value to static Inline Array at ${where()}`));
+				isStatic(table) && throws(Error$1(`Trying to append value to static Inline Array` + where(' at ')));
 				table = table[( table          ).length - 1];
 			}
-			else { throws(Error$1(`Trying to define Table under non-Table value at ${where()}`)); }
+			else { throws(Error$1(`Trying to define Table under non-Table value` + where(' at '))); }
 		}
 		else {
 			table = table[key] = new Table(IMPLICITLY);
@@ -1477,7 +1496,7 @@ const appendTable = (table       , key_key        , asArrayItem         , tag   
 	let lastTable       ;
 	if ( asArrayItem ) {
 		let arrayOfTables              ;
-		if ( finalKey in table ) { isArray(arrayOfTables = table[finalKey]) && !isStatic(arrayOfTables) || throws(Error$1(`Trying to push Table to non-ArrayOfTables value at ${where()}`)); }
+		if ( finalKey in table ) { isArray(arrayOfTables = table[finalKey]) && !isStatic(arrayOfTables) || throws(Error$1(`Trying to push Table to non-ArrayOfTables value` + where(' at '))); }
 		else { arrayOfTables = table[finalKey] = newArray(OF_TABLES); }
 		tag && collect(tag, arrayOfTables, table, finalKey);
 		arrayOfTables[arrayOfTables.length] = lastTable = new Table(DIRECTLY);
@@ -1485,9 +1504,9 @@ const appendTable = (table       , key_key        , asArrayItem         , tag   
 	else {
 		if ( finalKey in table ) {
 			lastTable = table[finalKey];
-			wasDirectly(lastTable) && throws(Error$1(`Duplicate Table definition at ${where()}`));
+			wasDirectly(lastTable) && throws(Error$1(`Duplicate Table definition` + where(' at ')));
 			directly(lastTable);
-			fromPair(lastTable) && throws(Error$1(`A table defined implicitly via key/value pair can not be accessed to via [], which at ${where()}`));
+			fromPair(lastTable) && throws(Error$1(`A table defined implicitly via key/value pair can not be accessed to via []` + where(', which at ')));
 		}
 		else { table[finalKey] = lastTable = new Table(DIRECTLY); }
 		tag && collect(tag, null, table, finalKey);
@@ -1502,9 +1521,9 @@ const prepareInlineTable = (table       , keys          )        => {
 		const key         = keys[index++] ;
 		if ( key in table ) {
 			table = table[key];
-			isTable(table) || throws(Error$1(`Trying to assign property through non-Table value at ${where()}`));
-			isInline(table) && throws(Error$1(`Trying to assign property through static Inline Table at ${where()}`));
-			fromPair(table) || throws(Error$1(`A table defined implicitly via [] can not be accessed to via key/value pair, which at ${where()}`));
+			isTable(table) || throws(Error$1(`Trying to assign property through non-Table value` + where(' at ')));
+			isInline(table) && throws(Error$1(`Trying to assign property through static Inline Table` + where(' at ')));
+			fromPair(table) || throws(Error$1(`A table defined implicitly via [] can not be accessed to via key/value pair` + where(', which at ')));
 		}
 		else {
 			table = table[key] = new Table(IMPLICITLY, PAIR);
@@ -1516,14 +1535,14 @@ const prepareInlineTable = (table       , keys          )        => {
 };
 
 const checkLiteralString = (literal        )         => {
-	__CONTROL_CHARACTER_EXCLUDE.test(literal) && throws(SyntaxError$1(`Control characters other than Tab are not permitted in a Literal String, which was found at ${where()}`));
+	__CONTROL_CHARACTER_EXCLUDE.test(literal) && throws(SyntaxError$1(`Control characters other than Tab are not permitted in a Literal String` + where(', which was found at ')));
 	return literal;
 };
 
 const assignLiteralString = ( (table       , finalKey        , literal        )         => {
-	let $;
+	let $                                                                        ;
 	if ( literal[1]!=='\'' || literal[2]!=='\'' ) {
-		$ = LITERAL_STRING_exec(literal) ?? throws(SyntaxError$1(where()));
+		$ = LITERAL_STRING_exec(literal) ?? throws(SyntaxError$1(`Bad literal string` + where(' at ')));
 		table[finalKey] = checkLiteralString($[1]);
 		return $[2];
 	}
@@ -1537,9 +1556,9 @@ const assignLiteralString = ( (table       , finalKey        , literal        ) 
 		checkLiteralString(literal);
 		literal += useWhatToJoinMultiLineString;
 	}
-	const start         = mark();
+	const start = mark('Literal String');
 	for ( ; ; ) {
-		const line         = must('Literal String', start);
+		const line         = must(start);
 		$ = MULTI_LINE_LITERAL_STRING_exec(line);
 		if ( $ ) {
 			table[finalKey] = literal + checkLiteralString($[1]) + $[2];
@@ -1562,28 +1581,30 @@ const assignBasicString = ( (table       , finalKey        , literal        )   
 	const $ = MULTI_LINE_BASIC_STRING_exec_0(literal);
 	let { length } = $;
 	if ( literal.startsWith('"""', length) ) {
-		ESCAPED_EXCLUDE_CONTROL_CHARACTER_test($) || throws(SyntaxError$1(where()));
+		ESCAPED_EXCLUDE_CONTROL_CHARACTER_test($) || throws(SyntaxError$1(`Bad multi-line basic string` + where(' at ')));
 		length += 3;
-		table[finalKey] = MultiLineBasicString($) + ( endsWithQuote ? literal[length]==='"' ? literal[++length]==='"' ? ( ++length, '""' ) : '"' : '' : '' );
+		table[finalKey] = BasicString($) + ( endsWithQuote ? literal[length]==='"' ? literal[++length]==='"' ? ( ++length, '""' ) : '"' : '' : '' );
 		return literal.slice(length).replace(PRE_WHITESPACE, '');
 	}
+	let skipped = true;
 	if ( literal ) {
 		literal += '\n';
-		ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(literal) || throws(SyntaxError$1(where()));
+		ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(literal) || throws(SyntaxError$1(`Bad multi-line basic string` + where(' at ')));
+		skipped = false;
 	}
-	const start         = mark();
+	const start = mark('Basic String');
 	for ( ; ; ) {
-		let line         = must('Basic String', start);
+		let line         = must(start);
 		const $ = MULTI_LINE_BASIC_STRING_exec_0(line);
 		let { length } = $;
 		if ( line.startsWith('"""', length) ) {
-			ESCAPED_EXCLUDE_CONTROL_CHARACTER_test($) || throws(SyntaxError$1(where()));
+			ESCAPED_EXCLUDE_CONTROL_CHARACTER_test($) || throws(SyntaxError$1(`Bad multi-line basic string` + where(' at ')));
 			length += 3;
-			table[finalKey] = MultiLineBasicString(literal + $) + ( endsWithQuote ? line[length]==='"' ? line[++length]==='"' ? ( ++length, '""' ) : '"' : '' : '' );
+			table[finalKey] = MultiLineBasicString(literal + $, skipped) + ( endsWithQuote ? line[length]==='"' ? line[++length]==='"' ? ( ++length, '""' ) : '"' : '' : '' );
 			return line.slice(length).replace(PRE_WHITESPACE, '');
 		}
 		line += '\n';
-		ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(line) || throws(SyntaxError$1(where()));
+		ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(line) || throws(SyntaxError$1(`Bad multi-line basic string` + where(' at ')));
 		literal += line;
 	}
 } )     
@@ -1593,7 +1614,7 @@ const assignBasicString = ( (table       , finalKey        , literal        )   
 
 const push = (lastArray       , lineRest        )         => {
 	if ( lineRest[0]==='<' ) {
-		const { 1: tag } = { 2: lineRest } = _VALUE_PAIR_exec(lineRest) ?? throws(SyntaxError$1(where()));
+		const { 1: tag } = { 2: lineRest } = _VALUE_PAIR_exec(lineRest) ?? throws(SyntaxError$1(`Bad tag ` + where(' at ')));
 		collect(tag, lastArray, null);
 		switch ( lineRest && lineRest[0] ) {
 			case ',':
@@ -1610,14 +1631,14 @@ const push = (lastArray       , lineRest        )         => {
 		case '"':
 			return assignBasicString(asStrings(lastArray), lastArray.length, lineRest);
 		case '{':
-			inlineTable || throws(SyntaxError$1(`Inline Table is not allowed before TOML v0.4, which at ${where()}`));
+			inlineTable || throws(SyntaxError$1(`Inline Table is not allowed before TOML v0.4` + where(', which at ')));
 			stacks_push(lineRest => equalInlineTable(asTables(lastArray), lastArray.length, lineRest));
 			return lineRest;
 		case '[':
 			stacks_push(lineRest => equalStaticArray(asArrays(lastArray), lastArray.length, lineRest));
 			return lineRest;
 	}
-	const { 1: literal } = { 2: lineRest } = VALUE_REST_exec(lineRest) ?? throws(SyntaxError$1(where()));
+	const { 1: literal } = { 2: lineRest } = VALUE_REST_exec(lineRest) ?? throws(SyntaxError$1(`Bad atom value` + where(' at ')));
 	if ( sFloat ) {
 		if ( literal==='inf' || literal==='+inf' ) {
 			asFloats(lastArray)[lastArray.length] = Infinity;
@@ -1638,18 +1659,18 @@ const push = (lastArray       , lineRest        )         => {
 				asOffsetDateTimes(lastArray)[lastArray.length] = new OffsetDateTime(literal);
 			}
 			else {
-				moreDatetime || throws(SyntaxError$1(where()));
+				moreDatetime || throws(SyntaxError$1(`Local Date-Time is not allowed before TOML v0.5` + where(', which at ')));
 				asLocalDateTimes(lastArray)[lastArray.length] = new LocalDateTime(literal);
 			}
 		}
 		else {
-			moreDatetime || throws(SyntaxError$1(where()));
+			moreDatetime || throws(SyntaxError$1(`Local Time is not allowed before TOML v0.5` + where(', which at ')));
 			asLocalTimes(lastArray)[lastArray.length] = new LocalTime(literal);
 		}
 		return lineRest;
 	}
 	if ( literal.indexOf('-')!==literal.lastIndexOf('-') && literal[0]!=='-' ) {
-		moreDatetime || throws(SyntaxError$1(where()));
+		moreDatetime || throws(SyntaxError$1(`Local Date is not allowed before TOML v0.5` + where(', which at ')));
 		asLocalDates(lastArray)[lastArray.length] = new LocalDate(literal);
 		return lineRest;
 	}
@@ -1662,10 +1683,10 @@ const push = (lastArray       , lineRest        )         => {
 
 const equalStaticArray = ( (table       , finalKey        , lineRest        )         => {
 	const staticArray        = table[finalKey] = newArray(STATICALLY);
-	const start         = mark();
+	const start = mark('Inline Array');
 	lineRest = lineRest.replace(SYM_WHITESPACE, '');
 	while ( !lineRest || lineRest[0]==='#' ) {
-		lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, '');
+		lineRest = must(start).replace(PRE_WHITESPACE, '');
 	}
 	if ( lineRest[0]===']' ) { return lineRest.replace(SYM_WHITESPACE, ''); }
 	const length = stacks_length;
@@ -1676,18 +1697,18 @@ const equalStaticArray = ( (table       , finalKey        , lineRest        )   
 				stacks_insertBeforeLast(function inserted (lineRest) {
 					//
 					while ( !lineRest || lineRest[0]==='#' ) {//
-						lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, '');//
+						lineRest = must(start).replace(PRE_WHITESPACE, '');//
 					}//
 					if ( lineRest[0]===',' ) {//
 						lineRest = lineRest.replace(SYM_WHITESPACE, '');//
 						while ( !lineRest || lineRest[0]==='#' ) {//
-							lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, '');//
+							lineRest = must(start).replace(PRE_WHITESPACE, '');//
 						}//
 						if ( lineRest[0]===']' ) { return lineRest.replace(SYM_WHITESPACE, ''); }//
 					}//
 					else {//
 						if ( lineRest[0]===']' ) { return lineRest.replace(SYM_WHITESPACE, ''); }//
-						throws(SyntaxError$1(where()));//
+						throws(SyntaxError$1(`Unexpect character after static array item value` + where(', which is found at ')));//
 					}//
 					//
 					return callee(lineRest);
@@ -1695,18 +1716,18 @@ const equalStaticArray = ( (table       , finalKey        , lineRest        )   
 				return lineRest;
 			}
 			while ( !lineRest || lineRest[0]==='#' ) {
-				lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, '');
+				lineRest = must(start).replace(PRE_WHITESPACE, '');
 			}
 			if ( lineRest[0]===',' ) {
 				lineRest = lineRest.replace(SYM_WHITESPACE, '');
 				while ( !lineRest || lineRest[0]==='#' ) {
-					lineRest = must('Inline Array', start).replace(PRE_WHITESPACE, '');
+					lineRest = must(start).replace(PRE_WHITESPACE, '');
 				}
 				if ( lineRest[0]===']' ) { return lineRest.replace(SYM_WHITESPACE, ''); }
 			}
 			else {
 				if ( lineRest[0]===']' ) { return lineRest.replace(SYM_WHITESPACE, ''); }
-				throws(SyntaxError$1(where()));
+				throws(SyntaxError$1(`Unexpect character in static array item value` + where(', which is found at ')));
 			}
 		}
 	}(lineRest);
@@ -1717,14 +1738,14 @@ const equalStaticArray = ( (table       , finalKey        , lineRest        )   
 
 const equalInlineTable = ( (table       , finalKey        , lineRest        )         => {
 	const inlineTable        = table[finalKey] = new Table(DIRECTLY, INLINE);
-	lineRest = lineRest.replace(SYM_WHITESPACE, '');
 	if ( allowInlineTableMultiLineAndTrailingCommaEvenNoComma ) {
-		const start         = mark();
+		const start = mark('Inline Table');
+		lineRest = lineRest.replace(SYM_WHITESPACE, '');
 		const length = stacks_length;
 		return function callee (lineRest) {
 			for ( ; ; ) {
 				while ( !lineRest || lineRest[0]==='#' ) {
-					lineRest = must('Inline Table', start).replace(PRE_WHITESPACE, '');
+					lineRest = must(start).replace(PRE_WHITESPACE, '');
 				}
 				if ( lineRest[0]==='}' ) { return lineRest.replace(SYM_WHITESPACE, ''); }
 				lineRest = assign(inlineTable, lineRest);
@@ -1732,7 +1753,7 @@ const equalInlineTable = ( (table       , finalKey        , lineRest        )   
 					stacks_insertBeforeLast(function inserted (lineRest) {
 						//
 						while ( !lineRest || lineRest[0]==='#' ) {//
-							lineRest = must('Inline Table', start).replace(PRE_WHITESPACE, '');//
+							lineRest = must(start).replace(PRE_WHITESPACE, '');//
 						}//
 						if ( lineRest[0]===',' ) { lineRest = lineRest.replace(SYM_WHITESPACE, ''); }//
 						//
@@ -1741,15 +1762,16 @@ const equalInlineTable = ( (table       , finalKey        , lineRest        )   
 					return lineRest;
 				}
 				while ( !lineRest || lineRest[0]==='#' ) {
-					lineRest = must('Inline Table', start).replace(PRE_WHITESPACE, '');
+					lineRest = must(start).replace(PRE_WHITESPACE, '');
 				}
 				if ( lineRest[0]===',' ) { lineRest = lineRest.replace(SYM_WHITESPACE, ''); }
 			}
 		}(lineRest);
 	}
 	else {
+		lineRest = lineRest.replace(SYM_WHITESPACE, '');
 		if ( lineRest[0]==='}' ) { return lineRest.replace(SYM_WHITESPACE, ''); }
-		lineRest && lineRest[0]!=='#' || throws(SyntaxError$1(`Inline Table is intended to appear on a single line, which broken at ${where()}`));
+		lineRest && lineRest[0]!=='#' || throws(SyntaxError$1(`Inline Table is intended to appear on a single line` + where(', which broken at ')));
 		const length = stacks_length;
 		return function callee (lineRest) {
 			for ( ; ; ) {
@@ -1760,9 +1782,9 @@ const equalInlineTable = ( (table       , finalKey        , lineRest        )   
 						if ( lineRest[0]==='}' ) { return lineRest.replace(SYM_WHITESPACE, ''); }//
 						if ( lineRest[0]===',' ) {//
 							lineRest = lineRest.replace(SYM_WHITESPACE, '');//
-							lineRest[0]==='}' && throws(SyntaxError$1(`The last property of an Inline Table can not have a trailing comma, which was found at ${where()}`));//
+							lineRest[0]==='}' && throws(SyntaxError$1(`The last property of an Inline Table can not have a trailing comma` + where(', which was found at ')));//
 						}//
-						( !lineRest || lineRest[0]==='#' ) && throws(SyntaxError$1(`Inline Table is intended to appear on a single line, which broken at ${where()}`));//
+						( !lineRest || lineRest[0]==='#' ) && throws(SyntaxError$1(`Inline Table is intended to appear on a single line` + where(', which broken at ')));//
 						//
 						return callee(lineRest);
 					});
@@ -1771,9 +1793,9 @@ const equalInlineTable = ( (table       , finalKey        , lineRest        )   
 				if ( lineRest[0]==='}' ) { return lineRest.replace(SYM_WHITESPACE, ''); }
 				if ( lineRest[0]===',' ) {
 					lineRest = lineRest.replace(SYM_WHITESPACE, '');
-					lineRest[0]==='}' && throws(SyntaxError$1(`The last property of an Inline Table can not have a trailing comma, which was found at ${where()}`));
+					lineRest[0]==='}' && throws(SyntaxError$1(`The last property of an Inline Table can not have a trailing comma` + where(', which was found at ')));
 				}
-				( !lineRest || lineRest[0]==='#' ) && throws(SyntaxError$1(`Inline Table is intended to appear on a single line, which broken at ${where()}`));
+				( !lineRest || lineRest[0]==='#' ) && throws(SyntaxError$1(`Inline Table is intended to appear on a single line` + where(', which broken at ')));
 			}
 		}(lineRest);
 	}
@@ -1788,7 +1810,7 @@ const assign = (lastInlineTable       , lineRest        )         => {
 	const finalKey         = leadingKeys[leadingKeys.length - 1] ;
 	--leadingKeys.length;
 	const table        = prepareInlineTable(lastInlineTable, leadingKeys);
-	finalKey in table && throws(Error$1(`Duplicate property definition at ${where()}`));
+	finalKey in table && throws(Error$1(`Duplicate property definition` + where(' at ')));
 	if ( tag ) {
 		collect(tag, null, table, finalKey);
 		switch ( lineRest && lineRest[0] ) {
@@ -1806,14 +1828,14 @@ const assign = (lastInlineTable       , lineRest        )         => {
 		case '"':
 			return assignBasicString(table, finalKey, lineRest);
 		case '{':
-			inlineTable || throws(SyntaxError$1(`Inline Table is not allowed before TOML v0.4, which at ${where()}`));
+			inlineTable || throws(SyntaxError$1(`Inline Table is not allowed before TOML v0.4` + where(', which at ')));
 			stacks_push((lineRest        )         => equalInlineTable(table, finalKey, lineRest));
 			return lineRest;
 		case '[':
 			stacks_push((lineRest        )         => equalStaticArray(table, finalKey, lineRest));
 			return lineRest;
 	}
-	const { 1: literal } = { 2: lineRest } = VALUE_REST_exec(lineRest) ?? throws(SyntaxError$1(where()));
+	const { 1: literal } = { 2: lineRest } = VALUE_REST_exec(lineRest) ?? throws(SyntaxError$1(`Bad atom value` + where(' at ')));
 	if ( sFloat ) {
 		if ( literal==='inf' || literal==='+inf' ) {
 			table[finalKey] = Infinity;
@@ -1834,18 +1856,18 @@ const assign = (lastInlineTable       , lineRest        )         => {
 				table[finalKey] = new OffsetDateTime(literal);
 			}
 			else {
-				moreDatetime || throws(SyntaxError$1(where()));
+				moreDatetime || throws(SyntaxError$1(`Local Date-Time is not allowed before TOML v0.5` + where(', which at ')));
 				table[finalKey] = new LocalDateTime(literal);
 			}
 		}
 		else {
-			moreDatetime || throws(SyntaxError$1(where()));
+			moreDatetime || throws(SyntaxError$1(`Local Time is not allowed before TOML v0.5` + where(', which at ')));
 			table[finalKey] = new LocalTime(literal);
 		}
 		return lineRest;
 	}
 	if ( literal.indexOf('-')!==literal.lastIndexOf('-') && literal[0]!=='-' ) {
-		moreDatetime || throws(SyntaxError$1(where()));
+		moreDatetime || throws(SyntaxError$1(`Local Date is not allowed before TOML v0.5` + where(', which at ')));
 		table[finalKey] = new LocalDate(literal);
 		return lineRest;
 	}
@@ -1864,16 +1886,16 @@ const Root = ()        => {
 		if ( line ) {
 			if ( line[0]==='[' ) {
 				const { $_asArrayItem$$, keys, $$asArrayItem$_, tag } = TABLE_DEFINITION_exec_groups(line);
-				$_asArrayItem$$===$$asArrayItem$_ || throws(SyntaxError$1(`Square brackets of Table definition statement not match at ${where()}`));
+				$_asArrayItem$$===$$asArrayItem$_ || throws(SyntaxError$1(`Square brackets of Table definition statement not match` + where(' at ')));
 				lastSectionTable = appendTable(rootTable, keys, $_asArrayItem$$, tag);
 			}
 			else if ( line[0]==='#' ) {
-				__CONTROL_CHARACTER_EXCLUDE.test(line) && throws(SyntaxError$1(`Control characters other than Tab are not permitted in comments, which was found at ${where()}`));
+				__CONTROL_CHARACTER_EXCLUDE.test(line) && throws(SyntaxError$1(`Control characters other than Tab are not permitted in comments` + where(', which was found at ')));
 			}
 			else {
 				let rest         = assign(lastSectionTable, line);
 				while ( stacks_length ) { rest = stacks_pop()(rest); }
-				rest && rest[0]!=='#' && throws(SyntaxError$1(where()));
+				rest && rest[0]!=='#' && throws(SyntaxError$1(`Unexpect charachtor after key/value pair` + where(' at ')));
 			}
 		}
 	}
@@ -1886,7 +1908,8 @@ const parse$1 = (
 	specificationVersion                                   ,
 	multiLineJoiner        ,
 	useBigInt                   = true,
-	xOptions                    
+	xOptions                    ,
+	sourcePath         = '',
 )        => {
 	could();
 	if ( isBuffer(sourceContent) ) {
@@ -1900,7 +1923,7 @@ const parse$1 = (
 		if ( NON_SCALAR.test(sourceContent) ) { throw Error$1('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any uncoupled UCS-4 character code.'); }
 		try {
 			use(specificationVersion, multiLineJoiner, useBigInt, xOptions);
-			todo(sourceContent);
+			todo(sourceContent, sourcePath);
 			try {
 				const rootTable = Root();
 				process();

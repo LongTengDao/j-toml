@@ -1,25 +1,21 @@
 import Error from '.Error';
+import TypeError from '.TypeError';
 import SyntaxError from '.SyntaxError';
 
 //import * as options\$0 from './options\$0';
 
 const NONE :Array<string> = [];
+let sourcePath :string = '';
 let sourceLines :Array<string> = NONE;
 let lastLineIndex :number = -1;
-let lineIndex :number = -1;
+export let lineIndex :number = -1;
 
 interface ErrorThrown extends Error {
 	lineIndex? :number
 	lineNumber? :number
 }
 export const throws :(error :ErrorThrown) => never = (error :ErrorThrown) :never => {
-	if ( sourceLines!==NONE ) {
-		//done();
-		//options\$0.clear();
-		//error.stack = error.stack!.replace('\n', `\n    at (*.toml:${lineIndex+1}:0)\n@*.toml:${lineIndex+1}\n`);
-		error.lineIndex = lineIndex;
-		error.lineNumber = lineIndex+1;
-	}
+	//if ( sourceLines!==NONE ) { done(); options\$0.clear(); }
 	throw error;
 };
 
@@ -39,9 +35,11 @@ export const could = () :void => {
 };
 
 const EOL = /\r?\n/;
-export const todo = (source :string) :void => {
+export const todo = (source :string, path :string) :void => {
+	if ( typeof path!=='string' ) { throw TypeError('TOML.parse(,,,,sourcePath)'); }
+	sourcePath = path;
 	sourceLines = source.split(EOL);
-	lastLineIndex = sourceLines.length-1;
+	lastLineIndex = sourceLines.length - 1;
 	lineIndex = -1;
 	stacks_length = 0;
 	last = noop;
@@ -51,16 +49,20 @@ export const next = () :string => sourceLines[++lineIndex]!;
 
 export const rest = () :boolean => lineIndex!==lastLineIndex;
 
-export const mark = () :number => lineIndex;
+export const mark = (type :string) => ( { type, lineIndex } );
 
-export const must = (message :string, startIndex :number) :string => {
-	lineIndex===lastLineIndex && throws(SyntaxError(message+' is not close until the end of the file, which started from line '+( startIndex+1 )+': '+sourceLines[startIndex]));
+export const must = (marker :{ type :string, lineIndex :number }) :string => {
+	lineIndex===lastLineIndex && throws(SyntaxError(`${marker.type} is not close until the end of the file` + where(', which started from ', marker.lineIndex)));
 	return sourceLines[++lineIndex]!;
 };
 
-export const where = () :string => 'line '+( lineIndex+1 )+': '+sourceLines[lineIndex];
+export const where = (pre :string, index :number = lineIndex) :string => sourceLines===NONE ? '' :
+	sourcePath
+		? `\n    at (${sourcePath}:${index + 1}:1)`
+		: `${pre}line ${index + 1}: ${sourceLines[index]}`;
 
 export const done = () :void => {
+	sourcePath = '';
 	sourceLines = NONE;
 	last = noop;
 };

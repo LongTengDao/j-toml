@@ -82,13 +82,14 @@ const TAG_REST_exec = newRegExp.s!`
 
 const MULTI_LINE_BASIC_STRING_exec = Exec(/^(?:[^\\"]+|\\.|""?(?!"))/s);
 export const MULTI_LINE_BASIC_STRING_exec_0 = (_ :string) :string => {
-	for ( let _0 :string = ''; ; ) {
-		if ( !_ ) { return _0; }
+	let _0 :string = '';
+	while ( _ ) {
 		const $ = MULTI_LINE_BASIC_STRING_exec(_);
-		if ( !$ ) { return _0; }
+		if ( !$ ) { break; }
 		_0 += $[0];
 		_ = _.slice($[0].length);
 	}
+	return _0;
 };
 
 const ESCAPED_EXCLUDE_CONTROL_CHARACTER_TAB______ = /[^\\\x00-\x08\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|[ \t]*\n[ \t\n]*|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
@@ -108,7 +109,7 @@ export const BASIC_STRING_exec = (_2 :string) :{ 1 :string, 2 :string } => {
 	for ( let _1 :string = ''; ; ) {
 		const $ = __BASIC_STRING_exec(_2);
 		if ( !$ ) {
-			_2[0]==='"' || iterator$0.throws(SyntaxError(iterator$0.where()));
+			_2[0]==='"' || iterator$0.throws(SyntaxError(`Bad basic string` + iterator$0.where(' at ')));
 			return { 1: _1, 2: _2.replace(SYM_WHITESPACE, '') };
 		}
 		_1 += $[0];
@@ -136,12 +137,12 @@ const getKeys = (_ :string) :string => {
 				_ = _.slice($[0].length);
 				key += $[0];
 			}
-			_[0]==='"' || iterator$0.throws(SyntaxError(iterator$0.where()));
+			_[0]==='"' || iterator$0.throws(SyntaxError(`Bad basic string key` + iterator$0.where(' at ')));
 			_ = _.slice(1);
 			keys += key + '"';
 		}
 		else {
-			const key :string = ( ( _.startsWith('\'') ? __LITERAL_KEY_exec : __BARE_KEY_exec )(_) ?? iterator$0.throws(SyntaxError(iterator$0.where())) )[0];
+			const key :string = ( ( _.startsWith('\'') ? __LITERAL_KEY_exec : __BARE_KEY_exec )(_) ?? iterator$0.throws(SyntaxError(`Bad ${_.startsWith('\'') ? 'literal string' : 'bare'} key` + iterator$0.where(' at '))) )[0];
 			_ = _.slice(key.length);
 			keys += key;
 		}
@@ -155,27 +156,27 @@ const getKeys = (_ :string) :string => {
 export const TABLE_DEFINITION_exec_groups = (_ :string) :{ $_asArrayItem$$ :boolean, keys :string, $$asArrayItem$_ :boolean, tag :string } => {
 	const $_asArrayItem$$ :boolean = _[1]==='[';
 	if ( $_asArrayItem$$ ) {
-		supportArrayOfTables || iterator$0.throws(SyntaxError(`Array of Tables is not allowed before TOML v0.2, which at ${iterator$0.where()}`));
+		supportArrayOfTables || iterator$0.throws(SyntaxError(`Array of Tables is not allowed before TOML v0.2` + iterator$0.where(', which at ')));
 		_ = _.slice(2);
 	}
 	else { _ = _.slice(1); }
 	_ = _.replace(PRE_WHITESPACE, '');
 	const keys :string = getKeys(_);
 	_ = _.slice(keys.length).replace(PRE_WHITESPACE, '');
-	_[0]===']' || iterator$0.throws(SyntaxError(iterator$0.where()));
+	_[0]===']' || iterator$0.throws(SyntaxError(`Table header is not closed` + iterator$0.where(', which is found at ')));
 	const $$asArrayItem$_ :boolean = _[1]===']';
 	_ = _.slice($$asArrayItem$_ ? 2 : 1).replace(PRE_WHITESPACE, '');
 	let tag :string;
-	if ( _[0]==='<' ) { ( { 1: tag, 2: _ } = TAG_REST_exec(_) ?? iterator$0.throws(SyntaxError(iterator$0.where())) ); }
+	if ( _[0]==='<' ) { ( { 1: tag, 2: _ } = TAG_REST_exec(_) ?? iterator$0.throws(SyntaxError(`Bad tag` + iterator$0.where(' at '))) ); }
 	else { tag = ''; }
-	!_ || _[0]==='#' || iterator$0.throws(SyntaxError(iterator$0.where()));
+	!_ || _[0]==='#' || iterator$0.throws(SyntaxError(`Unexpect charachtor after table header` + iterator$0.where(' at ')));
 	return { $_asArrayItem$$, keys, $$asArrayItem$_, tag };
 };
 
 export const KEY_VALUE_PAIR_exec_groups = (_ :string) :{ left :string, tag :string, right :string } => {
 	const left :string = getKeys(_);
-	const { 1: tag = '', 2: right } = KEY_VALUE_PAIR_exec(_.slice(left.length)) ?? iterator$0.throws(SyntaxError(iterator$0.where()));
-	tag || right && right[0]!=='#' || iterator$0.throws(SyntaxError(iterator$0.where()));
+	const { 1: tag = '', 2: right } = KEY_VALUE_PAIR_exec(_.slice(left.length)) ?? iterator$0.throws(SyntaxError(`Keys must equal something` + iterator$0.where(', but missing at ')));
+	tag || right && right[0]!=='#' || iterator$0.throws(SyntaxError(`Value can not be missing after euqal sign` + iterator$0.where(', which is found at ')));
 	return { left, tag, right };
 };
 

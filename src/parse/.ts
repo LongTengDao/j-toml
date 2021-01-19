@@ -18,7 +18,8 @@ const parse = (
 	specificationVersion :1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1,
 	multiLineJoiner :string,
 	useBigInt :boolean | number = true,
-	xOptions :options$0.XOptions
+	xOptions :options$0.XOptions,
+	sourcePath :string = '',
 ) :Table => {
 	iterator$0.could();
 	if ( isBuffer(sourceContent) ) {
@@ -32,7 +33,7 @@ const parse = (
 		if ( NON_SCALAR.test(sourceContent) ) { throw Error('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any uncoupled UCS-4 character code.'); }
 		try {
 			options$0.use(specificationVersion, multiLineJoiner, useBigInt, xOptions);
-			iterator$0.todo(sourceContent);
+			iterator$0.todo(sourceContent, sourcePath);
 			try {
 				const rootTable = Root();
 				options$0.process();
