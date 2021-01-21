@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '1.1.0';
+const version = '1.2.0';
 
 const Error$1 = Error;
 
@@ -610,7 +610,7 @@ const SYM_WHITESPACE = newRegExp.s `
 	${Whitespace}*`;
 
 
-const Tag = /[^<>\\"'`\r\n\u2028\u2029]+/;
+const Tag = /[^\x00-\x1F"#'()<>[\\\]`{}\x7F]+/;
 
 const KEY_VALUE_PAIR_exec = newRegExp.s `
 	^

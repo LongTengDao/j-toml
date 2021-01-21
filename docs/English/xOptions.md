@@ -96,7 +96,7 @@ ArrayOf = <tag> [        # processorForEach({ table: root, key: 'ArrayOf',      
 [[Items]] <tag>          # processorForEach({ table: root, key: 'Items',   array: root.Items,   index: 0, tag: 'tag' })
 ```
 
-Tag content could include any character rather than `<` `>` <code>&#92;</code> `"` `'` <code>&#96;</code> CR LF U+2028 U+2029, but it must not be empty.
+Tag content could include any non-control character rather than `<` `>` `(` `)` `[` `]` `{` `}` <code>&#92;</code> `"` `'` <code>&#96;</code> `#`, but it must not be empty.
 
 Tags are processed from after to before.
 

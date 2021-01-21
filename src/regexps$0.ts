@@ -50,7 +50,7 @@ export const SYM_WHITESPACE = newRegExp.s!`
 	${Whitespace}*`;
 
 
-const Tag = /[^<>\\"'`\r\n\u2028\u2029]+/;
+const Tag = /[^\x00-\x1F"#'()<>[\\\]`{}\x7F]+/;
 
 const KEY_VALUE_PAIR_exec = newRegExp.s!`
 	^
