@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '1.2.0';
+const version = '1.3.0';
 
 const Error$1 = Error;
 
@@ -105,7 +105,7 @@ function RE (               template                      ) {
 	var M = this.M;
 	var S = this.S;
 	var raw = template.raw;
-	var source = raw[0].replace(NT, '');
+	var source = raw[0] .replace(NT, '');
 	var index = 1;
 	var length = arguments.length;
 	while ( index!==length ) {
@@ -120,7 +120,7 @@ function RE (               template                      ) {
 			if ( value.dotAll===S && value_source.indexOf('.')>=0 ) { throw SyntaxError$1('dotAll'); }
 			source += value_source;
 		}
-		source += raw[index++].replace(NT, '');
+		source += raw[index++] .replace(NT, '');
 	}
 	var re = RegExp$1(U ? source = source.replace(ESCAPE, graveAccentReplacer) : source, this.flags);
 	var test = re.test = test_bind(re);
@@ -574,7 +574,7 @@ const Whitespace = /[ \t]/;
 const PRE_WHITESPACE = newRegExp`
 	^${Whitespace}+`;
 
-const VALUE_REST_exec = newRegExp.s `
+const VALUE_REST_exec = newRegExp.s`
 	^
 	(
 		(?:\d\d\d\d-\d\d-\d\d \d)?
@@ -584,19 +584,19 @@ const VALUE_REST_exec = newRegExp.s `
 	(.*)
 	$`.exec                                    ;
 
-const LITERAL_STRING_exec = newRegExp.s `
+const LITERAL_STRING_exec = newRegExp.s`
 	^
 	'([^']*)'
 	${Whitespace}*
 	(.*)`.exec                                    ;
 
-const MULTI_LINE_LITERAL_STRING_0_1_2 = newRegExp.s `
+const MULTI_LINE_LITERAL_STRING_0_1_2 = newRegExp.s`
 	^
 	(.*?)
 	'''('{0,2})
 	${Whitespace}*
 	(.*)`.exec                                            ;
-const MULTI_LINE_LITERAL_STRING_0 = newRegExp.s `
+const MULTI_LINE_LITERAL_STRING_0 = newRegExp.s`
 	^
 	(.*?)
 	'''()
@@ -604,7 +604,7 @@ const MULTI_LINE_LITERAL_STRING_0 = newRegExp.s `
 	(.*)`.exec                                            ;
 let MULTI_LINE_LITERAL_STRING_exec                                          ;
 
-const SYM_WHITESPACE = newRegExp.s `
+const SYM_WHITESPACE = newRegExp.s`
 	^
 	.
 	${Whitespace}*`;
@@ -612,7 +612,7 @@ const SYM_WHITESPACE = newRegExp.s `
 
 const Tag = /[^\x00-\x1F"#'()<>[\\\]`{}\x7F]+/;
 
-const KEY_VALUE_PAIR_exec = newRegExp.s `
+const KEY_VALUE_PAIR_exec = newRegExp.s`
 	^
 	${Whitespace}*
 	=
@@ -624,14 +624,14 @@ const KEY_VALUE_PAIR_exec = newRegExp.s `
 	(.*)
 	$`.exec                                                ;
 
-const _VALUE_PAIR_exec = newRegExp.s `
+const _VALUE_PAIR_exec = newRegExp.s`
 	^
 	<(${Tag})>
 	${Whitespace}*
 	(.*)
 	$`.exec                                    ;
 
-const TAG_REST_exec = newRegExp.s `
+const TAG_REST_exec = newRegExp.s`
 	^
 	<(${Tag})>
 	${Whitespace}*
@@ -969,6 +969,7 @@ const use = (specificationVersion         , multiLineJoiner         , useBigInt 
 	else if ( typeof xOptions==='function' ) {
 		Table = OrderedTable;
 		allowLonger = sError = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = true;
+		if ( !mixed ) { throw TypeError$1('TOML.parse(,,,,tag) needs at least TOML 1.0 to support mixed type array'); }
 		processor = xOptions;
 		collect = collect_on;
 	}
@@ -982,7 +983,7 @@ const use = (specificationVersion         , multiLineJoiner         , useBigInt 
 		allowInlineTableMultiLineAndTrailingCommaEvenNoComma = !!multi;
 		if ( tag ) {
 			if ( typeof tag!=='function' ) { throw TypeError$1('TOML.parse(,,,,xOptions.tag)'); }
-			if ( !mixed ) { throw TypeError$1('TOML.parse(,,,,xOptions) xOptions.tag needs TOML 1.0 to support mixed type array'); }
+			if ( !mixed ) { throw TypeError$1('TOML.parse(,,,,xOptions) xOptions.tag needs at least TOML 1.0 to support mixed type array'); }
 			processor = tag;
 			collect = collect_on;
 		}
@@ -1104,8 +1105,7 @@ const Datetime = function (            ) { return this; }                       
 		key==='toJSON' ||
 		( descriptors[key] = descriptor );
 	}
-	Datetime.prototype = create$1(NativeDate.prototype, descriptors);
-	preventExtensions(Datetime.prototype);
+	Datetime.prototype = preventExtensions(create$1(NativeDate.prototype, descriptors));
 	freeze(Datetime);
 }
 

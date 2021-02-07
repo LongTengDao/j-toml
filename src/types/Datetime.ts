@@ -102,8 +102,7 @@ const Datetime = function (this :object) { return this; } as unknown as { new ()
 		key==='toJSON' ||
 		( descriptors[key] = descriptor );
 	}
-	Datetime.prototype = create(NativeDate.prototype, descriptors);
-	preventExtensions(Datetime.prototype);
+	Datetime.prototype = preventExtensions(create(NativeDate.prototype, descriptors));
 	freeze(Datetime);
 }
 

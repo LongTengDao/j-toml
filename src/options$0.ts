@@ -191,6 +191,7 @@ export const use = (specificationVersion :unknown, multiLineJoiner :unknown, use
 	else if ( typeof xOptions==='function' ) {
 		Table = OrderedTable;
 		allowLonger = sError = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = true;
+		if ( !mixed ) { throw TypeError('TOML.parse(,,,,tag) needs at least TOML 1.0 to support mixed type array'); }
 		processor = xOptions;
 		collect = collect_on;
 	}
@@ -204,7 +205,7 @@ export const use = (specificationVersion :unknown, multiLineJoiner :unknown, use
 		allowInlineTableMultiLineAndTrailingCommaEvenNoComma = !!multi;
 		if ( tag ) {
 			if ( typeof tag!=='function' ) { throw TypeError('TOML.parse(,,,,xOptions.tag)'); }
-			if ( !mixed ) { throw TypeError('TOML.parse(,,,,xOptions) xOptions.tag needs TOML 1.0 to support mixed type array'); }
+			if ( !mixed ) { throw TypeError('TOML.parse(,,,,xOptions) xOptions.tag needs at least TOML 1.0 to support mixed type array'); }
 			processor = tag;
 			collect = collect_on;
 		}

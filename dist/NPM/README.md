@@ -94,8 +94,8 @@ function parse (
 4.  **`xOptions`**
     
     The extensional features not in the specification.  
-    Include keeping the key/value pairs order of tables, integers larger than `signed long`, mixed-type array, multi-line inline table with trailing comma even no comma, `null` value, custom constructor, etc.  
-    They are private experimental discouraged features. Only provide TSD support when `specificationVersion` is `0.4` or higher.  
+    Include keeping the key/value pairs order of tables, integers larger than `signed long`, multi-line inline table with trailing comma even no comma, `null` value, custom constructor, etc.  
+    They are private experimental discouraged features.  
     See [xOptions](https://GitHub.com/LongTengDao/j-toml/blob/master/docs/English/xOptions.md).
     
 5.  **`sourcePath`**

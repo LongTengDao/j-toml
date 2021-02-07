@@ -14,7 +14,7 @@ const Whitespace = /[ \t]/;
 export const PRE_WHITESPACE = newRegExp`
 	^${Whitespace}+`;
 
-export const VALUE_REST_exec = newRegExp.s!`
+export const VALUE_REST_exec = newRegExp.s`
 	^
 	(
 		(?:\d\d\d\d-\d\d-\d\d \d)?
@@ -24,19 +24,19 @@ export const VALUE_REST_exec = newRegExp.s!`
 	(.*)
 	$`.exec as Exec<[ string, string, string ]>;
 
-export const LITERAL_STRING_exec = newRegExp.s!`
+export const LITERAL_STRING_exec = newRegExp.s`
 	^
 	'([^']*)'
 	${Whitespace}*
 	(.*)`.exec as Exec<[ string, string, string ]>;
 
-const MULTI_LINE_LITERAL_STRING_0_1_2 = newRegExp.s!`
+const MULTI_LINE_LITERAL_STRING_0_1_2 = newRegExp.s`
 	^
 	(.*?)
 	'''('{0,2})
 	${Whitespace}*
 	(.*)`.exec as Exec<[ string, string, string, string ]>;
-const MULTI_LINE_LITERAL_STRING_0 = newRegExp.s!`
+const MULTI_LINE_LITERAL_STRING_0 = newRegExp.s`
 	^
 	(.*?)
 	'''()
@@ -44,7 +44,7 @@ const MULTI_LINE_LITERAL_STRING_0 = newRegExp.s!`
 	(.*)`.exec as Exec<[ string, string, string, string ]>;
 export let MULTI_LINE_LITERAL_STRING_exec :Exec<[ string, string, string, string ]>;
 
-export const SYM_WHITESPACE = newRegExp.s!`
+export const SYM_WHITESPACE = newRegExp.s`
 	^
 	.
 	${Whitespace}*`;
@@ -52,7 +52,7 @@ export const SYM_WHITESPACE = newRegExp.s!`
 
 const Tag = /[^\x00-\x1F"#'()<>[\\\]`{}\x7F]+/;
 
-const KEY_VALUE_PAIR_exec = newRegExp.s!`
+const KEY_VALUE_PAIR_exec = newRegExp.s`
 	^
 	${Whitespace}*
 	=
@@ -64,14 +64,14 @@ const KEY_VALUE_PAIR_exec = newRegExp.s!`
 	(.*)
 	$`.exec as Exec<[ string, string | undefined, string ]>;
 
-export const _VALUE_PAIR_exec = newRegExp.s!`
+export const _VALUE_PAIR_exec = newRegExp.s`
 	^
 	<(${Tag})>
 	${Whitespace}*
 	(.*)
 	$`.exec as Exec<[ string, string, string ]>;
 
-const TAG_REST_exec = newRegExp.s!`
+const TAG_REST_exec = newRegExp.s`
 	^
 	<(${Tag})>
 	${Whitespace}*

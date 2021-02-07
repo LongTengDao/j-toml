@@ -2,6 +2,8 @@
 `xOptions`
 ==========
 
+Only provide TSD support when `specificationVersion` is `0.4` or higher.
+
 All following options are not turned on by default. For simplicity, passing the `true` value directly opens all features except `xOptions.tag`.
 
 If the input is not an object, but a function, it is treated as `xOptions.tag`, and all other features are turned on at the same time.
@@ -105,3 +107,5 @@ Anyway, it is not difficult to deal with it after whole table returned.
 In the future, it is possible to add an extension method to remove both restrictions at the same time.
 
 Tag and its target must be in same line; while the target value after tag could be omitted (and `undefined` would be passed in as the value).
+
+The `specificationVersion` must be `1.0` or higher, to support feasible mixed type array.
