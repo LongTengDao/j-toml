@@ -30,21 +30,23 @@ const parse = (
 	xOptions :options$0.XOptions,
 ) :Table => {
 	iterator$0.could();
-	let sourcePath = '';
+	let sourcePath :string;
 	if ( isBuffer(source) ) {
 		source = buf2str(source);
 		sourcePath = '';
 	}
 	else if ( typeof source==='object' ) {
-		if ( !isAbsolute(sourcePath = sourcePath) ) { throw Error(''); }
+		sourcePath = source.path;
+		if ( typeof sourcePath!=='string' ) { throw TypeError('TOML.parse(source.path)'); }
+		if ( !isAbsolute(sourcePath) ) { throw Error('TOML.parse(source.path)'); }
 		const { data } = source;
 		if ( data===undefined ) { source = buf2str(readFileSync(sourcePath)); }
 		else if ( isBuffer(data) ) { source = buf2str(data); }
 		else if ( typeof data==='string' ) { source = data; }
-		else { throw TypeError('TOML.parse(sourceContent.data)'); }
+		else { throw TypeError('TOML.parse(source.data)'); }
 	}
 	else if ( typeof source==='string' ) { sourcePath = ''; }
-	else { throw TypeError('TOML.parse(sourceContent)'); }
+	else { throw TypeError('TOML.parse(source)'); }
 	try {
 		if ( NON_SCALAR.test(source) ) { throw Error('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any uncoupled UCS-4 character code.'); }
 		try {
