@@ -35,7 +35,7 @@ const parse = (
 		source = buf2str(source);
 		sourcePath = '';
 	}
-	else if ( typeof source==='object' ) {
+	else if ( typeof source==='object' && source ) {
 		sourcePath = source.path;
 		if ( typeof sourcePath!=='string' ) { throw TypeError('TOML.parse(source.path)'); }
 		if ( !isAbsolute(sourcePath) ) { throw Error('TOML.parse(source.path)'); }
