@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '1.3.0';
+const version = '1.4.0';
 
 const Error$1 = Error;
 
@@ -1902,28 +1902,43 @@ const Root = ()        => {
 	return rootTable;
 };
 
+const { isAbsolute } = require('path')                         ;
+const { readFileSync } = require('fs')                       ;
+
 const BOM = '\uFEFF';
+const buf2str = (buf        ) => {
+	const str = buf.toString();
+	if ( !from(str).equals(buf) ) { throw Error$1('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any unknown code point.'); }
+	return str[0]===BOM ? str.slice(1) : str;
+};
 const parse$1 = (
-	sourceContent                 ,
+	source                                                                              ,
 	specificationVersion                                   ,
 	multiLineJoiner        ,
 	useBigInt                   = true,
 	xOptions                    ,
-	sourcePath         = '',
 )        => {
 	could();
-	if ( isBuffer(sourceContent) ) {
-		const buffer         = sourceContent;
-		sourceContent = buffer.toString();
-		if ( !from(buffer).equals(buffer) ) { throw Error$1('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any unknown code point.'); }
-		if ( sourceContent[0]===BOM ) { sourceContent = sourceContent.slice(1); }
+	let sourcePath = '';
+	if ( isBuffer(source) ) {
+		source = buf2str(source);
+		sourcePath = '';
 	}
-	if ( typeof sourceContent!=='string' ) { throw TypeError$1('TOML.parse(sourceContent)'); }
+	else if ( typeof source==='object' ) {
+		if ( !isAbsolute(sourcePath = sourcePath) ) { throw Error$1(''); }
+		const { data } = source;
+		if ( data===undefined$1 ) { source = buf2str(readFileSync(sourcePath)); }
+		else if ( isBuffer(data) ) { source = buf2str(data); }
+		else if ( typeof data==='string' ) { source = data; }
+		else { throw TypeError$1('TOML.parse(sourceContent.data)'); }
+	}
+	else if ( typeof source==='string' ) { sourcePath = ''; }
+	else { throw TypeError$1('TOML.parse(sourceContent)'); }
 	try {
-		if ( NON_SCALAR.test(sourceContent) ) { throw Error$1('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any uncoupled UCS-4 character code.'); }
+		if ( NON_SCALAR.test(source) ) { throw Error$1('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any uncoupled UCS-4 character code.'); }
 		try {
 			use(specificationVersion, multiLineJoiner, useBigInt, xOptions);
-			todo(sourceContent, sourcePath);
+			todo(source, sourcePath);
 			try {
 				const rootTable = Root();
 				process();

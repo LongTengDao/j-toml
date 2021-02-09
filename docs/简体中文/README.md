@@ -16,14 +16,14 @@ npm install @ltd/j-toml
 ```javascript
 const TOML = require('@ltd/j-toml');
 
-const 源内容           = `
+const 源               = `
       "一个普通的键名" = "..."
       hasOwnProperty   = "..."
       constructor      = "..."
       __proto__        = "..."
 `;
 
-const 根表 = TOML.parse(源内容, 1.0, '\n');
+const 根表 = TOML.parse(源, 1.0, '\n');
 
 根表.一个普通的键名 // "..."
 根表.hasOwnProperty // "..."
@@ -38,34 +38,36 @@ Object.keys(根表)   // [ "一个普通的键名", "hasOwnProperty", "construct
 ------------
 
 ```
-TOML.parse(源内容, 遵循规范版本, 多行拼接字符[, 使用BigInt=true[, 超级选项[, 源路径]]]);
+TOML.parse(源, 遵循规范版本, 多行拼接字符[, 使用BigInt=true[, 超级选项]]);
 ```
 
 ```typescript
 function parse (
-         源内容       :Buffer | string,
+         源           :string | Buffer | { readonly path :string, readonly data? :string | Buffer },
          遵循规范版本 :1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1,
          多行拼接字符 :string,
-         使用BigInt?  :true | false | number,
+         使用BigInt?  :boolean | number,
          超级选项?    :object,
-         源路径?      :string,
 ) :Table;
 ```
 
 ### `arguments`
 
-0.  #### `源内容`
+0.  #### `源`
     
-    *   类型：`string | Buffer(UTF-8)`
+    *   类型：`string | Buffer | { readonly path :string, readonly data? :string | Buffer }`
     *   必需
     
-    你可以传入 `string`，也可以传入文件原始的二进制 `Buffer`。
+    你可以传入 `string`，也可以传入文件原始的二进制 `Buffer`（UTF-8）作为源内容。
     
     一个区别是，当传入 `string` 时，只会根据规范检查所有字符是否均为有效的 Unicode 字符（未配对的 UCS-4 字符码是无效的）；  
     而传入 `Buffer` 时，还会额外检查是否存在未知码点（而这在 `string` 状态下已经被自动替换为 `U+FFFD`）。
     
     另一个区别是，`Buffer` 允许以 UTF BOM 开头，这会用于文件编码的确认（但它必须是 UTF-8 编码的，这不是技术问题，而是规范的要求），并在正式解析前跳过；  
     而 `string` 不允许，因为 BOM 属于 UTF 而非 TOML。
+    
+    如果你希望内容抛错时控制台信息更加友好，请传递一个 `{ path, data }` 对象，`path` 键是 `.toml` 文件的绝对路径，`data` 键是源内容（`string` 或 `Buffer`）。  
+    你也可以省略 `data` 键，此时 `fs.readFileSync(源.path)` 将被自动调用。
     
 1.  #### `遵循规范版本`
     
@@ -95,12 +97,6 @@ function parse (
     包括保持表中键值对的顺序、超出有符号长整型的整数、跨行行内表及尾逗号甚至省略逗号、`null` 值、自定义构造器等。  
     私有实验期功能，不建议随意使用。  
     详见 [超级选项](https://GitHub.com/LongTengDao/j-toml/blob/master/docs/简体中文/xOptions.md)。
-    
-5.  #### `源路径`
-    
-    *   类型：`string`
-    
-    如果是因为源文本的问题报错，指定 `源路径` 能让错误位置信息以控制台友好的格式呈现。
 
 ### `return`
 

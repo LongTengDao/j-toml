@@ -12,6 +12,9 @@ module.exports = require('@ltd/j-dev')(__dirname + '/..')(async ({ import_defaul
 			if ( moduleName==='fs' ) {
 				return { readFileSync: require('fs').readFileSync };
 			}
+			if ( moduleName==='path' ) {
+				return { isAbsolute: require('path').isAbsolute };
+			}
 			throw Error(moduleName);
 		}
 	});

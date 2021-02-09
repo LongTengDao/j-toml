@@ -2,6 +2,7 @@ import Error from '.Error';
 import TypeError from '.TypeError';
 import isBuffer from '.Buffer.isBuffer?=()=>false';
 import from from '.Buffer.from?';
+import undefined from '.undefined';
 
 import { clearRegExp } from '@ltd/j-regexp';
 import { NON_SCALAR } from '@ltd/j-utf';
@@ -10,30 +11,45 @@ import * as iterator$0 from '../iterator$0';
 import * as options$0 from '../options$0';
 import Root from '../parse/level-loop';
 
+const { isAbsolute } = require('path') as typeof import('path');
+const { readFileSync } = require('fs') as typeof import('fs');
+
 const BOM = '\uFEFF';
+const buf2str = (buf :Buffer) => {
+	const str = buf.toString();
+	if ( !from(str).equals(buf) ) { throw Error('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any unknown code point.'); }
+	return str[0]===BOM ? str.slice(1) : str;
+};
 
 export { parse as default };
 const parse = (
-	sourceContent :Buffer | string,
+	source :string | Buffer | { readonly path :string, readonly data? :string | Buffer },
 	specificationVersion :1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1,
 	multiLineJoiner :string,
 	useBigInt :boolean | number = true,
 	xOptions :options$0.XOptions,
-	sourcePath :string = '',
 ) :Table => {
 	iterator$0.could();
-	if ( isBuffer(sourceContent) ) {
-		const buffer :Buffer = sourceContent;
-		sourceContent = buffer.toString();
-		if ( !from(buffer).equals(buffer) ) { throw Error('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any unknown code point.'); }
-		if ( sourceContent[0]===BOM ) { sourceContent = sourceContent.slice(1); }
+	let sourcePath = '';
+	if ( isBuffer(source) ) {
+		source = buf2str(source);
+		sourcePath = '';
 	}
-	if ( typeof sourceContent!=='string' ) { throw TypeError('TOML.parse(sourceContent)'); }
+	else if ( typeof source==='object' ) {
+		if ( !isAbsolute(sourcePath = sourcePath) ) { throw Error(''); }
+		const { data } = source;
+		if ( data===undefined ) { source = buf2str(readFileSync(sourcePath)); }
+		else if ( isBuffer(data) ) { source = buf2str(data); }
+		else if ( typeof data==='string' ) { source = data; }
+		else { throw TypeError('TOML.parse(sourceContent.data)'); }
+	}
+	else if ( typeof source==='string' ) { sourcePath = ''; }
+	else { throw TypeError('TOML.parse(sourceContent)'); }
 	try {
-		if ( NON_SCALAR.test(sourceContent) ) { throw Error('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any uncoupled UCS-4 character code.'); }
+		if ( NON_SCALAR.test(source) ) { throw Error('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any uncoupled UCS-4 character code.'); }
 		try {
 			options$0.use(specificationVersion, multiLineJoiner, useBigInt, xOptions);
-			iterator$0.todo(sourceContent, sourcePath);
+			iterator$0.todo(source, sourcePath);
 			try {
 				const rootTable = Root();
 				options$0.process();
