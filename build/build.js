@@ -35,7 +35,8 @@ module.exports = require('../test/test.js')(async ({ build, 龙腾道, get, map,
 });
 
 function ReadMe (_English_) {
-	return BOM + EOL +
+	return BOM +
 		i18n.map(lang => `[${lang}](https://GitHub.com/LongTengDao/j-toml/tree/master/docs/${lang}/)`).join(' | ') + EOL +
-		'___' + _English_.replace(/(\n```+)[^`\r\n]+/g, '$1').replace(/(\n\d\. {2})#+ +([^\r\n]*)/g, '$1**$2**');
+		'___' +  EOL +
+		_English_.replace(/(\n```+)[^`\r\n]+/g, '$1').replace(/(\n\d\. {2})#+ +([^\r\n]*)/g, '$1**$2**');
 }

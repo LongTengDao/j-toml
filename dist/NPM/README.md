@@ -1,6 +1,6 @@
-﻿
-[English](https://GitHub.com/LongTengDao/j-toml/tree/master/docs/English/) | [简体中文](https://GitHub.com/LongTengDao/j-toml/tree/master/docs/简体中文/)
+﻿[English](https://GitHub.com/LongTengDao/j-toml/tree/master/docs/English/) | [简体中文](https://GitHub.com/LongTengDao/j-toml/tree/master/docs/简体中文/)
 ___
+
 `@ltd/j-toml`
 =============
 
@@ -45,7 +45,7 @@ TOML.parse(source, specificationVersion, multiLineJoiner[, useBigInt=true[, xOpt
 
 ```
 function parse (
-         sourceContent        :string | Buffer | { readonly path :string, readonly data? :string | Buffer },
+         source               :string | Buffer | { readonly path :string, readonly data? :string | Buffer },
          specificationVersion :1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1,
          multiLineJoiner      :string,
          useBigInt?           :boolean | number,
