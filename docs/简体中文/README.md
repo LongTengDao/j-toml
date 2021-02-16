@@ -2,7 +2,7 @@
 `@ltd/j-toml`
 =============
 
-`@ltd/j-toml` 是龙腾道为 [汤小明语](https://GitHub.com/LongTengDao/TOML/)（“汤小明的小巧明晰语言”）写的实现。  
+`@ltd/j-toml` 是龙腾道为[汤小明语](https://GitHub.com/LongTengDao/TOML/)（“汤小明的小巧明晰语言”）写的实现。  
 ——这 TM 可能是“我”见过最好的配置文件书写格式了。  
 ——对于亲手折腾到爆炸的人而言。
 
@@ -96,7 +96,7 @@ function parse (
     标准中所没有的扩展功能。  
     包括保持表中键值对的顺序、超出有符号长整型的整数、跨行行内表及尾逗号甚至省略逗号、`null` 值、自定义构造器等。  
     私有实验期功能，不建议随意使用。  
-    详见 [超级选项](https://GitHub.com/LongTengDao/j-toml/blob/master/docs/简体中文/xOptions.md)。
+    详见[超级选项](https://GitHub.com/LongTengDao/j-toml/blob/master/docs/简体中文/xOptions.md)。
 
 ### `return`
 
