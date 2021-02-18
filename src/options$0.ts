@@ -29,7 +29,6 @@ export type XOptions = undefined | null | boolean | Tag | {
 	exact? :boolean,
 	null? :boolean,
 	multi? :boolean,
-	close? :boolean,
 };
 export let endsWithQuote :boolean;
 export let zeroDatetime :boolean;

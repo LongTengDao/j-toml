@@ -102,14 +102,13 @@ const checkLiteralString = (literal :string) :string => {
 };
 
 export const assignLiteralString = ( (table :Table, finalKey :string, literal :string) :string => {
-	let $ :[ string, string, string ] | [ string, string, string, string ] | null;
 	if ( literal[1]!=='\'' || literal[2]!=='\'' ) {
-		$ = regexps$0.LITERAL_STRING_exec(literal) ?? iterator$0.throws(SyntaxError(`Bad literal string` + iterator$0.where(' at ')));
+		const $ = regexps$0.LITERAL_STRING_exec(literal) ?? iterator$0.throws(SyntaxError(`Bad literal string` + iterator$0.where(' at ')));
 		table[finalKey] = checkLiteralString($[1]);
 		return $[2];
 	}
 	literal = literal.slice(3);
-	$ = regexps$0.MULTI_LINE_LITERAL_STRING_exec(literal);
+	const $ = regexps$0.MULTI_LINE_LITERAL_STRING_exec(literal);
 	if ( $ ) {
 		table[finalKey] = checkLiteralString($[1]) + $[2];
 		return $[3];
@@ -121,7 +120,7 @@ export const assignLiteralString = ( (table :Table, finalKey :string, literal :s
 	const start = iterator$0.mark('Literal String');
 	for ( ; ; ) {
 		const line :string = iterator$0.must(start);
-		$ = regexps$0.MULTI_LINE_LITERAL_STRING_exec(line);
+		const $ = regexps$0.MULTI_LINE_LITERAL_STRING_exec(line);
 		if ( $ ) {
 			table[finalKey] = literal + checkLiteralString($[1]) + $[2];
 			return $[3];

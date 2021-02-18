@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '1.5.1';
+const version = '1.5.2';
 
 const Error$1 = Error;
 
@@ -39,13 +39,15 @@ const from = (
 	/*¡ j-globals: Buffer.from (fallback) */
 );
 
-const SyntaxError$1 = SyntaxError;
-
-const RegExp$1 = RegExp;
+const bind = Function.prototype.bind;
 
 const test = RegExp.prototype.test;
 
 const exec = RegExp.prototype.exec;
+
+const SyntaxError$1 = SyntaxError;
+
+const RegExp$1 = RegExp;
 
 const freeze = Object.freeze;
 
@@ -92,8 +94,32 @@ const Default = (
  * 项目主页：https://GitHub.com/LongTengDao/j-regexp/
  */
 
-var test_bind                                           = /*#__PURE__*/test.bind.bind(test       )       ;
-var exec_bind                                           = /*#__PURE__*/exec.bind.bind(exec       )       ;
+var Test                                           = bind
+	? /*#__PURE__*/bind.bind(test       )       
+	: function (re) {
+		return function (string) {
+			return test.call(re, string);
+		};
+	};
+
+var Exec                                           = bind
+	? /*#__PURE__*/bind.bind(exec       )       
+	: function (re) {
+		return function (string) {
+			return exec.call(re, string);
+		};
+	};
+
+function theRegExp (re        )         {
+	var test = re.test = Test(re);
+	var exec = re.exec = Exec(re);
+	var source = test.source = exec.source = re.source;
+	test.unicode = exec.unicode = re.unicode;
+	test.ignoreCase = exec.ignoreCase = re.ignoreCase;
+	test.multiline = exec.multiline = source.indexOf('^')<0 && source.indexOf('$')<0 ? null : re.multiline;
+	test.dotAll = exec.dotAll = source.indexOf('.')<0 ? null : re.dotAll;
+	return re;
+}
 
 var NT = /[\n\t]+/g;
 var ESCAPE = /\\./g;
@@ -109,50 +135,56 @@ function RE (               template                      ) {
 	var index = 1;
 	var length = arguments.length;
 	while ( index!==length ) {
-		var value = arguments[index];
+		var value            
+			                       
+			                          
+			                             
+			                            
+			                         
+		  = arguments[index];
 		if ( typeof value==='string' ) { source += value; }
 		else {
 			var value_source = value.source;
-			if ( typeof value_source!=='string' ) { throw TypeError$1(typeof value); }
+			if ( typeof value_source!=='string' ) { throw TypeError$1('source'); }
 			if ( value.unicode===U ) { throw SyntaxError$1('unicode'); }
 			if ( value.ignoreCase===I ) { throw SyntaxError$1('ignoreCase'); }
-			if ( value.multiline===M && ( value_source.indexOf('^')>=0 || value_source.indexOf('$')>=0 ) ) { throw SyntaxError$1('multiline'); }
-			if ( value.dotAll===S && value_source.indexOf('.')>=0 ) { throw SyntaxError$1('dotAll'); }
+			if ( value.multiline===M && ( value_source.includes('^') || value_source.includes('$') ) ) { throw SyntaxError$1('multiline'); }
+			if ( value.dotAll===S && value_source.includes('.') ) { throw SyntaxError$1('dotAll'); }
 			source += value_source;
 		}
 		source += raw[index++] .replace(NT, '');
 	}
-	var re = RegExp$1(U ? source = source.replace(ESCAPE, graveAccentReplacer) : source, this.flags);
-	var test = re.test = test_bind(re);
-	var exec = re.exec = exec_bind(re);
+	var re         = RegExp$1(U ? source = source.replace(ESCAPE, graveAccentReplacer) : source, this.flags);
+	var test = re.test = Test(re);
+	var exec = re.exec = Exec(re);
 	test.source = exec.source = source;
 	test.unicode = exec.unicode = U;
 	test.ignoreCase = exec.ignoreCase = I;
-	test.multiline = exec.multiline = source.indexOf('^')<0 && source.indexOf('$')<0 ? null : M;
-	test.dotAll = exec.dotAll = source.indexOf('.')<0 ? null : S;
+	test.multiline = exec.multiline = source.includes('^') || source.includes('$') ? M : null;
+	test.dotAll = exec.dotAll = source.includes('.') ? S : null;
 	return re;
 }
 
-var RE_bind = /*#__PURE__*/RE.bind.bind(RE       );
+var RE_bind = bind && /*#__PURE__*/bind.bind(RE       );
 
-var newRegExp = /*#__PURE__*/new Proxy$1(RE, /*#__PURE__*/freeze({
+function Context (flags        )          {
+	return {
+		U: !flags.includes('u'),
+		I: !flags.includes('i'),
+		M: !flags.includes('m'),
+		S: !flags.includes('s'),
+		flags: flags
+	};
+}
+
+var CONTEXT          = Proxy$1 && /*#__PURE__*/Context('');
+
+var newRegExp = Proxy$1 && /*#__PURE__*/new Proxy$1(RE, /*#__PURE__*/freeze({
 	apply: function (RE, thisArg, args                                   ) { return Reflect_apply(RE, CONTEXT, args); },
 	get: function (RE, flags        ) { return RE_bind(Context(flags)); },
 	defineProperty: function () { return false; },
 	preventExtensions: function () { return false; }
 }));
-
-var CONTEXT          = /*#__PURE__*/Context('');
-
-function Context (flags        )          {
-	return {
-		U: flags.indexOf('u')<0,
-		I: flags.indexOf('i')<0,
-		M: flags.indexOf('m')<0,
-		S: flags.indexOf('s')<0,
-		flags: flags
-	};
-}
 
 var clearRegExp = '$_' in RegExp$1
 	? /*#__PURE__*/function () {
@@ -565,8 +597,6 @@ delete OrderedTable.prototype.constructor;
 freeze(OrderedTable.prototype);
 freeze(OrderedTable);
 
-const Exec =                                                                  (regExp        ) => regExp.exec.bind(regExp)           ;
-
 /* nested (readable) */
 
 const Whitespace = /[ \t]/;
@@ -574,7 +604,7 @@ const Whitespace = /[ \t]/;
 const PRE_WHITESPACE = newRegExp`
 	^${Whitespace}+`;
 
-const VALUE_REST_exec = newRegExp.s`
+const VALUE_REST_exec = newRegExp.s       `
 	^
 	(
 		(?:\d\d\d\d-\d\d-\d\d \d)?
@@ -582,27 +612,27 @@ const VALUE_REST_exec = newRegExp.s`
 	)
 	${Whitespace}*
 	(.*)
-	$`.exec                                    ;
+	$`.exec;
 
-const LITERAL_STRING_exec = newRegExp.s`
+const LITERAL_STRING_exec = newRegExp.s       `
 	^
 	'([^']*)'
 	${Whitespace}*
-	(.*)`.exec                                    ;
+	(.*)`.exec;
 
-const MULTI_LINE_LITERAL_STRING_0_1_2 = newRegExp.s`
+const MULTI_LINE_LITERAL_STRING_0_1_2 = newRegExp.s           `
 	^
 	(.*?)
 	'''('{0,2})
 	${Whitespace}*
-	(.*)`.exec                                            ;
-const MULTI_LINE_LITERAL_STRING_0 = newRegExp.s`
+	(.*)`.exec;
+const MULTI_LINE_LITERAL_STRING_0 = newRegExp.s           `
 	^
 	(.*?)
 	'''()
 	${Whitespace}*
-	(.*)`.exec                                            ;
-let MULTI_LINE_LITERAL_STRING_exec                                          ;
+	(.*)`.exec;
+let MULTI_LINE_LITERAL_STRING_exec                                    ;
 
 const SYM_WHITESPACE = newRegExp.s`
 	^
@@ -612,7 +642,7 @@ const SYM_WHITESPACE = newRegExp.s`
 
 const Tag = /[^\x00-\x1F"#'()<>[\\\]`{}\x7F]+/;
 
-const KEY_VALUE_PAIR_exec = newRegExp.s`
+const KEY_VALUE_PAIR_exec = newRegExp.s   `
 	^
 	${Whitespace}*
 	=
@@ -622,25 +652,25 @@ const KEY_VALUE_PAIR_exec = newRegExp.s`
 		${Whitespace}*
 	)?
 	(.*)
-	$`.exec                                                ;
+	$`.exec;
 
-const _VALUE_PAIR_exec = newRegExp.s`
+const _VALUE_PAIR_exec = newRegExp.s       `
 	^
 	<(${Tag})>
 	${Whitespace}*
 	(.*)
-	$`.exec                                    ;
+	$`.exec;
 
-const TAG_REST_exec = newRegExp.s`
+const TAG_REST_exec = newRegExp.s       `
 	^
 	<(${Tag})>
 	${Whitespace}*
 	(.*)
-	$`.exec                                    ;
+	$`.exec;
 
 /* optimized (avoid overflow or lost) */
 
-const MULTI_LINE_BASIC_STRING_exec = Exec(/^(?:[^\\"]+|\\.|""?(?!"))/s);
+const MULTI_LINE_BASIC_STRING_exec = theRegExp(/^(?:[^\\"]+|\\.|""?(?!"))/s).exec;
 const MULTI_LINE_BASIC_STRING_exec_0 = (_        )         => {
 	let _0         = '';
 	while ( _ ) {
@@ -659,11 +689,11 @@ const ESCAPED_EXCLUDE_CONTROL_CHARACTER_DEL_SLASH = /[^\\\x00-\x09\x0B-\x1F]+|\\
 let __ESCAPED_EXCLUDE_CONTROL_CHARACTER        ;
 const ESCAPED_EXCLUDE_CONTROL_CHARACTER_test = (_        )          => !_.replace(__ESCAPED_EXCLUDE_CONTROL_CHARACTER, '');
 
-const BASIC_STRING_TAB______ = Exec(/^(?:[^\\"\x00-\x08\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/);
-const BASIC_STRING__________ = Exec(/^(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/);
-const BASIC_STRING_DEL______ = Exec(/^(?:[^\\"\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/);
-const BASIC_STRING_DEL_SLASH = Exec(/^(?:[^\\"\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\/]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/);
-let __BASIC_STRING_exec      ;
+const BASIC_STRING_TAB______ = theRegExp(/^(?:[^\\"\x00-\x08\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/).exec;
+const BASIC_STRING__________ = theRegExp(/^(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/).exec;
+const BASIC_STRING_DEL______ = theRegExp(/^(?:[^\\"\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/).exec;
+const BASIC_STRING_DEL_SLASH = theRegExp(/^(?:[^\\"\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\/]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/).exec;
+let __BASIC_STRING_exec                               ;
 const BASIC_STRING_exec = (_2        )                           => {
 	_2 = _2.slice(1);
 	for ( let _1         = ''; ; ) {
@@ -677,13 +707,13 @@ const BASIC_STRING_exec = (_2        )                           => {
 	}
 };
 
-const DOT_KEY_exec = Exec(/^[ \t]*\.[ \t]*/);
-const BARE_KEY_STRICT = Exec(/^[\w-]+/);
-const BARE_KEY_FREE = Exec(/^[^ \t#=[\]'".]+(?:[ \t]+[^ \t#=[\]'".]+)*/);
-let __BARE_KEY_exec      ;
-const LITERAL_KEY____ = Exec(/^'[^'\x00-\x08\x0B-\x1F\x7F]*'/);
-const LITERAL_KEY_DEL = Exec(/^'[^'\x00-\x08\x0B-\x1F]*'/);
-let __LITERAL_KEY_exec      ;
+const DOT_KEY_exec = theRegExp(/^[ \t]*\.[ \t]*/).exec;
+const BARE_KEY_STRICT = theRegExp(/^[\w-]+/).exec;
+const BARE_KEY_FREE = theRegExp(/^[^ \t#=[\]'".]+(?:[ \t]+[^ \t#=[\]'".]+)*/).exec;
+let __BARE_KEY_exec                      ;
+const LITERAL_KEY____ = theRegExp(/^'[^'\x00-\x08\x0B-\x1F\x7F]*'/).exec;
+const LITERAL_KEY_DEL = theRegExp(/^'[^'\x00-\x08\x0B-\x1F]*'/).exec;
+let __LITERAL_KEY_exec                        ;
 let supportArrayOfTables         ;
 
 const getKeys = (_        )         => {
@@ -692,7 +722,7 @@ const getKeys = (_        )         => {
 		if ( _[0]==='"' ) {
 			_ = _.slice(1);
 			let key         = '"';
-			let $                   ;
+			let $                      ;
 			while ( ( $ = __BASIC_STRING_exec(_) ) ) {
 				_ = _.slice($[0].length);
 				key += $[0];
@@ -806,7 +836,6 @@ let IntegerMax        ;
 	                 
 	                
 	               
-	                
 	                
   
 let endsWithQuote         ;
@@ -1049,25 +1078,25 @@ const HMS = newRegExp`
 
 const OFFSET$ = /(?:Z|[+-]\d\d:\d\d)$/;
 
-const Z_exec = Exec                                       (/(([+-])\d\d):(\d\d)$/);
+const Z_exec = theRegExp           (/(([+-])\d\d):(\d\d)$/).exec;
 
-const OFFSET_DATETIME_exec = newRegExp`
+const OFFSET_DATETIME_exec = newRegExp   `
 	^
 	${YMD}
 	[T ]
 	${HMS}(?:\.\d{1,3})?
 	(\d*?)0*
 	(?:Z|[+-]${_23_}:${_59_})
-	$`.exec                            ;
+	$`.exec;
 
-const OFFSET_DATETIME_ZERO_exec = newRegExp`
+const OFFSET_DATETIME_ZERO_exec = newRegExp   `
 	^
 	${YMD}
 	[T ]
 	${HMS}
 	()
 	Z
-	$`.exec                        ;
+	$`.exec;
 
 const LOCAL_DATETIME = newRegExp`
 	^
@@ -1089,7 +1118,8 @@ const LOCAL_TIME = newRegExp`
 	$`;
 
 const DOT_ZERO = /\.?0+$/;
-const DELIMITER_DOT_ZERO = /[-T:.]|0+$/;
+const DELIMITER_DOT = /[-T:.]/g;
+const ZERO = /(?<=\.\d*)0+$/;
 
 const Datetime = function (            ) { return this; }                                 ;//expression? :undefined, literal? :undefined, dotValue? :undefined
 //                                > .setTime()
@@ -1121,70 +1151,77 @@ const Datetime = function (            ) { return this; }                       
                              
                              
 
+const Value = (ISOString        )        => ISOString.replace(ZERO, '').replace(DELIMITER_DOT, '');
+
+const leap = (literal        ) => literal.slice(5, 10)!=='02-29' || +literal.slice(0, 4)%4===0 && literal.slice(2, 4)!=='00';
+
 const DATE = new NativeDate(0);
 
 class OffsetDateTime extends Datetime {
 	
-	#dateString        ;
+	#ISOString        ;
 	#value       ;
 	
 	valueOf (                    )        { return this.#value; }
-	toISOString (                    )         { return this.#dateString; }
+	toISOString (                    )         { return this.#ISOString; }
 	
-	constructor (dateString        ) {
-		const { 1: more } = ( zeroDatetime ? OFFSET_DATETIME_ZERO_exec : OFFSET_DATETIME_exec )(dateString) ?? throws(SyntaxError$1(`Invalid Offset Date-Time ${dateString}` + where(' at ')));
+	constructor (literal        ) {
+		const { 1: more } = leap(literal) && ( zeroDatetime ? OFFSET_DATETIME_ZERO_exec : OFFSET_DATETIME_exec )(literal) || throws(SyntaxError$1(`Invalid Offset Date-Time ${literal}` + where(' at ')));
 		super();
-		this.#value = ( '' + parse(this.#dateString = dateString.replace(' ', 'T')) ).padStart(15, '0') + ( more ? '.' + more : '' );
+		this.#ISOString = literal.replace(' ', 'T');
+		this.#value = ( '' + parse(this.#ISOString) ).padStart(15, '0') + ( more ? '.' + more : '' );
 		return this;
 	}
 	
+	        static use = (that                , $         = 0) => {
+		DATE.setTime(+that.#value + $);
+		return DATE;
+	};
+	        static get = (that                , start        , end        ) => +that.#ISOString.slice(start, end);
 	        static set = (that                , start        , end        , value        )         => {
-		if ( end ) { that.#dateString = that.#dateString.slice(0, start) + ( '' + value ).padStart(end - start, '0') + that.#dateString.slice(end); }
-		const time = parse(that.#dateString);
+		if ( end ) { that.#ISOString = that.#ISOString.slice(0, start) + ( '' + value ).padStart(end - start, '0') + that.#ISOString.slice(end); }
+		const time = parse(that.#ISOString);
 		that.#value = ( '' + time ).padStart(15, '0') + that.#value.slice(15);
 		return time;
 	};
 	
-	getUTCFullYear (                    )           { DATE.setTime(+this.#value); return DATE.getUTCFullYear(); }
-	getFullYear (                    )           { return +this.#dateString.slice(0, 4); }
+	getUTCFullYear (                    )           { return OffsetDateTime.use(this).getUTCFullYear(); }
+	getFullYear (                    )           { return OffsetDateTime.get(this, 0, 4); }
 	setFullYear (                      value          ) { return OffsetDateTime.set(this, 0, 4, value); }
-	getUTCMonth (                    )        { DATE.setTime(+this.#value); return DATE.getUTCMonth(); }
-	getMonth (                    )        { return +this.#dateString.slice(5, 7) - 1; }
+	getUTCMonth (                    )        { return OffsetDateTime.use(this).getUTCMonth(); }
+	getMonth (                    )        { return OffsetDateTime.get(this, 5, 7) - 1; }
 	setMonth (                      value       ) { return OffsetDateTime.set(this, 5, 7, value + 1); }
-	getUTCDate (                    )       { DATE.setTime(+this.#value); return DATE.getUTCDate(); }
-	getDate (                    )       { return +this.#dateString.slice(8, 10); }
+	getUTCDate (                    )       { return OffsetDateTime.use(this).getUTCDate(); }
+	getDate (                    )       { return OffsetDateTime.get(this, 8, 10); }
 	setDate (                      value      ) { return OffsetDateTime.set(this, 8, 10, value); }
 	
-	getUTCHours (                    )        { DATE.setTime(+this.#value); return DATE.getUTCHours(); }
-	getHours (                    )        { return +this.#dateString.slice(11, 13); }
+	getUTCHours (                    )        { return OffsetDateTime.use(this).getUTCHours(); }
+	getHours (                    )        { return OffsetDateTime.get(this, 11, 13); }
 	setHours (                      value       ) { return OffsetDateTime.set(this, 11, 13, value); }
-	getUTCMinutes (                    )          { DATE.setTime(+this.#value); return DATE.getUTCMinutes(); }
-	getMinutes (                    )          { return +this.#dateString.slice(14, 16); }
+	getUTCMinutes (                    )          { return OffsetDateTime.use(this).getUTCMinutes(); }
+	getMinutes (                    )          { return OffsetDateTime.get(this, 14, 16); }
 	setMinutes (                      value         ) { return OffsetDateTime.set(this, 14, 16, value); }
-	getUTCSeconds (                    )          { DATE.setTime(+this.#value); return DATE.getUTCSeconds(); }
-	getSeconds (                    )          { return +this.#dateString.slice(17, 19); }
+	getUTCSeconds (                    )          { return OffsetDateTime.use(this).getUTCSeconds(); }
+	getSeconds (                    )          { return OffsetDateTime.get(this, 17, 19); }
 	setSeconds (                      value         ) { return OffsetDateTime.set(this, 17, 19, value); }
-	getUTCMilliseconds (                    )               { DATE.setTime(+this.#value); return DATE.getUTCMilliseconds(); }///
+	getUTCMilliseconds (                    )               { return OffsetDateTime.use(this).getUTCMilliseconds(); }///
 	getMilliseconds (                    )               { return +this.#value.slice(12, 15); }///
 	setMilliseconds (                      value              ) {
-		this.#dateString = this.#dateString.slice(0, 19) + ( value ? ( '.' + ( '' + value ).padStart(3, '0') ).replace(DOT_ZERO, '') : '' ) + this.#dateString.slice(this.#dateString.search(OFFSET$));
+		this.#ISOString = this.#ISOString.slice(0, 19) + ( value ? ( '.' + ( '' + value ).padStart(3, '0') ).replace(DOT_ZERO, '') : '' ) + this.#ISOString.slice(this.#ISOString.search(OFFSET$));
 		return OffsetDateTime.set(this, 0, 0, 0);
 	}
 	
-	getUTCDay (                    )      { DATE.setTime(+this.#value); return DATE.getUTCDay(); }
+	getUTCDay (                    )      { return OffsetDateTime.use(this).getUTCDay(); }
 	getDay (                    )      {
-		const z = Z_exec(this.#dateString);
-		DATE.setTime(+this.#value + ( z ? +z[1]*60 + +( z[2] + z[3] ) : 0 )*60000);
-		return DATE.getUTCDay();
+		return OffsetDateTime.use(this, this.getTimezoneOffset()*60000).getUTCDay();
 	}
 	getTimezoneOffset (                    )                 {
-		const z = Z_exec(this.#dateString);
+		const z = Z_exec(this.#ISOString);
 		return z ? +z[1]*60 + +( z[2] + z[3] ) : 0;
 	}
 	setTimezoneOffset (                      value                ) {
 		value = +value;
-		DATE.setTime(+this.#value + value*60000);
-		let string = DATE.toISOString().slice(0, -1);
+		let string = OffsetDateTime.use(this, value*60000).toISOString().slice(0, -1);
 		if ( value ) {
 			if ( value>0 ) { string += '+'; }
 			else {
@@ -1193,16 +1230,16 @@ class OffsetDateTime extends Datetime {
 			}
 			const m = value%60;
 			const h = ( value - m )/60;
-			this.#dateString = string + ( h>9 ? h : '0' + h ) + ( m>9 ? ':' + m : ':0' + m );
+			this.#ISOString = string + ( h>9 ? h : '0' + h ) + ( m>9 ? ':' + m : ':0' + m );
 		}
-		else { this.#dateString = string + ( is(value, 0) ? 'Z' : '-00:00' ); }
+		else { this.#ISOString = string + ( is(value, 0) ? 'Z' : '-00:00' ); }
 	}
 	getTime (                    )       { return +this.#value.slice(0, 15); }///
 	setTime (                      value      ) {
 		value = DATE.setTime(value);
-		const z = Z_exec(this.#dateString);
+		const z = Z_exec(this.#ISOString);
 		DATE.setTime(value + ( z ? +z[1]*60 + +( z[2] + z[3] ) : 0 )*60000);
-		this.#dateString = z ? DATE.toISOString().slice(0, -1) + z[0] : DATE.toISOString();
+		this.#ISOString = z ? DATE.toISOString().slice(0, -1) + z[0] : DATE.toISOString();
 		this.#value = ( '' + value ).padStart(15, '0');
 		return value;
 	}
@@ -1215,41 +1252,46 @@ freeze(OffsetDateTime);
 
 class LocalDateTime extends Datetime {
 	
-	#dateString        ;
+	#ISOString        ;
 	#value       ;
 	
 	valueOf (                   )        { return this.#value; }
-	toISOString (                   )         { return this.#dateString; }
+	toISOString (                   )         { return this.#ISOString; }
 	
-	constructor (dateString        ) {
-		LOCAL_DATETIME.test(dateString) || throws(SyntaxError$1(`Invalid Local Date-Time ${dateString}` + where(' at ')));
+	constructor (literal        ) {
+		LOCAL_DATETIME.test(literal) && leap(literal) || throws(SyntaxError$1(`Invalid Local Date-Time ${literal}` + where(' at ')));
 		super();
-		this.#value = ( this.#dateString = dateString.replace(' ', 'T') ).replace(DELIMITER_DOT_ZERO, '');
+		this.#value = Value(
+			this.#ISOString = literal.replace(' ', 'T')
+		);
 		return this;
 	}
 	
+	        static get = (that               , start        , end        ) => +that.#ISOString.slice(start, end);
 	        static set = (that               , start        , end        , value        ) => {
-		that.#dateString = that.#dateString.slice(0, start) + ( '' + value ).padStart(end - start, '0') + that.#dateString.slice(end);
-		that.#value = that.#dateString.replace(DELIMITER_DOT_ZERO, '');
+		that.#value = Value(
+			that.#ISOString = that.#ISOString.slice(0, start) + ( '' + value ).padStart(end - start, '0') + that.#ISOString.slice(end)
+		);
 	};
 	
-	getFullYear (                   )           { return +this.#dateString.slice(0, 4); }
-	setFullYear (                     value          ) { LocalDateTime.set(this, 0, 4, value); }
-	getMonth (                   )        { return +this.#dateString.slice(5, 7) - 1; }
-	setMonth (                     value       ) { LocalDateTime.set(this, 5, 7, value + 1); }
-	getDate (                   )       { return +this.#dateString.slice(8, 10); }
-	setDate (                     value      ) { LocalDateTime.set(this, 8, 10, value); }
+	getFullYear (                   )           { return LocalDateTime.get(this, 0, 4); }
+	setFullYear (                     value          ) { return LocalDateTime.set(this, 0, 4, value); }
+	getMonth (                   )        { return LocalDateTime.get(this, 5, 7) - 1; }
+	setMonth (                     value       ) { return LocalDateTime.set(this, 5, 7, value + 1); }
+	getDate (                   )       { return LocalDateTime.get(this, 8, 10); }
+	setDate (                     value      ) { return LocalDateTime.set(this, 8, 10, value); }
 	
-	getHours (                   )        { return +this.#dateString.slice(11, 13); }
-	setHours (                     value       ) { LocalDateTime.set(this, 11, 13, value); }
-	getMinutes (                   )          { return +this.#dateString.slice(14, 16); }
-	setMinutes (                     value         ) { LocalDateTime.set(this, 14, 16, value); }
-	getSeconds (                   )          { return +this.#dateString.slice(17, 19); }
-	setSeconds (                     value         ) { LocalDateTime.set(this, 17, 19, value); }
+	getHours (                   )        { return LocalDateTime.get(this, 11, 13); }
+	setHours (                     value       ) { return LocalDateTime.set(this, 11, 13, value); }
+	getMinutes (                   )          { return LocalDateTime.get(this, 14, 16); }
+	setMinutes (                     value         ) { return LocalDateTime.set(this, 14, 16, value); }
+	getSeconds (                   )          { return LocalDateTime.get(this, 17, 19); }
+	setSeconds (                     value         ) { return LocalDateTime.set(this, 17, 19, value); }
 	getMilliseconds (                   )               { return +this.#value.slice(14, 17).padEnd(3, '0'); }///
 	setMilliseconds (                     value              ) {
-		this.#dateString = this.#dateString.slice(0, 19) + ( value ? ( '.' + ( '' + value ).padStart(3, '0') ).replace(DOT_ZERO, '') : '' );
-		this.#value = this.#dateString.replace(DELIMITER_DOT_ZERO, '');
+		this.#value = Value(
+			this.#ISOString = this.#ISOString.slice(0, 19) + ( value ? ( '.' + ( '' + value ).padStart(3, '0') ).replace(DOT_ZERO, '') : '' )
+		);
 	}
 	
 }
@@ -1260,30 +1302,34 @@ freeze(LocalDateTime);
 
 class LocalDate extends Datetime {
 	
-	#dateString        ;
+	#ISOString        ;
 	#value       ;
 	
 	valueOf (               )        { return this.#value; }
-	toISOString (               )         { return this.#dateString; }
+	toISOString (               )         { return this.#ISOString; }
 	
-	constructor (dateString        ) {
-		LOCAL_DATE.test(dateString) || throws(SyntaxError$1(`Invalid Local Date ${dateString}` + where(' at ')));
+	constructor (literal        ) {
+		LOCAL_DATE.test(literal) && leap(literal) || throws(SyntaxError$1(`Invalid Local Date ${literal}` + where(' at ')));
 		super();
-		this.#value = ( this.#dateString = dateString ).replace('-', '').replace('-', '');
+		this.#value = Value(
+			this.#ISOString = literal
+		);
 		return this;
 	}
 	
+	        static get = (that           , start        , end        ) => +that.#ISOString.slice(start, end);
 	        static set = (that           , start        , end        , value        ) => {
-		that.#dateString = that.#dateString.slice(0, start) + ( '' + value ).padStart(end - start, '0') + that.#dateString.slice(end);
-		that.#value = that.#dateString.replace('-', '').replace('-', '');
+		that.#value = Value(
+			that.#ISOString = that.#ISOString.slice(0, start) + ( '' + value ).padStart(end - start, '0') + that.#ISOString.slice(end)
+		);
 	};
 	
-	getFullYear (               )           { return +this.#dateString.slice(0, 4); }
-	setFullYear (                 value          ) { LocalDate.set(this, 0, 4, value); }
-	getMonth (               )        { return +this.#dateString.slice(5, 7) - 1; }
-	setMonth (                 value       ) { LocalDate.set(this, 5, 7, value + 1); }
-	getDate (               )       { return +this.#dateString.slice(8, 10); }
-	setDate (                 value      ) { LocalDate.set(this, 8, 10, value); }
+	getFullYear (               )           { return LocalDate.get(this, 0, 4); }
+	setFullYear (                 value          ) { return LocalDate.set(this, 0, 4, value); }
+	getMonth (               )        { return LocalDate.get(this, 5, 7) - 1; }
+	setMonth (                 value       ) { return LocalDate.set(this, 5, 7, value + 1); }
+	getDate (               )       { return LocalDate.get(this, 8, 10); }
+	setDate (                 value      ) { return LocalDate.set(this, 8, 10, value); }
 	
 }
 //@ts-ignore
@@ -1293,34 +1339,39 @@ freeze(LocalDate);
 
 class LocalTime extends Datetime {
 	
-	#dateString        ;
+	#ISOString        ;
 	#value       ;
 	
 	valueOf (               )        { return this.#value; }
-	toISOString (               )         { return this.#dateString; }
+	toISOString (               )         { return this.#ISOString; }
 	
-	constructor (dateString        ) {
-		LOCAL_TIME.test(dateString) || throws(SyntaxError$1(`Invalid Local Time ${dateString}` + where(' at ')));
+	constructor (literal        ) {
+		LOCAL_TIME.test(literal) || throws(SyntaxError$1(`Invalid Local Time ${literal}` + where(' at ')));
 		super();
-		this.#value = ( this.#dateString = dateString ).replace(DELIMITER_DOT_ZERO, '');
+		this.#value = Value(
+			this.#ISOString = literal
+		);
 		return this;
 	}
 	
+	        static get = (that           , start        , end        ) => +that.#ISOString.slice(start, end);
 	        static set = (that           , start        , end        , value        ) => {
-		that.#dateString = that.#dateString.slice(0, start) + ( '' + value ).padStart(2, '0') + that.#dateString.slice(end);
-		that.#value = that.#dateString.replace(DELIMITER_DOT_ZERO, '');
+		that.#value = Value(
+			that.#ISOString = that.#ISOString.slice(0, start) + ( '' + value ).padStart(2, '0') + that.#ISOString.slice(end)
+		);
 	};
 	
-	getHours (               )        { return +this.#dateString.slice(0, 2); }
-	setHours (                 value       ) { LocalTime.set(this, 0, 2, value); }
-	getMinutes (               )          { return +this.#dateString.slice(3, 5); }
-	setMinutes (                 value         ) { LocalTime.set(this, 3, 5, value); }
-	getSeconds (               )          { return +this.#dateString.slice(6, 8); }
-	setSeconds (                 value         ) { LocalTime.set(this, 6, 8, value); }
+	getHours (               )        { return LocalTime.get(this, 0, 2); }
+	setHours (                 value       ) { return LocalTime.set(this, 0, 2, value); }
+	getMinutes (               )          { return LocalTime.get(this, 3, 5); }
+	setMinutes (                 value         ) { return LocalTime.set(this, 3, 5, value); }
+	getSeconds (               )          { return LocalTime.get(this, 6, 8); }
+	setSeconds (                 value         ) { return LocalTime.set(this, 6, 8, value); }
 	getMilliseconds (               )               { return +this.#value.slice(6, 9).padEnd(3, '0'); }///
 	setMilliseconds (                 value              ) {
-		this.#dateString = this.#dateString.slice(0, 8) + ( value ? ( '.' + ( '' + value ).padStart(3, '0') ).replace(DOT_ZERO, '') : '' );
-		this.#value = this.#dateString.replace(DELIMITER_DOT_ZERO, '');
+		this.#value = Value(
+			this.#ISOString = this.#ISOString.slice(0, 8) + ( value ? ( '.' + ( '' + value ).padStart(3, '0') ).replace(DOT_ZERO, '') : '' )
+		);
 	}
 	
 }
@@ -1377,14 +1428,14 @@ const FLOAT = newRegExp`
 	(?:[eE][-+]?\d+(?:_\d+)*)?
 	$`;
 const UNDERSCORES = /_/g;
-const ZERO = /^[-+]?0(?:\.[0_]+)?(?:[eE][-+]?0+)?$/;
+const ZERO$1 = /^[-+]?0(?:\.[0_]+)?(?:[eE][-+]?0+)?$/;
 
 const Float = (literal        )         => {
 	if ( FLOAT.test(literal) ) {
 		const number = +literal.replace(UNDERSCORES, '');
 		if ( sError ) {
 			isFinite$1(number) || throws(RangeError$1(`Float has been as big as inf, like ${literal}` + where(' at ')));
-			number || ZERO.test(literal) || throws(RangeError$1(`Float has been as little as ${literal[0]==='-' ? '-' : ''}0, like ${literal}` + where(' at ')));
+			number || ZERO$1.test(literal) || throws(RangeError$1(`Float has been as little as ${literal[0]==='-' ? '-' : ''}0, like ${literal}` + where(' at ')));
 		}
 		return number;
 	}
@@ -1540,14 +1591,13 @@ const checkLiteralString = (literal        )         => {
 };
 
 const assignLiteralString = ( (table       , finalKey        , literal        )         => {
-	let $                                                                        ;
 	if ( literal[1]!=='\'' || literal[2]!=='\'' ) {
-		$ = LITERAL_STRING_exec(literal) ?? throws(SyntaxError$1(`Bad literal string` + where(' at ')));
+		const $ = LITERAL_STRING_exec(literal) ?? throws(SyntaxError$1(`Bad literal string` + where(' at ')));
 		table[finalKey] = checkLiteralString($[1]);
 		return $[2];
 	}
 	literal = literal.slice(3);
-	$ = MULTI_LINE_LITERAL_STRING_exec(literal);
+	const $ = MULTI_LINE_LITERAL_STRING_exec(literal);
 	if ( $ ) {
 		table[finalKey] = checkLiteralString($[1]) + $[2];
 		return $[3];
@@ -1559,7 +1609,7 @@ const assignLiteralString = ( (table       , finalKey        , literal        ) 
 	const start = mark('Literal String');
 	for ( ; ; ) {
 		const line         = must(start);
-		$ = MULTI_LINE_LITERAL_STRING_exec(line);
+		const $ = MULTI_LINE_LITERAL_STRING_exec(line);
 		if ( $ ) {
 			table[finalKey] = literal + checkLiteralString($[1]) + $[2];
 			return $[3];
