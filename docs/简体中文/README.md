@@ -89,7 +89,7 @@ function parse (
     *   类型：`boolean | number`
     *   默认值：`true`
     
-    指定你是否要用 `BigInt` 来实现整数类型的值。`number` 类型的参数允许你精确控制超过多少才使用 `BigInt`，例如 `Number.MAX_SAFE_INTEGER`（自动通过 `-useBigInt` 获取负向界限，如果 `useBigInt>=0`；否则通过 `-useBigInt-1` 获取正向界限）。
+    指定你是否要用 `BigInt` 来实现整数类型的值。`number` 类型的参数允许你精确控制超过多少才使用 `BigInt`，例如 `Number.MAX_SAFE_INTEGER`（自动通过 `-使用BigInt` 获取负向界限，如果 `使用BigInt>=0`；否则通过 `-使用BigInt-1` 获取正向界限）。
     
 4.  #### `超级选项`
     
