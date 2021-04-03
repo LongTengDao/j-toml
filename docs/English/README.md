@@ -48,7 +48,6 @@ function parse (
          multiLineJoiner      :string,
          useBigInt?           :boolean | number,
          xOptions?            :object,
-         sourcePath?          :string,
 ) :Table;
 ```
 

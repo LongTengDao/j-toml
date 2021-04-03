@@ -1,3 +1,5 @@
+﻿[English](https://GitHub.com/LongTengDao/j-toml/tree/master/docs/English/) | [简体中文](https://GitHub.com/LongTengDao/j-toml/tree/master/docs/简体中文/)
+___
 1.  0.  0.  +   add feature: support TOML v1.0.0
             *   remove feature (experimental): `TOML.parse(,,,,xOptions?:{mix?,close?})`
     1.  0.  +   add feature (subsidiary): `TOML.parse(,,,,,sourcePath?:string)`

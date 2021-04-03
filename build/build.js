@@ -31,6 +31,7 @@ module.exports = require('../test/test.js')(async ({ build, 龙腾道, get, map,
 	
 	await put('docs/README.md', BOM + i18n.map(lang => `[${lang}](./${lang}/)`).join(' | '));
 	await map('docs/English/README.md', ReadMe, 'dist/NPM/README.md');
+	await map('CHANGELOG.md', ReadMe, 'dist/NPM/CHANGELOG.md');
 	
 });
 
