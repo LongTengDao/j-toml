@@ -4,7 +4,7 @@ import isBuffer from '.Buffer.isBuffer?=()=>false';
 import from from '.Buffer.from?';
 import undefined from '.undefined';
 
-import { clearRegExp } from '@ltd/j-regexp';
+import { clearRegExp, theRegExp } from '@ltd/j-regexp';
 import { NON_SCALAR } from '@ltd/j-utf';
 
 import * as iterator$0 from '../iterator$0';
@@ -14,6 +14,7 @@ import Root from '../parse/level-loop';
 const { isAbsolute } = require('path') as typeof import('path');
 const { readFileSync } = require('fs') as typeof import('fs');
 
+const IS_NON_SCALAR = theRegExp(NON_SCALAR).test;
 const BOM = '\uFEFF';
 const buf2str = (buf :Buffer) => {
 	const str = buf.toString();
@@ -48,7 +49,7 @@ const parse = (
 	else if ( typeof source==='string' ) { sourcePath = ''; }
 	else { throw TypeError('TOML.parse(source)'); }
 	try {
-		if ( NON_SCALAR.test(source) ) { throw Error('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any uncoupled UCS-4 character code.'); }
+		if ( IS_NON_SCALAR(source) ) { throw Error('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any uncoupled UCS-4 character code.'); }
 		try {
 			options$0.use(specificationVersion, multiLineJoiner, useBigInt, xOptions);
 			iterator$0.todo(source, sourcePath);

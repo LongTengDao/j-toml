@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '1.6.0';
+const version = '1.7.0';
 
 const Error$1 = Error;
 
@@ -31,7 +31,7 @@ var hasOwn = hasOwnProperty.bind
 	? /*#__PURE__*/hasOwnProperty.call.bind(hasOwnProperty)
 	: function (object, key) { return /*#__PURE__*/hasOwnProperty.call(object, key); };// && object!=null
 
-var create = Object.create;
+var create$1 = Object.create;
 
 const from = (
 	/*! j-globals: Buffer.from (fallback) */
@@ -49,17 +49,17 @@ const SyntaxError$1 = SyntaxError;
 
 const RegExp$1 = RegExp;
 
-const freeze = Object.freeze;
-
 const Reflect_apply = Reflect.apply;
 
 const Proxy$1 = Proxy;
 
-const create$1 = Object.create;
+const create = Object.create;
 
-const toStringTag = typeof Symbol!=='undefined' ? Symbol.toStringTag : undefined;
+const toStringTag = typeof Symbol==='undefined' ? undefined$1 : Symbol.toStringTag;
 
 const Object_defineProperty = Object.defineProperty;
+
+const freeze = Object.freeze;
 
 const Object_assign = Object.assign;
 
@@ -67,12 +67,12 @@ const Default = (
 	/*! j-globals: default (internal) */
 	function Default (exports, addOnOrigin) {
 		return /*#__PURE__*/ function Module (exports, addOnOrigin) {
-			if ( !addOnOrigin ) { addOnOrigin = exports; exports = create$1(NULL); }
+			if ( !addOnOrigin ) { addOnOrigin = exports; exports = create(NULL); }
 			if ( Object_assign ) { Object_assign(exports, addOnOrigin); }
 			else { for ( var key in addOnOrigin ) { if ( hasOwn(addOnOrigin, key) ) { exports[key] = addOnOrigin[key]; } } }
 			exports.default = exports;
 			if ( toStringTag ) {
-				var descriptor = create$1(NULL);
+				var descriptor = create(NULL);
 				descriptor.value = 'Module';
 				Object_defineProperty(exports, toStringTag, descriptor);
 			}
@@ -165,7 +165,7 @@ function RE (               template                      ) {
 	return re;
 }
 
-var RE_bind = bind && /*#__PURE__*/bind.bind(RE       );
+var RE_bind = /*#__PURE__*/bind.bind(RE       );
 
 function Context (flags        )          {
 	return {
@@ -177,14 +177,17 @@ function Context (flags        )          {
 	};
 }
 
-var CONTEXT          = Proxy$1 && /*#__PURE__*/Context('');
+var CONTEXT          = /*#__PURE__*/Context('');
 
-var newRegExp = Proxy$1 && /*#__PURE__*/new Proxy$1(RE, /*#__PURE__*/freeze({
-	apply: function (RE, thisArg, args                                   ) { return Reflect_apply(RE, CONTEXT, args); },
-	get: function (RE, flags        ) { return RE_bind(Context(flags)); },
-	defineProperty: function () { return false; },
+var newRegExp = /*#__PURE__*/new Proxy$1(RE, {
+	apply: function (RE, thisArg, args                                   ) { return Reflect_apply(RE, CONTEXT, args); }
+	,
+	get: function (RE, flags        ) { return RE_bind(Context(flags)); }
+	,
+	defineProperty: function () { return false; }
+	,
 	preventExtensions: function () { return false; }
-}));
+});
 
 var clearRegExp = '$_' in RegExp$1
 	? /*#__PURE__*/function () {
@@ -312,7 +315,7 @@ const WeakMap$1 = WeakMap;
 
 const isSafeInteger = Number.isSafeInteger;
 
-const ownKeys = Reflect.ownKeys;
+const ownKeys$1 = Reflect.ownKeys;
 
 const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER;
 
@@ -322,9 +325,9 @@ const WeakSet$1 = WeakSet;
 
 const Object_keys = Object.keys;
 
-const getOwnPropertySymbols = typeof Object!=='undefined' ? Object.getOwnPropertySymbols : undefined;
+const getOwnPropertySymbols = Object.getOwnPropertySymbols;
 
-const Null = (
+const Null$1 = (
 	/*! j-globals: null.constructor (internal) */
 	/*#__PURE__*/function () {
 		var assign = Object.assign || function assign (target, source) {
@@ -351,7 +354,7 @@ const Null = (
 				? this
 				: typeof origin==='function'
 					? /*#__PURE__*/Nullify(origin)
-					: /*#__PURE__*/assign(/*#__PURE__*/create(NULL), origin);
+					: /*#__PURE__*/assign(/*#__PURE__*/create$1(NULL), origin);
 		};
 		delete Null.name;
 		//try { delete Null.length; } catch (error) {}
@@ -382,7 +385,7 @@ const getOwnPropertyDescriptor = (
 	/*! j-globals: null.getOwnPropertyDescriptor (internal) */
 	function () {
 		function __PURE__ (descriptor) {
-			var propertyDescriptor = create(NULL);
+			var propertyDescriptor = create$1(NULL);
 			if ( descriptor.hasOwnProperty('value') ) {
 				propertyDescriptor.value = descriptor.value;
 				propertyDescriptor.writable = descriptor.writable;
@@ -402,13 +405,13 @@ const getOwnPropertyDescriptor = (
 	/*¡ j-globals: null.getOwnPropertyDescriptor (internal) */
 );
 
-var ownKeys$1 = typeof Reflect==='object' ? Reflect.ownKeys : Object.getOwnPropertyNames;
+var ownKeys = typeof Reflect==='object' ? Reflect.ownKeys : Object.getOwnPropertyNames;
 const getOwnPropertyDescriptors = (
 	/*! j-globals: null.getOwnPropertyDescriptors (internal) */
 	function () {
 		function __PURE__ (object) {
-			var descriptorMap = create(NULL);
-			for ( var keys = ownKeys$1(object), length = keys.length, index = 0; index<length; ++index ) {
+			var descriptorMap = create$1(NULL);
+			for ( var keys = ownKeys(object), length = keys.length, index = 0; index<length; ++index ) {
 				var key = keys[index];
 				descriptorMap[key] = getOwnPropertyDescriptor(object, key);
 			}
@@ -442,7 +445,7 @@ const Keeper = (
 			get flat () { }
 			get flatMap () { }
 			get __proto__ () { return getPrototypeOf(this); }
-			set __proto__ (proto) { setPrototypeOf(this, weak.get(proto) ?? weak.set(proto, preventExtensions(create$1(proto, properties))).get(proto)); }
+			set __proto__ (proto) { setPrototypeOf(this, weak.get(proto) ?? weak.set(proto, preventExtensions(create(proto, properties))).get(proto)); }
 		}).prototype));
 		return properties.constructor.value;
 	}()
@@ -483,12 +486,12 @@ const target2proxy = /*#__PURE__*/newWeakMap()
 	                                                   
  ;
 
-const handlers                       = /*#__PURE__*/Object_assign(create$1(NULL), {
+const handlers                       = /*#__PURE__*/Object_assign(create(NULL), {
 	defineProperty:                 (target                   , key   , descriptor                    )          => {
 		if ( hasOwnProperty_call(target, key) ) {
-			return Reflect_defineProperty(target, key, Object_assign(create$1(NULL), descriptor));
+			return Reflect_defineProperty(target, key, Object_assign(create(NULL), descriptor));
 		}
-		if ( Reflect_defineProperty(target, key, Object_assign(create$1(NULL), descriptor)) ) {
+		if ( Reflect_defineProperty(target, key, Object_assign(create(NULL), descriptor)) ) {
 			const keeper = target2keeper.get(target) ;
 			keeper[keeper.length] = key;
 			return true;
@@ -520,12 +523,12 @@ const orderify =                    (object   )    => {
 	if ( proxy2target.has(object) ) { return object; }
 	let proxy = target2proxy.get(object)                 ;
 	if ( proxy ) { return proxy; }
-	proxy = newProxy(object, Object_assign(new Keeper          (), ownKeys(object)));
+	proxy = newProxy(object, Object_assign(new Keeper          (), ownKeys$1(object)));
 	target2proxy.set(object, proxy);
 	return proxy;
 };
 
-const Null$1 = /*#__PURE__*/function () {
+const Null = /*#__PURE__*/function () {
 	function throwConstructing ()        { throw TypeError$1(`Super constructor Null cannot be invoked with 'new'`); }
 	function throwApplying ()        { throw TypeError$1(`Super constructor Null cannot be invoked without 'new'`); }
 	const Nullify = (constructor                             ) => {
@@ -544,7 +547,7 @@ const Null$1 = /*#__PURE__*/function () {
 	}
 	//@ts-ignore
 	Null.prototype = null;
-	Object_defineProperty(Null, 'name', Object_assign(create$1(NULL), { value: '', configurable: false }));
+	Object_defineProperty(Null, 'name', Object_assign(create(NULL), { value: '', configurable: false }));
 	//delete Null.length;
 	freeze(Null);
 	return Null;
@@ -569,7 +572,7 @@ const PAIR = true;
 const pairs                 = new WeakSet$1;
 const fromPair = (value       )          => pairs.has(value);
 
-const PlainTable = class Table extends Null      {
+const PlainTable = class Table extends Null$1      {
 	constructor (isDirect          , isInline          ) {
 		super();
 		tables.add(this);
@@ -583,7 +586,7 @@ delete PlainTable.prototype.constructor;
 freeze(PlainTable.prototype);
 freeze(PlainTable);
 
-const OrderedTable = class Table extends Null$1      {
+const OrderedTable = class Table extends Null      {
 	constructor (isDirect          , isInline          ) {
 		super();
 		tables.add(this);
@@ -632,7 +635,7 @@ const MULTI_LINE_LITERAL_STRING_0 = newRegExp.s           `
 	'''()
 	${Whitespace}*
 	(.*)`.exec;
-let MULTI_LINE_LITERAL_STRING_exec                                    ;
+let __MULTI_LINE_LITERAL_STRING_exec                                    ;
 
 const SYM_WHITESPACE = newRegExp.s`
 	^
@@ -770,9 +773,9 @@ const KEY_VALUE_PAIR_exec_groups = (_        )                                  
 	return { left, tag, right };
 };
 
-const CONTROL_CHARACTER_EXCLUDE_TAB____ = /[\x00-\x08\x0B-\x1F\x7F]/;
-const CONTROL_CHARACTER_EXCLUDE_TAB_DEL = /[\x00-\x08\x0B-\x1F]/;
-let __CONTROL_CHARACTER_EXCLUDE        ;
+const CONTROL_CHARACTER_EXCLUDE_TAB____ = theRegExp(/[\x00-\x08\x0B-\x1F\x7F]/).test;
+const CONTROL_CHARACTER_EXCLUDE_TAB_DEL = theRegExp(/[\x00-\x08\x0B-\x1F]/).test;
+let __CONTROL_CHARACTER_EXCLUDE_test                                         ;
 const KEYS_STRICT = /[\w-]+|"(?:[^\\"]+|\\.)*"|'[^']*'/gs;
 const KEYS_FREE = /[^ \t#=[\]'".]+(?:[ \t]+[^ \t#=[\]'".]+)*|"(?:[^\\"]+|\\.)*"|'[^']*'/gs;
 let __KEYS        ;
@@ -780,9 +783,9 @@ let __KEYS        ;
 const switchRegExp = (specificationVersion        )       => {
 	switch ( specificationVersion ) {
 		case 1.0:
-			MULTI_LINE_LITERAL_STRING_exec = MULTI_LINE_LITERAL_STRING_0_1_2;
+			__MULTI_LINE_LITERAL_STRING_exec = MULTI_LINE_LITERAL_STRING_0_1_2;
 			__LITERAL_KEY_exec = LITERAL_KEY____;
-			__CONTROL_CHARACTER_EXCLUDE = CONTROL_CHARACTER_EXCLUDE_TAB____;
+			__CONTROL_CHARACTER_EXCLUDE_test = CONTROL_CHARACTER_EXCLUDE_TAB____;
 			__ESCAPED_EXCLUDE_CONTROL_CHARACTER = ESCAPED_EXCLUDE_CONTROL_CHARACTER_TAB______;
 			__BASIC_STRING_exec = BASIC_STRING_TAB______;
 			__BARE_KEY_exec = BARE_KEY_STRICT;
@@ -790,9 +793,9 @@ const switchRegExp = (specificationVersion        )       => {
 			supportArrayOfTables = true;
 			break;
 		case 0.5:
-			MULTI_LINE_LITERAL_STRING_exec = MULTI_LINE_LITERAL_STRING_0;
+			__MULTI_LINE_LITERAL_STRING_exec = MULTI_LINE_LITERAL_STRING_0;
 			__LITERAL_KEY_exec = LITERAL_KEY____;
-			__CONTROL_CHARACTER_EXCLUDE = CONTROL_CHARACTER_EXCLUDE_TAB____;
+			__CONTROL_CHARACTER_EXCLUDE_test = CONTROL_CHARACTER_EXCLUDE_TAB____;
 			__ESCAPED_EXCLUDE_CONTROL_CHARACTER = ESCAPED_EXCLUDE_CONTROL_CHARACTER__________;
 			__BASIC_STRING_exec = BASIC_STRING__________;
 			__BARE_KEY_exec = BARE_KEY_STRICT;
@@ -800,9 +803,9 @@ const switchRegExp = (specificationVersion        )       => {
 			supportArrayOfTables = true;
 			break;
 		case 0.4:
-			MULTI_LINE_LITERAL_STRING_exec = MULTI_LINE_LITERAL_STRING_0;
+			__MULTI_LINE_LITERAL_STRING_exec = MULTI_LINE_LITERAL_STRING_0;
 			__LITERAL_KEY_exec = LITERAL_KEY_DEL;
-			__CONTROL_CHARACTER_EXCLUDE = CONTROL_CHARACTER_EXCLUDE_TAB_DEL;
+			__CONTROL_CHARACTER_EXCLUDE_test = CONTROL_CHARACTER_EXCLUDE_TAB_DEL;
 			__ESCAPED_EXCLUDE_CONTROL_CHARACTER = ESCAPED_EXCLUDE_CONTROL_CHARACTER_DEL______;
 			__BASIC_STRING_exec = BASIC_STRING_DEL______;
 			__BARE_KEY_exec = BARE_KEY_STRICT;
@@ -810,9 +813,9 @@ const switchRegExp = (specificationVersion        )       => {
 			supportArrayOfTables = true;
 			break;
 		default:
-			MULTI_LINE_LITERAL_STRING_exec = MULTI_LINE_LITERAL_STRING_0;
+			__MULTI_LINE_LITERAL_STRING_exec = MULTI_LINE_LITERAL_STRING_0;
 			__LITERAL_KEY_exec = LITERAL_KEY_DEL;
-			__CONTROL_CHARACTER_EXCLUDE = CONTROL_CHARACTER_EXCLUDE_TAB_DEL;
+			__CONTROL_CHARACTER_EXCLUDE_test = CONTROL_CHARACTER_EXCLUDE_TAB_DEL;
 			__ESCAPED_EXCLUDE_CONTROL_CHARACTER = ESCAPED_EXCLUDE_CONTROL_CHARACTER_DEL_SLASH;
 			__BASIC_STRING_exec = BASIC_STRING_DEL_SLASH;
 			__BARE_KEY_exec = BARE_KEY_FREE;
@@ -902,7 +905,7 @@ let processor             = null;
 let collection              = [];
 let collection_length         = 0;
 const collect_on = (tag        , array              , table              , key         )       => {
-	const each = create$1(NULL)                                                                           ;
+	const each = create(NULL)                                                                           ;
 	each.tag = tag;
 	if ( table ) {
 		each.table = table;
@@ -1004,7 +1007,7 @@ const use = (specificationVersion         , multiLineJoiner         , useBigInt 
 	}
 	else {
 		const { order, longer, exact, null: _null, multi, tag, ...unknown } = xOptions;
-		if ( ownKeys(unknown).length ) { throw TypeError$1('TOML.parse(,,,,xOptions)'); }
+		if ( ownKeys$1(unknown).length ) { throw TypeError$1('TOML.parse(,,,,xOptions)'); }
 		Table = order ? OrderedTable : PlainTable;
 		allowLonger = !!longer;
 		sError = !!exact;
@@ -1044,7 +1047,7 @@ const newArray = (isStatic         )        => {
 
 const NativeDate = Date;
 
-const parse = Date.parse;
+const parse$1 = Date.parse;
 
 const _29_ = /(?:0[1-9]|1\d|2[0-9])/;
 const _30_ = /(?:0[1-9]|[12]\d|30)/;
@@ -1098,24 +1101,24 @@ const OFFSET_DATETIME_ZERO_exec = newRegExp   `
 	Z
 	$`.exec;
 
-const LOCAL_DATETIME = newRegExp`
+const IS_LOCAL_DATETIME = newRegExp`
 	^
 	${YMD}
 	[T ]
 	${HMS}
 	(?:\.\d+)?
-	$`;
+	$`.test;
 
-const LOCAL_DATE = newRegExp`
+const IS_LOCAL_DATE = newRegExp`
 	^
 	${YMD}
-	$`;
+	$`.test;
 
-const LOCAL_TIME = newRegExp`
+const IS_LOCAL_TIME = newRegExp`
 	^
 	${HMS}
 	(?:\.\d+)?
-	$`;
+	$`.test;
 
 const DOT_ZERO = /\.?0+$/;
 const DELIMITER_DOT = /[-T:.]/g;
@@ -1127,15 +1130,15 @@ const Datetime = function (            ) { return this; }                       
 // [Symbol.toPrimitive]('number') > .valueOf()
 //                                > .toISOString()
 {
-	const descriptors = Null        (null);
-	const descriptor = Null(null);
-	for ( const key of ownKeys(NativeDate.prototype) ) {
+	const descriptors = Null$1        (null);
+	const descriptor = Null$1(null);
+	for ( const key of ownKeys$1(NativeDate.prototype) ) {
 		//@ts-ignore
 		key==='constructor' ||
 		key==='toJSON' ||
 		( descriptors[key] = descriptor );
 	}
-	Datetime.prototype = preventExtensions(create$1(NativeDate.prototype, descriptors));
+	Datetime.prototype = preventExtensions(create(NativeDate.prototype, descriptors));
 	freeze(Datetime);
 }
 
@@ -1169,51 +1172,51 @@ class OffsetDateTime extends Datetime {
 		const { 1: more } = leap(literal) && ( zeroDatetime ? OFFSET_DATETIME_ZERO_exec : OFFSET_DATETIME_exec )(literal) || throws(SyntaxError$1(`Invalid Offset Date-Time ${literal}` + where(' at ')));
 		super();
 		this.#ISOString = literal.replace(' ', 'T');
-		this.#value = ( '' + parse(this.#ISOString) ).padStart(15, '0') + ( more ? '.' + more : '' );
+		this.#value = ( '' + parse$1(this.#ISOString) ).padStart(15, '0') + ( more ? '.' + more : '' );
 		return this;
 	}
 	
-	        static use = (that                , $         = 0) => {
+	static use = (that                , $         = 0) => {
 		DATE.setTime(+that.#value + $);
 		return DATE;
 	};
-	        static get = (that                , start        , end        ) => +that.#ISOString.slice(start, end);
-	        static set = (that                , start        , end        , value        )         => {
+	static get = (that                , start        , end        ) => +that.#ISOString.slice(start, end);
+	static set = (that                , start        , end        , value        )         => {
 		if ( end ) { that.#ISOString = that.#ISOString.slice(0, start) + ( '' + value ).padStart(end - start, '0') + that.#ISOString.slice(end); }
-		const time = parse(that.#ISOString);
+		const time = parse$1(that.#ISOString);
 		that.#value = ( '' + time ).padStart(15, '0') + that.#value.slice(15);
 		return time;
 	};
 	
-	getUTCFullYear (                    )           { return OffsetDateTime.use(this).getUTCFullYear(); }
-	getFullYear (                    )           { return OffsetDateTime.get(this, 0, 4); }
-	setFullYear (                      value          ) { return OffsetDateTime.set(this, 0, 4, value); }
-	getUTCMonth (                    )        { return OffsetDateTime.use(this).getUTCMonth(); }
-	getMonth (                    )        { return OffsetDateTime.get(this, 5, 7) - 1; }
-	setMonth (                      value       ) { return OffsetDateTime.set(this, 5, 7, value + 1); }
-	getUTCDate (                    )       { return OffsetDateTime.use(this).getUTCDate(); }
-	getDate (                    )       { return OffsetDateTime.get(this, 8, 10); }
-	setDate (                      value      ) { return OffsetDateTime.set(this, 8, 10, value); }
+	getUTCFullYear (                    )           { return OffsetDateTime_use(this).getUTCFullYear(); }
+	getFullYear (                    )           { return OffsetDateTime_get(this, 0, 4); }
+	setFullYear (                      value          ) { return OffsetDateTime_set(this, 0, 4, value); }
+	getUTCMonth (                    )        { return OffsetDateTime_use(this).getUTCMonth(); }
+	getMonth (                    )        { return OffsetDateTime_get(this, 5, 7) - 1; }
+	setMonth (                      value       ) { return OffsetDateTime_set(this, 5, 7, value + 1); }
+	getUTCDate (                    )       { return OffsetDateTime_use(this).getUTCDate(); }
+	getDate (                    )       { return OffsetDateTime_get(this, 8, 10); }
+	setDate (                      value      ) { return OffsetDateTime_set(this, 8, 10, value); }
 	
-	getUTCHours (                    )        { return OffsetDateTime.use(this).getUTCHours(); }
-	getHours (                    )        { return OffsetDateTime.get(this, 11, 13); }
-	setHours (                      value       ) { return OffsetDateTime.set(this, 11, 13, value); }
-	getUTCMinutes (                    )          { return OffsetDateTime.use(this).getUTCMinutes(); }
-	getMinutes (                    )          { return OffsetDateTime.get(this, 14, 16); }
-	setMinutes (                      value         ) { return OffsetDateTime.set(this, 14, 16, value); }
-	getUTCSeconds (                    )          { return OffsetDateTime.use(this).getUTCSeconds(); }
-	getSeconds (                    )          { return OffsetDateTime.get(this, 17, 19); }
-	setSeconds (                      value         ) { return OffsetDateTime.set(this, 17, 19, value); }
-	getUTCMilliseconds (                    )               { return OffsetDateTime.use(this).getUTCMilliseconds(); }///
+	getUTCHours (                    )        { return OffsetDateTime_use(this).getUTCHours(); }
+	getHours (                    )        { return OffsetDateTime_get(this, 11, 13); }
+	setHours (                      value       ) { return OffsetDateTime_set(this, 11, 13, value); }
+	getUTCMinutes (                    )          { return OffsetDateTime_use(this).getUTCMinutes(); }
+	getMinutes (                    )          { return OffsetDateTime_get(this, 14, 16); }
+	setMinutes (                      value         ) { return OffsetDateTime_set(this, 14, 16, value); }
+	getUTCSeconds (                    )          { return OffsetDateTime_use(this).getUTCSeconds(); }
+	getSeconds (                    )          { return OffsetDateTime_get(this, 17, 19); }
+	setSeconds (                      value         ) { return OffsetDateTime_set(this, 17, 19, value); }
+	getUTCMilliseconds (                    )               { return OffsetDateTime_use(this).getUTCMilliseconds(); }///
 	getMilliseconds (                    )               { return +this.#value.slice(12, 15); }///
 	setMilliseconds (                      value              ) {
 		this.#ISOString = this.#ISOString.slice(0, 19) + ( value ? ( '.' + ( '' + value ).padStart(3, '0') ).replace(DOT_ZERO, '') : '' ) + this.#ISOString.slice(this.#ISOString.search(OFFSET$));
-		return OffsetDateTime.set(this, 0, 0, 0);
+		return OffsetDateTime_set(this, 0, 0, 0);
 	}
 	
-	getUTCDay (                    )      { return OffsetDateTime.use(this).getUTCDay(); }
+	getUTCDay (                    )      { return OffsetDateTime_use(this).getUTCDay(); }
 	getDay (                    )      {
-		return OffsetDateTime.use(this, this.getTimezoneOffset()*60000).getUTCDay();
+		return OffsetDateTime_use(this, this.getTimezoneOffset()*60000).getUTCDay();
 	}
 	getTimezoneOffset (                    )                 {
 		const z = Z_exec(this.#ISOString);
@@ -1221,7 +1224,7 @@ class OffsetDateTime extends Datetime {
 	}
 	setTimezoneOffset (                      value                ) {
 		value = +value;
-		let string = OffsetDateTime.use(this, value*60000).toISOString().slice(0, -1);
+		let string = OffsetDateTime_use(this, value*60000).toISOString().slice(0, -1);
 		if ( value ) {
 			if ( value>0 ) { string += '+'; }
 			else {
@@ -1245,6 +1248,7 @@ class OffsetDateTime extends Datetime {
 	}
 	
 }
+const { use: OffsetDateTime_use, get: OffsetDateTime_get, set: OffsetDateTime_set } = OffsetDateTime;
 //@ts-ignore
 delete OffsetDateTime.prototype.constructor;
 freeze(OffsetDateTime.prototype);
@@ -1259,7 +1263,7 @@ class LocalDateTime extends Datetime {
 	toISOString (                   )         { return this.#ISOString; }
 	
 	constructor (literal        ) {
-		LOCAL_DATETIME.test(literal) && leap(literal) || throws(SyntaxError$1(`Invalid Local Date-Time ${literal}` + where(' at ')));
+		IS_LOCAL_DATETIME(literal) && leap(literal) || throws(SyntaxError$1(`Invalid Local Date-Time ${literal}` + where(' at ')));
 		super();
 		this.#value = Value(
 			this.#ISOString = literal.replace(' ', 'T')
@@ -1267,26 +1271,26 @@ class LocalDateTime extends Datetime {
 		return this;
 	}
 	
-	        static get = (that               , start        , end        ) => +that.#ISOString.slice(start, end);
-	        static set = (that               , start        , end        , value        ) => {
+	static get = (that               , start        , end        ) => +that.#ISOString.slice(start, end);
+	static set = (that               , start        , end        , value        ) => {
 		that.#value = Value(
 			that.#ISOString = that.#ISOString.slice(0, start) + ( '' + value ).padStart(end - start, '0') + that.#ISOString.slice(end)
 		);
 	};
 	
-	getFullYear (                   )           { return LocalDateTime.get(this, 0, 4); }
-	setFullYear (                     value          ) { return LocalDateTime.set(this, 0, 4, value); }
-	getMonth (                   )        { return LocalDateTime.get(this, 5, 7) - 1; }
-	setMonth (                     value       ) { return LocalDateTime.set(this, 5, 7, value + 1); }
-	getDate (                   )       { return LocalDateTime.get(this, 8, 10); }
-	setDate (                     value      ) { return LocalDateTime.set(this, 8, 10, value); }
+	getFullYear (                   )           { return LocalDateTime_get(this, 0, 4); }
+	setFullYear (                     value          ) { return LocalDateTime_set(this, 0, 4, value); }
+	getMonth (                   )        { return LocalDateTime_get(this, 5, 7) - 1; }
+	setMonth (                     value       ) { return LocalDateTime_set(this, 5, 7, value + 1); }
+	getDate (                   )       { return LocalDateTime_get(this, 8, 10); }
+	setDate (                     value      ) { return LocalDateTime_set(this, 8, 10, value); }
 	
-	getHours (                   )        { return LocalDateTime.get(this, 11, 13); }
-	setHours (                     value       ) { return LocalDateTime.set(this, 11, 13, value); }
-	getMinutes (                   )          { return LocalDateTime.get(this, 14, 16); }
-	setMinutes (                     value         ) { return LocalDateTime.set(this, 14, 16, value); }
-	getSeconds (                   )          { return LocalDateTime.get(this, 17, 19); }
-	setSeconds (                     value         ) { return LocalDateTime.set(this, 17, 19, value); }
+	getHours (                   )        { return LocalDateTime_get(this, 11, 13); }
+	setHours (                     value       ) { return LocalDateTime_set(this, 11, 13, value); }
+	getMinutes (                   )          { return LocalDateTime_get(this, 14, 16); }
+	setMinutes (                     value         ) { return LocalDateTime_set(this, 14, 16, value); }
+	getSeconds (                   )          { return LocalDateTime_get(this, 17, 19); }
+	setSeconds (                     value         ) { return LocalDateTime_set(this, 17, 19, value); }
 	getMilliseconds (                   )               { return +this.#value.slice(14, 17).padEnd(3, '0'); }///
 	setMilliseconds (                     value              ) {
 		this.#value = Value(
@@ -1295,6 +1299,7 @@ class LocalDateTime extends Datetime {
 	}
 	
 }
+const { get: LocalDateTime_get, set: LocalDateTime_set } = LocalDateTime;
 //@ts-ignore
 delete LocalDateTime.prototype.constructor;
 freeze(LocalDateTime.prototype);
@@ -1309,7 +1314,7 @@ class LocalDate extends Datetime {
 	toISOString (               )         { return this.#ISOString; }
 	
 	constructor (literal        ) {
-		LOCAL_DATE.test(literal) && leap(literal) || throws(SyntaxError$1(`Invalid Local Date ${literal}` + where(' at ')));
+		IS_LOCAL_DATE(literal) && leap(literal) || throws(SyntaxError$1(`Invalid Local Date ${literal}` + where(' at ')));
 		super();
 		this.#value = Value(
 			this.#ISOString = literal
@@ -1317,21 +1322,22 @@ class LocalDate extends Datetime {
 		return this;
 	}
 	
-	        static get = (that           , start        , end        ) => +that.#ISOString.slice(start, end);
-	        static set = (that           , start        , end        , value        ) => {
+	static get = (that           , start        , end        ) => +that.#ISOString.slice(start, end);
+	static set = (that           , start        , end        , value        ) => {
 		that.#value = Value(
 			that.#ISOString = that.#ISOString.slice(0, start) + ( '' + value ).padStart(end - start, '0') + that.#ISOString.slice(end)
 		);
 	};
 	
-	getFullYear (               )           { return LocalDate.get(this, 0, 4); }
-	setFullYear (                 value          ) { return LocalDate.set(this, 0, 4, value); }
-	getMonth (               )        { return LocalDate.get(this, 5, 7) - 1; }
-	setMonth (                 value       ) { return LocalDate.set(this, 5, 7, value + 1); }
-	getDate (               )       { return LocalDate.get(this, 8, 10); }
-	setDate (                 value      ) { return LocalDate.set(this, 8, 10, value); }
+	getFullYear (               )           { return LocalDate_get(this, 0, 4); }
+	setFullYear (                 value          ) { return LocalDate_set(this, 0, 4, value); }
+	getMonth (               )        { return LocalDate_get(this, 5, 7) - 1; }
+	setMonth (                 value       ) { return LocalDate_set(this, 5, 7, value + 1); }
+	getDate (               )       { return LocalDate_get(this, 8, 10); }
+	setDate (                 value      ) { return LocalDate_set(this, 8, 10, value); }
 	
 }
+const { get: LocalDate_get, set: LocalDate_set } = LocalDate;
 //@ts-ignore
 delete LocalDate.prototype.constructor;
 freeze(LocalDate.prototype);
@@ -1346,7 +1352,7 @@ class LocalTime extends Datetime {
 	toISOString (               )         { return this.#ISOString; }
 	
 	constructor (literal        ) {
-		LOCAL_TIME.test(literal) || throws(SyntaxError$1(`Invalid Local Time ${literal}` + where(' at ')));
+		IS_LOCAL_TIME(literal) || throws(SyntaxError$1(`Invalid Local Time ${literal}` + where(' at ')));
 		super();
 		this.#value = Value(
 			this.#ISOString = literal
@@ -1354,19 +1360,19 @@ class LocalTime extends Datetime {
 		return this;
 	}
 	
-	        static get = (that           , start        , end        ) => +that.#ISOString.slice(start, end);
-	        static set = (that           , start        , end        , value        ) => {
+	static get = (that           , start        , end        ) => +that.#ISOString.slice(start, end);
+	static set = (that           , start        , end        , value        ) => {
 		that.#value = Value(
 			that.#ISOString = that.#ISOString.slice(0, start) + ( '' + value ).padStart(2, '0') + that.#ISOString.slice(end)
 		);
 	};
 	
-	getHours (               )        { return LocalTime.get(this, 0, 2); }
-	setHours (                 value       ) { return LocalTime.set(this, 0, 2, value); }
-	getMinutes (               )          { return LocalTime.get(this, 3, 5); }
-	setMinutes (                 value         ) { return LocalTime.set(this, 3, 5, value); }
-	getSeconds (               )          { return LocalTime.get(this, 6, 8); }
-	setSeconds (                 value         ) { return LocalTime.set(this, 6, 8, value); }
+	getHours (               )        { return LocalTime_get(this, 0, 2); }
+	setHours (                 value       ) { return LocalTime_set(this, 0, 2, value); }
+	getMinutes (               )          { return LocalTime_get(this, 3, 5); }
+	setMinutes (                 value         ) { return LocalTime_set(this, 3, 5, value); }
+	getSeconds (               )          { return LocalTime_get(this, 6, 8); }
+	setSeconds (                 value         ) { return LocalTime_set(this, 6, 8, value); }
 	getMilliseconds (               )               { return +this.#value.slice(6, 9).padEnd(3, '0'); }///
 	setMilliseconds (                 value              ) {
 		this.#value = Value(
@@ -1375,6 +1381,7 @@ class LocalTime extends Datetime {
 	}
 	
 }
+const { get: LocalTime_get, set: LocalTime_set } = LocalTime;
 //@ts-ignore
 delete LocalTime.prototype.constructor;
 freeze(LocalTime.prototype);
@@ -1383,13 +1390,13 @@ freeze(LocalTime);
 const BigInt$1 = BigInt;
 
 const INTEGER_D = /[-+]?(?:0|[1-9]\d*(?:_\d+)*)/;
-const D_INTEGER = newRegExp`^${INTEGER_D}$`;
-const XOB_INTEGER = /^0(?:x[0-9A-Fa-f]+(?:_[0-9A-Fa-f]+)*|o[0-7]+(?:_[0-7]+)*|b[01]+(?:_[01]+)*)$/;
+const IS_D_INTEGER = newRegExp`^${INTEGER_D}$`.test;
+const IS_XOB_INTEGER = theRegExp(/^0(?:x[0-9A-Fa-f]+(?:_[0-9A-Fa-f]+)*|o[0-7]+(?:_[0-7]+)*|b[01]+(?:_[01]+)*)$/).test;
 const UNDERSCORES_SIGN = /_|^[-+]/g;
 
 const BigIntInteger = (literal        )         => {
-	D_INTEGER.test(literal)
-	|| /*options\$0.xob && */XOB_INTEGER.test(literal)
+	IS_D_INTEGER(literal)
+	|| /*options\$0.xob && */IS_XOB_INTEGER(literal)
 	|| throws(SyntaxError$1(`Invalid Integer ${literal}` + where(' at ')));
 	let bigInt         = BigInt$1(literal.replace(UNDERSCORES_SIGN, ''));
 	if ( literal[0]==='-' ) { bigInt = -bigInt; }
@@ -1400,8 +1407,8 @@ const BigIntInteger = (literal        )         => {
 };
 
 const NumberInteger = (literal        )         => {
-	D_INTEGER.test(literal)
-	|| /*options\$0.xob && */XOB_INTEGER.test(literal)
+	IS_D_INTEGER(literal)
+	|| /*options\$0.xob && */IS_XOB_INTEGER(literal)
 	|| throws(SyntaxError$1(`Invalid Integer ${literal}` + where(' at ')));
 	const number = literal[0]==='-'
 		? -literal.replace(UNDERSCORES_SIGN, '')
@@ -1420,22 +1427,22 @@ const Integer = (literal        )                  => {
 
 const isFinite$1 = isFinite;
 
-const FLOAT = newRegExp`
+const IS_FLOAT = newRegExp`
 	^
 	${INTEGER_D}
 	(?=[.eE])
 	(?:\.\d+(?:_\d+)*)?
 	(?:[eE][-+]?\d+(?:_\d+)*)?
-	$`;
+	$`.test;
 const UNDERSCORES = /_/g;
-const ZERO$1 = /^[-+]?0(?:\.[0_]+)?(?:[eE][-+]?0+)?$/;
+const IS_ZERO = theRegExp(/^[-+]?0(?:\.[0_]+)?(?:[eE][-+]?0+)?$/).test;
 
 const Float = (literal        )         => {
-	if ( FLOAT.test(literal) ) {
+	if ( IS_FLOAT(literal) ) {
 		const number = +literal.replace(UNDERSCORES, '');
 		if ( sError ) {
 			isFinite$1(number) || throws(RangeError$1(`Float has been as big as inf, like ${literal}` + where(' at ')));
-			number || ZERO$1.test(literal) || throws(RangeError$1(`Float has been as little as ${literal[0]==='-' ? '-' : ''}0, like ${literal}` + where(' at ')));
+			number || IS_ZERO(literal) || throws(RangeError$1(`Float has been as little as ${literal[0]==='-' ? '-' : ''}0, like ${literal}` + where(' at ')));
 		}
 		return number;
 	}
@@ -1586,7 +1593,7 @@ const prepareInlineTable = (table       , keys          )        => {
 };
 
 const checkLiteralString = (literal        )         => {
-	__CONTROL_CHARACTER_EXCLUDE.test(literal) && throws(SyntaxError$1(`Control characters other than Tab are not permitted in a Literal String` + where(', which was found at ')));
+	__CONTROL_CHARACTER_EXCLUDE_test(literal) && throws(SyntaxError$1(`Control characters other than Tab are not permitted in a Literal String` + where(', which was found at ')));
 	return literal;
 };
 
@@ -1597,7 +1604,7 @@ const assignLiteralString = ( (table       , finalKey        , literal        ) 
 		return $[2];
 	}
 	literal = literal.slice(3);
-	const $ = MULTI_LINE_LITERAL_STRING_exec(literal);
+	const $ = __MULTI_LINE_LITERAL_STRING_exec(literal);
 	if ( $ ) {
 		table[finalKey] = checkLiteralString($[1]) + $[2];
 		return $[3];
@@ -1609,7 +1616,7 @@ const assignLiteralString = ( (table       , finalKey        , literal        ) 
 	const start = mark('Literal String');
 	for ( ; ; ) {
 		const line         = must(start);
-		const $ = MULTI_LINE_LITERAL_STRING_exec(line);
+		const $ = __MULTI_LINE_LITERAL_STRING_exec(line);
 		if ( $ ) {
 			table[finalKey] = literal + checkLiteralString($[1]) + $[2];
 			return $[3];
@@ -1662,6 +1669,8 @@ const assignBasicString = ( (table       , finalKey        , literal        )   
 	                                                          
  ;
 
+const IS_OFFSET$ = theRegExp(OFFSET$).test;
+
 const push = (lastArray       , lineRest        )         => {
 	if ( lineRest[0]==='<' ) {
 		const { 1: tag } = { 2: lineRest } = _VALUE_PAIR_exec(lineRest) ?? throws(SyntaxError$1(`Bad tag ` + where(' at ')));
@@ -1705,7 +1714,7 @@ const push = (lastArray       , lineRest        )         => {
 	}
 	if ( literal.includes(':') ) {
 		if ( literal.includes('-') ) {
-			if ( OFFSET$.test(literal) ) {
+			if ( IS_OFFSET$(literal) ) {
 				asOffsetDateTimes(lastArray)[lastArray.length] = new OffsetDateTime(literal);
 			}
 			else {
@@ -1902,7 +1911,7 @@ const assign = (lastInlineTable       , lineRest        )         => {
 	}
 	if ( literal.includes(':') ) {
 		if ( literal.includes('-') ) {
-			if ( OFFSET$.test(literal) ) {
+			if ( IS_OFFSET$(literal) ) {
 				table[finalKey] = new OffsetDateTime(literal);
 			}
 			else {
@@ -1940,7 +1949,7 @@ const Root = ()        => {
 				lastSectionTable = appendTable(rootTable, keys, $_asArrayItem$$, tag);
 			}
 			else if ( line[0]==='#' ) {
-				__CONTROL_CHARACTER_EXCLUDE.test(line) && throws(SyntaxError$1(`Control characters other than Tab are not permitted in comments` + where(', which was found at ')));
+				__CONTROL_CHARACTER_EXCLUDE_test(line) && throws(SyntaxError$1(`Control characters other than Tab are not permitted in comments` + where(', which was found at ')));
 			}
 			else {
 				let rest         = assign(lastSectionTable, line);
@@ -1955,13 +1964,14 @@ const Root = ()        => {
 const { isAbsolute } = require('path')                         ;
 const { readFileSync } = require('fs')                       ;
 
+const IS_NON_SCALAR = theRegExp(NON_SCALAR).test;
 const BOM = '\uFEFF';
 const buf2str = (buf        ) => {
 	const str = buf.toString();
 	if ( !from(str).equals(buf) ) { throw Error$1('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any unknown code point.'); }
 	return str[0]===BOM ? str.slice(1) : str;
 };
-const parse$1 = (
+const parse = (
 	source                                                                              ,
 	specificationVersion                                   ,
 	multiLineJoiner        ,
@@ -1987,7 +1997,7 @@ const parse$1 = (
 	else if ( typeof source==='string' ) { sourcePath = ''; }
 	else { throw TypeError$1('TOML.parse(source)'); }
 	try {
-		if ( NON_SCALAR.test(source) ) { throw Error$1('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any uncoupled UCS-4 character code.'); }
+		if ( IS_NON_SCALAR(source) ) { throw Error$1('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any uncoupled UCS-4 character code.'); }
 		try {
 			use(specificationVersion, multiLineJoiner, useBigInt, xOptions);
 			todo(source, sourcePath);
@@ -2008,7 +2018,7 @@ const parse$1 = (
 
 const _default = Default({
 	version,
-	parse: parse$1,
+	parse,
 });
 
 module.exports = _default;

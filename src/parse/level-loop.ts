@@ -4,6 +4,8 @@ import Infinity from '.Infinity';
 import NaN from '.NaN';
 import undefined from '.undefined';
 
+import { theRegExp } from '@ltd/j-regexp';
+
 import * as iterator$0 from '../iterator$0';
 import { INLINE, DIRECTLY } from '../types/Table';
 import { newArray, STATICALLY } from '../types/Array';
@@ -13,6 +15,8 @@ import { Float } from '../types/Float';
 import * as options$0 from '../options$0';
 import * as regexps$0 from '../regexps$0';
 import { appendTable, parseKeys, prepareInlineTable, assignLiteralString, assignBasicString } from './on-the-spot';
+
+const IS_OFFSET$ = theRegExp(OFFSET$).test;
 
 const push = (lastArray :Array, lineRest :string) :string => {
 	if ( lineRest[0]==='<' ) {
@@ -57,7 +61,7 @@ const push = (lastArray :Array, lineRest :string) :string => {
 	}
 	if ( literal.includes(':') ) {
 		if ( literal.includes('-') ) {
-			if ( OFFSET$.test(literal) ) {
+			if ( IS_OFFSET$(literal) ) {
 				options$0.asOffsetDateTimes(lastArray)[lastArray.length] = new OffsetDateTime(literal);
 			}
 			else {
@@ -254,7 +258,7 @@ const assign = (lastInlineTable :Table, lineRest :string) :string => {
 	}
 	if ( literal.includes(':') ) {
 		if ( literal.includes('-') ) {
-			if ( OFFSET$.test(literal) ) {
+			if ( IS_OFFSET$(literal) ) {
 				table[finalKey] = new OffsetDateTime(literal);
 			}
 			else {
@@ -294,7 +298,7 @@ const Root = () :Table => {
 				lastSectionTable = appendTable(rootTable, keys, $_asArrayItem$$, tag);
 			}
 			else if ( line[0]==='#' ) {
-				regexps$0.__CONTROL_CHARACTER_EXCLUDE.test(line) && iterator$0.throws(SyntaxError(`Control characters other than Tab are not permitted in comments` + iterator$0.where(', which was found at ')));
+				regexps$0.__CONTROL_CHARACTER_EXCLUDE_test(line) && iterator$0.throws(SyntaxError(`Control characters other than Tab are not permitted in comments` + iterator$0.where(', which was found at ')));
 			}
 			else {
 				let rest :string = assign(lastSectionTable, line);

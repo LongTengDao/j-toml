@@ -97,7 +97,7 @@ export const prepareInlineTable = (table :Table, keys :string[]) :Table => {
 };
 
 const checkLiteralString = (literal :string) :string => {
-	regexps$0.__CONTROL_CHARACTER_EXCLUDE.test(literal) && iterator$0.throws(SyntaxError(`Control characters other than Tab are not permitted in a Literal String` + iterator$0.where(', which was found at ')));
+	regexps$0.__CONTROL_CHARACTER_EXCLUDE_test(literal) && iterator$0.throws(SyntaxError(`Control characters other than Tab are not permitted in a Literal String` + iterator$0.where(', which was found at ')));
 	return literal;
 };
 
@@ -108,7 +108,7 @@ export const assignLiteralString = ( (table :Table, finalKey :string, literal :s
 		return $[2];
 	}
 	literal = literal.slice(3);
-	const $ = regexps$0.MULTI_LINE_LITERAL_STRING_exec(literal);
+	const $ = regexps$0.__MULTI_LINE_LITERAL_STRING_exec(literal);
 	if ( $ ) {
 		table[finalKey] = checkLiteralString($[1]) + $[2];
 		return $[3];
@@ -120,7 +120,7 @@ export const assignLiteralString = ( (table :Table, finalKey :string, literal :s
 	const start = iterator$0.mark('Literal String');
 	for ( ; ; ) {
 		const line :string = iterator$0.must(start);
-		const $ = regexps$0.MULTI_LINE_LITERAL_STRING_exec(line);
+		const $ = regexps$0.__MULTI_LINE_LITERAL_STRING_exec(line);
 		if ( $ ) {
 			table[finalKey] = literal + checkLiteralString($[1]) + $[2];
 			return $[3];

@@ -39,7 +39,8 @@ const MULTI_LINE_LITERAL_STRING_0 = newRegExp.s<1 | 2 | 3>`
 	'''()
 	${Whitespace}*
 	(.*)`.exec;
-export let MULTI_LINE_LITERAL_STRING_exec :typeof MULTI_LINE_LITERAL_STRING_0;
+export
+let __MULTI_LINE_LITERAL_STRING_exec :typeof MULTI_LINE_LITERAL_STRING_0;
 
 export const SYM_WHITESPACE = newRegExp.s`
 	^
@@ -177,19 +178,21 @@ export const KEY_VALUE_PAIR_exec_groups = (_ :string) :{ left :string, tag :stri
 	return { left, tag, right };
 };
 
-const CONTROL_CHARACTER_EXCLUDE_TAB____ = /[\x00-\x08\x0B-\x1F\x7F]/;
-const CONTROL_CHARACTER_EXCLUDE_TAB_DEL = /[\x00-\x08\x0B-\x1F]/;
-export let __CONTROL_CHARACTER_EXCLUDE :RegExp;
+const CONTROL_CHARACTER_EXCLUDE_TAB____ = theRegExp(/[\x00-\x08\x0B-\x1F\x7F]/).test;
+const CONTROL_CHARACTER_EXCLUDE_TAB_DEL = theRegExp(/[\x00-\x08\x0B-\x1F]/).test;
+export
+let __CONTROL_CHARACTER_EXCLUDE_test :(this :void, string :string) => boolean;
 const KEYS_STRICT = /[\w-]+|"(?:[^\\"]+|\\.)*"|'[^']*'/gs;
 const KEYS_FREE = /[^ \t#=[\]'".]+(?:[ \t]+[^ \t#=[\]'".]+)*|"(?:[^\\"]+|\\.)*"|'[^']*'/gs;
-export let __KEYS :RegExp;
+export
+let __KEYS :RegExp;
 
 export const switchRegExp = (specificationVersion :number) :void => {
 	switch ( specificationVersion ) {
 		case 1.0:
-			MULTI_LINE_LITERAL_STRING_exec = MULTI_LINE_LITERAL_STRING_0_1_2;
+			__MULTI_LINE_LITERAL_STRING_exec = MULTI_LINE_LITERAL_STRING_0_1_2;
 			__LITERAL_KEY_exec = LITERAL_KEY____;
-			__CONTROL_CHARACTER_EXCLUDE = CONTROL_CHARACTER_EXCLUDE_TAB____;
+			__CONTROL_CHARACTER_EXCLUDE_test = CONTROL_CHARACTER_EXCLUDE_TAB____;
 			__ESCAPED_EXCLUDE_CONTROL_CHARACTER = ESCAPED_EXCLUDE_CONTROL_CHARACTER_TAB______;
 			__BASIC_STRING_exec = BASIC_STRING_TAB______;
 			__BARE_KEY_exec = BARE_KEY_STRICT;
@@ -197,9 +200,9 @@ export const switchRegExp = (specificationVersion :number) :void => {
 			supportArrayOfTables = true;
 			break;
 		case 0.5:
-			MULTI_LINE_LITERAL_STRING_exec = MULTI_LINE_LITERAL_STRING_0;
+			__MULTI_LINE_LITERAL_STRING_exec = MULTI_LINE_LITERAL_STRING_0;
 			__LITERAL_KEY_exec = LITERAL_KEY____;
-			__CONTROL_CHARACTER_EXCLUDE = CONTROL_CHARACTER_EXCLUDE_TAB____;
+			__CONTROL_CHARACTER_EXCLUDE_test = CONTROL_CHARACTER_EXCLUDE_TAB____;
 			__ESCAPED_EXCLUDE_CONTROL_CHARACTER = ESCAPED_EXCLUDE_CONTROL_CHARACTER__________;
 			__BASIC_STRING_exec = BASIC_STRING__________;
 			__BARE_KEY_exec = BARE_KEY_STRICT;
@@ -207,9 +210,9 @@ export const switchRegExp = (specificationVersion :number) :void => {
 			supportArrayOfTables = true;
 			break;
 		case 0.4:
-			MULTI_LINE_LITERAL_STRING_exec = MULTI_LINE_LITERAL_STRING_0;
+			__MULTI_LINE_LITERAL_STRING_exec = MULTI_LINE_LITERAL_STRING_0;
 			__LITERAL_KEY_exec = LITERAL_KEY_DEL;
-			__CONTROL_CHARACTER_EXCLUDE = CONTROL_CHARACTER_EXCLUDE_TAB_DEL;
+			__CONTROL_CHARACTER_EXCLUDE_test = CONTROL_CHARACTER_EXCLUDE_TAB_DEL;
 			__ESCAPED_EXCLUDE_CONTROL_CHARACTER = ESCAPED_EXCLUDE_CONTROL_CHARACTER_DEL______;
 			__BASIC_STRING_exec = BASIC_STRING_DEL______;
 			__BARE_KEY_exec = BARE_KEY_STRICT;
@@ -217,9 +220,9 @@ export const switchRegExp = (specificationVersion :number) :void => {
 			supportArrayOfTables = true;
 			break;
 		default:
-			MULTI_LINE_LITERAL_STRING_exec = MULTI_LINE_LITERAL_STRING_0;
+			__MULTI_LINE_LITERAL_STRING_exec = MULTI_LINE_LITERAL_STRING_0;
 			__LITERAL_KEY_exec = LITERAL_KEY_DEL;
-			__CONTROL_CHARACTER_EXCLUDE = CONTROL_CHARACTER_EXCLUDE_TAB_DEL;
+			__CONTROL_CHARACTER_EXCLUDE_test = CONTROL_CHARACTER_EXCLUDE_TAB_DEL;
 			__ESCAPED_EXCLUDE_CONTROL_CHARACTER = ESCAPED_EXCLUDE_CONTROL_CHARACTER_DEL_SLASH;
 			__BASIC_STRING_exec = BASIC_STRING_DEL_SLASH;
 			__BARE_KEY_exec = BARE_KEY_FREE;
