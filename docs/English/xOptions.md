@@ -4,9 +4,9 @@
 
 Only provide TSD support when `specificationVersion` is `0.4` or higher.
 
-All following options are not turned on by default. For simplicity, passing the `true` value directly opens all features except `xOptions.tag`.
+All following options are not turned on by default.
 
-If the input is not an object, but a function, it is treated as `xOptions.tag`, and all other features are turned on at the same time.
+For simplicity, passing the `true` value directly opens all features except `xOptions.tag`; if the input is a function, it is treated as `xOptions.tag`, and all other features are turned on at the same time.
 
 `xOptions.order`
 ----------------
