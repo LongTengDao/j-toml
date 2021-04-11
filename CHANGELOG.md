@@ -12,3 +12,5 @@
     6.  0.  *   optimizing
     7.  0.  *   optimizing
     8.  0.  *   optimizing
+    9.  0.  *   only run `require('fs')` when it's really used.
+            *   do not check `require('path').isAbsolute(source.path)` anymore.

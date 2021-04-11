@@ -11,9 +11,6 @@ import * as iterator$0 from '../iterator$0';
 import * as options$0 from '../options$0';
 import Root from '../parse/level-loop';
 
-const { isAbsolute } = require('path') as typeof import('path');
-const { readFileSync } = require('fs') as typeof import('fs');
-
 const IS_NON_SCALAR = theRegExp(NON_SCALAR).test;
 const BOM = '\uFEFF';
 const buf2str = (buf :Buffer) => {
@@ -39,9 +36,8 @@ const parse = (
 	else if ( typeof source==='object' && source ) {
 		sourcePath = source.path;
 		if ( typeof sourcePath!=='string' ) { throw TypeError('TOML.parse(source.path)'); }
-		if ( !isAbsolute(sourcePath) ) { throw Error('TOML.parse(source.path)'); }
 		const { data } = source;
-		if ( data===undefined ) { source = buf2str(readFileSync(sourcePath)); }
+		if ( data===undefined ) { source = buf2str(( require('fs') as typeof import('fs') ).readFileSync(sourcePath)); }
 		else if ( isBuffer(data) ) { source = buf2str(data); }
 		else if ( typeof data==='string' ) { source = data; }
 		else { throw TypeError('TOML.parse(source.data)'); }

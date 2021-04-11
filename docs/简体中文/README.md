@@ -66,8 +66,8 @@ function parse (
     另一个区别是，`Buffer` 允许以 UTF BOM 开头，这会用于文件编码的确认（但它必须是 UTF-8 编码的，这不是技术问题，而是规范的要求），并在正式解析前跳过；  
     而 `string` 不允许，因为 BOM 属于 UTF 而非 TOML。
     
-    如果你希望内容抛错时控制台信息更加友好，请传递一个 `{ path, data }` 对象，`path` 键是 `.toml` 文件的绝对路径，`data` 键是源内容（`string` 或 `Buffer`）。  
-    你也可以省略 `data` 键，此时 `fs.readFileSync(源.path)` 将被自动调用。
+    如果你希望内容抛错时控制台信息更加友好，请传递一个 `{ path, data }` 对象，`path` 键是 `.toml` 文件的路径，`data` 键是源内容（`string` 或 `Buffer`）。  
+    你也可以省略 `data` 键，此时 `require('fs').readFileSync(源.path)` 将被自动调用。
     
 1.  #### `遵循规范版本`
     

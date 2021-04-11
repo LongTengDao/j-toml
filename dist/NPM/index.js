@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '1.8.0';
+const version = '1.9.0';
 
 const Error$1 = Error;
 
@@ -1961,9 +1961,6 @@ const Root = ()        => {
 	return rootTable;
 };
 
-const { isAbsolute } = require('path')                         ;
-const { readFileSync } = require('fs')                       ;
-
 const IS_NON_SCALAR = theRegExp(NON_SCALAR).test;
 const BOM = '\uFEFF';
 const buf2str = (buf        ) => {
@@ -1987,9 +1984,8 @@ const parse = (
 	else if ( typeof source==='object' && source ) {
 		sourcePath = source.path;
 		if ( typeof sourcePath!=='string' ) { throw TypeError$1('TOML.parse(source.path)'); }
-		if ( !isAbsolute(sourcePath) ) { throw Error$1('TOML.parse(source.path)'); }
 		const { data } = source;
-		if ( data===undefined$1 ) { source = buf2str(readFileSync(sourcePath)); }
+		if ( data===undefined$1 ) { source = buf2str(( require('fs')                        ).readFileSync(sourcePath)); }
 		else if ( isBuffer(data) ) { source = buf2str(data); }
 		else if ( typeof data==='string' ) { source = data; }
 		else { throw TypeError$1('TOML.parse(source.data)'); }

@@ -68,8 +68,8 @@ function parse (
     Another difference is that `Buffer` can start with UTF BOM, which is used for validation of file encoding (but it must be UTF-8 encoding, which is not a technical limit, but a specification requirement), and skipped before real parsing;  
     But `string` can't, because BOM belongs to UTF, not TOML.
     
-    If you want to be more console friendly when something of source content goes wrong, pass an object where the `path` key is the absolute path of that `.tmol` file, and the key `data` is the source content (`string` or `Buffer`).  
-    You can also omit the `data` key and `fs.readFileSync(source.path)` will be called automatically.
+    If you want to be more console friendly when something of source content goes wrong, pass an object where the `path` key is the path of that `.toml` file, and the key `data` is the source content (`string` or `Buffer`).  
+    You can also omit the `data` key and `require('fs').readFileSync(source.path)` will be called automatically.
     
 1.  **`specificationVersion`**
     
