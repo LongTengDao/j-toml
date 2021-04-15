@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '1.9.0';
+const version = '1.10.0';
 
 const Error$1 = Error;
 
@@ -11,8 +11,6 @@ const undefined$1 = void 0;
 const isBuffer = typeof Buffer!=='undefined' && Buffer.isBuffer!==undefined$1 ? Buffer.isBuffer : /*#__PURE__*/ ()=>false;
 
 const Infinity = 1/0;
-
-const Array$1 = Array;
 
 const hasOwnProperty = Object.prototype.hasOwnProperty;
 
@@ -315,7 +313,7 @@ const WeakMap$1 = WeakMap;
 
 const isSafeInteger = Number.isSafeInteger;
 
-const ownKeys$1 = Reflect.ownKeys;
+const ownKeys = Reflect.ownKeys;
 
 const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER;
 
@@ -367,90 +365,11 @@ const Null$1 = (
 
 const is = Object.is;
 
-const Object_getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
-
 const Reflect_construct = Reflect.construct;
 
 const Reflect_defineProperty = Reflect.defineProperty;
 
 const Reflect_deleteProperty = Reflect.deleteProperty;
-
-const setPrototypeOf = Object.setPrototypeOf;
-
-const getPrototypeOf = Object.getPrototypeOf;
-
-const preventExtensions = Object.preventExtensions;
-
-const getOwnPropertyDescriptor = (
-	/*! j-globals: null.getOwnPropertyDescriptor (internal) */
-	function () {
-		function __PURE__ (descriptor) {
-			var propertyDescriptor = create$1(NULL);
-			if ( descriptor.hasOwnProperty('value') ) {
-				propertyDescriptor.value = descriptor.value;
-				propertyDescriptor.writable = descriptor.writable;
-			}
-			else {
-				propertyDescriptor.get = descriptor.get;
-				propertyDescriptor.set = descriptor.set;
-			}
-			propertyDescriptor.enumerable = descriptor.enumerable;
-			propertyDescriptor.configurable = descriptor.configurable;
-			return propertyDescriptor;
-		}
-		return function getOwnPropertyDescriptor (object, key) {
-			return /*#__PURE__*/__PURE__(/*#__PURE__*/Object_getOwnPropertyDescriptor(object, key));
-		};
-	}()
-	/*¡ j-globals: null.getOwnPropertyDescriptor (internal) */
-);
-
-var ownKeys = typeof Reflect==='object' ? Reflect.ownKeys : Object.getOwnPropertyNames;
-const getOwnPropertyDescriptors = (
-	/*! j-globals: null.getOwnPropertyDescriptors (internal) */
-	function () {
-		function __PURE__ (object) {
-			var descriptorMap = create$1(NULL);
-			for ( var keys = ownKeys(object), length = keys.length, index = 0; index<length; ++index ) {
-				var key = keys[index];
-				descriptorMap[key] = getOwnPropertyDescriptor(object, key);
-			}
-			return descriptorMap;
-		}
-		return function getOwnPropertyDescriptors (object) {
-			return /*#__PURE__*/__PURE__(object);
-		};
-	}()
-	/*¡ j-globals: null.getOwnPropertyDescriptors (internal) */
-);
-
-const Keeper = (
-	/*! j-globals: Array (internal) */
-	/*#__PURE__*/function () {
-		const DELETED = class extends null { set length (value) { while ( value ) { this[--value] = null; } } }.prototype;
-		//new Proxy({}, {
-		//	defineProperty: () => true,// indexes
-		//	set: () => true,// length
-		//});
-		const weak = new WeakMap;
-		weak.get = weak.get;
-		weak.set = weak.set;
-		const properties = getOwnPropertyDescriptors(freeze(freeze(class extends Array$1 {
-			static [Symbol.species] = class extends null { constructor () { return DELETED; } };
-			constructor () { return super(); }
-			get slice () { }
-			get concat () { }
-			get map () { }
-			get filter () { }
-			get flat () { }
-			get flatMap () { }
-			get __proto__ () { return getPrototypeOf(this); }
-			set __proto__ (proto) { setPrototypeOf(this, weak.get(proto) ?? weak.set(proto, preventExtensions(create(proto, properties))).get(proto)); }
-		}).prototype));
-		return properties.constructor.value;
-	}()
-	/*¡ j-globals: Array (internal) */
-);
 
 /*!@preserve@license
  * 模块名称：j-orderify
@@ -462,6 +381,8 @@ const Keeper = (
  * 问题反馈：https://GitHub.com/LongTengDao/j-orderify/issues
  * 项目主页：https://GitHub.com/LongTengDao/j-orderify/
  */
+
+const Keeper =     ()      => [];
 
 const hasOwnProperty_call = /*#__PURE__*/hasOwnProperty.call.bind(hasOwnProperty);
 
@@ -502,7 +423,7 @@ const handlers                       = /*#__PURE__*/Object_assign(create(NULL), 
 		if ( Reflect_deleteProperty(target, key) ) {
 			const keeper = target2keeper.get(target) ;
 			const index = keeper.indexOf(key);
-			index<0 || keeper.splice(index, 1);
+			index<0 || --keeper.copyWithin(index, index + 1).length;
 			return true;
 		}
 		return false;
@@ -523,7 +444,7 @@ const orderify =                    (object   )    => {
 	if ( proxy2target.has(object) ) { return object; }
 	let proxy = target2proxy.get(object)                 ;
 	if ( proxy ) { return proxy; }
-	proxy = newProxy(object, Object_assign(new Keeper          (), ownKeys$1(object)));
+	proxy = newProxy(object, Object_assign(Keeper          (), ownKeys(object)));
 	target2proxy.set(object, proxy);
 	return proxy;
 };
@@ -540,7 +461,7 @@ const Null = /*#__PURE__*/function () {
 		return new.target
 			? new.target===Null
 				? /*#__PURE__*/throwConstructing()
-				: /*#__PURE__*/newProxy(this, new Keeper     ())
+				: /*#__PURE__*/newProxy(this, Keeper     ())
 			: typeof constructor==='function'
 				? /*#__PURE__*/Nullify(constructor)
 				: /*#__PURE__*/throwApplying();
@@ -1007,7 +928,7 @@ const use = (specificationVersion         , multiLineJoiner         , useBigInt 
 	}
 	else {
 		const { order, longer, exact, null: _null, multi, tag, ...unknown } = xOptions;
-		if ( ownKeys$1(unknown).length ) { throw TypeError$1('TOML.parse(,,,,xOptions)'); }
+		if ( ownKeys(unknown).length ) { throw TypeError$1('TOML.parse(,,,,xOptions)'); }
 		Table = order ? OrderedTable : PlainTable;
 		allowLonger = !!longer;
 		sError = !!exact;
@@ -1048,6 +969,8 @@ const newArray = (isStatic         )        => {
 const NativeDate = Date;
 
 const parse$1 = Date.parse;
+
+const preventExtensions = Object.preventExtensions;
 
 const _29_ = /(?:0[1-9]|1\d|2[0-9])/;
 const _30_ = /(?:0[1-9]|[12]\d|30)/;
@@ -1132,7 +1055,7 @@ const Datetime = function (            ) { return this; }                       
 {
 	const descriptors = Null$1        (null);
 	const descriptor = Null$1(null);
-	for ( const key of ownKeys$1(NativeDate.prototype) ) {
+	for ( const key of ownKeys(NativeDate.prototype) ) {
 		//@ts-ignore
 		key==='constructor' ||
 		key==='toJSON' ||

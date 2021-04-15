@@ -69,9 +69,6 @@ declare module '.Object.getOwnPropertyDescriptor' { export default getOwnPropert
 declare module '.Object.getOwnPropertySymbols?' { export default getOwnPropertySymbols;
 	function getOwnPropertySymbols<T extends {}> (nonNullable :T) :Extract<keyof T, symbol>[];
 }
-declare module '.Object.getPrototypeOf' { export default getPrototypeOf;
-	function getPrototypeOf<T extends {}> (nonNullable :T) :T & { [K in keyof T]? :T[K] };
-}
 declare module '.Object.is' { export default Object.is; }
 declare module '.Object.keys' { export default keys;
 	function keys<T extends {}> (nonNullable :T) :Extract<keyof T, string>[];
@@ -81,7 +78,6 @@ declare module '.Object.prototype' { export default Object.prototype; }
 declare module '.Object.prototype.hasOwnProperty' { export default Object.prototype.hasOwnProperty; }
 declare module '.Object.prototype.propertyIsEnumerable' { export default Object.prototype.propertyIsEnumerable; }
 declare module '.Object.prototype.toString' { export default Object.prototype.toString; }
-declare module '.Object.setPrototypeOf' { export default Object.setPrototypeOf; }
 
 declare module '.Proxy' { export default Proxy; }
 declare module '.Proxy?' { export default Proxy; }
@@ -173,12 +169,6 @@ declare module '.null' { export default Null;
 		['constructor']? :ValueType
 	}
 }
-declare module '.null.getOwnPropertyDescriptor' { export default getOwnPropertyDescriptor;
-	function getOwnPropertyDescriptor<O extends {}, K extends Extract<keyof O, string | symbol>> (object :O, key :K) :TypedPropertyDescriptor<O[K]>;
-}
-declare module '.null.getOwnPropertyDescriptors' { export default getOwnPropertyDescriptors;
-	function getOwnPropertyDescriptors<O extends {}> (object :O) :{ [k in keyof O] :TypedPropertyDescriptor<O[k]> };
-}
 declare module '.null.prototype' { export default NULL;
 	const NULL :object | null;
 }
@@ -186,61 +176,3 @@ declare module '.null.prototype' { export default NULL;
 declare module '.parseInt' { export default parseInt; }
 
 declare module '.undefined' { export default undefined; }
-
-declare module '.void.splice' { export default Array;
-	const Array :ArrayConstructor;
-	type ArrayConstructor = {
-		new<T = any> () :Array<T>
-		readonly isArray :(arg :any) => arg is readonly any[]
-		readonly from :{
-			<T            > (this :ArrayConstructor, iterable: Iterable<T> | ArrayLike<T>                                                                ) :Array<T>
-			<T, U         > (this :ArrayConstructor, iterable: Iterable<T> | ArrayLike<T>, mapfn: (this :void   , v: T, k: number) => U                  ) :Array<U>
-			<T, U, ThisArg> (this :ArrayConstructor, iterable: Iterable<T> | ArrayLike<T>, mapfn: (this :ThisArg, v: T, k: number) => U, thisArg: ThisArg) :Array<U>
-		}
-		readonly of :<T> (this :ArrayConstructor, ...items :T[]) => Array<T>
-	};
-	type Array<T> = {
-		readonly [Key in 'copyWithin' | 'fill' | 'lastIndexOf' | 'pop' | 'push' | 'reverse' | 'shift' | 'unshift' | 'sort' | 'includes' | 'indexOf' | 'join' | 'keys' | 'entries' | 'values' | 'toLocaleString' | 'toString'] :T[][Key]// Exclude<keyof T[], 'slice' | 'concat' | 'map' | 'filter' | 'flat' | 'flatMap' | number | 'length' | 'splice' | 'forEach' | 'every' | 'some' | 'reduce' | 'reduceRight' | 'find' | 'findIndex'>
-	} & {
-		readonly constructor :ArrayConstructor
-		[index :number] :T
-		length :number
-		readonly splice :{
-			(this :Array<T>, start :number, deleteCount? :number               ) :unknown
-			(this :Array<T>, start :number, deleteCount  :number, ...items :T[]) :unknown
-		}
-		readonly forEach :{
-			          (this :Array<T>, callbackfn :(this :void   , value :T, index :number, array :Array<T>) => void                  ) :void
-			<ThisArg> (this :Array<T>, callbackfn :(this :ThisArg, value :T, index :number, array :Array<T>) => void, thisArg :ThisArg) :void
-		}
-		readonly every :{
-			          (this :Array<T>, callbackfn :(this :void   , value :T, index :number, array :Array<T>) => boolean                  ) :boolean
-			<ThisArg> (this :Array<T>, callbackfn :(this :ThisArg, value :T, index :number, array :Array<T>) => boolean, thisArg :ThisArg) :boolean
-		}
-		readonly some :{
-			          (this :Array<T>, callbackfn :(this :void   , value :T, index :number, array :Array<T>) => boolean                  ) :boolean
-			<ThisArg> (this :Array<T>, callbackfn :(this :ThisArg, value :T, index :number, array :Array<T>) => boolean, thisArg :ThisArg) :boolean
-		}
-		readonly reduce :{
-			          (callbackfn :(previousValue :T      , currentValue :T, currentIndex :number, array :Array<T>) => T                             ) :T
-			          (callbackfn :(previousValue :T      , currentValue :T, currentIndex :number, array :Array<T>) => T      , initialValue :T      ) :T
-			<ThisArg> (callbackfn :(previousValue :ThisArg, currentValue :T, currentIndex :number, array :Array<T>) => ThisArg, initialValue :ThisArg) :ThisArg
-		}
-		readonly reduceRight :{
-			          (callbackfn :(previousValue :T      , currentValue :T, currentIndex :number, array :Array<T>) => T                             ) :T
-			          (callbackfn :(previousValue :T      , currentValue :T, currentIndex :number, array :Array<T>) => T      , initialValue :T      ) :T
-			<ThisArg> (callbackfn :(previousValue :ThisArg, currentValue :T, currentIndex :number, array :Array<T>) => ThisArg, initialValue :ThisArg) :ThisArg
-		}
-		readonly find :{
-			<S extends T         > (predicate :(this :void   , value :T, index :number, array :Array<T>) => value is S                  ) :S | undefined
-			<S extends T, ThisArg> (predicate :(this :ThisArg, value :T, index :number, array :Array<T>) => value is S, thisArg :ThisArg) :S | undefined
-		}
-		readonly findIndex :{
-			          (predicate :(this :void   , value :T, index :number, array :Array<T>) => boolean                  ) :number
-			<ThisArg> (predicate :(this :ThisArg, value :T, index :number, array :Array<T>) => boolean, thisArg :ThisArg) :number
-		}
-		readonly [Symbol.iterator] :{
-			() :IterableIterator<T>
-		}
-	};
-}
