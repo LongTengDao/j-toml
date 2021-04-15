@@ -2,6 +2,8 @@ import SyntaxError from '.SyntaxError';
 import RangeError from '.RangeError';
 import TypeError from '.TypeError';
 import WeakMap from '.WeakMap';
+import get from '.WeakMap.prototype.get';
+import set from '.WeakMap.prototype.set';
 import create from '.Object.create';
 import isSafeInteger from '.Number.isSafeInteger';
 import ownKeys from '.Reflect.ownKeys';
@@ -43,14 +45,16 @@ export let Table :TableConstructor;
 export let allowLonger :boolean;
 export let enableNull :boolean;
 export let allowInlineTableMultiLineAndTrailingCommaEvenNoComma :boolean;
-const arrayTypes :WeakMap<Array, As> = new WeakMap;
+const arrayTypes = new WeakMap<Array, As>();
+const arrayTypes_get = get.bind(arrayTypes) as (key :Array) => As | undefined;
+const arrayTypes_set = set.bind(arrayTypes) as (key :Array, value :As) => object;
 type As = (array :Array) => Array;
 let As :{ () :As } | null = () :As => {
 	const as = (array :Array) :Array => {
-		const got = arrayTypes.get(array);
+		const got = arrayTypes_get(array);
 		got
 			? got===as || iterator$0.throws(TypeError(`Types in Array must be same` + iterator$0.where('. Check ')))
-			: arrayTypes.set(array, as);
+			: arrayTypes_set(array, as);
 		return array;
 	};
 	return as;

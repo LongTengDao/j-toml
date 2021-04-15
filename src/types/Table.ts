@@ -1,33 +1,41 @@
 import WeakSet from '.WeakSet';
+import has from '.WeakSet.prototype.has';
+import add from '.WeakSet.prototype.add';
+import del from '.WeakSet.prototype.delete';
 import freeze from '.Object.freeze';
 import Null from '.null';
 
 import { Null as orderify_Null } from '@ltd/j-orderify';
 
-const tables :WeakSet<Table> = new WeakSet;
-export const isTable = (value :any) :value is Table => tables.has(value);
+const tables = new WeakSet<Table>();
+const tables_add = add.bind(tables);
+export const isTable = has.bind(tables) as (value :any) => value is Table;
 
 export const DIRECTLY = true;
 export const IMPLICITLY = false;
-const implicitTables :WeakSet<Table> = new WeakSet;
-export const wasDirectly = (table :Table) :boolean => !implicitTables.has(table);
-export const directly = (table :Table) :void => { implicitTables.delete(table); };
+const implicitTables = new WeakSet<Table>();
+const implicitTables_add = add.bind(implicitTables);
+const implicitTables_has = has.bind(implicitTables);
+export const wasDirectly = (table :Table) :boolean => !implicitTables_has(table);
+export const directly = del.bind(implicitTables) as (table :Table) => boolean;
 
 export const INLINE = true;
-const inlineTables :WeakSet<Table> = new WeakSet;
-export const isInline = (value :Table) :boolean => inlineTables.has(value);
+const inlineTables = new WeakSet<Table>();
+const inlineTables_add = add.bind(inlineTables);
+export const isInline = has.bind(inlineTables) as (value :Table) => boolean;
 
 export const PAIR = true;
-const pairs :WeakSet<Table> = new WeakSet;
-export const fromPair = (value :Table) :boolean => pairs.has(value);
+const pairs = new WeakSet<Table>();
+const pairs_add = add.bind(pairs);
+export const fromPair = has.bind(pairs) as (value :Table) => boolean;
 
 export const PlainTable = class Table extends Null<any> {
 	constructor (isDirect? :boolean, isInline? :boolean) {
 		super();
-		tables.add(this);
+		tables_add(this);
 		isDirect
-			? isInline && inlineTables.add(this)
-			: ( isInline ? pairs : implicitTables ).add(this);
+			? isInline && inlineTables_add(this)
+			: ( isInline ? pairs_add : implicitTables_add )(this);
 		return this;
 	}
 };
@@ -38,10 +46,10 @@ freeze(PlainTable);
 export const OrderedTable = class Table extends orderify_Null<any> {
 	constructor (isDirect? :boolean, isInline? :boolean) {
 		super();
-		tables.add(this);
+		tables_add(this);
 		isDirect
-			? isInline && inlineTables.add(this)
-			: ( isInline ? pairs : implicitTables ).add(this);
+			? isInline && inlineTables_add(this)
+			: ( isInline ? pairs_add : implicitTables_add )(this);
 		return this;
 	}
 };

@@ -17,3 +17,4 @@ ___
     9.  0.  *   only run `require('fs')` when it's really used.
             *   do not check `require('path').isAbsolute(source.path)` anymore.
     10. 0.  *   update dependency `@ltd/j-orderify` (use `copyWithin` to optimize `ownKeys` `splice` instead of modifying `constructor[Symbol.species]`).
+    11. 0.  *   optimizing

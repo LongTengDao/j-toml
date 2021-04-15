@@ -117,10 +117,15 @@ declare module '.TypeError' { export default TypeError; }
 declare module '.WeakMap' { export default constructor;
 	class constructor<K extends object, V> extends WeakMap<K, V> { constructor (entries? :Iterable<{ readonly 0 :K, readonly 1 :V }>) }
 }
+declare module '.WeakMap.prototype.get' { export default WeakMap.prototype.get; }
+declare module '.WeakMap.prototype.set' { export default WeakMap.prototype.set; }
 
 declare module '.WeakSet' { export default constructor;
 	class constructor<V extends object> extends WeakSet<V> { constructor (values? :Iterable<V>) }
 }
+declare module '.WeakSet.prototype.add' { export default WeakSet.prototype.add; }
+declare module '.WeakSet.prototype.delete' { export default WeakSet.prototype.delete; }
+declare module '.WeakSet.prototype.has' { export default WeakSet.prototype.has; }
 
 declare module '.class.isPrimitive' { export default isPrimitive;
 	function isPrimitive<T> (value :T) :T extends object ? false : true;

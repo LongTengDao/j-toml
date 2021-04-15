@@ -1,12 +1,15 @@
 import Error from '.Error';
 import TypeError from '.TypeError';
 import SyntaxError from '.SyntaxError';
+import WeakMap from '.WeakMap';
+import get from '.WeakMap.prototype.get';
+import set from '.WeakMap.prototype.set';
 
 //import * as options\$0 from './options\$0';
 
-const NONE :Array<string> = [];
+const NONE :ArrayLike<string> = [];
 let sourcePath :string = '';
-let sourceLines :Array<string> = NONE;
+let sourceLines :ArrayLike<string> = NONE;
 let lastLineIndex :number = -1;
 export let lineIndex :number = -1;
 
@@ -19,13 +22,12 @@ export const throws :(error :ErrorThrown) => never = (error :ErrorThrown) :never
 	throw error;
 };
 
-const previous = Symbol('previous');
-type Noop = {
-	(lineRest :string) :string
-	[previous]? :Noop
-};
+const previous = new WeakMap<Noop, Noop>();
+const previous_get = get.bind(previous) as (key :Noop) => Noop;
+const previous_set = set.bind(previous);
+type Noop = (lineRest :string) => string;
 const noop :Noop = () :string => '';
-noop[previous] = noop;
+previous_set(noop, noop);
 
 export let stacks_length = 0;
 let last :Noop = noop;
@@ -69,19 +71,19 @@ export const done = () :void => {
 
 export const stacks_pop = () :Noop => {
 	const item :Noop = last;
-	last = last[previous]!;
+	last = previous_get(last);
 	--stacks_length;
 	return item;
 };
 
 export const stacks_push = (item :Noop) :void => {
-	item[previous] = last;
+	previous_set(item, last);
 	last = item;
 	++stacks_length;
 };
 
 export const stacks_insertBeforeLast = (item :Noop) :void => {
-	item[previous] = last[previous];
-	last[previous] = item;
+	previous_set(item, previous_get(last));
+	previous_set(last, item);
 	++stacks_length;
 };

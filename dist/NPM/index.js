@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '1.10.0';
+const version = '1.11.0';
 
 const Error$1 = Error;
 
@@ -223,11 +223,17 @@ var NON_SCALAR = (
 
 /*¡ j-utf */
 
+const WeakMap$1 = WeakMap;
+
+const get = WeakMap.prototype.get;
+
+const set = WeakMap.prototype.set;
+
 //import * as options\$0 from './options\$0';
 
-const NONE                = [];
+const NONE                    = [];
 let sourcePath         = '';
-let sourceLines                = NONE;
+let sourceLines                    = NONE;
 let lastLineIndex         = -1;
 let lineIndex         = -1;
 
@@ -240,13 +246,12 @@ const throws                                = (error             )        => {
 	throw error;
 };
 
-const previous = Symbol('previous');
-             
-	                          
-	                 
-  
+const previous = new WeakMap$1            ();
+const previous_get = get.bind(previous)                       ;
+const previous_set = set.bind(previous);
+                                         
 const noop       = ()         => '';
-noop[previous] = noop;
+previous_set(noop, noop);
 
 let stacks_length = 0;
 let last       = noop;
@@ -290,26 +295,24 @@ const done = ()       => {
 
 const stacks_pop = ()       => {
 	const item       = last;
-	last = last[previous] ;
+	last = previous_get(last);
 	--stacks_length;
 	return item;
 };
 
 const stacks_push = (item      )       => {
-	item[previous] = last;
+	previous_set(item, last);
 	last = item;
 	++stacks_length;
 };
 
 const stacks_insertBeforeLast = (item      )       => {
-	item[previous] = last[previous];
-	last[previous] = item;
+	previous_set(item, previous_get(last));
+	previous_set(last, item);
 	++stacks_length;
 };
 
 const RangeError$1 = RangeError;
-
-const WeakMap$1 = WeakMap;
 
 const isSafeInteger = Number.isSafeInteger;
 
@@ -320,6 +323,12 @@ const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER;
 const MIN_SAFE_INTEGER = Number.MIN_SAFE_INTEGER;
 
 const WeakSet$1 = WeakSet;
+
+const has = WeakSet.prototype.has;
+
+const add = WeakSet.prototype.add;
+
+const del = WeakSet.prototype['delete'];
 
 const Object_keys = Object.keys;
 
@@ -476,30 +485,35 @@ const Null = /*#__PURE__*/function () {
 
 /*¡ j-orderify */
 
-const tables                 = new WeakSet$1;
-const isTable = (value     )                 => tables.has(value);
+const tables = new WeakSet$1       ();
+const tables_add = add.bind(tables);
+const isTable = has.bind(tables)                                  ;
 
 const DIRECTLY = true;
 const IMPLICITLY = false;
-const implicitTables                 = new WeakSet$1;
-const wasDirectly = (table       )          => !implicitTables.has(table);
-const directly = (table       )       => { implicitTables.delete(table); };
+const implicitTables = new WeakSet$1       ();
+const implicitTables_add = add.bind(implicitTables);
+const implicitTables_has = has.bind(implicitTables);
+const wasDirectly = (table       )          => !implicitTables_has(table);
+const directly = del.bind(implicitTables)                             ;
 
 const INLINE = true;
-const inlineTables                 = new WeakSet$1;
-const isInline = (value       )          => inlineTables.has(value);
+const inlineTables = new WeakSet$1       ();
+const inlineTables_add = add.bind(inlineTables);
+const isInline = has.bind(inlineTables)                             ;
 
 const PAIR = true;
-const pairs                 = new WeakSet$1;
-const fromPair = (value       )          => pairs.has(value);
+const pairs = new WeakSet$1       ();
+const pairs_add = add.bind(pairs);
+const fromPair = has.bind(pairs)                             ;
 
 const PlainTable = class Table extends Null$1      {
 	constructor (isDirect          , isInline          ) {
 		super();
-		tables.add(this);
+		tables_add(this);
 		isDirect
-			? isInline && inlineTables.add(this)
-			: ( isInline ? pairs : implicitTables ).add(this);
+			? isInline && inlineTables_add(this)
+			: ( isInline ? pairs_add : implicitTables_add )(this);
 		return this;
 	}
 };
@@ -510,10 +524,10 @@ freeze(PlainTable);
 const OrderedTable = class Table extends Null      {
 	constructor (isDirect          , isInline          ) {
 		super();
-		tables.add(this);
+		tables_add(this);
 		isDirect
-			? isInline && inlineTables.add(this)
-			: ( isInline ? pairs : implicitTables ).add(this);
+			? isInline && inlineTables_add(this)
+			: ( isInline ? pairs_add : implicitTables_add )(this);
 		return this;
 	}
 };
@@ -775,14 +789,16 @@ let Table                  ;
 let allowLonger         ;
 let enableNull         ;
 let allowInlineTableMultiLineAndTrailingCommaEvenNoComma         ;
-const arrayTypes                     = new WeakMap$1;
+const arrayTypes = new WeakMap$1           ();
+const arrayTypes_get = get.bind(arrayTypes)                                  ;
+const arrayTypes_set = set.bind(arrayTypes)                                     ;
                                   
 let As                    = ()     => {
 	const as = (array       )        => {
-		const got = arrayTypes.get(array);
+		const got = arrayTypes_get(array);
 		got
 			? got===as || throws(TypeError$1(`Types in Array must be same` + where('. Check ')))
-			: arrayTypes.set(array, as);
+			: arrayTypes_set(array, as);
 		return array;
 	};
 	return as;
@@ -951,18 +967,20 @@ const use = (specificationVersion         , multiLineJoiner         , useBigInt 
 
 const NaN = 0/0;
 
-const arrays                 = new WeakSet$1;
-const isArray = (value     )                 => arrays.has(value);
+const arrays = new WeakSet$1       ();
+const arrays_add = add.bind(arrays);
+const isArray = has.bind(arrays)                                  ;
 
 const OF_TABLES = false;
 const STATICALLY = true;
-const staticalArrays                 = new WeakSet$1;
-const isStatic = (value       )          => staticalArrays.has(value);
+const staticalArrays = new WeakSet$1       ();
+const staticalArrays_add = add.bind(staticalArrays);
+const isStatic = has.bind(staticalArrays)                             ;
 
 const newArray = (isStatic         )        => {
 	const array        = [];
-	arrays.add(array);
-	isStatic && staticalArrays.add(array);
+	arrays_add(array);
+	isStatic && staticalArrays_add(array);
 	return array;
 };
 
@@ -1077,39 +1095,41 @@ const Datetime = function (            ) { return this; }                       
                              
                              
 
+const _ISOString = Symbol('_ISOString');
+const _value = Symbol('_value');
+
 const Value = (ISOString        )        => ISOString.replace(ZERO, '').replace(DELIMITER_DOT, '');
 
 const leap = (literal        ) => literal.slice(5, 10)!=='02-29' || +literal.slice(0, 4)%4===0 && literal.slice(2, 4)!=='00';
 
 const DATE = new NativeDate(0);
 
+const OffsetDateTime_use = (that                , $         = 0) => {
+	DATE.setTime(+that[_value] + $);
+	return DATE;
+};
+const OffsetDateTime_get = (that                , start        , end        ) => +that[_ISOString].slice(start, end);
+const OffsetDateTime_set = (that                , start        , end        , value        )         => {
+	if ( end ) { that[_ISOString] = that[_ISOString].slice(0, start) + ( '' + value ).padStart(end - start, '0') + that[_ISOString].slice(end); }
+	const time = parse$1(that[_ISOString]);
+	that[_value] = ( '' + time ).padStart(15, '0') + that[_value].slice(15);
+	return time;
+};
 class OffsetDateTime extends Datetime {
 	
-	#ISOString        ;
-	#value       ;
+	[_ISOString]        ;
+	[_value]       ;
 	
-	valueOf (                    )        { return this.#value; }
-	toISOString (                    )         { return this.#ISOString; }
+	valueOf (                    )        { return this[_value]; }
+	toISOString (                    )         { return this[_ISOString]; }
 	
 	constructor (literal        ) {
 		const { 1: more } = leap(literal) && ( zeroDatetime ? OFFSET_DATETIME_ZERO_exec : OFFSET_DATETIME_exec )(literal) || throws(SyntaxError$1(`Invalid Offset Date-Time ${literal}` + where(' at ')));
 		super();
-		this.#ISOString = literal.replace(' ', 'T');
-		this.#value = ( '' + parse$1(this.#ISOString) ).padStart(15, '0') + ( more ? '.' + more : '' );
+		this[_ISOString] = literal.replace(' ', 'T');
+		this[_value] = ( '' + parse$1(this[_ISOString]) ).padStart(15, '0') + ( more ? '.' + more : '' );
 		return this;
 	}
-	
-	static use = (that                , $         = 0) => {
-		DATE.setTime(+that.#value + $);
-		return DATE;
-	};
-	static get = (that                , start        , end        ) => +that.#ISOString.slice(start, end);
-	static set = (that                , start        , end        , value        )         => {
-		if ( end ) { that.#ISOString = that.#ISOString.slice(0, start) + ( '' + value ).padStart(end - start, '0') + that.#ISOString.slice(end); }
-		const time = parse$1(that.#ISOString);
-		that.#value = ( '' + time ).padStart(15, '0') + that.#value.slice(15);
-		return time;
-	};
 	
 	getUTCFullYear (                    )           { return OffsetDateTime_use(this).getUTCFullYear(); }
 	getFullYear (                    )           { return OffsetDateTime_get(this, 0, 4); }
@@ -1131,9 +1151,9 @@ class OffsetDateTime extends Datetime {
 	getSeconds (                    )          { return OffsetDateTime_get(this, 17, 19); }
 	setSeconds (                      value         ) { return OffsetDateTime_set(this, 17, 19, value); }
 	getUTCMilliseconds (                    )               { return OffsetDateTime_use(this).getUTCMilliseconds(); }///
-	getMilliseconds (                    )               { return +this.#value.slice(12, 15); }///
+	getMilliseconds (                    )               { return +this[_value].slice(12, 15); }///
 	setMilliseconds (                      value              ) {
-		this.#ISOString = this.#ISOString.slice(0, 19) + ( value ? ( '.' + ( '' + value ).padStart(3, '0') ).replace(DOT_ZERO, '') : '' ) + this.#ISOString.slice(this.#ISOString.search(OFFSET$));
+		this[_ISOString] = this[_ISOString].slice(0, 19) + ( value ? ( '.' + ( '' + value ).padStart(3, '0') ).replace(DOT_ZERO, '') : '' ) + this[_ISOString].slice(this[_ISOString].search(OFFSET$));
 		return OffsetDateTime_set(this, 0, 0, 0);
 	}
 	
@@ -1142,7 +1162,7 @@ class OffsetDateTime extends Datetime {
 		return OffsetDateTime_use(this, this.getTimezoneOffset()*60000).getUTCDay();
 	}
 	getTimezoneOffset (                    )                 {
-		const z = Z_exec(this.#ISOString);
+		const z = Z_exec(this[_ISOString]);
 		return z ? +z[1]*60 + +( z[2] + z[3] ) : 0;
 	}
 	setTimezoneOffset (                      value                ) {
@@ -1156,50 +1176,48 @@ class OffsetDateTime extends Datetime {
 			}
 			const m = value%60;
 			const h = ( value - m )/60;
-			this.#ISOString = string + ( h>9 ? h : '0' + h ) + ( m>9 ? ':' + m : ':0' + m );
+			this[_ISOString] = string + ( h>9 ? h : '0' + h ) + ( m>9 ? ':' + m : ':0' + m );
 		}
-		else { this.#ISOString = string + ( is(value, 0) ? 'Z' : '-00:00' ); }
+		else { this[_ISOString] = string + ( is(value, 0) ? 'Z' : '-00:00' ); }
 	}
-	getTime (                    )       { return +this.#value.slice(0, 15); }///
+	getTime (                    )       { return +this[_value].slice(0, 15); }///
 	setTime (                      value      ) {
 		value = DATE.setTime(value);
-		const z = Z_exec(this.#ISOString);
+		const z = Z_exec(this[_ISOString]);
 		DATE.setTime(value + ( z ? +z[1]*60 + +( z[2] + z[3] ) : 0 )*60000);
-		this.#ISOString = z ? DATE.toISOString().slice(0, -1) + z[0] : DATE.toISOString();
-		this.#value = ( '' + value ).padStart(15, '0');
+		this[_ISOString] = z ? DATE.toISOString().slice(0, -1) + z[0] : DATE.toISOString();
+		this[_value] = ( '' + value ).padStart(15, '0');
 		return value;
 	}
 	
 }
-const { use: OffsetDateTime_use, get: OffsetDateTime_get, set: OffsetDateTime_set } = OffsetDateTime;
 //@ts-ignore
 delete OffsetDateTime.prototype.constructor;
 freeze(OffsetDateTime.prototype);
 freeze(OffsetDateTime);
 
+const LocalDateTime_get = (that               , start        , end        ) => +that[_ISOString].slice(start, end);
+const LocalDateTime_set = (that               , start        , end        , value        ) => {
+	that[_value] = Value(
+		that[_ISOString] = that[_ISOString].slice(0, start) + ( '' + value ).padStart(end - start, '0') + that[_ISOString].slice(end)
+	);
+};
 class LocalDateTime extends Datetime {
 	
-	#ISOString        ;
-	#value       ;
+	[_ISOString]        ;
+	[_value]       ;
 	
-	valueOf (                   )        { return this.#value; }
-	toISOString (                   )         { return this.#ISOString; }
+	valueOf (                   )        { return this[_value]; }
+	toISOString (                   )         { return this[_ISOString]; }
 	
 	constructor (literal        ) {
 		IS_LOCAL_DATETIME(literal) && leap(literal) || throws(SyntaxError$1(`Invalid Local Date-Time ${literal}` + where(' at ')));
 		super();
-		this.#value = Value(
-			this.#ISOString = literal.replace(' ', 'T')
+		this[_value] = Value(
+			this[_ISOString] = literal.replace(' ', 'T')
 		);
 		return this;
 	}
-	
-	static get = (that               , start        , end        ) => +that.#ISOString.slice(start, end);
-	static set = (that               , start        , end        , value        ) => {
-		that.#value = Value(
-			that.#ISOString = that.#ISOString.slice(0, start) + ( '' + value ).padStart(end - start, '0') + that.#ISOString.slice(end)
-		);
-	};
 	
 	getFullYear (                   )           { return LocalDateTime_get(this, 0, 4); }
 	setFullYear (                     value          ) { return LocalDateTime_set(this, 0, 4, value); }
@@ -1214,43 +1232,41 @@ class LocalDateTime extends Datetime {
 	setMinutes (                     value         ) { return LocalDateTime_set(this, 14, 16, value); }
 	getSeconds (                   )          { return LocalDateTime_get(this, 17, 19); }
 	setSeconds (                     value         ) { return LocalDateTime_set(this, 17, 19, value); }
-	getMilliseconds (                   )               { return +this.#value.slice(14, 17).padEnd(3, '0'); }///
+	getMilliseconds (                   )               { return +this[_value].slice(14, 17).padEnd(3, '0'); }///
 	setMilliseconds (                     value              ) {
-		this.#value = Value(
-			this.#ISOString = this.#ISOString.slice(0, 19) + ( value ? ( '.' + ( '' + value ).padStart(3, '0') ).replace(DOT_ZERO, '') : '' )
+		this[_value] = Value(
+			this[_ISOString] = this[_ISOString].slice(0, 19) + ( value ? ( '.' + ( '' + value ).padStart(3, '0') ).replace(DOT_ZERO, '') : '' )
 		);
 	}
 	
 }
-const { get: LocalDateTime_get, set: LocalDateTime_set } = LocalDateTime;
 //@ts-ignore
 delete LocalDateTime.prototype.constructor;
 freeze(LocalDateTime.prototype);
 freeze(LocalDateTime);
 
+const LocalDate_get = (that           , start        , end        ) => +that[_ISOString].slice(start, end);
+const LocalDate_set = (that           , start        , end        , value        ) => {
+	that[_value] = Value(
+		that[_ISOString] = that[_ISOString].slice(0, start) + ( '' + value ).padStart(end - start, '0') + that[_ISOString].slice(end)
+	);
+};
 class LocalDate extends Datetime {
 	
-	#ISOString        ;
-	#value       ;
+	[_ISOString]        ;
+	[_value]       ;
 	
-	valueOf (               )        { return this.#value; }
-	toISOString (               )         { return this.#ISOString; }
+	valueOf (               )        { return this[_value]; }
+	toISOString (               )         { return this[_ISOString]; }
 	
 	constructor (literal        ) {
 		IS_LOCAL_DATE(literal) && leap(literal) || throws(SyntaxError$1(`Invalid Local Date ${literal}` + where(' at ')));
 		super();
-		this.#value = Value(
-			this.#ISOString = literal
+		this[_value] = Value(
+			this[_ISOString] = literal
 		);
 		return this;
 	}
-	
-	static get = (that           , start        , end        ) => +that.#ISOString.slice(start, end);
-	static set = (that           , start        , end        , value        ) => {
-		that.#value = Value(
-			that.#ISOString = that.#ISOString.slice(0, start) + ( '' + value ).padStart(end - start, '0') + that.#ISOString.slice(end)
-		);
-	};
 	
 	getFullYear (               )           { return LocalDate_get(this, 0, 4); }
 	setFullYear (                 value          ) { return LocalDate_set(this, 0, 4, value); }
@@ -1260,35 +1276,33 @@ class LocalDate extends Datetime {
 	setDate (                 value      ) { return LocalDate_set(this, 8, 10, value); }
 	
 }
-const { get: LocalDate_get, set: LocalDate_set } = LocalDate;
 //@ts-ignore
 delete LocalDate.prototype.constructor;
 freeze(LocalDate.prototype);
 freeze(LocalDate);
 
+const LocalTime_get = (that           , start        , end        ) => +that[_ISOString].slice(start, end);
+const LocalTime_set = (that           , start        , end        , value        ) => {
+	that[_value] = Value(
+		that[_ISOString] = that[_ISOString].slice(0, start) + ( '' + value ).padStart(2, '0') + that[_ISOString].slice(end)
+	);
+};
 class LocalTime extends Datetime {
 	
-	#ISOString        ;
-	#value       ;
+	[_ISOString]        ;
+	[_value]       ;
 	
-	valueOf (               )        { return this.#value; }
-	toISOString (               )         { return this.#ISOString; }
+	valueOf (               )        { return this[_value]; }
+	toISOString (               )         { return this[_ISOString]; }
 	
 	constructor (literal        ) {
 		IS_LOCAL_TIME(literal) || throws(SyntaxError$1(`Invalid Local Time ${literal}` + where(' at ')));
 		super();
-		this.#value = Value(
-			this.#ISOString = literal
+		this[_value] = Value(
+			this[_ISOString] = literal
 		);
 		return this;
 	}
-	
-	static get = (that           , start        , end        ) => +that.#ISOString.slice(start, end);
-	static set = (that           , start        , end        , value        ) => {
-		that.#value = Value(
-			that.#ISOString = that.#ISOString.slice(0, start) + ( '' + value ).padStart(2, '0') + that.#ISOString.slice(end)
-		);
-	};
 	
 	getHours (               )        { return LocalTime_get(this, 0, 2); }
 	setHours (                 value       ) { return LocalTime_set(this, 0, 2, value); }
@@ -1296,15 +1310,14 @@ class LocalTime extends Datetime {
 	setMinutes (                 value         ) { return LocalTime_set(this, 3, 5, value); }
 	getSeconds (               )          { return LocalTime_get(this, 6, 8); }
 	setSeconds (                 value         ) { return LocalTime_set(this, 6, 8, value); }
-	getMilliseconds (               )               { return +this.#value.slice(6, 9).padEnd(3, '0'); }///
+	getMilliseconds (               )               { return +this[_value].slice(6, 9).padEnd(3, '0'); }///
 	setMilliseconds (                 value              ) {
-		this.#value = Value(
-			this.#ISOString = this.#ISOString.slice(0, 8) + ( value ? ( '.' + ( '' + value ).padStart(3, '0') ).replace(DOT_ZERO, '') : '' )
+		this[_value] = Value(
+			this[_ISOString] = this[_ISOString].slice(0, 8) + ( value ? ( '.' + ( '' + value ).padStart(3, '0') ).replace(DOT_ZERO, '') : '' )
 		);
 	}
 	
 }
-const { get: LocalTime_get, set: LocalTime_set } = LocalTime;
 //@ts-ignore
 delete LocalTime.prototype.constructor;
 freeze(LocalTime.prototype);

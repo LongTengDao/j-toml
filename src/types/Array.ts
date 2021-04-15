@@ -1,17 +1,21 @@
 import WeakSet from '.WeakSet';
+import has from '.WeakSet.prototype.has';
+import add from '.WeakSet.prototype.add';
 
-const arrays :WeakSet<Array> = new WeakSet;
-export const isArray = (value :any) :value is Array => arrays.has(value);
+const arrays = new WeakSet<Array>();
+const arrays_add = add.bind(arrays);
+export const isArray = has.bind(arrays) as (value :any) => value is Array;
 
 export const OF_TABLES = false;
 export const STATICALLY = true;
-const staticalArrays :WeakSet<Array> = new WeakSet;
-export const isStatic = (value :Array) :boolean => staticalArrays.has(value);
+const staticalArrays = new WeakSet<Array>();
+const staticalArrays_add = add.bind(staticalArrays);
+export const isStatic = has.bind(staticalArrays) as (value :Array) => boolean;
 
 export const newArray = (isStatic :boolean) :Array => {
 	const array :Array = [];
-	arrays.add(array);
-	isStatic && staticalArrays.add(array);
+	arrays_add(array);
+	isStatic && staticalArrays_add(array);
 	return array;
 };
 
