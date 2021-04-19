@@ -14,7 +14,9 @@ ___
     6.  0.  *   optimizing
     7.  0.  *   optimizing
     8.  0.  *   optimizing
-    9.  0.  *   only run `require('fs')` when it's really used.
-            *   do not check `require('path').isAbsolute(source.path)` anymore.
-    10. 0.  *   update dependency `@ltd/j-orderify` (use `copyWithin` to optimize `ownKeys` `splice` instead of modifying `constructor[Symbol.species]`).
-    11. 0.  *   optimizing
+    9.  0.  *   only run `require('fs')` when it's really used
+            *   no more do `require('path').isAbsolute(source.path)` check
+    10. 0.  *   update dependency `@ltd/j-orderify` (use `copyWithin` to optimize `ownKeys` `splice` instead of modifying `constructor[Symbol.species]`)
+    11. 0.  *   change date-time internal implementation from private to symbol, to support `Proxy` use case
+    12. 0.  *   remove stage 3 class field syntax for compatibility
+            +   add ESM edition (with full tree shaking support)

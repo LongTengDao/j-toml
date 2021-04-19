@@ -5,6 +5,7 @@ import ownKeys from '.Reflect.ownKeys';
 import is from '.Object.is';
 import create from '.Object.create';
 import preventExtensions from '.Object.preventExtensions';
+import defineProperty from '.Object.defineProperty';
 import freeze from '.Object.freeze';
 import Null from '.null';
 
@@ -19,7 +20,7 @@ const _31_ = /(?:0[1-9]|[12]\d|3[01])/;
 const _23_ = /(?:[01]\d|2[0-3])/;
 const _59_ = /[0-5]\d/;
 
-const YMD = newRegExp`
+const YMD = /*#__PURE__*/( () => newRegExp`
 	\d\d\d\d-
 	(?:
 		0
@@ -37,74 +38,78 @@ const YMD = newRegExp`
 			|
 			1-${_30_}
 		)
-	)`;
+	)` )();
 
-const HMS = newRegExp`
+const HMS = /*#__PURE__*/( () => newRegExp`
 	${_23_}:${_59_}:${_59_}
-	`;
+	` )();
 
 export const OFFSET$ = /(?:Z|[+-]\d\d:\d\d)$/;
 
-const Z_exec = theRegExp<1 | 2 | 3>(/(([+-])\d\d):(\d\d)$/).exec;
+const Z_exec = /*#__PURE__*/( () => theRegExp<1 | 2 | 3>(/(([+-])\d\d):(\d\d)$/).exec )();
 
-const OFFSET_DATETIME_exec = newRegExp<1>`
+const OFFSET_DATETIME_exec = /*#__PURE__*/( () => newRegExp<1>`
 	^
 	${YMD}
 	[T ]
 	${HMS}(?:\.\d{1,3})?
 	(\d*?)0*
 	(?:Z|[+-]${_23_}:${_59_})
-	$`.exec;
+	$`.exec )();
 
-const OFFSET_DATETIME_ZERO_exec = newRegExp<1>`
+const OFFSET_DATETIME_ZERO_exec = /*#__PURE__*/( () => newRegExp<1>`
 	^
 	${YMD}
 	[T ]
 	${HMS}
 	()
 	Z
-	$`.exec;
+	$`.exec )();
 
-const IS_LOCAL_DATETIME = newRegExp`
+const IS_LOCAL_DATETIME = /*#__PURE__*/( () => newRegExp`
 	^
 	${YMD}
 	[T ]
 	${HMS}
 	(?:\.\d+)?
-	$`.test;
+	$`.test )();
 
-const IS_LOCAL_DATE = newRegExp`
+const IS_LOCAL_DATE = /*#__PURE__*/( () => newRegExp`
 	^
 	${YMD}
-	$`.test;
+	$`.test )();
 
-const IS_LOCAL_TIME = newRegExp`
+const IS_LOCAL_TIME = /*#__PURE__*/( () => newRegExp`
 	^
 	${HMS}
 	(?:\.\d+)?
-	$`.test;
+	$`.test )();
 
 const DOT_ZERO = /\.?0+$/;
 const DELIMITER_DOT = /[-T:.]/g;
 const ZERO = /(?<=\.\d*)0+$/;
 
-const Datetime = function (this :object) { return this; } as unknown as { new () :object };//expression? :undefined, literal? :undefined, dotValue? :undefined
-//                                > .setTime()
-//                                > .getTime() : Date.parse('T')
-// [Symbol.toPrimitive]('number') > .valueOf()
-//                                > .toISOString()
-{
-	const descriptors = Null<object>(null);
-	const descriptor = Null(null);
-	for ( const key of ownKeys(NativeDate.prototype) ) {
-		//@ts-ignore
-		key==='constructor' ||
-		key==='toJSON' ||
-		( descriptors[key] = descriptor );
+const Datetime = /*#__PURE__*/( () => {
+	const descriptor = Null({ value: '', writable: true, enumerable: true, configurable: true });
+	const Datetime = function (this :object, _ISOString :symbol, _value :symbol) {
+		return defineProperty(defineProperty(this, _ISOString, descriptor), _value, descriptor);
+	} as unknown as { new (_ISOString :symbol, _value :symbol) :object };//expression? :undefined, literal? :undefined, dotValue? :undefined
+	//                                > .setTime()
+	//                                > .getTime() : Date.parse('T')
+	// [Symbol.toPrimitive]('number') > .valueOf()
+	//                                > .toISOString()
+	const descriptors = Null(null) as { [Key in keyof NativeDate] :object };
+	{
+		const descriptor = Null(null);
+		for ( const key of ownKeys(NativeDate.prototype as NativeDate & { constructor :unknown }) ) {
+			key==='constructor' ||
+			key==='toJSON' ||
+			( descriptors[key] = descriptor );
+		}
 	}
 	Datetime.prototype = preventExtensions(create(NativeDate.prototype, descriptors));
-	freeze(Datetime);
-}
+	return freeze(Datetime);
+} )();
 
 type FullYear       = 0 | number | 9999;
 type Month          = 0 | number | 11;
@@ -118,39 +123,38 @@ type TimezoneOffset = -1439 | number | 1439;
 type Time           = number;
 type Value          = string;
 
-const _ISOString = Symbol('_ISOString');
-const _value = Symbol('_value');
-
 const Value = (ISOString :string) :Value => ISOString.replace(ZERO, '').replace(DELIMITER_DOT, '');
 
 const leap = (literal :string) => literal.slice(5, 10)!=='02-29' || +literal.slice(0, 4)%4===0 && literal.slice(2, 4)!=='00';
 
 const DATE = new NativeDate(0);
 
-const OffsetDateTime_use = (that :OffsetDateTime, $ :number = 0) => {
-	DATE.setTime(+that[_value] + $);
+const OffsetDateTime_ISOString = Symbol('OffsetDateTime_ISOString');
+const OffsetDateTime_value = Symbol('OffsetDateTime_value');
+const OffsetDateTime_use = (that :InstanceType<typeof OffsetDateTime>, $ :number = 0) => {
+	DATE.setTime(+that[OffsetDateTime_value] + $);
 	return DATE;
 };
-const OffsetDateTime_get = (that :OffsetDateTime, start :number, end :number) => +that[_ISOString].slice(start, end);
-const OffsetDateTime_set = (that :OffsetDateTime, start :number, end :number, value :number) :number => {
-	if ( end ) { that[_ISOString] = that[_ISOString].slice(0, start) + ( '' + value ).padStart(end - start, '0') + that[_ISOString].slice(end); }
-	const time = parse(that[_ISOString]);
-	that[_value] = ( '' + time ).padStart(15, '0') + that[_value].slice(15);
+const OffsetDateTime_get = (that :InstanceType<typeof OffsetDateTime>, start :number, end :number) => +that[OffsetDateTime_ISOString].slice(start, end);
+const OffsetDateTime_set = (that :InstanceType<typeof OffsetDateTime>, start :number, end :number, value :number) :number => {
+	if ( end ) { that[OffsetDateTime_ISOString] = that[OffsetDateTime_ISOString].slice(0, start) + ( '' + value ).padStart(end - start, '0') + that[OffsetDateTime_ISOString].slice(end); }
+	const time = parse(that[OffsetDateTime_ISOString]);
+	that[OffsetDateTime_value] = ( '' + time ).padStart(15, '0') + that[OffsetDateTime_value].slice(15);
 	return time;
 };
-export class OffsetDateTime extends Datetime {
+export const OffsetDateTime = Null(class OffsetDateTime extends Datetime {
 	
-	[_ISOString] :string;
-	[_value] :Value;
+	declare [OffsetDateTime_ISOString] :string;
+	declare [OffsetDateTime_value] :Value;
 	
-	valueOf (this :OffsetDateTime) :Value { return this[_value]; }
-	toISOString (this :OffsetDateTime) :string { return this[_ISOString]; }
+	valueOf (this :OffsetDateTime) :Value { return this[OffsetDateTime_value]; }
+	toISOString (this :OffsetDateTime) :string { return this[OffsetDateTime_ISOString]; }
 	
 	constructor (literal :string) {
 		const { 1: more } = leap(literal) && ( options$0.zeroDatetime ? OFFSET_DATETIME_ZERO_exec : OFFSET_DATETIME_exec )(literal) || iterator$0.throws(SyntaxError(`Invalid Offset Date-Time ${literal}` + iterator$0.where(' at ')));
-		super();
-		this[_ISOString] = literal.replace(' ', 'T');
-		this[_value] = ( '' + parse(this[_ISOString]) ).padStart(15, '0') + ( more ? '.' + more : '' );
+		super(OffsetDateTime_ISOString, OffsetDateTime_value);
+		this[OffsetDateTime_ISOString] = literal.replace(' ', 'T');
+		this[OffsetDateTime_value] = ( '' + parse(this[OffsetDateTime_ISOString]) ).padStart(15, '0') + ( more ? '.' + more : '' );
 		return this;
 	}
 	
@@ -174,9 +178,9 @@ export class OffsetDateTime extends Datetime {
 	getSeconds (this :OffsetDateTime) :Seconds { return OffsetDateTime_get(this, 17, 19); }
 	setSeconds (this :OffsetDateTime, value :Seconds) { return OffsetDateTime_set(this, 17, 19, value); }
 	getUTCMilliseconds (this :OffsetDateTime) :Milliseconds { return OffsetDateTime_use(this).getUTCMilliseconds(); }///
-	getMilliseconds (this :OffsetDateTime) :Milliseconds { return +this[_value].slice(12, 15); }///
+	getMilliseconds (this :OffsetDateTime) :Milliseconds { return +this[OffsetDateTime_value].slice(12, 15); }///
 	setMilliseconds (this :OffsetDateTime, value :Milliseconds) {
-		this[_ISOString] = this[_ISOString].slice(0, 19) + ( value ? ( '.' + ( '' + value ).padStart(3, '0') ).replace(DOT_ZERO, '') : '' ) + this[_ISOString].slice(this[_ISOString].search(OFFSET$));
+		this[OffsetDateTime_ISOString] = this[OffsetDateTime_ISOString].slice(0, 19) + ( value ? ( '.' + ( '' + value ).padStart(3, '0') ).replace(DOT_ZERO, '') : '' ) + this[OffsetDateTime_ISOString].slice(this[OffsetDateTime_ISOString].search(OFFSET$));
 		return OffsetDateTime_set(this, 0, 0, 0);
 	}
 	
@@ -185,7 +189,7 @@ export class OffsetDateTime extends Datetime {
 		return OffsetDateTime_use(this, this.getTimezoneOffset()*60000).getUTCDay();
 	}
 	getTimezoneOffset (this :OffsetDateTime) :TimezoneOffset {
-		const z = Z_exec(this[_ISOString]);
+		const z = Z_exec(this[OffsetDateTime_ISOString]);
 		return z ? +z[1]*60 + +( z[2] + z[3] ) : 0;
 	}
 	setTimezoneOffset (this :OffsetDateTime, value :TimezoneOffset) {
@@ -199,45 +203,43 @@ export class OffsetDateTime extends Datetime {
 			}
 			const m = value%60;
 			const h = ( value - m )/60;
-			this[_ISOString] = string + ( h>9 ? h : '0' + h ) + ( m>9 ? ':' + m : ':0' + m );
+			this[OffsetDateTime_ISOString] = string + ( h>9 ? h : '0' + h ) + ( m>9 ? ':' + m : ':0' + m );
 		}
-		else { this[_ISOString] = string + ( is(value, 0) ? 'Z' : '-00:00' ); }
+		else { this[OffsetDateTime_ISOString] = string + ( is(value, 0) ? 'Z' : '-00:00' ); }
 	}
-	getTime (this :OffsetDateTime) :Time { return +this[_value].slice(0, 15); }///
+	getTime (this :OffsetDateTime) :Time { return +this[OffsetDateTime_value].slice(0, 15); }///
 	setTime (this :OffsetDateTime, value :Time) {
 		value = DATE.setTime(value);
-		const z = Z_exec(this[_ISOString]);
+		const z = Z_exec(this[OffsetDateTime_ISOString]);
 		DATE.setTime(value + ( z ? +z[1]*60 + +( z[2] + z[3] ) : 0 )*60000);
-		this[_ISOString] = z ? DATE.toISOString().slice(0, -1) + z[0] : DATE.toISOString();
-		this[_value] = ( '' + value ).padStart(15, '0');
+		this[OffsetDateTime_ISOString] = z ? DATE.toISOString().slice(0, -1) + z[0] : DATE.toISOString();
+		this[OffsetDateTime_value] = ( '' + value ).padStart(15, '0');
 		return value;
 	}
 	
-}
-//@ts-ignore
-delete OffsetDateTime.prototype.constructor;
-freeze(OffsetDateTime.prototype);
-freeze(OffsetDateTime);
+});
 
-const LocalDateTime_get = (that :LocalDateTime, start :number, end :number) => +that[_ISOString].slice(start, end);
-const LocalDateTime_set = (that :LocalDateTime, start :number, end :number, value :number) => {
-	that[_value] = Value(
-		that[_ISOString] = that[_ISOString].slice(0, start) + ( '' + value ).padStart(end - start, '0') + that[_ISOString].slice(end)
+const LocalDateTime_ISOString = Symbol('LocalDateTime_ISOString');
+const LocalDateTime_value = Symbol('LocalDateTime_value');
+const LocalDateTime_get = (that :InstanceType<typeof LocalDateTime>, start :number, end :number) => +that[LocalDateTime_ISOString].slice(start, end);
+const LocalDateTime_set = (that :InstanceType<typeof LocalDateTime>, start :number, end :number, value :number) => {
+	that[LocalDateTime_value] = Value(
+		that[LocalDateTime_ISOString] = that[LocalDateTime_ISOString].slice(0, start) + ( '' + value ).padStart(end - start, '0') + that[LocalDateTime_ISOString].slice(end)
 	);
 };
-export class LocalDateTime extends Datetime {
+export const LocalDateTime = Null(class LocalDateTime extends Datetime {
 	
-	[_ISOString] :string;
-	[_value] :Value;
+	declare [LocalDateTime_ISOString] :string;
+	declare [LocalDateTime_value] :Value;
 	
-	valueOf (this :LocalDateTime) :Value { return this[_value]; }
-	toISOString (this :LocalDateTime) :string { return this[_ISOString]; }
+	valueOf (this :LocalDateTime) :Value { return this[LocalDateTime_value]; }
+	toISOString (this :LocalDateTime) :string { return this[LocalDateTime_ISOString]; }
 	
 	constructor (literal :string) {
 		IS_LOCAL_DATETIME(literal) && leap(literal) || iterator$0.throws(SyntaxError(`Invalid Local Date-Time ${literal}` + iterator$0.where(' at ')));
-		super();
-		this[_value] = Value(
-			this[_ISOString] = literal.replace(' ', 'T')
+		super(LocalDateTime_ISOString, LocalDateTime_value);
+		this[LocalDateTime_value] = Value(
+			this[LocalDateTime_ISOString] = literal.replace(' ', 'T')
 		);
 		return this;
 	}
@@ -255,38 +257,36 @@ export class LocalDateTime extends Datetime {
 	setMinutes (this :LocalDateTime, value :Minutes) { return LocalDateTime_set(this, 14, 16, value); }
 	getSeconds (this :LocalDateTime) :Seconds { return LocalDateTime_get(this, 17, 19); }
 	setSeconds (this :LocalDateTime, value :Seconds) { return LocalDateTime_set(this, 17, 19, value); }
-	getMilliseconds (this :LocalDateTime) :Milliseconds { return +this[_value].slice(14, 17).padEnd(3, '0'); }///
+	getMilliseconds (this :LocalDateTime) :Milliseconds { return +this[LocalDateTime_value].slice(14, 17).padEnd(3, '0'); }///
 	setMilliseconds (this :LocalDateTime, value :Milliseconds) {
-		this[_value] = Value(
-			this[_ISOString] = this[_ISOString].slice(0, 19) + ( value ? ( '.' + ( '' + value ).padStart(3, '0') ).replace(DOT_ZERO, '') : '' )
+		this[LocalDateTime_value] = Value(
+			this[LocalDateTime_ISOString] = this[LocalDateTime_ISOString].slice(0, 19) + ( value ? ( '.' + ( '' + value ).padStart(3, '0') ).replace(DOT_ZERO, '') : '' )
 		);
 	}
 	
-}
-//@ts-ignore
-delete LocalDateTime.prototype.constructor;
-freeze(LocalDateTime.prototype);
-freeze(LocalDateTime);
+});
 
-const LocalDate_get = (that :LocalDate, start :number, end :number) => +that[_ISOString].slice(start, end);
-const LocalDate_set = (that :LocalDate, start :number, end :number, value :number) => {
-	that[_value] = Value(
-		that[_ISOString] = that[_ISOString].slice(0, start) + ( '' + value ).padStart(end - start, '0') + that[_ISOString].slice(end)
+const LocalDate_ISOString = Symbol('LocalDate_ISOString');
+const LocalDate_value = Symbol('LocalDate_value');
+const LocalDate_get = (that :InstanceType<typeof LocalDate>, start :number, end :number) => +that[LocalDate_ISOString].slice(start, end);
+const LocalDate_set = (that :InstanceType<typeof LocalDate>, start :number, end :number, value :number) => {
+	that[LocalDate_value] = Value(
+		that[LocalDate_ISOString] = that[LocalDate_ISOString].slice(0, start) + ( '' + value ).padStart(end - start, '0') + that[LocalDate_ISOString].slice(end)
 	);
 };
-export class LocalDate extends Datetime {
+export const LocalDate = Null(class LocalDate extends Datetime {
 	
-	[_ISOString] :string;
-	[_value] :Value;
+	declare [LocalDate_ISOString] :string;
+	declare [LocalDate_value] :Value;
 	
-	valueOf (this :LocalDate) :Value { return this[_value]; }
-	toISOString (this :LocalDate) :string { return this[_ISOString]; }
+	valueOf (this :LocalDate) :Value { return this[LocalDate_value]; }
+	toISOString (this :LocalDate) :string { return this[LocalDate_ISOString]; }
 	
 	constructor (literal :string) {
 		IS_LOCAL_DATE(literal) && leap(literal) || iterator$0.throws(SyntaxError(`Invalid Local Date ${literal}` + iterator$0.where(' at ')));
-		super();
-		this[_value] = Value(
-			this[_ISOString] = literal
+		super(LocalDate_ISOString, LocalDate_value);
+		this[LocalDate_value] = Value(
+			this[LocalDate_ISOString] = literal
 		);
 		return this;
 	}
@@ -298,31 +298,29 @@ export class LocalDate extends Datetime {
 	getDate (this :LocalDate) :Date { return LocalDate_get(this, 8, 10); }
 	setDate (this :LocalDate, value :Date) { return LocalDate_set(this, 8, 10, value); }
 	
-}
-//@ts-ignore
-delete LocalDate.prototype.constructor;
-freeze(LocalDate.prototype);
-freeze(LocalDate);
+});
 
-const LocalTime_get = (that :LocalTime, start :number, end :number) => +that[_ISOString].slice(start, end);
-const LocalTime_set = (that :LocalTime, start :number, end :number, value :number) => {
-	that[_value] = Value(
-		that[_ISOString] = that[_ISOString].slice(0, start) + ( '' + value ).padStart(2, '0') + that[_ISOString].slice(end)
+const LocalTime_ISOString = Symbol('LocalTime_ISOString');
+const LocalTime_value = Symbol('LocalTime_value');
+const LocalTime_get = (that :InstanceType<typeof LocalTime>, start :number, end :number) => +that[LocalTime_ISOString].slice(start, end);
+const LocalTime_set = (that :InstanceType<typeof LocalTime>, start :number, end :number, value :number) => {
+	that[LocalTime_value] = Value(
+		that[LocalTime_ISOString] = that[LocalTime_ISOString].slice(0, start) + ( '' + value ).padStart(2, '0') + that[LocalTime_ISOString].slice(end)
 	);
 };
-export class LocalTime extends Datetime {
+export const LocalTime = Null(class LocalTime extends Datetime {
 	
-	[_ISOString] :string;
-	[_value] :Value;
+	declare [LocalTime_ISOString] :string;
+	declare [LocalTime_value] :Value;
 	
-	valueOf (this :LocalTime) :Value { return this[_value]; }
-	toISOString (this :LocalTime) :string { return this[_ISOString]; }
+	valueOf (this :LocalTime) :Value { return this[LocalTime_value]; }
+	toISOString (this :LocalTime) :string { return this[LocalTime_ISOString]; }
 	
 	constructor (literal :string) {
 		IS_LOCAL_TIME(literal) || iterator$0.throws(SyntaxError(`Invalid Local Time ${literal}` + iterator$0.where(' at ')));
-		super();
-		this[_value] = Value(
-			this[_ISOString] = literal
+		super(LocalTime_ISOString, LocalTime_value);
+		this[LocalTime_value] = Value(
+			this[LocalTime_ISOString] = literal
 		);
 		return this;
 	}
@@ -333,15 +331,11 @@ export class LocalTime extends Datetime {
 	setMinutes (this :LocalTime, value :Minutes) { return LocalTime_set(this, 3, 5, value); }
 	getSeconds (this :LocalTime) :Seconds { return LocalTime_get(this, 6, 8); }
 	setSeconds (this :LocalTime, value :Seconds) { return LocalTime_set(this, 6, 8, value); }
-	getMilliseconds (this :LocalTime) :Milliseconds { return +this[_value].slice(6, 9).padEnd(3, '0'); }///
+	getMilliseconds (this :LocalTime) :Milliseconds { return +this[LocalTime_value].slice(6, 9).padEnd(3, '0'); }///
 	setMilliseconds (this :LocalTime, value :Milliseconds) {
-		this[_value] = Value(
-			this[_ISOString] = this[_ISOString].slice(0, 8) + ( value ? ( '.' + ( '' + value ).padStart(3, '0') ).replace(DOT_ZERO, '') : '' )
+		this[LocalTime_value] = Value(
+			this[LocalTime_ISOString] = this[LocalTime_ISOString].slice(0, 8) + ( value ? ( '.' + ( '' + value ).padStart(3, '0') ).replace(DOT_ZERO, '') : '' )
 		);
 	}
 	
-}
-//@ts-ignore
-delete LocalTime.prototype.constructor;
-freeze(LocalTime.prototype);
-freeze(LocalTime);
+});

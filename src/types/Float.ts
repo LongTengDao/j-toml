@@ -10,15 +10,15 @@ import { INTEGER_D } from './Integer';
 import * as iterator$0 from '../iterator$0';
 import * as options$0 from '../options$0';
 
-const IS_FLOAT = newRegExp`
+const IS_FLOAT = /*#__PURE__*/( () => newRegExp`
 	^
 	${INTEGER_D}
 	(?=[.eE])
 	(?:\.\d+(?:_\d+)*)?
 	(?:[eE][-+]?\d+(?:_\d+)*)?
-	$`.test;
+	$`.test )();
 const UNDERSCORES = /_/g;
-const IS_ZERO = theRegExp(/^[-+]?0(?:\.[0_]+)?(?:[eE][-+]?0+)?$/).test;
+const IS_ZERO = /*#__PURE__*/( () => theRegExp(/^[-+]?0(?:\.[0_]+)?(?:[eE][-+]?0+)?$/).test )();
 
 export const Float = (literal :string) :number => {
 	if ( IS_FLOAT(literal) ) {

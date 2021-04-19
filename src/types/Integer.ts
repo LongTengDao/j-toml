@@ -9,8 +9,8 @@ import * as iterator$0 from '../iterator$0';
 import * as options$0 from '../options$0';
 
 export const INTEGER_D = /[-+]?(?:0|[1-9]\d*(?:_\d+)*)/;
-const IS_D_INTEGER = newRegExp`^${INTEGER_D}$`.test;
-const IS_XOB_INTEGER = theRegExp(/^0(?:x[0-9A-Fa-f]+(?:_[0-9A-Fa-f]+)*|o[0-7]+(?:_[0-7]+)*|b[01]+(?:_[01]+)*)$/).test;
+const IS_D_INTEGER = /*#__PURE__*/( () => newRegExp`^${INTEGER_D}$`.test )();
+const IS_XOB_INTEGER = /*#__PURE__*/( () => theRegExp(/^0(?:x[0-9A-Fa-f]+(?:_[0-9A-Fa-f]+)*|o[0-7]+(?:_[0-7]+)*|b[01]+(?:_[01]+)*)$/).test )();
 const UNDERSCORES_SIGN = /_|^[-+]/g;
 
 const BigIntInteger = (literal :string) :bigint => {

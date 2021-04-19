@@ -2,6 +2,7 @@ import Error from '.Error';
 import TypeError from '.TypeError';
 import isBuffer from '.Buffer.isBuffer?=()=>false';
 import from from '.Buffer.from?';
+import globalThis from '.globalThis';
 import undefined from '.undefined';
 
 import { clearRegExp, theRegExp } from '@ltd/j-regexp';
@@ -11,7 +12,7 @@ import * as iterator$0 from '../iterator$0';
 import * as options$0 from '../options$0';
 import Root from '../parse/level-loop';
 
-const IS_NON_SCALAR = theRegExp(NON_SCALAR).test;
+const IS_NON_SCALAR = /*#__PURE__*/( () => theRegExp(NON_SCALAR).test )();
 const BOM = '\uFEFF';
 const buf2str = (buf :Buffer) => {
 	const str = buf.toString();
@@ -37,7 +38,7 @@ const parse = (
 		sourcePath = source.path;
 		if ( typeof sourcePath!=='string' ) { throw TypeError('TOML.parse(source.path)'); }
 		const { data } = source;
-		if ( data===undefined ) { source = buf2str(( require('fs') as typeof import('fs') ).readFileSync(sourcePath)); }
+		if ( data===undefined ) { source = buf2str(( globalThis.require('fs') as typeof import('fs') ).readFileSync(sourcePath)); }
 		else if ( isBuffer(data) ) { source = buf2str(data); }
 		else if ( typeof data==='string' ) { source = data; }
 		else { throw TypeError('TOML.parse(source.data)'); }

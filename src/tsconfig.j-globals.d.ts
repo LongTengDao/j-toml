@@ -148,6 +148,8 @@ declare module '.default?=' { export default Default;
 	type Newable = { new (...args :any) :any };
 }
 
+declare module '.globalThis' { export default globalThis; }
+
 declare module '.isFinite' { export default isFinite; }
 
 declare module '.native' { export default _; const _ :never; }

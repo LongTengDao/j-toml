@@ -1,6 +1,4 @@
-﻿'use strict';
-
-const version = '1.12.0';
+﻿const version = '1.12.0';
 
 const Error$1 = Error;
 
@@ -1968,6 +1966,7 @@ const _export = Default({
 	parse,
 });
 
-module.exports = _export;
+export default _export;
+export { parse, version };
 
-//# sourceMappingURL=index.js.map
+//# sourceMappingURL=index.mjs.map

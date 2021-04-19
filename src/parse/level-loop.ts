@@ -16,7 +16,7 @@ import * as options$0 from '../options$0';
 import * as regexps$0 from '../regexps$0';
 import { appendTable, parseKeys, prepareInlineTable, assignLiteralString, assignBasicString } from './on-the-spot';
 
-const IS_OFFSET$ = theRegExp(OFFSET$).test;
+const IS_OFFSET$ = /*#__PURE__*/( () => theRegExp(OFFSET$).test )();
 
 const push = (lastArray :Array, lineRest :string) :string => {
 	if ( lineRest[0]==='<' ) {

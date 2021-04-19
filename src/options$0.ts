@@ -46,10 +46,10 @@ export let allowLonger :boolean;
 export let enableNull :boolean;
 export let allowInlineTableMultiLineAndTrailingCommaEvenNoComma :boolean;
 const arrayTypes = new WeakMap<Array, As>();
-const arrayTypes_get = get.bind(arrayTypes) as (key :Array) => As | undefined;
-const arrayTypes_set = set.bind(arrayTypes) as (key :Array, value :As) => object;
+const arrayTypes_get = /*#__PURE__*/get.bind(arrayTypes) as (key :Array) => As | undefined;
+const arrayTypes_set = /*#__PURE__*/set.bind(arrayTypes) as (key :Array, value :As) => object;
 type As = (array :Array) => Array;
-let As :{ () :As } | null = () :As => {
+const As = () :As => {
 	const as = (array :Array) :Array => {
 		const got = arrayTypes_get(array);
 		got
@@ -72,7 +72,6 @@ const AS_TYPED = {
 	asLocalDates: As(),
 	asLocalTimes: As(),
 };
-As = null;
 const asMixed :As = (array :Array) :Array => array;
 export let
 	asNulls :As,

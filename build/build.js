@@ -21,6 +21,7 @@ module.exports = require('../test/test.js')(async ({ build, 龙腾道, get, map,
 			description: `${en}／${zhs}`,
 			keywords: [ 'TOML' ],
 		},
+		ESM: true,
 		locate: {
 			'@ltd/j-orderify': ful('../../LongTengDao/j-orderify/dist/ESM/.j-orderify.js'),
 			'@ltd/j-regexp': ful('../../LongTengDao/j-regexp/dist/ESM/.j-regexp.js'),

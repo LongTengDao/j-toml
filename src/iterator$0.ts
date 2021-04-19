@@ -23,11 +23,14 @@ export const throws :(error :ErrorThrown) => never = (error :ErrorThrown) :never
 };
 
 const previous = new WeakMap<Noop, Noop>();
-const previous_get = get.bind(previous) as (key :Noop) => Noop;
-const previous_set = set.bind(previous);
+const previous_get = /*#__PURE__*/get.bind(previous) as (key :Noop) => Noop;
+const previous_set = /*#__PURE__*/set.bind(previous);
 type Noop = (lineRest :string) => string;
-const noop :Noop = () :string => '';
-previous_set(noop, noop);
+const noop :Noop = /*#__PURE__*/( () => {
+	const noop :Noop = () :string => '';
+	previous_set(noop, noop);
+	return noop;
+} )();
 
 export let stacks_length = 0;
 let last :Noop = noop;

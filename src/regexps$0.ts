@@ -8,10 +8,10 @@ import * as iterator$0 from './iterator$0';
 
 const Whitespace = /[ \t]/;
 
-export const PRE_WHITESPACE = newRegExp`
-	^${Whitespace}+`;
+export const PRE_WHITESPACE = /*#__PURE__*/( () => newRegExp`
+	^${Whitespace}+` )();
 
-export const VALUE_REST_exec = newRegExp.s<1 | 2>`
+export const VALUE_REST_exec = /*#__PURE__*/( () => newRegExp.s<1 | 2>`
 	^
 	(
 		(?:\d\d\d\d-\d\d-\d\d \d)?
@@ -19,38 +19,38 @@ export const VALUE_REST_exec = newRegExp.s<1 | 2>`
 	)
 	${Whitespace}*
 	(.*)
-	$`.exec;
+	$`.exec )();
 
-export const LITERAL_STRING_exec = newRegExp.s<1 | 2>`
+export const LITERAL_STRING_exec = /*#__PURE__*/( () => newRegExp.s<1 | 2>`
 	^
 	'([^']*)'
 	${Whitespace}*
-	(.*)`.exec;
+	(.*)`.exec )();
 
-const MULTI_LINE_LITERAL_STRING_0_1_2 = newRegExp.s<1 | 2 | 3>`
+const MULTI_LINE_LITERAL_STRING_0_1_2 = /*#__PURE__*/( () => newRegExp.s<1 | 2 | 3>`
 	^
 	(.*?)
 	'''('{0,2})
 	${Whitespace}*
-	(.*)`.exec;
-const MULTI_LINE_LITERAL_STRING_0 = newRegExp.s<1 | 2 | 3>`
+	(.*)`.exec )();
+const MULTI_LINE_LITERAL_STRING_0 = /*#__PURE__*/( () => newRegExp.s<1 | 2 | 3>`
 	^
 	(.*?)
 	'''()
 	${Whitespace}*
-	(.*)`.exec;
+	(.*)`.exec )();
 export
 let __MULTI_LINE_LITERAL_STRING_exec :typeof MULTI_LINE_LITERAL_STRING_0;
 
-export const SYM_WHITESPACE = newRegExp.s`
+export const SYM_WHITESPACE = /*#__PURE__*/( () => newRegExp.s`
 	^
 	.
-	${Whitespace}*`;
+	${Whitespace}*` )();
 
 
 export const Tag = /[^\x00-\x1F"#'()<>[\\\]`{}\x7F]+/;
 
-const KEY_VALUE_PAIR_exec = newRegExp.s<2>`
+const KEY_VALUE_PAIR_exec = /*#__PURE__*/( () => newRegExp.s<2>`
 	^
 	${Whitespace}*
 	=
@@ -60,25 +60,25 @@ const KEY_VALUE_PAIR_exec = newRegExp.s<2>`
 		${Whitespace}*
 	)?
 	(.*)
-	$`.exec;
+	$`.exec )();
 
-export const _VALUE_PAIR_exec = newRegExp.s<1 | 2>`
+export const _VALUE_PAIR_exec = /*#__PURE__*/( () => newRegExp.s<1 | 2>`
 	^
 	<(${Tag})>
 	${Whitespace}*
 	(.*)
-	$`.exec;
+	$`.exec )();
 
-const TAG_REST_exec = newRegExp.s<1 | 2>`
+const TAG_REST_exec = /*#__PURE__*/( () => newRegExp.s<1 | 2>`
 	^
 	<(${Tag})>
 	${Whitespace}*
 	(.*)
-	$`.exec;
+	$`.exec )();
 
 /* optimized (avoid overflow or lost) */
 
-const MULTI_LINE_BASIC_STRING_exec = theRegExp(/^(?:[^\\"]+|\\.|""?(?!"))/s).exec;
+const MULTI_LINE_BASIC_STRING_exec = /*#__PURE__*/( () => theRegExp(/^(?:[^\\"]+|\\.|""?(?!"))/s).exec )();
 export const MULTI_LINE_BASIC_STRING_exec_0 = (_ :string) :string => {
 	let _0 :string = '';
 	while ( _ ) {
@@ -97,10 +97,10 @@ const ESCAPED_EXCLUDE_CONTROL_CHARACTER_DEL_SLASH = /[^\\\x00-\x09\x0B-\x1F]+|\\
 let __ESCAPED_EXCLUDE_CONTROL_CHARACTER :RegExp;
 export const ESCAPED_EXCLUDE_CONTROL_CHARACTER_test = (_ :string) :boolean => !_.replace(__ESCAPED_EXCLUDE_CONTROL_CHARACTER, '');
 
-const BASIC_STRING_TAB______ = theRegExp(/^(?:[^\\"\x00-\x08\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/).exec;
-const BASIC_STRING__________ = theRegExp(/^(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/).exec;
-const BASIC_STRING_DEL______ = theRegExp(/^(?:[^\\"\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/).exec;
-const BASIC_STRING_DEL_SLASH = theRegExp(/^(?:[^\\"\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\/]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/).exec;
+const BASIC_STRING_TAB______ = /*#__PURE__*/( () => theRegExp(/^(?:[^\\"\x00-\x08\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/).exec )();
+const BASIC_STRING__________ = /*#__PURE__*/( () => theRegExp(/^(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/).exec )();
+const BASIC_STRING_DEL______ = /*#__PURE__*/( () => theRegExp(/^(?:[^\\"\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/).exec )();
+const BASIC_STRING_DEL_SLASH = /*#__PURE__*/( () => theRegExp(/^(?:[^\\"\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\/]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/).exec )();
 let __BASIC_STRING_exec :typeof BASIC_STRING_DEL_SLASH;
 export const BASIC_STRING_exec = (_2 :string) :{ 1 :string, 2 :string } => {
 	_2 = _2.slice(1);
@@ -115,12 +115,12 @@ export const BASIC_STRING_exec = (_2 :string) :{ 1 :string, 2 :string } => {
 	}
 };
 
-const DOT_KEY_exec = theRegExp(/^[ \t]*\.[ \t]*/).exec;
-const BARE_KEY_STRICT = theRegExp(/^[\w-]+/).exec;
-const BARE_KEY_FREE = theRegExp(/^[^ \t#=[\]'".]+(?:[ \t]+[^ \t#=[\]'".]+)*/).exec;
+const DOT_KEY_exec = /*#__PURE__*/( () => theRegExp(/^[ \t]*\.[ \t]*/).exec )();
+const BARE_KEY_STRICT = /*#__PURE__*/( () => theRegExp(/^[\w-]+/).exec )();
+const BARE_KEY_FREE = /*#__PURE__*/( () => theRegExp(/^[^ \t#=[\]'".]+(?:[ \t]+[^ \t#=[\]'".]+)*/).exec )();
 let __BARE_KEY_exec :typeof BARE_KEY_FREE;
-const LITERAL_KEY____ = theRegExp(/^'[^'\x00-\x08\x0B-\x1F\x7F]*'/).exec;
-const LITERAL_KEY_DEL = theRegExp(/^'[^'\x00-\x08\x0B-\x1F]*'/).exec;
+const LITERAL_KEY____ = /*#__PURE__*/( () => theRegExp(/^'[^'\x00-\x08\x0B-\x1F\x7F]*'/).exec )();
+const LITERAL_KEY_DEL = /*#__PURE__*/( () => theRegExp(/^'[^'\x00-\x08\x0B-\x1F]*'/).exec )();
 let __LITERAL_KEY_exec :typeof LITERAL_KEY_DEL;
 let supportArrayOfTables :boolean;
 
@@ -178,8 +178,8 @@ export const KEY_VALUE_PAIR_exec_groups = (_ :string) :{ left :string, tag :stri
 	return { left, tag, right };
 };
 
-const CONTROL_CHARACTER_EXCLUDE_TAB____ = theRegExp(/[\x00-\x08\x0B-\x1F\x7F]/).test;
-const CONTROL_CHARACTER_EXCLUDE_TAB_DEL = theRegExp(/[\x00-\x08\x0B-\x1F]/).test;
+const CONTROL_CHARACTER_EXCLUDE_TAB____ = /*#__PURE__*/( () => theRegExp(/[\x00-\x08\x0B-\x1F\x7F]/).test )();
+const CONTROL_CHARACTER_EXCLUDE_TAB_DEL = /*#__PURE__*/( () => theRegExp(/[\x00-\x08\x0B-\x1F]/).test )();
 export
 let __CONTROL_CHARACTER_EXCLUDE_test :(this :void, string :string) => boolean;
 const KEYS_STRICT = /[\w-]+|"(?:[^\\"]+|\\.)*"|'[^']*'/gs;
