@@ -69,7 +69,7 @@ function parse (
     But `string` can't, because BOM belongs to UTF, not TOML.
     
     If you want to be more console friendly when something of source content goes wrong, pass an object where the `path` key is the path of that `.toml` file, and the key `data` is the source content (`string` or `Buffer`).  
-    You can also omit the `data` key and `require('fs').readFileSync(source.path)` will be called automatically.
+    You can also omit the `data` key and `globalThis.require('fs').readFileSync(source.path)` will be called automatically.
     
 1.  **`specificationVersion`**
     

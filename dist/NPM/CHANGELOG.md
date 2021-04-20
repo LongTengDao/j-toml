@@ -21,3 +21,4 @@ ___
     12. 0.  *   remove stage 3 class field syntax for compatibility
             +   add ESM edition (with full tree shaking support)
         1.  *   fix typing file path
+        2.  *   fix ESM support of `package.json`

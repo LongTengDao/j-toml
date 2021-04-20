@@ -67,7 +67,7 @@ function parse (
     而 `string` 不允许，因为 BOM 属于 UTF 而非 TOML。
     
     如果你希望内容抛错时控制台信息更加友好，请传递一个 `{ path, data }` 对象，`path` 键是 `.toml` 文件的路径，`data` 键是源内容（`string` 或 `Buffer`）。  
-    你也可以省略 `data` 键，此时 `require('fs').readFileSync(源.path)` 将被自动调用。
+    你也可以省略 `data` 键，此时 `globalThis.require('fs').readFileSync(源.path)` 将被自动调用。
     
 1.  #### `遵循规范版本`
     
