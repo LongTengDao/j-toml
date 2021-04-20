@@ -18,3 +18,4 @@
     11. 0.  *   change date-time internal implementation from private to symbol, to support `Proxy` use case
     12. 0.  *   remove stage 3 class field syntax for compatibility
             +   add ESM edition (with full tree shaking support)
+        1.  *   fix typing file path
