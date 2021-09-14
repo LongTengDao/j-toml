@@ -44,11 +44,11 @@ TOML.parse(source,                       multiLineJoiner, useBigInt = true, xOpt
 
 ```typescript
 declare const parse :{
-	(this :void, source :Source, specificationVersion :SpecificationVersion, multiLineJoiner :string, useBigInt? :boolean | number, xOptions? :object) :Table;
-	(this :void, source :Source,                                             multiLineJoiner :string, useBigInt? :boolean | number, xOptions? :object) :Table;
+    (this :void, source :Source, specificationVersion :SpecificationVersion, multiLineJoiner :string, useBigInt? :boolean | number, xOptions? :object) :Table;
+    (this :void, source :Source,                                             multiLineJoiner :string, useBigInt? :boolean | number, xOptions? :object) :Table;
 };
 type Source = string | Buffer | {
-	readonly path  :string,
+    readonly path  :string,
     readonly data? :string | Buffer,
 };
 type SpecificationVersion = 1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1;
@@ -131,7 +131,7 @@ TOML.parse[0.1](source, multiLineJoiner, useBigInt = true, xOptions = null);
 ```typescript
 declare const parse :{
     readonly [SpecificationVersion in 1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1] :(
-    	this :void,
+        this :void,
         source :Source,
         multiLineJoiner :string,
         useBigInt? :boolean | number,

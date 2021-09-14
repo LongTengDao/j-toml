@@ -48,7 +48,7 @@ declare const parse :{
     (this :void, 源 :源,                             多行拼接字符 :string, 使用BigInt? :boolean | number, 超级选项? :object) :表;
 };
 type 源 = string | Buffer | {
-	readonly path  :string,
+    readonly path  :string,
     readonly data? :string | Buffer,
 };
 type 遵循规范版本 = 1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1;
@@ -131,7 +131,7 @@ TOML.parse[0.1](源, 多行拼接字符, 使用BigInt = true, 超级选项 = nul
 ```typescript
 declare const parse :{
     readonly [遵循规范版本 in 1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1] :(
-    	this :void,
+        this :void,
         源 :源,
         多行拼接字符 :string,
         使用BigInt? :boolean | number,

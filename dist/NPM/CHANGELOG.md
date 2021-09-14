@@ -25,4 +25,5 @@ ___
         2.  *   fix ESM support of `package.json`
     13. 0.  *   reuse stage 4 class field syntax
             +   add feature: allow to skip the `specificationVersion` (default to `1.0`)
-            +   add feature: add `1.0`, `0.5`, `0.4`, `0.3`, `0.2`, `0.1` sub functions in `TOML.parse` 
+            +   add feature: add `1.0`, `0.5`, `0.4`, `0.3`, `0.2`, `0.1` sub functions in `TOML.parse`
+    14. 0.  *   fix indent in markdown docs
