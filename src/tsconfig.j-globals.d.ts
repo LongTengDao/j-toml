@@ -8,7 +8,7 @@ declare module '.Array.prototype' { export default Array.prototype; }
 declare module '.BigInt' { export default BigInt; }
 
 declare module '.Buffer.from?' { export default Buffer.from; }
-declare module '.Buffer.isBuffer?=()=>false' { export default Buffer.isBuffer; }
+declare module '.Buffer.isBuffer?=' { export default Buffer.isBuffer; }
 
 declare module '.Date' { export default Date; }
 declare module '.Date.parse' { export default Date.parse; }

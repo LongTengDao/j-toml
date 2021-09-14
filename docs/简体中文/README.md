@@ -23,7 +23,7 @@ const 源               = `
       __proto__        = "..."
 `;
 
-const 根表 = TOML.parse(源, 1.0, '\n');
+const 根表 = TOML.parse(源, '\n');
 
 根表.一个普通的键名 // "..."
 根表.hasOwnProperty // "..."
@@ -38,17 +38,21 @@ Object.keys(根表)   // [ "一个普通的键名", "hasOwnProperty", "construct
 ------------
 
 ```
-TOML.parse(源, 遵循规范版本, 多行拼接字符[, 使用BigInt=true[, 超级选项]]);
+TOML.parse(源, 遵循规范版本, 多行拼接字符, 使用BigInt = true, 超级选项 = null);
+TOML.parse(源,               多行拼接字符, 使用BigInt = true, 超级选项 = null);
 ```
 
 ```typescript
-function parse (
-         源           :string | Buffer | { readonly path :string, readonly data? :string | Buffer },
-         遵循规范版本 :1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1,
-         多行拼接字符 :string,
-         使用BigInt?  :boolean | number,
-         超级选项?    :object,
-) :Table;
+declare const parse :{
+    (this :void, 源 :源, 遵循规范版本 :遵循规范版本, 多行拼接字符 :string, 使用BigInt? :boolean | number, 超级选项? :object) :表;
+    (this :void, 源 :源,                             多行拼接字符 :string, 使用BigInt? :boolean | number, 超级选项? :object) :表;
+};
+type 源 = string | Buffer | {
+	readonly path  :string,
+    readonly data? :string | Buffer,
+};
+type 遵循规范版本 = 1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1;
+type 表 = object;
 ```
 
 ### `arguments`
@@ -63,7 +67,7 @@ function parse (
     一个区别是，当传入 `string` 时，只会根据规范检查所有字符是否均为有效的 Unicode 字符（未配对的 UCS-4 字符码是无效的）；  
     而传入 `Buffer` 时，还会额外检查是否存在未知码点（而这在 `string` 状态下已经被自动替换为 `U+FFFD`）。
     
-    另一个区别是，`Buffer` 允许以 UTF BOM 开头，这会用于文件编码的确认（但它必须是 UTF-8 编码的，这不是技术问题，而是规范的要求），并在正式解析前跳过；  
+    另一个区别是，`Buffer` 允许以 UTF BOM（`U+FEFF`）开头，这会用于文件编码的确认（但它必须是 UTF-8 编码的，这不是技术问题，而是规范的要求），并在正式解析前跳过；  
     而 `string` 不允许，因为 BOM 属于 UTF 而非 TOML。
     
     如果你希望内容抛错时控制台信息更加友好，请传递一个 `{ path, data }` 对象，`path` 键是 `.toml` 文件的路径，`data` 键是源内容（`string` 或 `Buffer`）。  
@@ -72,9 +76,11 @@ function parse (
 1.  #### `遵循规范版本`
     
     *   类型：`1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1`
-    *   必需
+    *   默认值：`1.0`
     
     如果没有特殊理由（例如下游程序尚不能妥善处置 `Infinity`、`NaN`、小数秒和极端时间值，各地日期时刻、各地日期、各地时刻类型，空字符串键名，混合类型的数组甚至表数组、数组数组下的表结构），建议使用最新的版本。
+    
+    当不指定此参数时，后续参数均需往前移动一位。
     
 2.  #### `多行拼接字符`
     
@@ -100,7 +106,7 @@ function parse (
 
 ### `return`
 
-*   类型：`Table`
+*   类型：`表`
 
 返回根表（本实现解析出的表，是没有任何继承属性的对象）。
 
@@ -109,3 +115,27 @@ function parse (
 *   类型：`Error`
 
 参数不符合要求或源文本内有错误，均会抛出错误。
+
+`TOML.parse[1.0]` `TOML.parse[0.5]` `TOML.parse[0.4]` `TOML.parse[0.3]` `TOML.parse[0.2]` `TOML.parse[0.1]`
+-----------------------------------------------------------------------------------------------------------
+
+```
+TOML.parse[1.0](源, 多行拼接字符, 使用BigInt = true, 超级选项 = null);
+TOML.parse[0.5](源, 多行拼接字符, 使用BigInt = true, 超级选项 = null);
+TOML.parse[0.4](源, 多行拼接字符, 使用BigInt = true, 超级选项 = null);
+TOML.parse[0.3](源, 多行拼接字符, 使用BigInt = true, 超级选项 = null);
+TOML.parse[0.2](源, 多行拼接字符, 使用BigInt = true, 超级选项 = null);
+TOML.parse[0.1](源, 多行拼接字符, 使用BigInt = true, 超级选项 = null);
+```
+
+```typescript
+declare const parse :{
+    readonly [遵循规范版本 in 1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1] :(
+    	this :void,
+        源 :源,
+        多行拼接字符 :string,
+        使用BigInt? :boolean | number,
+        超级选项? :object,
+    ) => 表
+};
+```

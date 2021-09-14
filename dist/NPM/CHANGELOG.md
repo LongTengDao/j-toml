@@ -1,7 +1,8 @@
-﻿[English](https://GitHub.com/LongTengDao/j-toml/tree/master/docs/English/) | [简体中文](https://GitHub.com/LongTengDao/j-toml/tree/master/docs/简体中文/)
+﻿[English](https://GitHub.com/LongTengDao/j-toml/tree/master/CHANGELOG/English.md) | [简体中文](https://GitHub.com/LongTengDao/j-toml/tree/master/CHANGELOG/简体中文.md)
 ___
+
 1.  0.  0.  +   add feature: support TOML v1.0.0
-            *   remove feature (experimental): `TOML.parse(,,,,xOptions?:{mix?,close?})`
+            -   remove feature (experimental): `TOML.parse(,,,,xOptions?:{mix?,close?})`
     1.  0.  +   add feature (subsidiary): `TOML.parse(,,,,,sourcePath?:string)`
             -   remove feature (subsidiary): `{lineNumber,lineIndex}` on error thrown (since 0.5.*)
     2.  0.  *   change syntax (experimental): `TOML.parse(,,,,xOptions?:{tag?})`
@@ -10,7 +11,7 @@ ___
     5.  0.  *   optimizing
         1.  *   fix bug: `source.path` (since 1.4.0)
         2.  *   fix bug: check and forbid `02-29` for non-leap years (since 0.5.*)
-            +   improve typing: detailing `.d.ts` for 4 types of datetime
+            +   improve typing: detailing `.d.ts` for 4 types of date-time
     6.  0.  *   optimizing
     7.  0.  *   optimizing
     8.  0.  *   optimizing
@@ -22,3 +23,6 @@ ___
             +   add ESM edition (with full tree shaking support)
         1.  *   fix typing file path
         2.  *   fix ESM support of `package.json`
+    13. 0.  *   reuse stage 4 class field syntax
+            +   add feature: allow to skip the `specificationVersion` (default to `1.0`)
+            +   add feature: add `1.0`, `0.5`, `0.4`, `0.3`, `0.2`, `0.1` sub functions in `TOML.parse` 

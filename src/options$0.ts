@@ -9,6 +9,7 @@ import isSafeInteger from '.Number.isSafeInteger';
 import ownKeys from '.Reflect.ownKeys';
 import MAX_SAFE_INTEGER from '.Number.MAX_SAFE_INTEGER';
 import MIN_SAFE_INTEGER from '.Number.MIN_SAFE_INTEGER';
+import undefined from '.undefined';
 import NULL from '.null.prototype';
 
 import { PlainTable, OrderedTable } from './types/Table';
@@ -169,7 +170,7 @@ export const use = (specificationVersion :unknown, multiLineJoiner :unknown, use
 	if ( typeof multiLineJoiner==='string' ) { useWhatToJoinMultiLineString = multiLineJoiner; }
 	else { throw TypeError('TOML.parse(,,multiLineJoiner)'); }
 	
-	if ( useBigInt===true ) { usingBigInt = true; }
+	if ( useBigInt===undefined || useBigInt===true ) { usingBigInt = true; }
 	else if ( useBigInt===false ) { usingBigInt = false; }
 	else {
 		if ( typeof useBigInt!=='number' ) { throw TypeError('TOML.parse(,,,useBigInt)'); }

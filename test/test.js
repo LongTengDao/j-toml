@@ -2,7 +2,7 @@
 
 const { not } = require('@ltd/j-validator');
 
-module.exports = require('@ltd/j-dev')(__dirname + '/..')(async ({ import_default, get }) => {
+module.exports = require('j-dev')(__dirname + '/..')(async ({ import_default, get }) => {
 	
 	const TOML = await import_default('src/default', {
 		require (moduleName) {
@@ -19,12 +19,12 @@ module.exports = require('@ltd/j-dev')(__dirname + '/..')(async ({ import_defaul
 		}
 	});
 	
-	TOML.parse('', 1.0, '\n');
+	TOML.parse(``, 1.0, '\n');
 	
 	TOML.parse([
 		`["${'bt\\b\\t'.repeat(10000)}${'\\b\\t'.repeat(10000)}"]`,
-		'k=[{'.repeat(10000) + '}]'.repeat(10000),
-	].join('\n'), 1.0, '\r\n');
+		'k=[{'.repeat(20000) + '}]'.repeat(20000),
+	].join('\n'), 1.0, '\n');
 	
 	const toml = TOML.parse(await get('./test/sample.toml'), 1.0, '\n', true);
 	const expect = require('./expect');

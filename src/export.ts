@@ -8,7 +8,7 @@ export {
 };
 
 import Default from '.default';
-export default Default({
+export default /*#__PURE__*/Default({
 	version,
 	parse,
 });

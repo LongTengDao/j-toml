@@ -4,7 +4,7 @@ const BOM = '\uFEFF';
 const EOL = '\r\n';
 const i18n = [ 'English', '简体中文' ];
 
-module.exports = require('../test/test.js')(async ({ build, 龙腾道, get, map, ful, put }) => {
+require('../test/test.js')(async ({ build, 龙腾道, get, map, ful, put }) => {
 	
 	const zhs = '龙腾道为汤小明语写的实现。从属于“简计划”。';
 	const en = 'An implementation of TOML written by LongTengDao. Belong to "Plan J".';
@@ -31,14 +31,14 @@ module.exports = require('../test/test.js')(async ({ build, 龙腾道, get, map,
 	});
 	
 	await put('docs/README.md', BOM + i18n.map(lang => `[${lang}](./${lang}/)`).join(' | '));
-	await map('docs/English/README.md', ReadMe, 'dist/NPM/README.md');
-	await map('CHANGELOG.md', ReadMe, 'dist/NPM/CHANGELOG.md');
+	await map('docs/English/README.md', Markdown(lang => `docs/${lang}/`), 'dist/NPM/README.md');
+	await map('CHANGELOG/English.md', Markdown(lang => `CHANGELOG/${lang}.md`), 'dist/NPM/CHANGELOG.md');
 	
 });
 
-function ReadMe (_English_) {
-	return BOM +
-		i18n.map(lang => `[${lang}](https://GitHub.com/LongTengDao/j-toml/tree/master/docs/${lang}/)`).join(' | ') + EOL +
+function Markdown (Path) {
+	return (_English_) => BOM +
+		i18n.map(lang => `[${lang}](https://GitHub.com/LongTengDao/j-toml/tree/master/${Path(lang)})`).join(' | ') + EOL +
 		'___' +  EOL +
-		_English_.replace(/(\n```+)[^`\r\n]+/g, '$1').replace(/(\n\d\. {2})#+ +([^\r\n]*)/g, '$1**$2**');
+		_English_.replace(/^\uFEFF/, '').replace(/(?<=\n```+)[^`\r\n]+/g, '').replace(/(?<=\n\d\. {2})#+ +([^\r\n]*)/g, '**$1**');
 }

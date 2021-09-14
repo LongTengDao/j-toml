@@ -1,14 +1,25 @@
 {
 	"compilerOptions": {
-		"useDefineForClassFields": true,
-		"target": "ESNext",
-		"baseUrl": ".",
+		"target": "ESNext"
+		,
+		"baseUrl": "."
+		,
 		"paths": {
 			"@ltd/*": [ "../../../LongTengDao/*/src/export.d" ]
-		},
-		"strict": true,
-		"noImplicitReturns": true,
-		"noUnusedLocals": true,
+		}
+		,
+		"strict": true
+		,
+		"noImplicitReturns": true
+		,
+		"noUnusedLocals": true
+		,
 		"noUncheckedIndexedAccess": true
+		,
+		"noImplicitOverride": true
+		,
+		"isolatedModules": true
+		,
+		"exactOptionalPropertyTypes": true
 	}
 }

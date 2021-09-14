@@ -5,7 +5,6 @@ import ownKeys from '.Reflect.ownKeys';
 import is from '.Object.is';
 import create from '.Object.create';
 import preventExtensions from '.Object.preventExtensions';
-import defineProperty from '.Object.defineProperty';
 import freeze from '.Object.freeze';
 import Null from '.null';
 
@@ -90,10 +89,9 @@ const DELIMITER_DOT = /[-T:.]/g;
 const ZERO = /(?<=\.\d*)0+$/;
 
 const Datetime = /*#__PURE__*/( () => {
-	const descriptor = Null({ value: '', writable: true, enumerable: true, configurable: true });
-	const Datetime = function (this :object, _ISOString :symbol, _value :symbol) {
-		return defineProperty(defineProperty(this, _ISOString, descriptor), _value, descriptor);
-	} as unknown as { new (_ISOString :symbol, _value :symbol) :object };//expression? :undefined, literal? :undefined, dotValue? :undefined
+	const Datetime = function (this :object) {
+		return this;
+	} as unknown as { new () :object };//expression? :undefined, literal? :undefined, dotValue? :undefined
 	//                                > .setTime()
 	//                                > .getTime() : Date.parse('T')
 	// [Symbol.toPrimitive]('number') > .valueOf()
@@ -144,15 +142,15 @@ const OffsetDateTime_set = (that :InstanceType<typeof OffsetDateTime>, start :nu
 };
 export const OffsetDateTime = Null(class OffsetDateTime extends Datetime {
 	
-	declare [OffsetDateTime_ISOString] :string;
-	declare [OffsetDateTime_value] :Value;
+	[OffsetDateTime_ISOString] :string;
+	[OffsetDateTime_value] :Value;
 	
 	valueOf (this :OffsetDateTime) :Value { return this[OffsetDateTime_value]; }
 	toISOString (this :OffsetDateTime) :string { return this[OffsetDateTime_ISOString]; }
 	
 	constructor (literal :string) {
 		const { 1: more } = leap(literal) && ( options$0.zeroDatetime ? OFFSET_DATETIME_ZERO_exec : OFFSET_DATETIME_exec )(literal) || iterator$0.throws(SyntaxError(`Invalid Offset Date-Time ${literal}` + iterator$0.where(' at ')));
-		super(OffsetDateTime_ISOString, OffsetDateTime_value);
+		super();
 		this[OffsetDateTime_ISOString] = literal.replace(' ', 'T');
 		this[OffsetDateTime_value] = ( '' + parse(this[OffsetDateTime_ISOString]) ).padStart(15, '0') + ( more ? '.' + more : '' );
 		return this;
@@ -229,15 +227,15 @@ const LocalDateTime_set = (that :InstanceType<typeof LocalDateTime>, start :numb
 };
 export const LocalDateTime = Null(class LocalDateTime extends Datetime {
 	
-	declare [LocalDateTime_ISOString] :string;
-	declare [LocalDateTime_value] :Value;
+	[LocalDateTime_ISOString] :string;
+	[LocalDateTime_value] :Value;
 	
 	valueOf (this :LocalDateTime) :Value { return this[LocalDateTime_value]; }
 	toISOString (this :LocalDateTime) :string { return this[LocalDateTime_ISOString]; }
 	
 	constructor (literal :string) {
 		IS_LOCAL_DATETIME(literal) && leap(literal) || iterator$0.throws(SyntaxError(`Invalid Local Date-Time ${literal}` + iterator$0.where(' at ')));
-		super(LocalDateTime_ISOString, LocalDateTime_value);
+		super();
 		this[LocalDateTime_value] = Value(
 			this[LocalDateTime_ISOString] = literal.replace(' ', 'T')
 		);
@@ -276,15 +274,15 @@ const LocalDate_set = (that :InstanceType<typeof LocalDate>, start :number, end 
 };
 export const LocalDate = Null(class LocalDate extends Datetime {
 	
-	declare [LocalDate_ISOString] :string;
-	declare [LocalDate_value] :Value;
+	[LocalDate_ISOString] :string;
+	[LocalDate_value] :Value;
 	
 	valueOf (this :LocalDate) :Value { return this[LocalDate_value]; }
 	toISOString (this :LocalDate) :string { return this[LocalDate_ISOString]; }
 	
 	constructor (literal :string) {
 		IS_LOCAL_DATE(literal) && leap(literal) || iterator$0.throws(SyntaxError(`Invalid Local Date ${literal}` + iterator$0.where(' at ')));
-		super(LocalDate_ISOString, LocalDate_value);
+		super();
 		this[LocalDate_value] = Value(
 			this[LocalDate_ISOString] = literal
 		);
@@ -310,15 +308,15 @@ const LocalTime_set = (that :InstanceType<typeof LocalTime>, start :number, end 
 };
 export const LocalTime = Null(class LocalTime extends Datetime {
 	
-	declare [LocalTime_ISOString] :string;
-	declare [LocalTime_value] :Value;
+	[LocalTime_ISOString] :string;
+	[LocalTime_value] :Value;
 	
 	valueOf (this :LocalTime) :Value { return this[LocalTime_value]; }
 	toISOString (this :LocalTime) :string { return this[LocalTime_ISOString]; }
 	
 	constructor (literal :string) {
 		IS_LOCAL_TIME(literal) || iterator$0.throws(SyntaxError(`Invalid Local Time ${literal}` + iterator$0.where(' at ')));
-		super(LocalTime_ISOString, LocalTime_value);
+		super();
 		this[LocalTime_value] = Value(
 			this[LocalTime_ISOString] = literal
 		);

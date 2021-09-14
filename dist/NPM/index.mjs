@@ -1,12 +1,18 @@
-﻿const version = '1.12.2';
+﻿const version = '1.13.0';
 
 const Error$1 = Error;
 
 const TypeError$1 = TypeError;
 
-const undefined$1 = void null;
+const assign$1 = Object.assign;
 
-const isBuffer = typeof Buffer!=='undefined' && Buffer.isBuffer!==undefined$1 ? Buffer.isBuffer : /*#__PURE__*/ ()=>false;
+const isBuffer = (
+	/*! j-globals: Buffer.isBuffer (polyfill) */
+	typeof Buffer==='function' ? Buffer.isBuffer : function isBuffer () { return false; }
+	/*¡ j-globals: Buffer.isBuffer (polyfill) */
+);
+
+const undefined$1 = void null;
 
 const from = (
 	/*! j-globals: Buffer.from (fallback) */
@@ -44,9 +50,7 @@ const NULL = (
 
 const toStringTag = typeof Symbol==='undefined' ? undefined$1 : Symbol.toStringTag;
 
-const defineProperty = Object.defineProperty;
-
-const Object_assign = Object.assign;
+const Object_defineProperty = Object.defineProperty;
 
 const Infinity = 1/0;
 
@@ -66,19 +70,17 @@ var create = Object.create;
 const Default = (
 	/*! j-globals: default (internal) */
 	function Default (exports, addOnOrigin) {
-		return /*#__PURE__*/ function Module (exports, addOnOrigin) {
-			if ( !addOnOrigin ) { addOnOrigin = exports; exports = create$1(NULL); }
-			if ( Object_assign ) { Object_assign(exports, addOnOrigin); }
-			else { for ( var key in addOnOrigin ) { if ( hasOwn(addOnOrigin, key) ) { exports[key] = addOnOrigin[key]; } } }
-			exports.default = exports;
-			if ( toStringTag ) {
-				var descriptor = create$1(NULL);
-				descriptor.value = 'Module';
-				defineProperty(exports, toStringTag, descriptor);
-			}
-			typeof exports==='function' && exports.prototype && freeze(exports.prototype);
-			return freeze(exports);
-		}(exports, addOnOrigin);
+		if ( !addOnOrigin ) { addOnOrigin = exports; exports = create$1(NULL); }
+		if ( assign$1 ) { assign$1(exports, addOnOrigin); }
+		else { for ( var key in addOnOrigin ) { if ( hasOwn(addOnOrigin, key) ) { exports[key] = addOnOrigin[key]; } } }
+		exports.default = exports;
+		if ( toStringTag ) {
+			var descriptor = create$1(NULL);
+			descriptor.value = 'Module';
+			Object_defineProperty(exports, toStringTag, descriptor);
+		}
+		typeof exports==='function' && exports.prototype && freeze(exports.prototype);
+		return freeze(exports);
 	}
 	/*¡ j-globals: default (internal) */
 );
@@ -228,11 +230,11 @@ var clearRegExp = '$_' in RegExp$1
 
 const RegExp_prototype = RegExp.prototype;
 
-/*!
+/*!@preserve@license
  * 模块名称：j-utf
  * 模块功能：UTF 相关共享实用程序。从属于“简计划”。
    　　　　　UTF util. Belong to "Plan J".
- * 模块版本：3.2.0
+ * 模块版本：4.0.0
  * 许可条款：LGPL-3.0
  * 所属作者：龙腾道 <LongTengDao@LongTengDao.com> (www.LongTengDao.com)
  * 问题反馈：https://GitHub.com/LongTengDao/j-utf/issues
@@ -362,7 +364,7 @@ const Object_keys = Object.keys;
 const getOwnPropertySymbols = Object.getOwnPropertySymbols;
 
 const Null$1 = (
-	/*! j-globals: null.constructor (internal) */
+	/*! j-globals: null (internal) */
 	/*#__PURE__*/function () {
 		var assign = Object.assign || function assign (target, source) {
 			var keys, index, key;
@@ -396,7 +398,7 @@ const Null$1 = (
 		freeze(Null);
 		return Null;
 	}()
-	/*¡ j-globals: null.constructor (internal) */
+	/*¡ j-globals: null (internal) */
 );
 
 const is = Object.is;
@@ -443,12 +445,12 @@ const target2proxy = /*#__PURE__*/newWeakMap()
 	                                                   
  ;
 
-const handlers                       = /*#__PURE__*/Object_assign(create$1(NULL), {
+const handlers                       = /*#__PURE__*/assign$1(create$1(NULL), {
 	defineProperty:                 (target                   , key   , descriptor                    )          => {
 		if ( hasOwnProperty_call(target, key) ) {
-			return Reflect_defineProperty(target, key, Object_assign(create$1(NULL), descriptor));
+			return Reflect_defineProperty(target, key, assign$1(create$1(NULL), descriptor));
 		}
-		if ( Reflect_defineProperty(target, key, Object_assign(create$1(NULL), descriptor)) ) {
+		if ( Reflect_defineProperty(target, key, assign$1(create$1(NULL), descriptor)) ) {
 			const keeper = target2keeper.get(target) ;
 			keeper[keeper.length] = key;
 			return true;
@@ -480,7 +482,7 @@ const orderify =                    (object   )    => {
 	if ( proxy2target.has(object) ) { return object; }
 	let proxy = target2proxy.get(object)                 ;
 	if ( proxy ) { return proxy; }
-	proxy = newProxy(object, Object_assign(Keeper          (), ownKeys(object)));
+	proxy = newProxy(object, assign$1(Keeper          (), ownKeys(object)));
 	target2proxy.set(object, proxy);
 	return proxy;
 };
@@ -504,7 +506,7 @@ const Null = /*#__PURE__*/function () {
 	}
 	//@ts-ignore
 	Null.prototype = null;
-	defineProperty(Null, 'name', Object_assign(create$1(NULL), { value: '', configurable: false }));
+	Object_defineProperty(Null, 'name', assign$1(create$1(NULL), { value: '', configurable: false }));
 	//delete Null.length;
 	freeze(Null);
 	return Null;
@@ -934,7 +936,7 @@ const use = (specificationVersion         , multiLineJoiner         , useBigInt 
 	if ( typeof multiLineJoiner==='string' ) { useWhatToJoinMultiLineString = multiLineJoiner; }
 	else { throw TypeError$1('TOML.parse(,,multiLineJoiner)'); }
 	
-	if ( useBigInt===true ) { usingBigInt = true; }
+	if ( useBigInt===undefined$1 || useBigInt===true ) { usingBigInt = true; }
 	else if ( useBigInt===false ) { usingBigInt = false; }
 	else {
 		if ( typeof useBigInt!=='number' ) { throw TypeError$1('TOML.parse(,,,useBigInt)'); }
@@ -1006,7 +1008,7 @@ const newArray = (isStatic         )        => {
 
 const NativeDate = Date;
 
-const parse$1 = Date.parse;
+const parse$2 = Date.parse;
 
 const preventExtensions = Object.preventExtensions;
 
@@ -1086,10 +1088,9 @@ const DELIMITER_DOT = /[-T:.]/g;
 const ZERO = /(?<=\.\d*)0+$/;
 
 const Datetime = /*#__PURE__*/( () => {
-	const descriptor = Null$1({ value: '', writable: true, enumerable: true, configurable: true });
-	const Datetime = function (              _ISOString        , _value        ) {
-		return defineProperty(defineProperty(this, _ISOString, descriptor), _value, descriptor);
-	}                                                                   ;//expression? :undefined, literal? :undefined, dotValue? :undefined
+	const Datetime = function (            ) {
+		return this;
+	}                                 ;//expression? :undefined, literal? :undefined, dotValue? :undefined
 	//                                > .setTime()
 	//                                > .getTime() : Date.parse('T')
 	// [Symbol.toPrimitive]('number') > .valueOf()
@@ -1134,23 +1135,23 @@ const OffsetDateTime_use = (that                                     , $        
 const OffsetDateTime_get = (that                                     , start        , end        ) => +that[OffsetDateTime_ISOString].slice(start, end);
 const OffsetDateTime_set = (that                                     , start        , end        , value        )         => {
 	if ( end ) { that[OffsetDateTime_ISOString] = that[OffsetDateTime_ISOString].slice(0, start) + ( '' + value ).padStart(end - start, '0') + that[OffsetDateTime_ISOString].slice(end); }
-	const time = parse$1(that[OffsetDateTime_ISOString]);
+	const time = parse$2(that[OffsetDateTime_ISOString]);
 	that[OffsetDateTime_value] = ( '' + time ).padStart(15, '0') + that[OffsetDateTime_value].slice(15);
 	return time;
 };
 const OffsetDateTime = Null$1(class OffsetDateTime extends Datetime {
 	
-	                                           
-	                                      
+	[OffsetDateTime_ISOString]        ;
+	[OffsetDateTime_value]       ;
 	
 	valueOf (                    )        { return this[OffsetDateTime_value]; }
 	toISOString (                    )         { return this[OffsetDateTime_ISOString]; }
 	
 	constructor (literal        ) {
 		const { 1: more } = leap(literal) && ( zeroDatetime ? OFFSET_DATETIME_ZERO_exec : OFFSET_DATETIME_exec )(literal) || throws(SyntaxError$1(`Invalid Offset Date-Time ${literal}` + where(' at ')));
-		super(OffsetDateTime_ISOString, OffsetDateTime_value);
+		super();
 		this[OffsetDateTime_ISOString] = literal.replace(' ', 'T');
-		this[OffsetDateTime_value] = ( '' + parse$1(this[OffsetDateTime_ISOString]) ).padStart(15, '0') + ( more ? '.' + more : '' );
+		this[OffsetDateTime_value] = ( '' + parse$2(this[OffsetDateTime_ISOString]) ).padStart(15, '0') + ( more ? '.' + more : '' );
 		return this;
 	}
 	
@@ -1225,15 +1226,15 @@ const LocalDateTime_set = (that                                    , start      
 };
 const LocalDateTime = Null$1(class LocalDateTime extends Datetime {
 	
-	                                          
-	                                     
+	[LocalDateTime_ISOString]        ;
+	[LocalDateTime_value]       ;
 	
 	valueOf (                   )        { return this[LocalDateTime_value]; }
 	toISOString (                   )         { return this[LocalDateTime_ISOString]; }
 	
 	constructor (literal        ) {
 		IS_LOCAL_DATETIME(literal) && leap(literal) || throws(SyntaxError$1(`Invalid Local Date-Time ${literal}` + where(' at ')));
-		super(LocalDateTime_ISOString, LocalDateTime_value);
+		super();
 		this[LocalDateTime_value] = Value(
 			this[LocalDateTime_ISOString] = literal.replace(' ', 'T')
 		);
@@ -1272,15 +1273,15 @@ const LocalDate_set = (that                                , start        , end 
 };
 const LocalDate = Null$1(class LocalDate extends Datetime {
 	
-	                                      
-	                                 
+	[LocalDate_ISOString]        ;
+	[LocalDate_value]       ;
 	
 	valueOf (               )        { return this[LocalDate_value]; }
 	toISOString (               )         { return this[LocalDate_ISOString]; }
 	
 	constructor (literal        ) {
 		IS_LOCAL_DATE(literal) && leap(literal) || throws(SyntaxError$1(`Invalid Local Date ${literal}` + where(' at ')));
-		super(LocalDate_ISOString, LocalDate_value);
+		super();
 		this[LocalDate_value] = Value(
 			this[LocalDate_ISOString] = literal
 		);
@@ -1306,15 +1307,15 @@ const LocalTime_set = (that                                , start        , end 
 };
 const LocalTime = Null$1(class LocalTime extends Datetime {
 	
-	                                      
-	                                 
+	[LocalTime_ISOString]        ;
+	[LocalTime_value]       ;
 	
 	valueOf (               )        { return this[LocalTime_value]; }
 	toISOString (               )         { return this[LocalTime_ISOString]; }
 	
 	constructor (literal        ) {
 		IS_LOCAL_TIME(literal) || throws(SyntaxError$1(`Invalid Local Time ${literal}` + where(' at ')));
-		super(LocalTime_ISOString, LocalTime_value);
+		super();
 		this[LocalTime_value] = Value(
 			this[LocalTime_ISOString] = literal
 		);
@@ -1917,13 +1918,8 @@ const buf2str = (buf        ) => {
 	if ( !from(str).equals(buf) ) { throw Error$1('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any unknown code point.'); }
 	return str[0]===BOM ? str.slice(1) : str;
 };
-const parse = (
-	source                                                                              ,
-	specificationVersion                                   ,
-	multiLineJoiner        ,
-	useBigInt                   = true,
-	xOptions                    ,
-)        => {
+
+const parse = (source        , specificationVersion                                   , multiLineJoiner        , useBigInt                   , xOptions                     )        => {
 	could();
 	let sourcePath        ;
 	if ( isBuffer(source) ) {
@@ -1961,12 +1957,27 @@ const parse = (
 	finally { clearRegExp(); }
 };
 
-const _export = Default({
+const parse$1 = /*#__PURE__*/assign$1(
+	(source        , specificationVersion                                   , multiLineJoiner        , useBigInt                   , xOptions                     ) => typeof specificationVersion==='number'
+		? parse(source, specificationVersion, multiLineJoiner, useBigInt, xOptions)
+		: parse(source, 1.0, specificationVersion          , multiLineJoiner                                       , useBigInt                      ),
+	{
+		'1.0': (source        , multiLineJoiner        , useBigInt                   , xOptions                     ) => parse(source, 0.1, multiLineJoiner, useBigInt, xOptions),
+		1.0: (source        , multiLineJoiner        , useBigInt                   , xOptions                     ) => parse(source, 1.0, multiLineJoiner, useBigInt, xOptions),
+		0.5: (source        , multiLineJoiner        , useBigInt                   , xOptions                     ) => parse(source, 0.5, multiLineJoiner, useBigInt, xOptions),
+		0.4: (source        , multiLineJoiner        , useBigInt                   , xOptions                     ) => parse(source, 0.4, multiLineJoiner, useBigInt, xOptions),
+		0.3: (source        , multiLineJoiner        , useBigInt                   , xOptions                     ) => parse(source, 0.3, multiLineJoiner, useBigInt, xOptions),
+		0.2: (source        , multiLineJoiner        , useBigInt                   , xOptions                     ) => parse(source, 0.2, multiLineJoiner, useBigInt, xOptions),
+		0.1: (source        , multiLineJoiner        , useBigInt                   , xOptions                     ) => parse(source, 0.1, multiLineJoiner, useBigInt, xOptions),
+	}
+);
+
+const _export = /*#__PURE__*/Default({
 	version,
-	parse,
+	parse: parse$1,
 });
 
 export default _export;
-export { parse, version };
+export { parse$1 as parse, version };
 
 //# sourceMappingURL=index.mjs.map

@@ -25,7 +25,7 @@ const source  = `
       __proto__      = "..."
 `;
 
-const rootTable = TOML.parse(source, 1.0, '\n');
+const rootTable = TOML.parse(source, '\n');
 
 rootTable.I_am_normal    // "..."
 rootTable.hasOwnProperty // "..."
@@ -40,17 +40,21 @@ Object.keys(rootTable)   // [ "I_am_normal", "hasOwnProperty", "constructor", "_
 ------------
 
 ```
-TOML.parse(source, specificationVersion, multiLineJoiner[, useBigInt=true[, xOptions]]);
+TOML.parse(source, specificationVersion, multiLineJoiner, useBigInt = true, xOptions = null);
+TOML.parse(source,                       multiLineJoiner, useBigInt = true, xOptions = null);
 ```
 
 ```
-function parse (
-         source               :string | Buffer | { readonly path :string, readonly data? :string | Buffer },
-         specificationVersion :1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1,
-         multiLineJoiner      :string,
-         useBigInt?           :boolean | number,
-         xOptions?            :object,
-) :Table;
+declare const parse :{
+	(this :void, source :Source, specificationVersion :SpecificationVersion, multiLineJoiner :string, useBigInt? :boolean | number, xOptions? :object) :Table;
+	(this :void, source :Source,                                             multiLineJoiner :string, useBigInt? :boolean | number, xOptions? :object) :Table;
+};
+type Source = string | Buffer | {
+	readonly path  :string,
+    readonly data? :string | Buffer,
+};
+type SpecificationVersion = 1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1;
+type Table = object;
 ```
 
 ### `arguments`
@@ -65,7 +69,7 @@ function parse (
     One difference is that when passing in `string`, parser will only check whether all characters are valid Unicode characters according to the specification (uncoupled UCS-4 character code is invalid);  
     When `Buffer` is passed in, an additional check is made to see whether there is unknown code point (which has been automatically replaced by `U+FFFD` in the `string` state).
     
-    Another difference is that `Buffer` can start with UTF BOM, which is used for validation of file encoding (but it must be UTF-8 encoding, which is not a technical limit, but a specification requirement), and skipped before real parsing;  
+    Another difference is that `Buffer` can start with UTF BOM (`U+FEFF`), which is used for validation of file encoding (but it must be UTF-8 encoding, which is not a technical limit, but a specification requirement), and skipped before real parsing;  
     But `string` can't, because BOM belongs to UTF, not TOML.
     
     If you want to be more console friendly when something of source content goes wrong, pass an object where the `path` key is the path of that `.toml` file, and the key `data` is the source content (`string` or `Buffer`).  
@@ -74,9 +78,11 @@ function parse (
 1.  **`specificationVersion`**
     
     *   type: `1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1`
-    *   required
+    *   default: `1.0`
     
     If there is no special reason (e.g. the downstream program could not deal with `Infinity`、`NaN`、fractional seconds and edge Datetime values, Local Date-Time / Local Date / Local Time types, empty string key name, mixed type array even array of tables / table under array of arrays structure yet), the latest version is recommended.
+    
+    If you skip this argument, the rest arguments must be moved one position to the left.
     
 2.  **`multiLineJoiner`**
     
@@ -111,3 +117,27 @@ Return the root table (tables parsed by this implementation are objects without 
 *   type: `Error`
 
 There will be an error thrown, when the arguments not meet the requirement or there is any error within the source.
+
+`TOML.parse[1.0]` `TOML.parse[0.5]` `TOML.parse[0.4]` `TOML.parse[0.3]` `TOML.parse[0.2]` `TOML.parse[0.1]`
+-----------------------------------------------------------------------------------------------------------
+
+```
+TOML.parse[1.0](source, multiLineJoiner, useBigInt = true, xOptions = null);
+TOML.parse[0.5](source, multiLineJoiner, useBigInt = true, xOptions = null);
+TOML.parse[0.4](source, multiLineJoiner, useBigInt = true, xOptions = null);
+TOML.parse[0.3](source, multiLineJoiner, useBigInt = true, xOptions = null);
+TOML.parse[0.2](source, multiLineJoiner, useBigInt = true, xOptions = null);
+TOML.parse[0.1](source, multiLineJoiner, useBigInt = true, xOptions = null);
+```
+
+```
+declare const parse :{
+    readonly [SpecificationVersion in 1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1] :(
+    	this :void,
+        source :Source,
+        multiLineJoiner :string,
+        useBigInt? :boolean | number,
+        xOptions? :object,
+    ) => Table
+};
+```

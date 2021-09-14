@@ -1,6 +1,7 @@
 import Error from '.Error';
 import TypeError from '.TypeError';
-import isBuffer from '.Buffer.isBuffer?=()=>false';
+import assign from '.Object.assign';
+import isBuffer from '.Buffer.isBuffer?=';
 import from from '.Buffer.from?';
 import globalThis from '.globalThis';
 import undefined from '.undefined';
@@ -20,14 +21,7 @@ const buf2str = (buf :Buffer) => {
 	return str[0]===BOM ? str.slice(1) : str;
 };
 
-export { parse as default };
-const parse = (
-	source :string | Buffer | { readonly path :string, readonly data? :string | Buffer },
-	specificationVersion :1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1,
-	multiLineJoiner :string,
-	useBigInt :boolean | number = true,
-	xOptions :options$0.XOptions,
-) :Table => {
+const parse = (source :Source, specificationVersion :1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1, multiLineJoiner :string, useBigInt? :boolean | number, xOptions? :options$0.XOptions) :Table => {
 	iterator$0.could();
 	let sourcePath :string;
 	if ( isBuffer(source) ) {
@@ -64,5 +58,22 @@ const parse = (
 	}
 	finally { clearRegExp(); }
 };
+
+export default /*#__PURE__*/assign(
+	(source :Source, specificationVersion :1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1, multiLineJoiner :string, useBigInt? :boolean | number, xOptions? :options$0.XOptions) => typeof specificationVersion==='number'
+		? parse(source, specificationVersion, multiLineJoiner, useBigInt, xOptions)
+		: parse(source, 1.0, specificationVersion as string, multiLineJoiner as any as undefined | boolean | number, useBigInt as options$0.XOptions),
+	{
+		'1.0': (source :Source, multiLineJoiner :string, useBigInt? :boolean | number, xOptions? :options$0.XOptions) => parse(source, 0.1, multiLineJoiner, useBigInt, xOptions),
+		1.0: (source :Source, multiLineJoiner :string, useBigInt? :boolean | number, xOptions? :options$0.XOptions) => parse(source, 1.0, multiLineJoiner, useBigInt, xOptions),
+		0.5: (source :Source, multiLineJoiner :string, useBigInt? :boolean | number, xOptions? :options$0.XOptions) => parse(source, 0.5, multiLineJoiner, useBigInt, xOptions),
+		0.4: (source :Source, multiLineJoiner :string, useBigInt? :boolean | number, xOptions? :options$0.XOptions) => parse(source, 0.4, multiLineJoiner, useBigInt, xOptions),
+		0.3: (source :Source, multiLineJoiner :string, useBigInt? :boolean | number, xOptions? :options$0.XOptions) => parse(source, 0.3, multiLineJoiner, useBigInt, xOptions),
+		0.2: (source :Source, multiLineJoiner :string, useBigInt? :boolean | number, xOptions? :options$0.XOptions) => parse(source, 0.2, multiLineJoiner, useBigInt, xOptions),
+		0.1: (source :Source, multiLineJoiner :string, useBigInt? :boolean | number, xOptions? :options$0.XOptions) => parse(source, 0.1, multiLineJoiner, useBigInt, xOptions),
+	}
+);
+
+type Source = string | Buffer | { readonly path :string, readonly data? :string | Buffer };
 
 import type { Table } from '../types/Table';

@@ -2,7 +2,7 @@ declare module '*?text' {
 	const text :string;
 	export default text;
 }
-declare module '*?components' {
-	const components :{ [Name in string]? :object };
-	export default components;
+declare module '*.css' {
+	const css :string;
+	export default css;
 }
