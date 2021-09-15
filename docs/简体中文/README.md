@@ -38,19 +38,27 @@ Object.keys(根表)   // [ "一个普通的键名", "hasOwnProperty", "construct
 ------------
 
 ```
-TOML.parse(源, 遵循规范版本, 多行拼接字符, 使用BigInt = true, 超级选项 = null);
-TOML.parse(源,               多行拼接字符, 使用BigInt = true, 超级选项 = null);
+TOML.parse(源, 遵循规范版本, 多行字符串拼接字符, 使用BigInt = true, 超级选项 = null);
+TOML.parse(源,               多行字符串拼接字符, 使用BigInt = true, 超级选项 = null);
 ```
 
 ```typescript
-declare const parse :{
-    (this :void, 源 :源, 遵循规范版本 :遵循规范版本, 多行拼接字符 :string, 使用BigInt? :boolean | number, 超级选项? :object) :表;
-    (this :void, 源 :源,                             多行拼接字符 :string, 使用BigInt? :boolean | number, 超级选项? :object) :表;
-};
-type 源 = string | Buffer | {
-    readonly path  :string,
-    readonly data? :string | Buffer,
-};
+declare function parse (
+    源 :源,
+    遵循规范版本 :遵循规范版本,
+    多行字符串拼接字符 :string,
+    使用BigInt? :boolean | number,
+    超级选项? :object,
+) :表;
+
+declare function parse (
+    源 :源,
+    多行字符串拼接字符 :string,
+    使用BigInt? :boolean | number,
+    超级选项? :object,
+) :表;
+
+type 源 = string | Buffer | { readonly path :string, readonly data? :string | Buffer };
 type 遵循规范版本 = 1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1;
 type 表 = object;
 ```
@@ -82,7 +90,7 @@ type 表 = object;
     
     当不指定此参数时，后续参数均需往前移动一位。
     
-2.  #### `多行拼接字符`
+2.  #### `多行字符串拼接字符`
     
     *   类型：`string`
     *   必需
@@ -120,20 +128,19 @@ type 表 = object;
 -----------------------------------------------------------------------------------------------------------
 
 ```
-TOML.parse[1.0](源, 多行拼接字符, 使用BigInt = true, 超级选项 = null);
-TOML.parse[0.5](源, 多行拼接字符, 使用BigInt = true, 超级选项 = null);
-TOML.parse[0.4](源, 多行拼接字符, 使用BigInt = true, 超级选项 = null);
-TOML.parse[0.3](源, 多行拼接字符, 使用BigInt = true, 超级选项 = null);
-TOML.parse[0.2](源, 多行拼接字符, 使用BigInt = true, 超级选项 = null);
-TOML.parse[0.1](源, 多行拼接字符, 使用BigInt = true, 超级选项 = null);
+TOML.parse[1.0](源, 多行字符串拼接字符, 使用BigInt = true, 超级选项 = null);
+TOML.parse[0.5](源, 多行字符串拼接字符, 使用BigInt = true, 超级选项 = null);
+TOML.parse[0.4](源, 多行字符串拼接字符, 使用BigInt = true, 超级选项 = null);
+TOML.parse[0.3](源, 多行字符串拼接字符, 使用BigInt = true, 超级选项 = null);
+TOML.parse[0.2](源, 多行字符串拼接字符, 使用BigInt = true, 超级选项 = null);
+TOML.parse[0.1](源, 多行字符串拼接字符, 使用BigInt = true, 超级选项 = null);
 ```
 
 ```typescript
 declare const parse :{
     readonly [遵循规范版本 in 1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1] :(
-        this :void,
         源 :源,
-        多行拼接字符 :string,
+        多行字符串拼接字符 :string,
         使用BigInt? :boolean | number,
         超级选项? :object,
     ) => 表

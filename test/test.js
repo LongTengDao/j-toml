@@ -42,4 +42,11 @@ module.exports = require('j-dev')(__dirname + '/..')(async ({ import_default, ge
 		throw Error(name);
 	}
 	
+	TOML.parse(``);
+	label: {
+		try { TOML.parse(`a='''a\nb'''`); }
+		catch (error) { break label; }
+		throw Error('!multiLineStringJoiner');
+	}
+	
 });

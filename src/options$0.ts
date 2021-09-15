@@ -1,3 +1,4 @@
+import Error from '.Error';
 import SyntaxError from '.SyntaxError';
 import RangeError from '.RangeError';
 import TypeError from '.TypeError';
@@ -18,10 +19,15 @@ import * as regexps$0 from './regexps$0';
 
 /* options */
 
-export let useWhatToJoinMultiLineString :string;
-export let usingBigInt :boolean | null;
-export let IntegerMin :number;
-export let IntegerMax :number;
+const THROW_WHILE_MEETING_MULTI = {
+	[Symbol.toPrimitive] () :never {
+		iterator$0.throws(Error(`TOML.parse(,,multiLineStringJoiner) must be passed, while the source including multi-line string` + iterator$0.where(', which is found at ')));
+	}
+};
+export let useWhatToJoinMultiLineString = '';
+export let usingBigInt :boolean | null = true;
+export let IntegerMin = 0;
+export let IntegerMax = 0;
 
 /* xOptions */
 
@@ -134,7 +140,7 @@ export const clear = () :void => {
 	zeroDatetime = false;
 };
 
-export const use = (specificationVersion :unknown, multiLineJoiner :unknown, useBigInt :unknown, xOptions :XOptions) :void => {
+export const use = (specificationVersion :unknown, multiLineStringJoiner :unknown, useBigInt :unknown, xOptions :XOptions) :void => {
 	
 	let mixed :boolean;
 	switch ( specificationVersion ) {
@@ -167,8 +173,9 @@ export const use = (specificationVersion :unknown, multiLineJoiner :unknown, use
 	}
 	regexps$0.switchRegExp(specificationVersion);
 	
-	if ( typeof multiLineJoiner==='string' ) { useWhatToJoinMultiLineString = multiLineJoiner; }
-	else { throw TypeError('TOML.parse(,,multiLineJoiner)'); }
+	if ( typeof multiLineStringJoiner==='string' ) { useWhatToJoinMultiLineString = multiLineStringJoiner; }
+	else if ( multiLineStringJoiner===undefined ) { useWhatToJoinMultiLineString = THROW_WHILE_MEETING_MULTI as never; }
+	else { throw TypeError('TOML.parse(,,multiLineStringJoiner)'); }
 	
 	if ( useBigInt===undefined || useBigInt===true ) { usingBigInt = true; }
 	else if ( useBigInt===false ) { usingBigInt = false; }

@@ -37,8 +37,11 @@ require('../test/test.js')(async ({ build, 龙腾道, get, map, ful, put }) => {
 });
 
 function Markdown (Path) {
-	return (_English_) => BOM +
-		i18n.map(lang => `[${lang}](https://GitHub.com/LongTengDao/j-toml/tree/master/${Path(lang)})`).join(' | ') + EOL +
-		'___' +  EOL +
-		_English_.replace(/^\uFEFF/, '').replace(/(?<=\n```+)[^`\r\n]+/g, '').replace(/(?<=\n\d\. {2})#+ +([^\r\n]*)/g, '**$1**');
+	return (_English_) => {
+		if ( _English_.includes('\t') ) { throw Error(`.md 中存在 Tab`); }
+		return BOM +
+			i18n.map(lang => `[${lang}](https://GitHub.com/LongTengDao/j-toml/tree/master/${Path(lang)})`).join(' | ') + EOL +
+			'___' +  EOL +
+			_English_.replace(/^\uFEFF/, '').replace(/(?<=\n```+)[^`\r\n]+/g, '').replace(/(?<=\n\d\. {2})#+ +([^\r\n]*)/g, '**$1**');
+	};
 }

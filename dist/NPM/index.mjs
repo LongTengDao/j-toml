@@ -1,4 +1,4 @@
-﻿const version = '1.14.0';
+﻿const version = '1.15.0';
 
 const Error$1 = Error;
 
@@ -784,10 +784,15 @@ const switchRegExp = (specificationVersion        )       => {
 
 /* options */
 
-let useWhatToJoinMultiLineString        ;
-let usingBigInt                ;
-let IntegerMin        ;
-let IntegerMax        ;
+const THROW_WHILE_MEETING_MULTI = {
+	[Symbol.toPrimitive] ()        {
+		throws(Error$1(`TOML.parse(,,multiLineStringJoiner) must be passed, while the source including multi-line string` + where(', which is found at ')));
+	}
+};
+let useWhatToJoinMultiLineString = '';
+let usingBigInt                 = true;
+let IntegerMin = 0;
+let IntegerMax = 0;
 
               
 
@@ -900,7 +905,7 @@ const clear = ()       => {
 	zeroDatetime = false;
 };
 
-const use = (specificationVersion         , multiLineJoiner         , useBigInt         , xOptions          )       => {
+const use = (specificationVersion         , multiLineStringJoiner         , useBigInt         , xOptions          )       => {
 	
 	let mixed         ;
 	switch ( specificationVersion ) {
@@ -933,8 +938,9 @@ const use = (specificationVersion         , multiLineJoiner         , useBigInt 
 	}
 	switchRegExp(specificationVersion);
 	
-	if ( typeof multiLineJoiner==='string' ) { useWhatToJoinMultiLineString = multiLineJoiner; }
-	else { throw TypeError$1('TOML.parse(,,multiLineJoiner)'); }
+	if ( typeof multiLineStringJoiner==='string' ) { useWhatToJoinMultiLineString = multiLineStringJoiner; }
+	else if ( multiLineStringJoiner===undefined$1 ) { useWhatToJoinMultiLineString = THROW_WHILE_MEETING_MULTI         ; }
+	else { throw TypeError$1('TOML.parse(,,multiLineStringJoiner)'); }
 	
 	if ( useBigInt===undefined$1 || useBigInt===true ) { usingBigInt = true; }
 	else if ( useBigInt===false ) { usingBigInt = false; }
@@ -1919,7 +1925,7 @@ const buf2str = (buf        ) => {
 	return str[0]===BOM ? str.slice(1) : str;
 };
 
-const parse = (source        , specificationVersion                                   , multiLineJoiner        , useBigInt                   , xOptions                     )        => {
+const parse = (source        , specificationVersion                                   , multiLineStringJoiner        , useBigInt                   , xOptions                     )        => {
 	could();
 	let sourcePath        ;
 	if ( isBuffer(source) ) {
@@ -1940,7 +1946,7 @@ const parse = (source        , specificationVersion                             
 	try {
 		if ( IS_NON_SCALAR(source) ) { throw Error$1('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any uncoupled UCS-4 character code.'); }
 		try {
-			use(specificationVersion, multiLineJoiner, useBigInt, xOptions);
+			use(specificationVersion, multiLineStringJoiner, useBigInt, xOptions);
 			todo(source, sourcePath);
 			try {
 				const rootTable = Root();
@@ -1958,17 +1964,17 @@ const parse = (source        , specificationVersion                             
 };
 
 const parse$1 = /*#__PURE__*/assign$1(
-	(source        , specificationVersion                                   , multiLineJoiner        , useBigInt                   , xOptions                     ) => typeof specificationVersion==='number'
-		? parse(source, specificationVersion, multiLineJoiner, useBigInt, xOptions)
-		: parse(source, 1.0, specificationVersion          , multiLineJoiner                                       , useBigInt                      ),
+	(source        , specificationVersion                                   , multiLineStringJoiner        , useBigInt                   , xOptions                     ) => typeof specificationVersion==='number'
+		? parse(source, specificationVersion, multiLineStringJoiner, useBigInt, xOptions)
+		: parse(source, 1.0, specificationVersion          , multiLineStringJoiner                                       , useBigInt                      ),
 	{
-		'1.0': (source        , multiLineJoiner        , useBigInt                   , xOptions                     ) => parse(source, 0.1, multiLineJoiner, useBigInt, xOptions),
-		1.0: (source        , multiLineJoiner        , useBigInt                   , xOptions                     ) => parse(source, 1.0, multiLineJoiner, useBigInt, xOptions),
-		0.5: (source        , multiLineJoiner        , useBigInt                   , xOptions                     ) => parse(source, 0.5, multiLineJoiner, useBigInt, xOptions),
-		0.4: (source        , multiLineJoiner        , useBigInt                   , xOptions                     ) => parse(source, 0.4, multiLineJoiner, useBigInt, xOptions),
-		0.3: (source        , multiLineJoiner        , useBigInt                   , xOptions                     ) => parse(source, 0.3, multiLineJoiner, useBigInt, xOptions),
-		0.2: (source        , multiLineJoiner        , useBigInt                   , xOptions                     ) => parse(source, 0.2, multiLineJoiner, useBigInt, xOptions),
-		0.1: (source        , multiLineJoiner        , useBigInt                   , xOptions                     ) => parse(source, 0.1, multiLineJoiner, useBigInt, xOptions),
+		'1.0': (source        , multiLineStringJoiner        , useBigInt                   , xOptions                     ) => parse(source, 0.1, multiLineStringJoiner, useBigInt, xOptions),
+		1.0: (source        , multiLineStringJoiner        , useBigInt                   , xOptions                     ) => parse(source, 1.0, multiLineStringJoiner, useBigInt, xOptions),
+		0.5: (source        , multiLineStringJoiner        , useBigInt                   , xOptions                     ) => parse(source, 0.5, multiLineStringJoiner, useBigInt, xOptions),
+		0.4: (source        , multiLineStringJoiner        , useBigInt                   , xOptions                     ) => parse(source, 0.4, multiLineStringJoiner, useBigInt, xOptions),
+		0.3: (source        , multiLineStringJoiner        , useBigInt                   , xOptions                     ) => parse(source, 0.3, multiLineStringJoiner, useBigInt, xOptions),
+		0.2: (source        , multiLineStringJoiner        , useBigInt                   , xOptions                     ) => parse(source, 0.2, multiLineStringJoiner, useBigInt, xOptions),
+		0.1: (source        , multiLineStringJoiner        , useBigInt                   , xOptions                     ) => parse(source, 0.1, multiLineStringJoiner, useBigInt, xOptions),
 	}
 );
 

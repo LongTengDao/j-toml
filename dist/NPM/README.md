@@ -40,19 +40,27 @@ Object.keys(rootTable)   // [ "I_am_normal", "hasOwnProperty", "constructor", "_
 ------------
 
 ```
-TOML.parse(source, specificationVersion, multiLineJoiner, useBigInt = true, xOptions = null);
-TOML.parse(source,                       multiLineJoiner, useBigInt = true, xOptions = null);
+TOML.parse(source, specificationVersion, multiLineStringJoiner, useBigInt = true, xOptions = null);
+TOML.parse(source,                       multiLineStringJoiner, useBigInt = true, xOptions = null);
 ```
 
 ```
-declare const parse :{
-    (this :void, source :Source, specificationVersion :SpecificationVersion, multiLineJoiner :string, useBigInt? :boolean | number, xOptions? :object) :Table;
-    (this :void, source :Source,                                             multiLineJoiner :string, useBigInt? :boolean | number, xOptions? :object) :Table;
-};
-type Source = string | Buffer | {
-    readonly path  :string,
-    readonly data? :string | Buffer,
-};
+declare function parse (
+    source :Source,
+    specificationVersion :SpecificationVersion,
+    multiLineStringJoiner :string,
+    useBigInt? :boolean | number,
+    xOptions? :object,
+) :Table;
+
+declare function parse (
+    source :Source,
+    multiLineStringJoiner :string,
+    useBigInt? :boolean | number,
+    xOptions? :object,
+) :Table;
+
+type Source = string | Buffer | { readonly path :string, readonly data? :string | Buffer };
 type SpecificationVersion = 1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1;
 type Table = object;
 ```
@@ -84,7 +92,7 @@ type Table = object;
     
     If you skip this argument, the rest arguments must be moved one position to the left.
     
-2.  **`multiLineJoiner`**
+2.  **`multiLineStringJoiner`**
     
     *   type: `string`
     *   required
@@ -122,20 +130,19 @@ There will be an error thrown, when the arguments not meet the requirement or th
 -----------------------------------------------------------------------------------------------------------
 
 ```
-TOML.parse[1.0](source, multiLineJoiner, useBigInt = true, xOptions = null);
-TOML.parse[0.5](source, multiLineJoiner, useBigInt = true, xOptions = null);
-TOML.parse[0.4](source, multiLineJoiner, useBigInt = true, xOptions = null);
-TOML.parse[0.3](source, multiLineJoiner, useBigInt = true, xOptions = null);
-TOML.parse[0.2](source, multiLineJoiner, useBigInt = true, xOptions = null);
-TOML.parse[0.1](source, multiLineJoiner, useBigInt = true, xOptions = null);
+TOML.parse[1.0](source, multiLineStringJoiner, useBigInt = true, xOptions = null);
+TOML.parse[0.5](source, multiLineStringJoiner, useBigInt = true, xOptions = null);
+TOML.parse[0.4](source, multiLineStringJoiner, useBigInt = true, xOptions = null);
+TOML.parse[0.3](source, multiLineStringJoiner, useBigInt = true, xOptions = null);
+TOML.parse[0.2](source, multiLineStringJoiner, useBigInt = true, xOptions = null);
+TOML.parse[0.1](source, multiLineStringJoiner, useBigInt = true, xOptions = null);
 ```
 
 ```
 declare const parse :{
     readonly [SpecificationVersion in 1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1] :(
-        this :void,
         source :Source,
-        multiLineJoiner :string,
+        multiLineStringJoiner :string,
         useBigInt? :boolean | number,
         xOptions? :object,
     ) => Table
