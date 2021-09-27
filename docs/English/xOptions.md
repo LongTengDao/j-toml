@@ -84,7 +84,7 @@ dotted.key = 'value' # this is a dotted key/value pair
 [table.header] # this is a table header (but it cannot be a table in an array of tables)
 ```
 
-这将得到：
+This will result in:
 
 ```javascript
 ( {
