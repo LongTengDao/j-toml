@@ -22,7 +22,7 @@ ___
     12. 0.  *   remove stage 3 class field syntax for compatibility
             +   add ESM edition (with full tree shaking support)
         1.  *   fix typing file path
-        2.  *   fix ESM support of `package.json`
+        2.  *   bug fix: fix ESM support of `package.json`
     13. 0.  *   reuse stage 4 class field syntax
             +   new feature: allow to skip the `specificationVersion` (default to `1.0`)
             +   new feature: add `1.0`, `0.5`, `0.4`, `0.3`, `0.2`, `0.1` sub functions in `TOML.parse`
@@ -36,3 +36,5 @@ ___
             *   bug fix: fix incorrect line number information in parsing error once met "line ending backslash"
             *   bug fix: fix parsing stack overflow caused by too many underscores in integer or float
             *   bug fix: fix the problem that `globalThis.require` doesn't exist actually
+        1.  *   bug fix: make error position more exact
+            *   bug fix: make `parse` more robust to eradicate broken by overlapped calling

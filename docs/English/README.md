@@ -122,7 +122,7 @@ Return the root table (tables parsed by this implementation are objects without 
 
 *   type: `Error`
 
-There will be an error thrown, when the arguments not meet the requirement or there is any error within the source.
+There will be an error thrown, when the arguments not meet the requirement or there is any error within the source. Parsing during parsing caused by hacking will also be blocked.
 
 This library will not cause stack overflow error unexpectedly due to too deep tables or arrays, or too many escaping in basic string, or too many underscores in integer or float.
 

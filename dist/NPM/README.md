@@ -124,7 +124,7 @@ Return the root table (tables parsed by this implementation are objects without 
 
 *   type: `Error`
 
-There will be an error thrown, when the arguments not meet the requirement or there is any error within the source.
+There will be an error thrown, when the arguments not meet the requirement or there is any error within the source. Parsing during parsing caused by hacking will also be blocked.
 
 This library will not cause stack overflow error unexpectedly due to too deep tables or arrays, or too many escaping in basic string, or too many underscores in integer or float.
 
@@ -264,8 +264,6 @@ You can use the `Section` function to mark a table as a block table (and return 
 You can also use `multiline` function to mark a table as a multiline mode inline table (and return it), but note that this is not the specification allowed currently (remember to specify `options.xBeforeNewlineInMultilineTable` to make such marking will not be ignored when serializing).
 
 ```
-const TOML = require('@ltd/j-toml');
-
 TOML.stringify({
     key: 'value',
     dotted: {
@@ -312,8 +310,6 @@ A non-empty array, whose item is table that marked by `Section`, will be seriali
 Otherwise, arrays are treated as static and multi-line by default. If you want single-line mode, you can use the `inline` function to mark it.
 
 ```
-const TOML = require('@ltd/j-toml');
-
 TOML.stringify({
     staticArray: [
         'string',
@@ -343,17 +339,15 @@ Another sore point is comment. Obviously we don't want a configuration file that
 Now you can write `[commentFor(key)]` as key in your tables (this gives you a `symbol` as key, and the value should be the comment content string), so that the comment is after the value belong the `key` in the final serialization!
 
 ```
-const TOML = require('@ltd/j-toml');
-
 TOML.stringify({
-    [TOML.commentFor('key')]: ' this is a key/value pair',
+    [commentFor('key')]: ' this is a key/value pair',
     key: 'value',
     dotted: {
-        [TOML.commentFor('key')]: ' this is a dotted key/value pair',
+        [commentFor('key')]: ' this is a dotted key/value pair',
         key: 'value',
     },
     table: {
-        [TOML.commentFor('header')]: ' this is a table header (but it cannot be a table in an array of tables)',
+        [commentFor('header')]: ' this is a table header (but it cannot be a table in an array of tables)',
         header: Section({
         }),
     },
@@ -377,16 +371,14 @@ This library provides several helper functions for this purpose, including `lite
 When you need to serialize a brand new temporary data directly, use `literal` to specify the writing style:
 
 ```
-const TOML = require('@ltd/j-toml');
-
 TOML.stringify({
-    underscore: TOML.literal`1_000`,
-    zero: TOML.literal`10.00`,
-    base: TOML.literal`0o777`,
-    mark: TOML.inline([ '+10e10', '+inf' ].map(TOML.literal)),
-    multilineString: TOML.literal`"""
+    underscore: literal`1_000`,
+    zero: literal`10.00`,
+    base: literal`0o777`,
+    mark: inline([ '+10e10', '+inf' ].map(literal)),
+    multilineString: literal`"""
 1\b2
-2"""`,
+3"""`,
 });
 ```
 
@@ -398,7 +390,7 @@ base = 0o777
 mark = [ +10e10, +inf ]
 multilineString = """
 1\b2
-2"""
+3"""
 
 ```
 
@@ -409,13 +401,11 @@ Here, `multiline` (string case) would help when the multi-line string comes from
 base = 0o777
 multilineString = """
 1\b2
-2"""
+3"""
 
 ```
 
 ```
-const TOML = require('@ltd/j-toml');
-
 const table = TOML.parse('/path/to/example.toml', '\n');
 
 table.base = TOML.literal('0o' + table.base.toString(8).padStart(3, '0'));
@@ -429,7 +419,7 @@ TOML.stringify(table);
 base = 0o777
 multilineString = """
 1\b2
-2\b4"""
+3\b4"""
 
 ```
 
@@ -448,8 +438,6 @@ It was a bit of a hassle, what's worse, you had to mark all other unmodified ato
 In applications where this behaviour occurs frequently, consider converting the table from `parse` into an instance of a class containing methods like `toTOML` that specify the serialization choice for each property, and use the returned copy for 'stringify', that will improve the experience greatly:
 
 ```
-const TOML = require('@ltd/j-toml');
-
 const model = new class {
     base;
     multilineString;

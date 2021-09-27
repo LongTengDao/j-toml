@@ -16,10 +16,10 @@ export const prepareTable = (table :Table, keys :Array<string>) :Table => {
 		if ( key in table ) {
 			table = table[key];
 			if ( isTable(table) ) {
-				isInline(table) && iterator$0.throws(Error(`Trying to define Table under static Inline Table` + iterator$0.where(' at ')));
+				isInline(table) && iterator$0.throws(Error(`Trying to define Table under Inline Table` + iterator$0.where(' at ')));
 			}
 			else if ( isArray(table) ) {
-				isStatic(table) && iterator$0.throws(Error(`Trying to append value to static Inline Array` + iterator$0.where(' at ')));
+				isStatic(table) && iterator$0.throws(Error(`Trying to append value to Static Array` + iterator$0.where(' at ')));
 				table = table[( table as Array ).length - 1];
 			}
 			else { iterator$0.throws(Error(`Trying to define Table under non-Table value` + iterator$0.where(' at '))); }
@@ -91,16 +91,25 @@ export const assignLiteralString = ( (table :Table, finalKey :string, literal :s
 		table[finalKey] = checkLiteralString($[1]) + $[2];
 		return $[3];
 	}
-	const lines :string[] = literal ? [ checkLiteralString(literal) ] : [];
-	for ( const start = iterator$0.mark('Literal String'); ; ) {
-		const line :string = iterator$0.must(start);
+	const start = new iterator$0.mark('Multi-line Literal String', literal.length + 3);
+	if ( !literal ) {
+		literal = start.must();
+		const $ = regexps$0.__MULTI_LINE_LITERAL_STRING_exec(literal);
+		if ( $ ) {
+			table[finalKey] = checkLiteralString($[1]) + $[2];
+			return $[3];
+		}
+	}
+	options$0.useWhatToJoinMultilineString ?? start.nowrap();
+	for ( const lines :[ string, ...string[] ] = [ checkLiteralString(literal) ]; ; ) {
+		const line :string = start.must();
 		const $ = regexps$0.__MULTI_LINE_LITERAL_STRING_exec(line);
 		if ( $ ) {
 			lines[lines.length] = checkLiteralString($[1]) + $[2];
-			table[finalKey] = lines.join(options$0.useWhatToJoinMultilineString);
+			table[finalKey] = lines.join(options$0.useWhatToJoinMultilineString!);
 			return $[3];
 		}
-		lines[lines.length] = line;
+		lines[lines.length] = checkLiteralString(line);
 	}
 } ) as {
 	(this :void, array :Array, finalIndex :number, literal :string) :string
@@ -122,17 +131,29 @@ export const assignBasicString = ( (table :Table, finalKey :string, literal :str
 		table[finalKey] = BasicString($) + ( options$0.endsWithQuote ? literal[length]==='"' ? literal[++length]==='"' ? ( ++length, '""' ) : '"' : '' : '' );
 		return literal.slice(length).replace(regexps$0.PRE_WHITESPACE, '');
 	}
-	const skipped :1 | 0 = literal ? 1 : 0;
-	if ( skipped ) { regexps$0.ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(literal += '\n') || iterator$0.throws(SyntaxError(`Bad multi-line basic string` + iterator$0.where(' at '))); }
-	const lines :string[] = skipped ? [ literal ] : [];
-	for ( const start = iterator$0.mark('Basic String'); ; ) {
-		let line :string = iterator$0.must(start);
+	const start = new iterator$0.mark('Multi-line Basic String', literal.length + 3);
+	const skipped :0 | 1 = literal ? 0 : 1;
+	if ( skipped ) {
+		literal = start.must();
+		const $ = regexps$0.MULTI_LINE_BASIC_STRING_exec_0(literal);
+		let { length } = $;
+		if ( literal.startsWith('"""', length) ) {
+			regexps$0.ESCAPED_EXCLUDE_CONTROL_CHARACTER_test($) || iterator$0.throws(SyntaxError(`Bad multi-line basic string` + iterator$0.where(' at ')));
+			length += 3;
+			table[finalKey] = MultilineBasicString($, options$0.useWhatToJoinMultilineString!, skipped) + ( options$0.endsWithQuote ? literal[length]==='"' ? literal[++length]==='"' ? ( ++length, '""' ) : '"' : '' : '' );
+			return literal.slice(length).replace(regexps$0.PRE_WHITESPACE, '');
+		}
+	}
+	options$0.useWhatToJoinMultilineString ?? start.nowrap();
+	regexps$0.ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(literal += '\n') || iterator$0.throws(SyntaxError(`Bad multi-line basic string` + iterator$0.where(' at ')));
+	for ( const lines :[ string, ...string[] ] = [ literal ]; ; ) {
+		let line :string = start.must();
 		const $ = regexps$0.MULTI_LINE_BASIC_STRING_exec_0(line);
 		let { length } = $;
 		if ( line.startsWith('"""', length) ) {
 			regexps$0.ESCAPED_EXCLUDE_CONTROL_CHARACTER_test($) || iterator$0.throws(SyntaxError(`Bad multi-line basic string` + iterator$0.where(' at ')));
 			length += 3;
-			table[finalKey] = MultilineBasicString(lines.join('') + $, skipped) + ( options$0.endsWithQuote ? line[length]==='"' ? line[++length]==='"' ? ( ++length, '""' ) : '"' : '' : '' );
+			table[finalKey] = MultilineBasicString(lines.join('') + $, options$0.useWhatToJoinMultilineString!, skipped) + ( options$0.endsWithQuote ? line[length]==='"' ? line[++length]==='"' ? ( ++length, '""' ) : '"' : '' : '' );
 			return line.slice(length).replace(regexps$0.PRE_WHITESPACE, '');
 		}
 		regexps$0.ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(line += '\n') || iterator$0.throws(SyntaxError(`Bad multi-line basic string` + iterator$0.where(' at ')));

@@ -122,12 +122,12 @@ const push = (lastArray :Array, lineRest :string) :string | S => {
 
 const equalStaticArray = function * (this :void, table :Table, finalKey :string, lineRest :string) :S {
 	const staticArray :Array = table[finalKey] = newArray(STATICALLY);
-	const start = iterator$0.mark('Inline Array');
+	const start = new iterator$0.mark('Static Array', lineRest.length);
 	lineRest = lineRest.replace(regexps$0.SYM_WHITESPACE, '');
 	let inline = true;
 	while ( !lineRest || lineRest[0]==='#' ) {
 		inline = false;
-		lineRest = iterator$0.must(start).replace(regexps$0.PRE_WHITESPACE, '');
+		lineRest = start.must().replace(regexps$0.PRE_WHITESPACE, '');
 	}
 	if ( lineRest[0]===']' ) {
 		inline && beInline(staticArray, true);
@@ -138,13 +138,13 @@ const equalStaticArray = function * (this :void, table :Table, finalKey :string,
 		lineRest = typeof rest==='string' ? rest : yield rest;
 		while ( !lineRest || lineRest[0]==='#' ) {
 			inline = false;
-			lineRest = iterator$0.must(start).replace(regexps$0.PRE_WHITESPACE, '');
+			lineRest = start.must().replace(regexps$0.PRE_WHITESPACE, '');
 		}
 		if ( lineRest[0]===',' ) {
 			lineRest = lineRest.replace(regexps$0.SYM_WHITESPACE, '');
 			while ( !lineRest || lineRest[0]==='#' ) {
 				inline = false;
-				lineRest = iterator$0.must(start).replace(regexps$0.PRE_WHITESPACE, '');
+				lineRest = start.must().replace(regexps$0.PRE_WHITESPACE, '');
 			}
 			if ( lineRest[0]===']' ) { break; }
 		}
@@ -162,14 +162,14 @@ const equalStaticArray = function * (this :void, table :Table, finalKey :string,
 
 const equalInlineTable = function * (this :void, table :Table, finalKey :string, lineRest :string) :S {
 	const inlineTable :Table = table[finalKey] = new options$0.Table(DIRECTLY, INLINE);
-	lineRest = lineRest.replace(regexps$0.SYM_WHITESPACE, '');
 	if ( options$0.allowInlineTableMultilineAndTrailingCommaEvenNoComma ) {
-		const start = iterator$0.mark('Inline Table');
+		const start = new iterator$0.mark('Inline Table', lineRest.length);
+		lineRest = lineRest.replace(regexps$0.SYM_WHITESPACE, '');
 		let inline = true;
 		for ( ; ; ) {
 			while ( !lineRest || lineRest[0]==='#' ) {
 				inline = false;
-				lineRest = iterator$0.must(start).replace(regexps$0.PRE_WHITESPACE, '');
+				lineRest = start.must().replace(regexps$0.PRE_WHITESPACE, '');
 			}
 			if ( lineRest[0]==='}' ) { break; }
 			const forComment :ForComment = ForComment(inlineTable, lineRest);
@@ -179,13 +179,13 @@ const equalInlineTable = function * (this :void, table :Table, finalKey :string,
 				if ( lineRest[0]==='#' ) {
 					if ( options$0.preserveComment ) { forComment.table[commentFor(forComment.finalKey)] = lineRest.slice(1); }
 					inline = false;
-					do { lineRest = iterator$0.must(start).replace(regexps$0.PRE_WHITESPACE, ''); }
+					do { lineRest = start.must().replace(regexps$0.PRE_WHITESPACE, ''); }
 					while ( !lineRest || lineRest[0]==='#' );
 				}
 			}
 			else {
 				inline = false;
-				do { lineRest = iterator$0.must(start).replace(regexps$0.PRE_WHITESPACE, ''); }
+				do { lineRest = start.must().replace(regexps$0.PRE_WHITESPACE, ''); }
 				while ( !lineRest || lineRest[0]==='#' );
 			}
 			if ( lineRest[0]===',' ) { lineRest = lineRest.replace(regexps$0.SYM_WHITESPACE, ''); }
@@ -193,7 +193,7 @@ const equalInlineTable = function * (this :void, table :Table, finalKey :string,
 		inline || beInline(inlineTable, false);
 	}
 	else {
-		lineRest || iterator$0.throws(SyntaxError(`Inline Table is intended to appear on a single line` + iterator$0.where(', which broken at ')));
+		lineRest = lineRest.replace(regexps$0.SYM_WHITESPACE, '') || iterator$0.throws(SyntaxError(`Inline Table is intended to appear on a single line` + iterator$0.where(', which broken at ')));
 		if ( lineRest[0]!=='}' ) {
 			for ( ; ; ) {
 				lineRest[0]==='#' && iterator$0.throws(SyntaxError(`Inline Table is intended to appear on a single line` + iterator$0.where(', which broken at ')));

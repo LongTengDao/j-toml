@@ -19,12 +19,7 @@ import * as regexps$0 from './regexps$0';
 
 /* options */
 
-const THROW_WHILE_MEETING_MULTI = {
-	[Symbol.toPrimitive] () :never {
-		iterator$0.throws(Error(`TOML.parse(,,multilineStringJoiner) must be passed, while the source including multi-line string` + iterator$0.where(', which is found at ')));
-	}
-};
-export let useWhatToJoinMultilineString = '';
+export let useWhatToJoinMultilineString :string | null = null;
 export let usingBigInt :boolean | null = true;
 export let IntegerMin = 0;
 export let IntegerMax = 0;
@@ -120,18 +115,22 @@ const collect_on = (tag :string, array :null | Array, table :null | Table, key? 
 };
 const collect_off = () :never => { iterator$0.throws(SyntaxError(`xOptions.tag is not enabled, but found tag syntax` + iterator$0.where(' at '))); };
 export let collect :(tag :string, ...rest :[ null, Table, string ] | [ Array, null ] | [ Array<Table>, Table, string ]) => void = collect_off;
-export const process = () :void => {
+export type Process = ( (this :void) => void ) | null;
+export const Process = () :Process => {
 	if ( collection_length ) {
-		iterator$0.done();
+		let index = collection_length;
 		const process = processor!;
 		const queue = collection;
-		processor = null;
 		collection = [];
-		while ( collection_length-- ) {
-			process(queue[collection_length]!);
-			queue.length = collection_length;
-		}
+		return () :void => {
+			do {
+				process(queue[--index]!);
+				queue.length = index;
+			}
+			while ( index );
+		};
 	}
+	return null;
 };
 
 /* use & clear */
@@ -140,6 +139,7 @@ export const clear = () :void => {
 	processor = null;
 	collection.length = collection_length = 0;
 	zeroDatetime = false;
+	useWhatToJoinMultilineString = null;
 };
 
 export const use = (specificationVersion :unknown, multilineStringJoiner :unknown, useBigInt :unknown, xOptions :XOptions) :void => {
@@ -176,7 +176,7 @@ export const use = (specificationVersion :unknown, multilineStringJoiner :unknow
 	regexps$0.switchRegExp(specificationVersion);
 	
 	if ( typeof multilineStringJoiner==='string' ) { useWhatToJoinMultilineString = multilineStringJoiner; }
-	else if ( multilineStringJoiner===undefined ) { useWhatToJoinMultilineString = THROW_WHILE_MEETING_MULTI as never; }
+	else if ( multilineStringJoiner===undefined ) { useWhatToJoinMultilineString = null; }
 	else { throw TypeError('TOML.parse(,,multilineStringJoiner)'); }
 	
 	if ( useBigInt===undefined || useBigInt===true ) { usingBigInt = true; }

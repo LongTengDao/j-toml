@@ -22,42 +22,47 @@ const buf2str = (buf :Buffer) => {
 	return str && str[0]===BOM ? str.slice(1) : str;
 };
 
+let holding :boolean = false;
 const parse = (source :Source, specificationVersion :1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1, multilineStringJoiner :string, useBigInt? :boolean | number, xOptions? :options$0.XOptions) :Table => {
-	iterator$0.could();
-	let sourcePath :string;
-	if ( isBuffer(source) ) {
-		source = buf2str(source);
-		sourcePath = '';
-	}
-	else if ( typeof source==='object' && source ) {
-		sourcePath = source.path;
-		if ( typeof sourcePath!=='string' ) { throw TypeError('TOML.parse(source.path)'); }
-		const { data } = source;
-		if ( data===undefined ) { source = buf2str(readFileSync(sourcePath)); }
-		else if ( isBuffer(data) ) { source = buf2str(data); }
-		else if ( typeof data==='string' ) { source = data; }
-		else { throw TypeError('TOML.parse(source.data)'); }
-	}
-	else if ( typeof source==='string' ) { sourcePath = ''; }
-	else { throw TypeError('TOML.parse(source)'); }
+	if ( holding ) { throw Error('parse during parsing.'); }
+	holding = true;
+	let rootTable :Table;
+	let process :options$0.Process;
 	try {
-		if ( IS_NON_SCALAR(source) ) { throw Error('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any uncoupled UCS-4 character code.'); }
-		try {
-			options$0.use(specificationVersion, multilineStringJoiner, useBigInt, xOptions);
-			iterator$0.todo(source, sourcePath);
-			try {
-				const rootTable = Root();
-				options$0.process();
-				return rootTable;
-			}
-			finally {
-				//clearWeakSets();
-				iterator$0.done();
-			}
+		let sourcePath :string;
+		if ( isBuffer(source) ) {
+			source = buf2str(source);
+			sourcePath = '';
 		}
-		finally { options$0.clear(); }
+		else if ( typeof source==='object' && source ) {
+			sourcePath = source.path;
+			if ( typeof sourcePath!=='string' ) { throw TypeError('TOML.parse(source.path)'); }
+			const { data } = source;
+			if ( data===undefined ) { source = buf2str(readFileSync(sourcePath)); }
+			else if ( isBuffer(data) ) { source = buf2str(data); }
+			else if ( typeof data==='string' ) { source = data; }
+			else { throw TypeError('TOML.parse(source.data)'); }
+		}
+		else if ( typeof source==='string' ) { sourcePath = ''; }
+		else { throw TypeError('TOML.parse(source)'); }
+		try {
+			if ( IS_NON_SCALAR(source) ) { throw Error('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any uncoupled UCS-4 character code.'); }
+			try {
+				options$0.use(specificationVersion, multilineStringJoiner, useBigInt, xOptions);
+				iterator$0.todo(source, sourcePath);
+				try {
+					rootTable = Root();
+					process = options$0.Process();
+				}
+				finally { iterator$0.done(); }//clearWeakSets();
+			}
+			finally { options$0.clear(); }
+		}
+		finally { clearRegExp(); }
 	}
-	finally { clearRegExp(); }
+	finally { holding = false; }
+	process?.();
+	return rootTable;
 };
 
 export default /*#__PURE__*/assign(

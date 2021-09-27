@@ -15,10 +15,6 @@ export const throws = (error :Error) :never => {
 	throw error;
 };
 
-export const could = () :void => {
-	if ( sourceLines!==NONE ) { throw Error('Internal error: parsing during parsing.'); }
-};
-
 const EOL = /\r?\n/;
 export const todo = (source :string, path :string) :void => {
 	if ( typeof path!=='string' ) { throw TypeError('TOML.parse(,,,,sourcePath)'); }
@@ -32,17 +28,28 @@ export const next = () :string => sourceLines[++lineIndex]!;
 
 export const rest = () :boolean => lineIndex!==lastLineIndex;
 
-export const mark = (type :string) => ( { type, lineIndex } );
-
-export const must = (marker :{ type :string, lineIndex :number }) :string => {
-	lineIndex===lastLineIndex && throws(SyntaxError(`${marker.type} is not close until the end of the file` + where(', which started from ', marker.lineIndex)));
-	return sourceLines[++lineIndex]!;
+export class mark {
+	private readonly lineIndex = lineIndex;
+	private readonly type :'Static Array' | 'Inline Table' | 'Multi-line Literal String' | 'Multi-line Basic String';
+	private readonly restColumn :number;
+	constructor (type :'Static Array' | 'Inline Table' | 'Multi-line Literal String' | 'Multi-line Basic String', restColumn :number) {
+		this.type = type;
+		this.restColumn = restColumn;
+		return this;
+	}
+	must (this :mark) :string {
+		lineIndex===lastLineIndex && throws(SyntaxError(`${this.type} is not close until the end of the file` + where(', which started from ', this.lineIndex, sourceLines[this.lineIndex]!.length - this.restColumn + 1)));
+		return sourceLines[++lineIndex]!;
+	}
+	nowrap (this :mark) :never {
+		throws(Error(`TOML.parse(,,multilineStringJoiner) must be passed, while the source including multi-line string` + where(', which started from ', this.lineIndex, sourceLines[this.lineIndex]!.length - this.restColumn + 1)));
+	}
 };
 
-export const where = (pre :string, index :number = lineIndex) :string => sourceLines===NONE ? '' :
+export const where = (pre :string, rowIndex :number = lineIndex, columnNumber :number = 0) :string => sourceLines===NONE ? '' :
 	sourcePath
-		? `\n    at (${sourcePath}:${index + 1}:1)`
-		: `${pre}line ${index + 1}: ${sourceLines[index]}`;
+		? `\n    at (${sourcePath}:${rowIndex + 1}:${columnNumber})`
+		: `${pre}line ${rowIndex + 1}: ${sourceLines[rowIndex]}`;
 
 export const done = () :void => {
 	sourcePath = '';

@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 
-const version = '1.16.0';
+const version = '1.16.1';
 
 const Error$1 = Error;
 
@@ -270,10 +270,6 @@ const throws = (error       )        => {
 	throw error;
 };
 
-const could = ()       => {
-	if ( sourceLines!==NONE ) { throw Error$1('Internal error: parsing during parsing.'); }
-};
-
 const EOL = /\r?\n/;
 const todo = (source        , path        )       => {
 	if ( typeof path!=='string' ) { throw TypeError$1('TOML.parse(,,,,sourcePath)'); }
@@ -287,17 +283,27 @@ const next = ()         => sourceLines[++lineIndex] ;
 
 const rest = ()          => lineIndex!==lastLineIndex;
 
-const mark = (type        ) => ( { type, lineIndex } );
-
-const must = (marker                                     )         => {
-	lineIndex===lastLineIndex && throws(SyntaxError$1(`${marker.type} is not close until the end of the file` + where(', which started from ', marker.lineIndex)));
-	return sourceLines[++lineIndex] ;
-};
-
-const where = (pre        , index         = lineIndex)         => sourceLines===NONE ? '' :
+class mark {
+	                 lineIndex = lineIndex;
+	                 type                                                                                           ;
+	                 restColumn        ;
+	constructor (type                                                                                           , restColumn        ) {
+		this.type = type;
+		this.restColumn = restColumn;
+		return this;
+	}
+	must (          )         {
+		lineIndex===lastLineIndex && throws(SyntaxError$1(`${this.type} is not close until the end of the file` + where(', which started from ', this.lineIndex, sourceLines[this.lineIndex] .length - this.restColumn + 1)));
+		return sourceLines[++lineIndex] ;
+	}
+	nowrap (          )        {
+		throws(Error$1(`TOML.parse(,,multilineStringJoiner) must be passed, while the source including multi-line string` + where(', which started from ', this.lineIndex, sourceLines[this.lineIndex] .length - this.restColumn + 1)));
+	}
+}
+const where = (pre        , rowIndex         = lineIndex, columnNumber         = 0)         => sourceLines===NONE ? '' :
 	sourcePath
-		? `\n    at (${sourcePath}:${index + 1}:1)`
-		: `${pre}line ${index + 1}: ${sourceLines[index]}`;
+		? `\n    at (${sourcePath}:${rowIndex + 1}:${columnNumber})`
+		: `${pre}line ${rowIndex + 1}: ${sourceLines[rowIndex]}`;
 
 const done = ()       => {
 	sourcePath = '';
@@ -741,12 +747,7 @@ const switchRegExp = (specificationVersion        )       => {
 
 /* options */
 
-const THROW_WHILE_MEETING_MULTI = {
-	[Symbol.toPrimitive] ()        {
-		throws(Error$1(`TOML.parse(,,multilineStringJoiner) must be passed, while the source including multi-line string` + where(', which is found at ')));
-	}
-};
-let useWhatToJoinMultilineString = '';
+let useWhatToJoinMultilineString                = null;
 let usingBigInt                 = true;
 let IntegerMin = 0;
 let IntegerMax = 0;
@@ -842,18 +843,22 @@ const collect_on = (tag        , array              , table              , key  
 };
 const collect_off = ()        => { throws(SyntaxError$1(`xOptions.tag is not enabled, but found tag syntax` + where(' at '))); };
 let collect                                                                                                              = collect_off;
-const process = ()       => {
+                                                      
+const Process = ()          => {
 	if ( collection_length ) {
-		done();
+		let index = collection_length;
 		const process = processor ;
 		const queue = collection;
-		processor = null;
 		collection = [];
-		while ( collection_length-- ) {
-			process(queue[collection_length] );
-			queue.length = collection_length;
-		}
+		return ()       => {
+			do {
+				process(queue[--index] );
+				queue.length = index;
+			}
+			while ( index );
+		};
 	}
+	return null;
 };
 
 /* use & clear */
@@ -862,6 +867,7 @@ const clear = ()       => {
 	processor = null;
 	collection.length = collection_length = 0;
 	zeroDatetime = false;
+	useWhatToJoinMultilineString = null;
 };
 
 const use = (specificationVersion         , multilineStringJoiner         , useBigInt         , xOptions          )       => {
@@ -898,7 +904,7 @@ const use = (specificationVersion         , multilineStringJoiner         , useB
 	switchRegExp(specificationVersion);
 	
 	if ( typeof multilineStringJoiner==='string' ) { useWhatToJoinMultilineString = multilineStringJoiner; }
-	else if ( multilineStringJoiner===undefined$1 ) { useWhatToJoinMultilineString = THROW_WHILE_MEETING_MULTI         ; }
+	else if ( multilineStringJoiner===undefined$1 ) { useWhatToJoinMultilineString = null; }
 	else { throw TypeError$1('TOML.parse(,,multilineStringJoiner)'); }
 	
 	if ( useBigInt===undefined$1 || useBigInt===true ) { usingBigInt = true; }
@@ -1382,19 +1388,25 @@ const BasicString = (literal        )         => {
 	return parts.join('');
 };
 
-const MultilineBasicString = (literal        , skipped       )         => {
+const MultilineBasicString = (literal        , useWhatToJoinMultilineString        , n        )         => {
 	if ( !literal ) { return ''; }
 	const parts = literal.match(ESCAPED_IN_MULTI_LINE) ;
 	const { length } = parts;
 	let index = 0;
 	do {
 		const part = parts[index] ;
-		if ( part==='\n' ) { parts[index] = useWhatToJoinMultilineString; }
+		if ( part==='\n' ) {
+			++n;
+			parts[index] = useWhatToJoinMultilineString;
+		}
 		else if ( part[0]==='\\' ) {
 			switch ( part[1] ) {
 				case '\n':
 				case ' ':
-				case '\t': parts[index] = ''; break;
+				case '\t':
+					for ( let i = 0; i = part.indexOf('\n', i) + 1; ) { ++n; }
+					parts[index] = '';
+					break;
 				case '\\': parts[index] = '\\'; break;
 				case '"': parts[index] = '"'; break;
 				case 'b': parts[index] = '\b'; break;
@@ -1405,13 +1417,13 @@ const MultilineBasicString = (literal        , skipped       )         => {
 				case 'u':
 					const charCode         = parseInt$1(part.slice(2), 16);
 					0xD7FF<charCode && charCode<0xE000
-					&& throws(RangeError$1(`Invalid Unicode Scalar ${part}` + where(' at ', lineIndex + index + skipped)));
+					&& throws(RangeError$1(`Invalid Unicode Scalar ${part}` + where(' at ', lineIndex + n)));
 					parts[index] = fromCharCode(charCode);
 					break;
 				case 'U':
 					const codePoint         = parseInt$1(part.slice(2), 16);
 					( 0xD7FF<codePoint && codePoint<0xE000 || 0x10FFFF<codePoint )
-					&& throws(RangeError$1(`Invalid Unicode Scalar ${part}` + where(' at ', lineIndex + index + skipped)));
+					&& throws(RangeError$1(`Invalid Unicode Scalar ${part}` + where(' at ', lineIndex + n)));
 					parts[index] = fromCodePoint(codePoint);
 					break;
 				case '/': parts[index] = '/'; break;
@@ -1500,10 +1512,10 @@ const prepareTable = (table       , keys               )        => {
 		if ( key in table ) {
 			table = table[key];
 			if ( isTable(table) ) {
-				isInline(table) && throws(Error$1(`Trying to define Table under static Inline Table` + where(' at ')));
+				isInline(table) && throws(Error$1(`Trying to define Table under Inline Table` + where(' at ')));
 			}
 			else if ( isArray(table) ) {
-				isStatic(table) && throws(Error$1(`Trying to append value to static Inline Array` + where(' at ')));
+				isStatic(table) && throws(Error$1(`Trying to append value to Static Array` + where(' at ')));
 				table = table[( table          ).length - 1];
 			}
 			else { throws(Error$1(`Trying to define Table under non-Table value` + where(' at '))); }
@@ -1575,16 +1587,25 @@ const assignLiteralString = ( (table       , finalKey        , literal        ) 
 		table[finalKey] = checkLiteralString($[1]) + $[2];
 		return $[3];
 	}
-	const lines           = literal ? [ checkLiteralString(literal) ] : [];
-	for ( const start = mark('Literal String'); ; ) {
-		const line         = must(start);
+	const start = new mark('Multi-line Literal String', literal.length + 3);
+	if ( !literal ) {
+		literal = start.must();
+		const $ = __MULTI_LINE_LITERAL_STRING_exec(literal);
+		if ( $ ) {
+			table[finalKey] = checkLiteralString($[1]) + $[2];
+			return $[3];
+		}
+	}
+	useWhatToJoinMultilineString ?? start.nowrap();
+	for ( const lines                          = [ checkLiteralString(literal) ]; ; ) {
+		const line         = start.must();
 		const $ = __MULTI_LINE_LITERAL_STRING_exec(line);
 		if ( $ ) {
 			lines[lines.length] = checkLiteralString($[1]) + $[2];
-			table[finalKey] = lines.join(useWhatToJoinMultilineString);
+			table[finalKey] = lines.join(useWhatToJoinMultilineString );
 			return $[3];
 		}
-		lines[lines.length] = line;
+		lines[lines.length] = checkLiteralString(line);
 	}
 } )     
 	                                                                       
@@ -1606,17 +1627,29 @@ const assignBasicString = ( (table       , finalKey        , literal        )   
 		table[finalKey] = BasicString($) + ( endsWithQuote ? literal[length]==='"' ? literal[++length]==='"' ? ( ++length, '""' ) : '"' : '' : '' );
 		return literal.slice(length).replace(PRE_WHITESPACE, '');
 	}
-	const skipped        = literal ? 1 : 0;
-	if ( skipped ) { ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(literal += '\n') || throws(SyntaxError$1(`Bad multi-line basic string` + where(' at '))); }
-	const lines           = skipped ? [ literal ] : [];
-	for ( const start = mark('Basic String'); ; ) {
-		let line         = must(start);
+	const start = new mark('Multi-line Basic String', literal.length + 3);
+	const skipped        = literal ? 0 : 1;
+	if ( skipped ) {
+		literal = start.must();
+		const $ = MULTI_LINE_BASIC_STRING_exec_0(literal);
+		let { length } = $;
+		if ( literal.startsWith('"""', length) ) {
+			ESCAPED_EXCLUDE_CONTROL_CHARACTER_test($) || throws(SyntaxError$1(`Bad multi-line basic string` + where(' at ')));
+			length += 3;
+			table[finalKey] = MultilineBasicString($, useWhatToJoinMultilineString , skipped) + ( endsWithQuote ? literal[length]==='"' ? literal[++length]==='"' ? ( ++length, '""' ) : '"' : '' : '' );
+			return literal.slice(length).replace(PRE_WHITESPACE, '');
+		}
+	}
+	useWhatToJoinMultilineString ?? start.nowrap();
+	ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(literal += '\n') || throws(SyntaxError$1(`Bad multi-line basic string` + where(' at ')));
+	for ( const lines                          = [ literal ]; ; ) {
+		let line         = start.must();
 		const $ = MULTI_LINE_BASIC_STRING_exec_0(line);
 		let { length } = $;
 		if ( line.startsWith('"""', length) ) {
 			ESCAPED_EXCLUDE_CONTROL_CHARACTER_test($) || throws(SyntaxError$1(`Bad multi-line basic string` + where(' at ')));
 			length += 3;
-			table[finalKey] = MultilineBasicString(lines.join('') + $, skipped) + ( endsWithQuote ? line[length]==='"' ? line[++length]==='"' ? ( ++length, '""' ) : '"' : '' : '' );
+			table[finalKey] = MultilineBasicString(lines.join('') + $, useWhatToJoinMultilineString , skipped) + ( endsWithQuote ? line[length]==='"' ? line[++length]==='"' ? ( ++length, '""' ) : '"' : '' : '' );
 			return line.slice(length).replace(PRE_WHITESPACE, '');
 		}
 		ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(line += '\n') || throws(SyntaxError$1(`Bad multi-line basic string` + where(' at ')));
@@ -1747,12 +1780,12 @@ const push = (lastArray       , lineRest        )             => {
 
 const equalStaticArray = function * (            table       , finalKey        , lineRest        )    {
 	const staticArray        = table[finalKey] = newArray(STATICALLY);
-	const start = mark('Inline Array');
+	const start = new mark('Static Array', lineRest.length);
 	lineRest = lineRest.replace(SYM_WHITESPACE, '');
 	let inline = true;
 	while ( !lineRest || lineRest[0]==='#' ) {
 		inline = false;
-		lineRest = must(start).replace(PRE_WHITESPACE, '');
+		lineRest = start.must().replace(PRE_WHITESPACE, '');
 	}
 	if ( lineRest[0]===']' ) {
 		inline && beInline(staticArray, true);
@@ -1763,13 +1796,13 @@ const equalStaticArray = function * (            table       , finalKey        ,
 		lineRest = typeof rest==='string' ? rest : yield rest;
 		while ( !lineRest || lineRest[0]==='#' ) {
 			inline = false;
-			lineRest = must(start).replace(PRE_WHITESPACE, '');
+			lineRest = start.must().replace(PRE_WHITESPACE, '');
 		}
 		if ( lineRest[0]===',' ) {
 			lineRest = lineRest.replace(SYM_WHITESPACE, '');
 			while ( !lineRest || lineRest[0]==='#' ) {
 				inline = false;
-				lineRest = must(start).replace(PRE_WHITESPACE, '');
+				lineRest = start.must().replace(PRE_WHITESPACE, '');
 			}
 			if ( lineRest[0]===']' ) { break; }
 		}
@@ -1787,14 +1820,14 @@ const equalStaticArray = function * (            table       , finalKey        ,
 
 const equalInlineTable = function * (            table       , finalKey        , lineRest        )    {
 	const inlineTable        = table[finalKey] = new Table(DIRECTLY, INLINE);
-	lineRest = lineRest.replace(SYM_WHITESPACE, '');
 	if ( allowInlineTableMultilineAndTrailingCommaEvenNoComma ) {
-		const start = mark('Inline Table');
+		const start = new mark('Inline Table', lineRest.length);
+		lineRest = lineRest.replace(SYM_WHITESPACE, '');
 		let inline = true;
 		for ( ; ; ) {
 			while ( !lineRest || lineRest[0]==='#' ) {
 				inline = false;
-				lineRest = must(start).replace(PRE_WHITESPACE, '');
+				lineRest = start.must().replace(PRE_WHITESPACE, '');
 			}
 			if ( lineRest[0]==='}' ) { break; }
 			const forComment             = ForComment(inlineTable, lineRest);
@@ -1804,13 +1837,13 @@ const equalInlineTable = function * (            table       , finalKey        ,
 				if ( lineRest[0]==='#' ) {
 					if ( preserveComment ) { forComment.table[commentFor(forComment.finalKey)] = lineRest.slice(1); }
 					inline = false;
-					do { lineRest = must(start).replace(PRE_WHITESPACE, ''); }
+					do { lineRest = start.must().replace(PRE_WHITESPACE, ''); }
 					while ( !lineRest || lineRest[0]==='#' );
 				}
 			}
 			else {
 				inline = false;
-				do { lineRest = must(start).replace(PRE_WHITESPACE, ''); }
+				do { lineRest = start.must().replace(PRE_WHITESPACE, ''); }
 				while ( !lineRest || lineRest[0]==='#' );
 			}
 			if ( lineRest[0]===',' ) { lineRest = lineRest.replace(SYM_WHITESPACE, ''); }
@@ -1818,7 +1851,7 @@ const equalInlineTable = function * (            table       , finalKey        ,
 		inline || beInline(inlineTable, false);
 	}
 	else {
-		lineRest || throws(SyntaxError$1(`Inline Table is intended to appear on a single line` + where(', which broken at ')));
+		lineRest = lineRest.replace(SYM_WHITESPACE, '') || throws(SyntaxError$1(`Inline Table is intended to appear on a single line` + where(', which broken at ')));
 		if ( lineRest[0]!=='}' ) {
 			for ( ; ; ) {
 				lineRest[0]==='#' && throws(SyntaxError$1(`Inline Table is intended to appear on a single line` + where(', which broken at ')));
@@ -1951,42 +1984,47 @@ const buf2str = (buf        ) => {
 	return str && str[0]===BOM ? str.slice(1) : str;
 };
 
+let holding          = false;
 const parse = (source        , specificationVersion                                   , multilineStringJoiner        , useBigInt                   , xOptions                     )        => {
-	could();
-	let sourcePath        ;
-	if ( isBuffer(source) ) {
-		source = buf2str(source);
-		sourcePath = '';
-	}
-	else if ( typeof source==='object' && source ) {
-		sourcePath = source.path;
-		if ( typeof sourcePath!=='string' ) { throw TypeError$1('TOML.parse(source.path)'); }
-		const { data } = source;
-		if ( data===undefined$1 ) { source = buf2str(fs.readFileSync(sourcePath)); }
-		else if ( isBuffer(data) ) { source = buf2str(data); }
-		else if ( typeof data==='string' ) { source = data; }
-		else { throw TypeError$1('TOML.parse(source.data)'); }
-	}
-	else if ( typeof source==='string' ) { sourcePath = ''; }
-	else { throw TypeError$1('TOML.parse(source)'); }
+	if ( holding ) { throw Error$1('parse during parsing.'); }
+	holding = true;
+	let rootTable       ;
+	let process                   ;
 	try {
-		if ( IS_NON_SCALAR(source) ) { throw Error$1('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any uncoupled UCS-4 character code.'); }
-		try {
-			use(specificationVersion, multilineStringJoiner, useBigInt, xOptions);
-			todo(source, sourcePath);
-			try {
-				const rootTable = Root();
-				process();
-				return rootTable;
-			}
-			finally {
-				//clearWeakSets();
-				done();
-			}
+		let sourcePath        ;
+		if ( isBuffer(source) ) {
+			source = buf2str(source);
+			sourcePath = '';
 		}
-		finally { clear(); }
+		else if ( typeof source==='object' && source ) {
+			sourcePath = source.path;
+			if ( typeof sourcePath!=='string' ) { throw TypeError$1('TOML.parse(source.path)'); }
+			const { data } = source;
+			if ( data===undefined$1 ) { source = buf2str(fs.readFileSync(sourcePath)); }
+			else if ( isBuffer(data) ) { source = buf2str(data); }
+			else if ( typeof data==='string' ) { source = data; }
+			else { throw TypeError$1('TOML.parse(source.data)'); }
+		}
+		else if ( typeof source==='string' ) { sourcePath = ''; }
+		else { throw TypeError$1('TOML.parse(source)'); }
+		try {
+			if ( IS_NON_SCALAR(source) ) { throw Error$1('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any uncoupled UCS-4 character code.'); }
+			try {
+				use(specificationVersion, multilineStringJoiner, useBigInt, xOptions);
+				todo(source, sourcePath);
+				try {
+					rootTable = Root();
+					process = Process();
+				}
+				finally { done(); }//clearWeakSets();
+			}
+			finally { clear(); }
+		}
+		finally { clearRegExp(); }
 	}
-	finally { clearRegExp(); }
+	finally { holding = false; }
+	process?.();
+	return rootTable;
 };
 
 const parse$1 = /*#__PURE__*/assign$1(
