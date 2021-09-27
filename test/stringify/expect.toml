@@ -1,0 +1,38 @@
+
+c = true # comment
+e = 0b0000_0000
+s = ''
+b = "\b"
+d.d = 0
+d.o = 0
+d.t.e = 1
+d.t.d = 1
+i = { }
+as = [ ]
+am = [
+]
+m1 = '''
+1'''
+m0 = '''
+'''
+m = '''
+'''
+_sub.k = 'v'
+
+[_sub.section]
+
+[sub]
+
+k = 'v'
+
+[sub.section]
+
+[[arrayOfTables]]
+
+'' = 1.0
+
+[[arrayOfTables]]
+
+[[arrayOfTables]]
+
+[arrayOfTables.sub]

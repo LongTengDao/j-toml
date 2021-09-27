@@ -1,7 +1,7 @@
 {
 	"name": "@ltd/j-toml",
 	"description": "An implementation of TOML written by LongTengDao. Belong to \"Plan J\".／龙腾道为汤小明语写的实现。从属于“简计划”。",
-	"version": "1.15.0",
+	"version": "1.16.0",
 	"license": "LGPL-3.0",
 	"author": "龙腾道 <LongTengDao@LongTengDao.com> (www.LongTengDao.com)",
 	"bugs": "https://GitHub.com/LongTengDao/j-toml/issues",
@@ -10,7 +10,15 @@
 		"url": "https://GitHub.com/LongTengDao/j-toml.git"
 	},
 	"keywords": [
-		"TOML"
+		"parse",
+		"stringify",
+		"TOML",
+		"1.0.0",
+		"0.5.0",
+		"0.4.0",
+		"0.3.0",
+		"0.2.0",
+		"0.1.0"
 	],
 	"exports": {
 		"import": "./index.mjs",

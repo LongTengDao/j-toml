@@ -8,14 +8,15 @@ import { newRegExp, theRegExp } from '@ltd/j-regexp';
 import * as iterator$0 from '../iterator$0';
 import * as options$0 from '../options$0';
 
-export const INTEGER_D = /[-+]?(?:0|[1-9]\d*(?:_\d+)*)/;
+export const INTEGER_D = /[-+]?(?:0|[1-9][_\d]*)/;
+export const BAD_D = /*#__PURE__*/( () => newRegExp`_(?!\d)`.test )();
 const IS_D_INTEGER = /*#__PURE__*/( () => newRegExp`^${INTEGER_D}$`.test )();
-const IS_XOB_INTEGER = /*#__PURE__*/( () => theRegExp(/^0(?:x[0-9A-Fa-f]+(?:_[0-9A-Fa-f]+)*|o[0-7]+(?:_[0-7]+)*|b[01]+(?:_[01]+)*)$/).test )();
+const IS_XOB_INTEGER = /*#__PURE__*/( () => theRegExp(/^0(?:x[\dA-Fa-f][_\dA-Fa-f]*|o[0-7][_0-7]*|b[01][_01]*)$/).test )();
+const BAD_XOB = /*#__PURE__*/( () => newRegExp`_(?![\dA-Fa-f])`.test )();
 const UNDERSCORES_SIGN = /_|^[-+]/g;
 
 const BigIntInteger = (literal :string) :bigint => {
-	IS_D_INTEGER(literal)
-	|| /*options\$0.xob && */IS_XOB_INTEGER(literal)
+	( IS_D_INTEGER(literal) || /*options\$0.xob && */IS_XOB_INTEGER(literal) ) && !BAD_XOB(literal)
 	|| iterator$0.throws(SyntaxError(`Invalid Integer ${literal}` + iterator$0.where(' at ')));
 	let bigInt :bigint = BigInt(literal.replace(UNDERSCORES_SIGN, ''));
 	if ( literal[0]==='-' ) { bigInt = -bigInt; }
@@ -26,8 +27,7 @@ const BigIntInteger = (literal :string) :bigint => {
 };
 
 const NumberInteger = (literal :string) :number => {
-	IS_D_INTEGER(literal)
-	|| /*options\$0.xob && */IS_XOB_INTEGER(literal)
+	( IS_D_INTEGER(literal) || /*options\$0.xob && */IS_XOB_INTEGER(literal) ) && !BAD_XOB(literal)
 	|| iterator$0.throws(SyntaxError(`Invalid Integer ${literal}` + iterator$0.where(' at ')));
 	const number = literal[0]==='-'
 		? -literal.replace(UNDERSCORES_SIGN, '')

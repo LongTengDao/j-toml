@@ -78,114 +78,79 @@ const TAG_REST_exec = /*#__PURE__*/( () => newRegExp.s<1 | 2>`
 
 /* optimized (avoid overflow or lost) */
 
-const MULTI_LINE_BASIC_STRING_exec = /*#__PURE__*/( () => theRegExp(/^(?:[^\\"]+|\\.|""?(?!"))/s).exec )();
+const MULTI_LINE_BASIC_STRING = /(?<=^(?:[^\\"]+|\\.|""?(?!")))/s;/// .?
 export const MULTI_LINE_BASIC_STRING_exec_0 = (_ :string) :string => {
-	let _0 :string = '';
-	while ( _ ) {
-		const $ = MULTI_LINE_BASIC_STRING_exec(_);
-		if ( !$ ) { break; }
-		_0 += $[0];
-		_ = _.slice($[0].length);
+	let count :number = 0;
+	for ( let offset :number = _.search(MULTI_LINE_BASIC_STRING); offset>0; ) {
+		offset = _.slice(count += offset).search(MULTI_LINE_BASIC_STRING);
 	}
-	return _0;
+	return _.slice(0, count);
 };
 
-const ESCAPED_EXCLUDE_CONTROL_CHARACTER_TAB______ = /[^\\\x00-\x08\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|[ \t]*\n[ \t\n]*|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
-const ESCAPED_EXCLUDE_CONTROL_CHARACTER__________ = /[^\\\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]| *\n[ \n]*|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
-const ESCAPED_EXCLUDE_CONTROL_CHARACTER_DEL______ = /[^\\\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\]| *\n[ \n]*|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
-const ESCAPED_EXCLUDE_CONTROL_CHARACTER_DEL_SLASH = /[^\\\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\/]| *\n[ \n]*|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/g;
+const ESCAPED_EXCLUDE_CONTROL_CHARACTER_TAB______ = /[^\\\x00-\x08\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|[\t ]*\n[\t\n ]*|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})/g;
+const ESCAPED_EXCLUDE_CONTROL_CHARACTER__________ = /[^\\\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]| *\n[\n ]*|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})/g;
+const ESCAPED_EXCLUDE_CONTROL_CHARACTER_DEL______ = /[^\\\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\]|\n[\n ]*|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})/g;
+const ESCAPED_EXCLUDE_CONTROL_CHARACTER_DEL_SLASH = /[^\\\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\/]|\n[\n ]*|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})/g;
 let __ESCAPED_EXCLUDE_CONTROL_CHARACTER :RegExp;
-export const ESCAPED_EXCLUDE_CONTROL_CHARACTER_test = (_ :string) :boolean => !_.replace(__ESCAPED_EXCLUDE_CONTROL_CHARACTER, '');
+export const ESCAPED_EXCLUDE_CONTROL_CHARACTER_test = (_ :string) :boolean => !_.replace(__ESCAPED_EXCLUDE_CONTROL_CHARACTER, '');///
 
-const BASIC_STRING_TAB______ = /*#__PURE__*/( () => theRegExp(/^(?:[^\\"\x00-\x08\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/).exec )();
-const BASIC_STRING__________ = /*#__PURE__*/( () => theRegExp(/^(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/).exec )();
-const BASIC_STRING_DEL______ = /*#__PURE__*/( () => theRegExp(/^(?:[^\\"\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/).exec )();
-const BASIC_STRING_DEL_SLASH = /*#__PURE__*/( () => theRegExp(/^(?:[^\\"\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\/]|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))/).exec )();
-let __BASIC_STRING_exec :typeof BASIC_STRING_DEL_SLASH;
-export const BASIC_STRING_exec = (_2 :string) :{ 1 :string, 2 :string } => {
-	_2 = _2.slice(1);
-	for ( let _1 :string = ''; ; ) {
-		const $ = __BASIC_STRING_exec(_2);
-		if ( !$ ) {
-			_2[0]==='"' || iterator$0.throws(SyntaxError(`Bad basic string` + iterator$0.where(' at ')));
-			return { 1: _1, 2: _2.replace(SYM_WHITESPACE, '') };
-		}
-		_1 += $[0];
-		_2 = _2.slice($[0].length);
+const BASIC_STRING_TAB______ = /(?<=^(?:[^\\"\x00-\x08\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})))/;
+const BASIC_STRING__________ = /(?<=^(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})))/;
+const BASIC_STRING_DEL______ = /(?<=^(?:[^\\"\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\]|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})))/;
+const BASIC_STRING_DEL_SLASH = /(?<=^(?:[^\\"\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\/]|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})))/;
+let __BASIC_STRING :typeof BASIC_STRING_DEL_SLASH;
+export const BASIC_STRING_exec_1 = (line :string) :string => {
+	let count :number = 1;
+	for ( let offset :number = line.slice(1).search(__BASIC_STRING); offset>0; ) {
+		offset = line.slice(count += offset).search(__BASIC_STRING);
 	}
+	count!==line.length && line[count]==='"' || iterator$0.throws(SyntaxError(`Bad basic string` + iterator$0.where(' at ')));
+	return line.slice(1, count);
 };
 
-const DOT_KEY_exec = /*#__PURE__*/( () => theRegExp(/^[ \t]*\.[ \t]*/).exec )();
+export
+const IS_DOT_KEY = /*#__PURE__*/( () => theRegExp(/^[ \t]*\./).test )();
+export
+const DOT_KEY = /^[ \t]*\.[ \t]*/;
 const BARE_KEY_STRICT = /*#__PURE__*/( () => theRegExp(/^[\w-]+/).exec )();
 const BARE_KEY_FREE = /*#__PURE__*/( () => theRegExp(/^[^ \t#=[\]'".]+(?:[ \t]+[^ \t#=[\]'".]+)*/).exec )();
+export
 let __BARE_KEY_exec :typeof BARE_KEY_FREE;
 const LITERAL_KEY____ = /*#__PURE__*/( () => theRegExp(/^'[^'\x00-\x08\x0B-\x1F\x7F]*'/).exec )();
 const LITERAL_KEY_DEL = /*#__PURE__*/( () => theRegExp(/^'[^'\x00-\x08\x0B-\x1F]*'/).exec )();
+export
 let __LITERAL_KEY_exec :typeof LITERAL_KEY_DEL;
 let supportArrayOfTables :boolean;
 
-const getKeys = (_ :string) :string => {
-	let keys :string = '';
-	for ( ; ; ) {
-		if ( _[0]==='"' ) {
-			_ = _.slice(1);
-			let key :string = '"';
-			let $ :{ 0 :string } | null;
-			while ( ( $ = __BASIC_STRING_exec(_) ) ) {
-				_ = _.slice($[0].length);
-				key += $[0];
-			}
-			_[0]==='"' || iterator$0.throws(SyntaxError(`Bad basic string key` + iterator$0.where(' at ')));
-			_ = _.slice(1);
-			keys += key + '"';
-		}
-		else {
-			const key :string = ( ( _.startsWith('\'') ? __LITERAL_KEY_exec : __BARE_KEY_exec )(_) ?? iterator$0.throws(SyntaxError(`Bad ${_.startsWith('\'') ? 'literal string' : 'bare'} key` + iterator$0.where(' at '))) )[0];
-			_ = _.slice(key.length);
-			keys += key;
-		}
-		const $ = DOT_KEY_exec(_);
-		if ( !$ ) { return keys; }
-		_ = _.slice($[0].length);
-		keys += $[0];
-	}
-};
-
-export const TABLE_DEFINITION_exec_groups = (_ :string) :{ $_asArrayItem$$ :boolean, keys :string, $$asArrayItem$_ :boolean, tag :string } => {
-	const $_asArrayItem$$ :boolean = _[1]==='[';
-	if ( $_asArrayItem$$ ) {
+export const TABLE_DEFINITION_exec_groups = (lineRest :string, parseKeys :(lineRest :string) => { leadingKeys :string[], finalKey :string, lineRest :string }) :{ leadingKeys :string[], finalKey :string, asArrayItem :boolean, tag :string, lineRest :string } => {
+	const asArrayItem :boolean = lineRest[1]==='[';
+	if ( asArrayItem ) {
 		supportArrayOfTables || iterator$0.throws(SyntaxError(`Array of Tables is not allowed before TOML v0.2` + iterator$0.where(', which at ')));
-		_ = _.slice(2);
+		lineRest = lineRest.slice(2);
 	}
-	else { _ = _.slice(1); }
-	_ = _.replace(PRE_WHITESPACE, '');
-	const keys :string = getKeys(_);
-	_ = _.slice(keys.length).replace(PRE_WHITESPACE, '');
-	_[0]===']' || iterator$0.throws(SyntaxError(`Table header is not closed` + iterator$0.where(', which is found at ')));
-	const $$asArrayItem$_ :boolean = _[1]===']';
-	_ = _.slice($$asArrayItem$_ ? 2 : 1).replace(PRE_WHITESPACE, '');
+	else { lineRest = lineRest.slice(1); }
+	lineRest = lineRest.replace(PRE_WHITESPACE, '');
+	const { leadingKeys, finalKey } = { lineRest } = parseKeys(lineRest);
+	lineRest = lineRest.replace(PRE_WHITESPACE, '');
+	lineRest && lineRest[0]===']' || iterator$0.throws(SyntaxError(`Table header is not closed` + iterator$0.where(', which is found at ')));
+	( lineRest.length>1 ? lineRest[1]===']'===asArrayItem : !asArrayItem ) || iterator$0.throws(SyntaxError(`Square brackets of Table definition statement not match` + iterator$0.where(' at ')));
+	lineRest = lineRest.slice(asArrayItem ? 2 : 1).replace(PRE_WHITESPACE, '');
 	let tag :string;
-	if ( _[0]==='<' ) { ( { 1: tag, 2: _ } = TAG_REST_exec(_) ?? iterator$0.throws(SyntaxError(`Bad tag` + iterator$0.where(' at '))) ); }
+	if ( lineRest && lineRest[0]==='<' ) { ( { 1: tag, 2: lineRest } = TAG_REST_exec(lineRest) ?? iterator$0.throws(SyntaxError(`Bad tag` + iterator$0.where(' at '))) ); }
 	else { tag = ''; }
-	!_ || _[0]==='#' || iterator$0.throws(SyntaxError(`Unexpect charachtor after table header` + iterator$0.where(' at ')));
-	return { $_asArrayItem$$, keys, $$asArrayItem$_, tag };
+	return { leadingKeys, finalKey, asArrayItem, tag, lineRest };
 };
 
-export const KEY_VALUE_PAIR_exec_groups = (_ :string) :{ left :string, tag :string, right :string } => {
-	const left :string = getKeys(_);
-	const { 1: tag = '', 2: right } = KEY_VALUE_PAIR_exec(_.slice(left.length)) ?? iterator$0.throws(SyntaxError(`Keys must equal something` + iterator$0.where(', but missing at ')));
-	tag || right && right[0]!=='#' || iterator$0.throws(SyntaxError(`Value can not be missing after euqal sign` + iterator$0.where(', which is found at ')));
-	return { left, tag, right };
+export const KEY_VALUE_PAIR_exec_groups = ({ leadingKeys, finalKey, lineRest } :{ leadingKeys :string[], finalKey :string, lineRest :string }) :{ leadingKeys :string[], finalKey :string, tag :string, lineRest :string } => {
+	const { 1: tag = '' } = { 2: lineRest } = KEY_VALUE_PAIR_exec(lineRest) ?? iterator$0.throws(SyntaxError(`Keys must equal something` + iterator$0.where(', but missing at ')));
+	tag || lineRest && lineRest[0]!=='#' || iterator$0.throws(SyntaxError(`Value can not be missing after euqal sign` + iterator$0.where(', which is found at ')));
+	return { leadingKeys, finalKey, tag, lineRest };
 };
 
 const CONTROL_CHARACTER_EXCLUDE_TAB____ = /*#__PURE__*/( () => theRegExp(/[\x00-\x08\x0B-\x1F\x7F]/).test )();
 const CONTROL_CHARACTER_EXCLUDE_TAB_DEL = /*#__PURE__*/( () => theRegExp(/[\x00-\x08\x0B-\x1F]/).test )();
 export
 let __CONTROL_CHARACTER_EXCLUDE_test :(this :void, string :string) => boolean;
-const KEYS_STRICT = /[\w-]+|"(?:[^\\"]+|\\.)*"|'[^']*'/gs;
-const KEYS_FREE = /[^ \t#=[\]'".]+(?:[ \t]+[^ \t#=[\]'".]+)*|"(?:[^\\"]+|\\.)*"|'[^']*'/gs;
-export
-let __KEYS :RegExp;
 
 export const switchRegExp = (specificationVersion :number) :void => {
 	switch ( specificationVersion ) {
@@ -194,9 +159,8 @@ export const switchRegExp = (specificationVersion :number) :void => {
 			__LITERAL_KEY_exec = LITERAL_KEY____;
 			__CONTROL_CHARACTER_EXCLUDE_test = CONTROL_CHARACTER_EXCLUDE_TAB____;
 			__ESCAPED_EXCLUDE_CONTROL_CHARACTER = ESCAPED_EXCLUDE_CONTROL_CHARACTER_TAB______;
-			__BASIC_STRING_exec = BASIC_STRING_TAB______;
+			__BASIC_STRING = BASIC_STRING_TAB______;
 			__BARE_KEY_exec = BARE_KEY_STRICT;
-			__KEYS = KEYS_STRICT;
 			supportArrayOfTables = true;
 			break;
 		case 0.5:
@@ -204,9 +168,8 @@ export const switchRegExp = (specificationVersion :number) :void => {
 			__LITERAL_KEY_exec = LITERAL_KEY____;
 			__CONTROL_CHARACTER_EXCLUDE_test = CONTROL_CHARACTER_EXCLUDE_TAB____;
 			__ESCAPED_EXCLUDE_CONTROL_CHARACTER = ESCAPED_EXCLUDE_CONTROL_CHARACTER__________;
-			__BASIC_STRING_exec = BASIC_STRING__________;
+			__BASIC_STRING = BASIC_STRING__________;
 			__BARE_KEY_exec = BARE_KEY_STRICT;
-			__KEYS = KEYS_STRICT;
 			supportArrayOfTables = true;
 			break;
 		case 0.4:
@@ -214,9 +177,8 @@ export const switchRegExp = (specificationVersion :number) :void => {
 			__LITERAL_KEY_exec = LITERAL_KEY_DEL;
 			__CONTROL_CHARACTER_EXCLUDE_test = CONTROL_CHARACTER_EXCLUDE_TAB_DEL;
 			__ESCAPED_EXCLUDE_CONTROL_CHARACTER = ESCAPED_EXCLUDE_CONTROL_CHARACTER_DEL______;
-			__BASIC_STRING_exec = BASIC_STRING_DEL______;
+			__BASIC_STRING = BASIC_STRING_DEL______;
 			__BARE_KEY_exec = BARE_KEY_STRICT;
-			__KEYS = KEYS_STRICT;
 			supportArrayOfTables = true;
 			break;
 		default:
@@ -224,9 +186,8 @@ export const switchRegExp = (specificationVersion :number) :void => {
 			__LITERAL_KEY_exec = LITERAL_KEY_DEL;
 			__CONTROL_CHARACTER_EXCLUDE_test = CONTROL_CHARACTER_EXCLUDE_TAB_DEL;
 			__ESCAPED_EXCLUDE_CONTROL_CHARACTER = ESCAPED_EXCLUDE_CONTROL_CHARACTER_DEL_SLASH;
-			__BASIC_STRING_exec = BASIC_STRING_DEL_SLASH;
+			__BASIC_STRING = BASIC_STRING_DEL_SLASH;
 			__BARE_KEY_exec = BARE_KEY_FREE;
-			__KEYS = KEYS_FREE;
 			supportArrayOfTables = false;
 	}
 };

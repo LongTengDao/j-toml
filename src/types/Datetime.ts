@@ -13,7 +13,12 @@ import { newRegExp, theRegExp } from '@ltd/j-regexp';
 import * as options$0 from '../options$0';
 import * as iterator$0 from '../iterator$0';
 
-const _29_ = /(?:0[1-9]|1\d|2[0-9])/;
+const fpc = <T extends Function> (c :T) :T => {
+	freeze(freeze(c).prototype);
+	return c;
+};
+
+const _29_ = /(?:0[1-9]|1\d|2\d)/;
 const _30_ = /(?:0[1-9]|[12]\d|30)/;
 const _31_ = /(?:0[1-9]|[12]\d|3[01])/;
 const _23_ = /(?:[01]\d|2[0-3])/;
@@ -37,11 +42,12 @@ const YMD = /*#__PURE__*/( () => newRegExp`
 			|
 			1-${_30_}
 		)
-	)` )();
+	)
+` )();
 
 const HMS = /*#__PURE__*/( () => newRegExp`
 	${_23_}:${_59_}:${_59_}
-	` )();
+` )();
 
 export const OFFSET$ = /(?:Z|[+-]\d\d:\d\d)$/;
 
@@ -51,8 +57,8 @@ const OFFSET_DATETIME_exec = /*#__PURE__*/( () => newRegExp<1>`
 	^
 	${YMD}
 	[T ]
-	${HMS}(?:\.\d{1,3})?
-	(\d*?)0*
+	${HMS}
+	(?:\.\d{1,3}(\d*?)0*)?
 	(?:Z|[+-]${_23_}:${_59_})
 	$`.exec )();
 
@@ -140,12 +146,12 @@ const OffsetDateTime_set = (that :InstanceType<typeof OffsetDateTime>, start :nu
 	that[OffsetDateTime_value] = ( '' + time ).padStart(15, '0') + that[OffsetDateTime_value].slice(15);
 	return time;
 };
-export const OffsetDateTime = Null(class OffsetDateTime extends Datetime {
+export const OffsetDateTime = /*#__PURE__*/fpc(class OffsetDateTime extends Datetime {
 	
 	[OffsetDateTime_ISOString] :string;
 	[OffsetDateTime_value] :Value;
 	
-	valueOf (this :OffsetDateTime) :Value { return this[OffsetDateTime_value]; }
+	override valueOf (this :OffsetDateTime) :Value { return this[OffsetDateTime_value]; }
 	toISOString (this :OffsetDateTime) :string { return this[OffsetDateTime_ISOString]; }
 	
 	constructor (literal :string) {
@@ -225,12 +231,12 @@ const LocalDateTime_set = (that :InstanceType<typeof LocalDateTime>, start :numb
 		that[LocalDateTime_ISOString] = that[LocalDateTime_ISOString].slice(0, start) + ( '' + value ).padStart(end - start, '0') + that[LocalDateTime_ISOString].slice(end)
 	);
 };
-export const LocalDateTime = Null(class LocalDateTime extends Datetime {
+export const LocalDateTime = /*#__PURE__*/fpc(class LocalDateTime extends Datetime {
 	
 	[LocalDateTime_ISOString] :string;
 	[LocalDateTime_value] :Value;
 	
-	valueOf (this :LocalDateTime) :Value { return this[LocalDateTime_value]; }
+	override valueOf (this :LocalDateTime) :Value { return this[LocalDateTime_value]; }
 	toISOString (this :LocalDateTime) :string { return this[LocalDateTime_ISOString]; }
 	
 	constructor (literal :string) {
@@ -272,12 +278,12 @@ const LocalDate_set = (that :InstanceType<typeof LocalDate>, start :number, end 
 		that[LocalDate_ISOString] = that[LocalDate_ISOString].slice(0, start) + ( '' + value ).padStart(end - start, '0') + that[LocalDate_ISOString].slice(end)
 	);
 };
-export const LocalDate = Null(class LocalDate extends Datetime {
+export const LocalDate = /*#__PURE__*/fpc(class LocalDate extends Datetime {
 	
 	[LocalDate_ISOString] :string;
 	[LocalDate_value] :Value;
 	
-	valueOf (this :LocalDate) :Value { return this[LocalDate_value]; }
+	override valueOf (this :LocalDate) :Value { return this[LocalDate_value]; }
 	toISOString (this :LocalDate) :string { return this[LocalDate_ISOString]; }
 	
 	constructor (literal :string) {
@@ -306,12 +312,12 @@ const LocalTime_set = (that :InstanceType<typeof LocalTime>, start :number, end 
 		that[LocalTime_ISOString] = that[LocalTime_ISOString].slice(0, start) + ( '' + value ).padStart(2, '0') + that[LocalTime_ISOString].slice(end)
 	);
 };
-export const LocalTime = Null(class LocalTime extends Datetime {
+export const LocalTime = /*#__PURE__*/fpc(class LocalTime extends Datetime {
 	
 	[LocalTime_ISOString] :string;
 	[LocalTime_value] :Value;
 	
-	valueOf (this :LocalTime) :Value { return this[LocalTime_value]; }
+	override valueOf (this :LocalTime) :Value { return this[LocalTime_value]; }
 	toISOString (this :LocalTime) :string { return this[LocalTime_ISOString]; }
 	
 	constructor (literal :string) {

@@ -6,19 +6,54 @@ import undefined from '.undefined';
 
 import { theRegExp } from '@ltd/j-regexp';
 
+import { x } from '../j-lexer';///
+
 import * as iterator$0 from '../iterator$0';
 import { INLINE, DIRECTLY } from '../types/Table';
 import { newArray, STATICALLY } from '../types/Array';
 import { OffsetDateTime, LocalDateTime, LocalDate, LocalTime, OFFSET$ } from '../types/Datetime';
+import { BasicString } from '../types/String';
 import { Integer } from '../types/Integer';
 import { Float } from '../types/Float';
 import * as options$0 from '../options$0';
 import * as regexps$0 from '../regexps$0';
-import { appendTable, parseKeys, prepareInlineTable, assignLiteralString, assignBasicString } from './on-the-spot';
+import { appendTable, prepareTable, prepareInlineTable, assignLiteralString, assignBasicString } from './on-the-spot';
+
+import { commentFor } from '../stringify/comment';
+import { beInline } from '../stringify/non-atom';
 
 const IS_OFFSET$ = /*#__PURE__*/( () => theRegExp(OFFSET$).test )();
 
-const push = (lastArray :Array, lineRest :string) :string => {
+const parseKeys = (lineRest :string) :{ leadingKeys :string[], finalKey :string, lineRest :string } => {
+	const leadingKeys :string[] = [];
+	let lastIndex :number = -1;
+	for ( ; ; ) {
+		lineRest || iterator$0.throws(SyntaxError(`Empty bare key` + iterator$0.where(' at ')));
+		if ( lineRest[0]==='"' ) {
+			const key :string = regexps$0.BASIC_STRING_exec_1(lineRest);
+			lineRest = lineRest.slice(2 + key.length);
+			leadingKeys[++lastIndex] = BasicString(key);
+		}
+		else {
+			const isQuoted = lineRest[0]==='\'';
+			const key :string = ( ( isQuoted ? regexps$0.__LITERAL_KEY_exec : regexps$0.__BARE_KEY_exec )(lineRest) ?? iterator$0.throws(SyntaxError(`Bad ${isQuoted ? 'literal string' : 'bare'} key` + iterator$0.where(' at '))) )[0];
+			lineRest = lineRest.slice(key.length);
+			leadingKeys[++lastIndex] = isQuoted ? key.slice(1, -1) : key;
+		}
+		if ( regexps$0.IS_DOT_KEY(lineRest) ) { lineRest = lineRest.replace(regexps$0.DOT_KEY, ''); }
+		else { break; }
+	}
+	if ( options$0.disallowEmptyKey ) {
+		let index :number = lastIndex;
+		do { leadingKeys[index]! || iterator$0.throws(SyntaxError(`Empty key is not allowed before TOML v0.5` + iterator$0.where(', which at '))); }
+		while ( index-- );
+	}
+	const finalKey :string = leadingKeys[lastIndex]!;
+	leadingKeys.length = lastIndex;
+	return { leadingKeys, finalKey, lineRest };
+};
+
+const push = (lastArray :Array, lineRest :string) :string | S => {
 	if ( lineRest[0]==='<' ) {
 		const { 1: tag } = { 2: lineRest } = regexps$0._VALUE_PAIR_exec(lineRest) ?? iterator$0.throws(SyntaxError(`Bad tag ` + iterator$0.where(' at ')));
 		options$0.collect(tag, lastArray, null);
@@ -38,11 +73,9 @@ const push = (lastArray :Array, lineRest :string) :string => {
 			return assignBasicString(options$0.asStrings(lastArray), lastArray.length, lineRest);
 		case '{':
 			options$0.inlineTable || iterator$0.throws(SyntaxError(`Inline Table is not allowed before TOML v0.4` + iterator$0.where(', which at ')));
-			iterator$0.stacks_push(lineRest => equalInlineTable(options$0.asTables(lastArray), lastArray.length, lineRest));
-			return lineRest;
+			return equalInlineTable(options$0.asTables(lastArray), lastArray.length, lineRest);
 		case '[':
-			iterator$0.stacks_push(lineRest => equalStaticArray(options$0.asArrays(lastArray), lastArray.length, lineRest));
-			return lineRest;
+			return equalStaticArray(options$0.asArrays(lastArray), lastArray.length, lineRest);
 	}
 	const { 1: literal } = { 2: lineRest } = regexps$0.VALUE_REST_exec(lineRest) ?? iterator$0.throws(SyntaxError(`Bad atom value` + iterator$0.where(' at ')));
 	if ( options$0.sFloat ) {
@@ -87,135 +120,105 @@ const push = (lastArray :Array, lineRest :string) :string => {
 	return lineRest;
 };
 
-const equalStaticArray = ( (table :Table, finalKey :string, lineRest :string) :string => {
+const equalStaticArray = function * (this :void, table :Table, finalKey :string, lineRest :string) :S {
 	const staticArray :Array = table[finalKey] = newArray(STATICALLY);
 	const start = iterator$0.mark('Inline Array');
 	lineRest = lineRest.replace(regexps$0.SYM_WHITESPACE, '');
+	let inline = true;
 	while ( !lineRest || lineRest[0]==='#' ) {
+		inline = false;
 		lineRest = iterator$0.must(start).replace(regexps$0.PRE_WHITESPACE, '');
 	}
-	if ( lineRest[0]===']' ) { return lineRest.replace(regexps$0.SYM_WHITESPACE, ''); }
-	const length = iterator$0.stacks_length;
-	return function callee (lineRest) {
-		for ( ; ; ) {
-			lineRest = push(staticArray, lineRest);
-			if ( iterator$0.stacks_length>length ) {
-				iterator$0.stacks_insertBeforeLast(function inserted (lineRest) {
-					//
-					while ( !lineRest || lineRest[0]==='#' ) {//
-						lineRest = iterator$0.must(start).replace(regexps$0.PRE_WHITESPACE, '');//
-					}//
-					if ( lineRest[0]===',' ) {//
-						lineRest = lineRest.replace(regexps$0.SYM_WHITESPACE, '');//
-						while ( !lineRest || lineRest[0]==='#' ) {//
-							lineRest = iterator$0.must(start).replace(regexps$0.PRE_WHITESPACE, '');//
-						}//
-						if ( lineRest[0]===']' ) { return lineRest.replace(regexps$0.SYM_WHITESPACE, ''); }//
-					}//
-					else {//
-						if ( lineRest[0]===']' ) { return lineRest.replace(regexps$0.SYM_WHITESPACE, ''); }//
-						iterator$0.throws(SyntaxError(`Unexpect character after static array item value` + iterator$0.where(', which is found at ')));//
-					}//
-					//
-					return callee(lineRest);
-				});
-				return lineRest;
-			}
+	if ( lineRest[0]===']' ) {
+		inline && beInline(staticArray, true);
+		return lineRest.replace(regexps$0.SYM_WHITESPACE, '');
+	}
+	for ( ; ; ) {
+		const rest :string | S = push(staticArray, lineRest);
+		lineRest = typeof rest==='string' ? rest : yield rest;
+		while ( !lineRest || lineRest[0]==='#' ) {
+			inline = false;
+			lineRest = iterator$0.must(start).replace(regexps$0.PRE_WHITESPACE, '');
+		}
+		if ( lineRest[0]===',' ) {
+			lineRest = lineRest.replace(regexps$0.SYM_WHITESPACE, '');
 			while ( !lineRest || lineRest[0]==='#' ) {
+				inline = false;
 				lineRest = iterator$0.must(start).replace(regexps$0.PRE_WHITESPACE, '');
 			}
-			if ( lineRest[0]===',' ) {
-				lineRest = lineRest.replace(regexps$0.SYM_WHITESPACE, '');
-				while ( !lineRest || lineRest[0]==='#' ) {
-					lineRest = iterator$0.must(start).replace(regexps$0.PRE_WHITESPACE, '');
+			if ( lineRest[0]===']' ) { break; }
+		}
+		else {
+			if ( lineRest[0]===']' ) { break; }
+			iterator$0.throws(SyntaxError(`Unexpect character in static array item value` + iterator$0.where(', which is found at ')));
+		}
+	}
+	inline && beInline(staticArray, true);
+	return lineRest.replace(regexps$0.SYM_WHITESPACE, '');
+} as {
+	(this :void, array :Array, finalIndex :number, lineRest :string) :S
+	(this :void, table :Table, finalName :string, lineRest :string) :S
+};
+
+const equalInlineTable = function * (this :void, table :Table, finalKey :string, lineRest :string) :S {
+	const inlineTable :Table = table[finalKey] = new options$0.Table(DIRECTLY, INLINE);
+	lineRest = lineRest.replace(regexps$0.SYM_WHITESPACE, '');
+	if ( options$0.allowInlineTableMultilineAndTrailingCommaEvenNoComma ) {
+		const start = iterator$0.mark('Inline Table');
+		let inline = true;
+		for ( ; ; ) {
+			while ( !lineRest || lineRest[0]==='#' ) {
+				inline = false;
+				lineRest = iterator$0.must(start).replace(regexps$0.PRE_WHITESPACE, '');
+			}
+			if ( lineRest[0]==='}' ) { break; }
+			const forComment :ForComment = ForComment(inlineTable, lineRest);
+			const rest :string | S = assign(forComment);
+			lineRest = typeof rest==='string' ? rest : yield rest;
+			if ( lineRest ) {
+				if ( lineRest[0]==='#' ) {
+					if ( options$0.preserveComment ) { forComment.table[commentFor(forComment.finalKey)] = lineRest.slice(1); }
+					inline = false;
+					do { lineRest = iterator$0.must(start).replace(regexps$0.PRE_WHITESPACE, ''); }
+					while ( !lineRest || lineRest[0]==='#' );
 				}
-				if ( lineRest[0]===']' ) { return lineRest.replace(regexps$0.SYM_WHITESPACE, ''); }
 			}
 			else {
-				if ( lineRest[0]===']' ) { return lineRest.replace(regexps$0.SYM_WHITESPACE, ''); }
-				iterator$0.throws(SyntaxError(`Unexpect character in static array item value` + iterator$0.where(', which is found at ')));
+				inline = false;
+				do { lineRest = iterator$0.must(start).replace(regexps$0.PRE_WHITESPACE, ''); }
+				while ( !lineRest || lineRest[0]==='#' );
 			}
+			if ( lineRest[0]===',' ) { lineRest = lineRest.replace(regexps$0.SYM_WHITESPACE, ''); }
 		}
-	}(lineRest);
-} ) as {
-	(array :Array, finalIndex :number, lineRest :string) :string
-	(table :Table, finalName :string, lineRest :string) :string
-};
-
-const equalInlineTable = ( (table :Table, finalKey :string, lineRest :string) :string => {
-	const inlineTable :Table = table[finalKey] = new options$0.Table(DIRECTLY, INLINE);
-	if ( options$0.allowInlineTableMultiLineAndTrailingCommaEvenNoComma ) {
-		const start = iterator$0.mark('Inline Table');
-		lineRest = lineRest.replace(regexps$0.SYM_WHITESPACE, '');
-		const length = iterator$0.stacks_length;
-		return function callee (lineRest) {
-			for ( ; ; ) {
-				while ( !lineRest || lineRest[0]==='#' ) {
-					lineRest = iterator$0.must(start).replace(regexps$0.PRE_WHITESPACE, '');
-				}
-				if ( lineRest[0]==='}' ) { return lineRest.replace(regexps$0.SYM_WHITESPACE, ''); }
-				lineRest = assign(inlineTable, lineRest);
-				if ( iterator$0.stacks_length>length ) {
-					iterator$0.stacks_insertBeforeLast(function inserted (lineRest) {
-						//
-						while ( !lineRest || lineRest[0]==='#' ) {//
-							lineRest = iterator$0.must(start).replace(regexps$0.PRE_WHITESPACE, '');//
-						}//
-						if ( lineRest[0]===',' ) { lineRest = lineRest.replace(regexps$0.SYM_WHITESPACE, ''); }//
-						//
-						return callee(lineRest);
-					});
-					return lineRest;
-				}
-				while ( !lineRest || lineRest[0]==='#' ) {
-					lineRest = iterator$0.must(start).replace(regexps$0.PRE_WHITESPACE, '');
-				}
-				if ( lineRest[0]===',' ) { lineRest = lineRest.replace(regexps$0.SYM_WHITESPACE, ''); }
-			}
-		}(lineRest);
+		inline || beInline(inlineTable, false);
 	}
 	else {
-		lineRest = lineRest.replace(regexps$0.SYM_WHITESPACE, '');
-		if ( lineRest[0]==='}' ) { return lineRest.replace(regexps$0.SYM_WHITESPACE, ''); }
-		lineRest && lineRest[0]!=='#' || iterator$0.throws(SyntaxError(`Inline Table is intended to appear on a single line` + iterator$0.where(', which broken at ')));
-		const length = iterator$0.stacks_length;
-		return function callee (lineRest) {
+		lineRest || iterator$0.throws(SyntaxError(`Inline Table is intended to appear on a single line` + iterator$0.where(', which broken at ')));
+		if ( lineRest[0]!=='}' ) {
 			for ( ; ; ) {
-				lineRest = assign(inlineTable, lineRest);
-				if ( iterator$0.stacks_length>length ) {
-					iterator$0.stacks_insertBeforeLast(function inserted (lineRest) {
-						//
-						if ( lineRest[0]==='}' ) { return lineRest.replace(regexps$0.SYM_WHITESPACE, ''); }//
-						if ( lineRest[0]===',' ) {//
-							lineRest = lineRest.replace(regexps$0.SYM_WHITESPACE, '');//
-							lineRest[0]==='}' && iterator$0.throws(SyntaxError(`The last property of an Inline Table can not have a trailing comma` + iterator$0.where(', which was found at ')));//
-						}//
-						( !lineRest || lineRest[0]==='#' ) && iterator$0.throws(SyntaxError(`Inline Table is intended to appear on a single line` + iterator$0.where(', which broken at ')));//
-						//
-						return callee(lineRest);
-					});
-					return lineRest;
-				}
-				if ( lineRest[0]==='}' ) { return lineRest.replace(regexps$0.SYM_WHITESPACE, ''); }
+				lineRest[0]==='#' && iterator$0.throws(SyntaxError(`Inline Table is intended to appear on a single line` + iterator$0.where(', which broken at ')));
+				const rest :string | S = assign(ForComment(inlineTable, lineRest));
+				lineRest = ( typeof rest==='string' ? rest : yield rest ) || iterator$0.throws(SyntaxError(`Inline Table is intended to appear on a single line` + iterator$0.where(', which broken at ')));
+				if ( lineRest[0]==='}' ) { break; }
 				if ( lineRest[0]===',' ) {
-					lineRest = lineRest.replace(regexps$0.SYM_WHITESPACE, '');
+					lineRest = lineRest.replace(regexps$0.SYM_WHITESPACE, '') || iterator$0.throws(SyntaxError(`Inline Table is intended to appear on a single line` + iterator$0.where(', which broken at ')));
 					lineRest[0]==='}' && iterator$0.throws(SyntaxError(`The last property of an Inline Table can not have a trailing comma` + iterator$0.where(', which was found at ')));
 				}
-				( !lineRest || lineRest[0]==='#' ) && iterator$0.throws(SyntaxError(`Inline Table is intended to appear on a single line` + iterator$0.where(', which broken at ')));
 			}
-		}(lineRest);
+		}
 	}
-} ) as {
-	(array :Array, finalIndex :number, lineRest :string) :string
-	(table :Table, finalName :string, lineRest :string) :string
+	return lineRest.replace(regexps$0.SYM_WHITESPACE, '');
+} as {
+	(this :void, array :Array, finalIndex :number, lineRest :string) :S
+	(this :void, table :Table, finalName :string, lineRest :string) :S
 };
 
-const assign = (lastInlineTable :Table, lineRest :string) :string => {
-	const { left, tag } = { right: lineRest } = regexps$0.KEY_VALUE_PAIR_exec_groups(lineRest);
-	const leadingKeys :string[] = parseKeys(left);
-	const finalKey :string = leadingKeys[leadingKeys.length - 1]!;
-	--leadingKeys.length;
-	const table :Table = prepareInlineTable(lastInlineTable, leadingKeys);
+type ForComment = Readonly<{ table :Table, finalKey :string, tag :string, lineRest :string }>;
+const ForComment = (lastInlineTable :Table, lineRest :string) :ForComment => {
+	const { leadingKeys, finalKey, tag } = { lineRest } = regexps$0.KEY_VALUE_PAIR_exec_groups(parseKeys(lineRest));
+	return { table: prepareInlineTable(lastInlineTable, leadingKeys), finalKey, tag, lineRest };
+};
+const assign = ({ finalKey, tag, lineRest, table } :ForComment) :string | S => {
 	finalKey in table && iterator$0.throws(Error(`Duplicate property definition` + iterator$0.where(' at ')));
 	if ( tag ) {
 		options$0.collect(tag, null, table, finalKey);
@@ -235,11 +238,9 @@ const assign = (lastInlineTable :Table, lineRest :string) :string => {
 			return assignBasicString(table, finalKey, lineRest);
 		case '{':
 			options$0.inlineTable || iterator$0.throws(SyntaxError(`Inline Table is not allowed before TOML v0.4` + iterator$0.where(', which at ')));
-			iterator$0.stacks_push((lineRest :string) :string => equalInlineTable(table, finalKey, lineRest));
-			return lineRest;
+			return equalInlineTable(table, finalKey, lineRest);
 		case '[':
-			iterator$0.stacks_push((lineRest :string) :string => equalStaticArray(table, finalKey, lineRest));
-			return lineRest;
+			return equalStaticArray(table, finalKey, lineRest);
 	}
 	const { 1: literal } = { 2: lineRest } = regexps$0.VALUE_REST_exec(lineRest) ?? iterator$0.throws(SyntaxError(`Bad atom value` + iterator$0.where(' at ')));
 	if ( options$0.sFloat ) {
@@ -285,30 +286,39 @@ const assign = (lastInlineTable :Table, lineRest :string) :string => {
 	return lineRest;
 };
 
-export { Root as default };
-const Root = () :Table => {
+export default () :Table => {
 	const rootTable :Table = new options$0.Table;
 	let lastSectionTable :Table = rootTable;
 	while ( iterator$0.rest() ) {
 		const line :string = iterator$0.next().replace(regexps$0.PRE_WHITESPACE, '');
 		if ( line ) {
 			if ( line[0]==='[' ) {
-				const { $_asArrayItem$$, keys, $$asArrayItem$_, tag } = regexps$0.TABLE_DEFINITION_exec_groups(line);
-				$_asArrayItem$$===$$asArrayItem$_ || iterator$0.throws(SyntaxError(`Square brackets of Table definition statement not match` + iterator$0.where(' at ')));
-				lastSectionTable = appendTable(rootTable, keys, $_asArrayItem$$, tag);
+				const { leadingKeys, finalKey, asArrayItem, tag, lineRest } = regexps$0.TABLE_DEFINITION_exec_groups(line, parseKeys);
+				const table :Table = prepareTable(rootTable, leadingKeys);
+				if ( lineRest ) {
+					if ( lineRest[0]==='#' ) { if ( options$0.preserveComment && !asArrayItem ) { table[commentFor(finalKey)] = lineRest.slice(1); } }
+					else { iterator$0.throws(SyntaxError(`Unexpect charachtor after table header` + iterator$0.where(' at '))); }
+				}
+				lastSectionTable = appendTable(table, finalKey, asArrayItem, tag);
 			}
 			else if ( line[0]==='#' ) {
 				regexps$0.__CONTROL_CHARACTER_EXCLUDE_test(line) && iterator$0.throws(SyntaxError(`Control characters other than Tab are not permitted in comments` + iterator$0.where(', which was found at ')));
 			}
 			else {
-				let rest :string = assign(lastSectionTable, line);
-				while ( iterator$0.stacks_length ) { rest = iterator$0.stacks_pop()(rest); }
-				rest && rest[0]!=='#' && iterator$0.throws(SyntaxError(`Unexpect charachtor after key/value pair` + iterator$0.where(' at ')));
+				const forComment :ForComment = ForComment(lastSectionTable, line);
+				let rest :string | S = assign(forComment);
+				typeof rest==='string' || ( rest = x<string>(rest) );
+				if ( rest ) {
+					if ( rest[0]==='#' ) { if ( options$0.preserveComment ) { forComment.table[commentFor(forComment.finalKey)] = rest.slice(1); } }
+					else { iterator$0.throws(SyntaxError(`Unexpect charachtor after key/value pair` + iterator$0.where(' at '))); }
+				}
 			}
 		}
 	}
 	return rootTable;
 };
+
+type S = import('../j-lexer').default<string>;
 
 import type { Array } from '../types/Array';
 import type { Table } from '../types/Table';

@@ -73,6 +73,34 @@ y = 2
 key = null
 ```
 
+`超级选项.comment`
+------------------
+
+是否尽可能保留注释信息（仅限直接书写于键值、表头后面的注释），通过 `TOML.commentFor(key)` 得到的 `symbol` 安插在 `key` 所在的表中。
+
+```toml
+key = 'value' # 这是一个键值对
+dotted.key = 'value' # 这是一个点分隔键值对
+[table.header] # 这是一个表头（不能是表数组中的表）
+```
+
+这将得到：
+
+```javascript
+( {
+    [commentFor('key')]: ' 这是一个键值对',
+    key: 'value',
+    dotted: {
+        [commentFor('key')]: ' 这是一个点分隔键值对',
+    	key: 'value',
+    },
+    table: {
+    	[commentFor('header')]: ' 这是一个表头（不能是表数组中的表）',
+    	header: {},
+    },
+} )
+```
+
 `超级选项.tag`
 --------------
 

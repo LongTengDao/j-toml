@@ -73,6 +73,34 @@ y = 2
 key = null
 ```
 
+`xOptions.comment`
+------------------
+
+Whether to preserve comment information as much as possible (only comments written directly after key/value pairs or table headers), which will be set via the `symbol` returned by `TOML.commentFor(key)` in the table where `key` in.
+
+```toml
+key = 'value' # this is a key/value pair
+dotted.key = 'value' # this is a dotted key/value pair
+[table.header] # this is a table header (but it cannot be a table in an array of tables)
+```
+
+这将得到：
+
+```javascript
+( {
+    [commentFor('key')]: ' this is a key/value pair',
+    key: 'value',
+    dotted: {
+        [commentFor('key')]: ' this is a dotted key/value pair',
+    	key: 'value',
+    },
+    table: {
+    	[commentFor('header')]: ' this is a table header (but it cannot be a table in an array of tables)',
+    	header: {},
+    },
+} )
+```
+
 `xOptions.tag`
 --------------
 

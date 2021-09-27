@@ -19,9 +19,11 @@ require('../test/test.js')(async ({ build, 龙腾道, get, map, ful, put }) => {
 		ES: 6,
 		NPM: {
 			description: `${en}／${zhs}`,
-			keywords: [ 'TOML' ],
+			keywords: [ 'parse', 'stringify', 'TOML', '1.0.0', '0.5.0', '0.4.0', '0.3.0', '0.2.0', '0.1.0' ],
 		},
-		ESM: true,
+		ESM: {
+			deps: [ 'fs' ],
+		},
 		locate: {
 			'@ltd/j-orderify': ful('../../LongTengDao/j-orderify/dist/ESM/.j-orderify.js'),
 			'@ltd/j-regexp': ful('../../LongTengDao/j-regexp/dist/ESM/.j-regexp.js'),

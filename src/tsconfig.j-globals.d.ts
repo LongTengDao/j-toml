@@ -1,11 +1,16 @@
 
 declare module '.Array' { export default Array; }
+declare module '.Array.isArray' { export default isArray;
+	function isArray (value :any) :value is readonly any[];
+}
 declare module '.Array.isArray?=' { export default isArray;
 	function isArray (value :any) :value is readonly any[];
 }
 declare module '.Array.prototype' { export default Array.prototype; }
 
 declare module '.BigInt' { export default BigInt; }
+
+declare module '.Boolean' { export default Boolean; }
 
 declare module '.Buffer.from?' { export default Buffer.from; }
 declare module '.Buffer.isBuffer?=' { export default Buffer.isBuffer; }
@@ -24,6 +29,7 @@ declare module '.Math.floor' { export default Math.floor; }
 
 declare module '.NaN' { export default NaN; }
 
+declare module '.Number' { export default Number; }
 declare module '.Number.MAX_SAFE_INTEGER' { export default Number.MAX_SAFE_INTEGER; }
 declare module '.Number.MIN_SAFE_INTEGER' { export default Number.MIN_SAFE_INTEGER; }
 declare module '.Number.isSafeInteger' { export default Number.isSafeInteger; }
@@ -66,6 +72,9 @@ declare module '.Object.fromEntries' { export default fromEntries;
 declare module '.Object.getOwnPropertyDescriptor' { export default getOwnPropertyDescriptor;
 	function getOwnPropertyDescriptor<O extends {}, P extends string | symbol> (o :O, p :P) :P extends keyof O ? { value :O[P], writable :boolean, enumerable :boolean, configurable :boolean } | { get? () :O[P], set? (v :O[P]) :void, enumerable :boolean, configurable :boolean } : undefined;
 }
+declare module '.Object.getOwnPropertyNames' { export default getOwnPropertyNames;
+	function getOwnPropertyNames<T extends {}> (nonNullable :T) :Extract<keyof T, string>[];
+}
 declare module '.Object.getOwnPropertySymbols?' { export default getOwnPropertySymbols;
 	function getOwnPropertySymbols<T extends {}> (nonNullable :T) :Extract<keyof T, symbol>[];
 }
@@ -104,9 +113,11 @@ declare module '.RegExp.prototype' { export default RegExp.prototype; }
 declare module '.RegExp.prototype.exec' { export default RegExp.prototype.exec; }
 declare module '.RegExp.prototype.test' { export default RegExp.prototype.test; }
 
+declare module '.String' { export default String; }
 declare module '.String.fromCharCode' { export default String.fromCharCode; }
 declare module '.String.fromCodePoint' { export default String.fromCodePoint; }
 
+declare module '.Symbol' { export default Symbol; }
 declare module '.Symbol.species?' { export default Symbol.species; }
 declare module '.Symbol.toStringTag?' { export default Symbol.toStringTag; }
 
@@ -118,6 +129,7 @@ declare module '.WeakMap' { export default constructor;
 	class constructor<K extends object, V> extends WeakMap<K, V> { constructor (entries? :Iterable<{ readonly 0 :K, readonly 1 :V }>) }
 }
 declare module '.WeakMap.prototype.get' { export default WeakMap.prototype.get; }
+declare module '.WeakMap.prototype.has' { export default WeakMap.prototype.has; }
 declare module '.WeakMap.prototype.set' { export default WeakMap.prototype.set; }
 
 declare module '.WeakSet' { export default constructor;
@@ -147,8 +159,6 @@ declare module '.default?=' { export default Default;
 	type Callable = (...args :any) => any;
 	type Newable = { new (...args :any) :any };
 }
-
-declare module '.globalThis' { export default globalThis; }
 
 declare module '.isFinite' { export default isFinite; }
 

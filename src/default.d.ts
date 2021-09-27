@@ -6,48 +6,145 @@ declare namespace exports {
 	
 	export const parse :
 		& {
-			   <CustomValue                                                  > (this :void, source :Source, specificationVersion :1.0, multiLineStringJoiner :string, useBigInt  :boolean | number     , xOptions :TagProcessor<CustomValue> | { readonly tag :TagProcessor<CustomValue>, readonly null? :boolean } & TypeAgnosticOptions/* = false */) :Table<CustomValue>;
-			   <CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source, specificationVersion :1.0, multiLineStringJoiner :string, useBigInt  :UseBigInt            , xOptions :true | { readonly tag? :null, readonly null :true } & TypeAgnosticOptions) :Table<Mixed<UseBigInt extends false ? BasicValueWithoutBigintWithNull : BasicValueWithNull>>;
-			   <CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source, specificationVersion :1.0, multiLineStringJoiner :string, useBigInt? :UseBigInt/* = true */, xOptions? :null | false | { readonly tag? :null, readonly null? :false } & TypeAgnosticOptions/* = null */) :Table<Mixed<UseBigInt extends false ? BasicValueWithoutBigint : BasicValue>>;
+			   <CustomValue                                                  > (this :void, source :Source, specificationVersion :1.0, multilineStringJoiner :string, useBigInt  :boolean | number     , xOptions :TagProcessor<CustomValue> | { readonly tag :TagProcessor<CustomValue>, readonly null? :boolean } & TypeAgnosticOptions/* = false */) :Table<CustomValue>;
+			   <CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source, specificationVersion :1.0, multilineStringJoiner :string, useBigInt  :UseBigInt            , xOptions :true | { readonly tag? :null, readonly null :true } & TypeAgnosticOptions) :Table<Mixed<UseBigInt extends false ? BasicValueWithoutBigintWithNull : BasicValueWithNull>>;
+			   <CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source, specificationVersion :1.0, multilineStringJoiner :string, useBigInt? :UseBigInt/* = true */, xOptions? :null | false | { readonly tag? :null, readonly null? :false } & TypeAgnosticOptions/* = null */) :Table<Mixed<UseBigInt extends false ? BasicValueWithoutBigint : BasicValue>>;
 			
-			   <CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source, specificationVersion :0.5, multiLineStringJoiner :string, useBigInt  :UseBigInt            , xOptions :true | { readonly tag? :null, readonly null :true } & TypeAgnosticOptions) :Table<UseBigInt extends false ? BasicValueWithoutBigintWithNull : BasicValueWithNull>;
-			   <CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source, specificationVersion :0.5, multiLineStringJoiner :string, useBigInt? :UseBigInt/* = true */, xOptions? :null | false | { readonly tag? :null, readonly null? :false } & TypeAgnosticOptions/* = null */) :Table<UseBigInt extends false ? BasicValueWithoutBigint : BasicValue>;
+			   <CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source, specificationVersion :0.5, multilineStringJoiner :string, useBigInt  :UseBigInt            , xOptions :true | { readonly tag? :null, readonly null :true } & TypeAgnosticOptions) :Table<UseBigInt extends false ? BasicValueWithoutBigintWithNull : BasicValueWithNull>;
+			   <CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source, specificationVersion :0.5, multilineStringJoiner :string, useBigInt? :UseBigInt/* = true */, xOptions? :null | false | { readonly tag? :null, readonly null? :false } & TypeAgnosticOptions/* = null */) :Table<UseBigInt extends false ? BasicValueWithoutBigint : BasicValue>;
 			
-			   <CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source, specificationVersion :0.4, multiLineStringJoiner :string, useBigInt  :UseBigInt            , xOptions :true | { readonly tag? :null, readonly null :true } & TypeAgnosticOptions,) :Table<UseBigInt extends false ? BasicValueWithoutBigintWithNull_WithoutMoreDatetime : BasicValueWithNull_WithoutMoreDatetime>;
-			   <CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source, specificationVersion :0.4, multiLineStringJoiner :string, useBigInt? :UseBigInt/* = true */, xOptions? :null | false | { readonly tag? :null, readonly null? :false } & TypeAgnosticOptions/* = null */) :Table<UseBigInt extends false ? BasicValueWithoutBigint_WithoutMoreDatetime : BasicValue_WithoutMoreDatetime>;
+			   <CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source, specificationVersion :0.4, multilineStringJoiner :string, useBigInt  :UseBigInt            , xOptions :true | { readonly tag? :null, readonly null :true } & TypeAgnosticOptions,) :Table<UseBigInt extends false ? BasicValueWithoutBigintWithNull_WithoutMoreDatetime : BasicValueWithNull_WithoutMoreDatetime>;
+			   <CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source, specificationVersion :0.4, multilineStringJoiner :string, useBigInt? :UseBigInt/* = true */, xOptions? :null | false | { readonly tag? :null, readonly null? :false } & TypeAgnosticOptions/* = null */) :Table<UseBigInt extends false ? BasicValueWithoutBigint_WithoutMoreDatetime : BasicValue_WithoutMoreDatetime>;
 			
-			   <CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source, specificationVersion :0.3, multiLineStringJoiner :string, useBigInt? :UseBigInt/* = true */, xOptions? :null | false) :Table<UseBigInt extends false ? BasicValueWithoutBigint_WithoutInlineTable_WithoutMoreDatetime : BasicValue_WithoutInlineTable_WithoutMoreDatetime>;
+			   <CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source, specificationVersion :0.3, multilineStringJoiner :string, useBigInt? :UseBigInt/* = true */, xOptions? :null | false) :Table<UseBigInt extends false ? BasicValueWithoutBigint_WithoutInlineTable_WithoutMoreDatetime : BasicValue_WithoutInlineTable_WithoutMoreDatetime>;
 			
-			   <CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source, specificationVersion :0.2, multiLineStringJoiner :string, useBigInt? :UseBigInt/* = true */, xOptions? :null | false) :Table<UseBigInt extends false ? BasicValueWithoutBigint_WithoutInlineTable_WithoutMoreDatetime : BasicValue_WithoutInlineTable_WithoutMoreDatetime>;
+			   <CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source, specificationVersion :0.2, multilineStringJoiner :string, useBigInt? :UseBigInt/* = true */, xOptions? :null | false) :Table<UseBigInt extends false ? BasicValueWithoutBigint_WithoutInlineTable_WithoutMoreDatetime : BasicValue_WithoutInlineTable_WithoutMoreDatetime>;
 			
-			   <CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source, specificationVersion :0.1, multiLineStringJoiner :string, useBigInt? :UseBigInt/* = true */, xOptions? :null | false) :Table<UseBigInt extends false ? BasicValueWithoutBigint_WithoutArrayOfTables_WithoutMoreDatetime : BasicValue_WithoutArrayOfTables_WithoutMoreDatetime>;
+			   <CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source, specificationVersion :0.1, multilineStringJoiner :string, useBigInt? :UseBigInt/* = true */, xOptions? :null | false) :Table<UseBigInt extends false ? BasicValueWithoutBigint_WithoutArrayOfTables_WithoutMoreDatetime : BasicValue_WithoutArrayOfTables_WithoutMoreDatetime>;
 			
-			   <CustomValue                                                  > (this :void, source :Source,                            multiLineStringJoiner :string, useBigInt  :boolean | number     , xOptions :TagProcessor<CustomValue> | { readonly tag :TagProcessor<CustomValue>, readonly null? :boolean/* = false */ } & TypeAgnosticOptions) :Table<CustomValue>;
-			   <CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source,                            multiLineStringJoiner :string, useBigInt  :UseBigInt            , xOptions :true | { readonly tag? :null, readonly null :true } & TypeAgnosticOptions) :Table<Mixed<UseBigInt extends false ? BasicValueWithoutBigintWithNull : BasicValueWithNull>>;
-			   <CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source,                            multiLineStringJoiner :string, useBigInt? :UseBigInt/* = true */, xOptions? :null | false | { readonly tag? :null, readonly null? :false } & TypeAgnosticOptions/* = null */) :Table<Mixed<UseBigInt extends false ? BasicValueWithoutBigint : BasicValue>>;
+			   <CustomValue                                                  > (this :void, source :Source,                            multilineStringJoiner :string, useBigInt  :boolean | number     , xOptions :TagProcessor<CustomValue> | { readonly tag :TagProcessor<CustomValue>, readonly null? :boolean/* = false */ } & TypeAgnosticOptions) :Table<CustomValue>;
+			   <CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source,                            multilineStringJoiner :string, useBigInt  :UseBigInt            , xOptions :true | { readonly tag? :null, readonly null :true } & TypeAgnosticOptions) :Table<Mixed<UseBigInt extends false ? BasicValueWithoutBigintWithNull : BasicValueWithNull>>;
+			   <CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source,                            multilineStringJoiner :string, useBigInt? :UseBigInt/* = true */, xOptions? :null | false | { readonly tag? :null, readonly null? :false } & TypeAgnosticOptions/* = null */) :Table<Mixed<UseBigInt extends false ? BasicValueWithoutBigint : BasicValue>>;
 		}
 		& Readonly<{
-			1.0<CustomValue                                                  > (this :void, source :Source,                            multiLineStringJoiner :string, useBigInt  :boolean | number     , xOptions :TagProcessor<CustomValue> | { readonly tag :TagProcessor<CustomValue>, readonly null? :boolean/* = false */ } & TypeAgnosticOptions) :Table<CustomValue>;
-			1.0<CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source,                            multiLineStringJoiner :string, useBigInt  :UseBigInt            , xOptions :true | { readonly tag? :null, readonly null :true } & TypeAgnosticOptions) :Table<Mixed<UseBigInt extends false ? BasicValueWithoutBigintWithNull : BasicValueWithNull>>;
-			1.0<CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source,                            multiLineStringJoiner :string, useBigInt? :UseBigInt/* = true */, xOptions? :null | false | { readonly tag? :null, readonly null? :false } & TypeAgnosticOptions/* = null */) :Table<Mixed<UseBigInt extends false ? BasicValueWithoutBigint : BasicValue>>;
+			1.0<CustomValue                                                  > (this :void, source :Source,                            multilineStringJoiner :string, useBigInt  :boolean | number     , xOptions :TagProcessor<CustomValue> | { readonly tag :TagProcessor<CustomValue>, readonly null? :boolean/* = false */ } & TypeAgnosticOptions) :Table<CustomValue>;
+			1.0<CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source,                            multilineStringJoiner :string, useBigInt  :UseBigInt            , xOptions :true | { readonly tag? :null, readonly null :true } & TypeAgnosticOptions) :Table<Mixed<UseBigInt extends false ? BasicValueWithoutBigintWithNull : BasicValueWithNull>>;
+			1.0<CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source,                            multilineStringJoiner :string, useBigInt? :UseBigInt/* = true */, xOptions? :null | false | { readonly tag? :null, readonly null? :false } & TypeAgnosticOptions/* = null */) :Table<Mixed<UseBigInt extends false ? BasicValueWithoutBigint : BasicValue>>;
 			
-			0.5<CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source,                            multiLineStringJoiner :string, useBigInt  :UseBigInt            , xOptions :true | { readonly tag? :null, readonly null :true } & TypeAgnosticOptions) :Table<UseBigInt extends false ? BasicValueWithoutBigintWithNull : BasicValueWithNull>;
-			0.5<CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source,                            multiLineStringJoiner :string, useBigInt? :UseBigInt/* = true */, xOptions? :null | false | { readonly tag? :null, readonly null? :false } & TypeAgnosticOptions/* = null */) :Table<UseBigInt extends false ? BasicValueWithoutBigint : BasicValue>;
+			0.5<CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source,                            multilineStringJoiner :string, useBigInt  :UseBigInt            , xOptions :true | { readonly tag? :null, readonly null :true } & TypeAgnosticOptions) :Table<UseBigInt extends false ? BasicValueWithoutBigintWithNull : BasicValueWithNull>;
+			0.5<CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source,                            multilineStringJoiner :string, useBigInt? :UseBigInt/* = true */, xOptions? :null | false | { readonly tag? :null, readonly null? :false } & TypeAgnosticOptions/* = null */) :Table<UseBigInt extends false ? BasicValueWithoutBigint : BasicValue>;
 			
-			0.4<CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source,                            multiLineStringJoiner :string, useBigInt  :UseBigInt            , xOptions :true | { readonly tag? :null, readonly null :true } & TypeAgnosticOptions,) :Table<UseBigInt extends false ? BasicValueWithoutBigintWithNull_WithoutMoreDatetime : BasicValueWithNull_WithoutMoreDatetime>;
-			0.4<CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source,                            multiLineStringJoiner :string, useBigInt? :UseBigInt/* = true */, xOptions? :null | false | { readonly tag? :null, readonly null? :false } & TypeAgnosticOptions/* = null */) :Table<UseBigInt extends false ? BasicValueWithoutBigint_WithoutMoreDatetime : BasicValue_WithoutMoreDatetime>;
+			0.4<CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source,                            multilineStringJoiner :string, useBigInt  :UseBigInt            , xOptions :true | { readonly tag? :null, readonly null :true } & TypeAgnosticOptions,) :Table<UseBigInt extends false ? BasicValueWithoutBigintWithNull_WithoutMoreDatetime : BasicValueWithNull_WithoutMoreDatetime>;
+			0.4<CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source,                            multilineStringJoiner :string, useBigInt? :UseBigInt/* = true */, xOptions? :null | false | { readonly tag? :null, readonly null? :false } & TypeAgnosticOptions/* = null */) :Table<UseBigInt extends false ? BasicValueWithoutBigint_WithoutMoreDatetime : BasicValue_WithoutMoreDatetime>;
 			
-			0.3<CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source,                            multiLineStringJoiner :string, useBigInt? :UseBigInt/* = true */, xOptions? :null | false) :Table<UseBigInt extends false ? BasicValueWithoutBigint_WithoutInlineTable_WithoutMoreDatetime : BasicValue_WithoutInlineTable_WithoutMoreDatetime>;
+			0.3<CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source,                            multilineStringJoiner :string, useBigInt? :UseBigInt/* = true */, xOptions? :null | false) :Table<UseBigInt extends false ? BasicValueWithoutBigint_WithoutInlineTable_WithoutMoreDatetime : BasicValue_WithoutInlineTable_WithoutMoreDatetime>;
 			
-			0.2<CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source,                            multiLineStringJoiner :string, useBigInt? :UseBigInt/* = true */, xOptions? :null | false) :Table<UseBigInt extends false ? BasicValueWithoutBigint_WithoutInlineTable_WithoutMoreDatetime : BasicValue_WithoutInlineTable_WithoutMoreDatetime>;
+			0.2<CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source,                            multilineStringJoiner :string, useBigInt? :UseBigInt/* = true */, xOptions? :null | false) :Table<UseBigInt extends false ? BasicValueWithoutBigint_WithoutInlineTable_WithoutMoreDatetime : BasicValue_WithoutInlineTable_WithoutMoreDatetime>;
 			
-			0.1<CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source,                            multiLineStringJoiner :string, useBigInt? :UseBigInt/* = true */, xOptions? :null | false) :Table<UseBigInt extends false ? BasicValueWithoutBigint_WithoutArrayOfTables_WithoutMoreDatetime : BasicValue_WithoutArrayOfTables_WithoutMoreDatetime>;
+			0.1<CustomValue extends never, UseBigInt extends boolean | number> (this :void, source :Source,                            multilineStringJoiner :string, useBigInt? :UseBigInt/* = true */, xOptions? :null | false) :Table<UseBigInt extends false ? BasicValueWithoutBigint_WithoutArrayOfTables_WithoutMoreDatetime : BasicValue_WithoutArrayOfTables_WithoutMoreDatetime>;
 		}>;
+	
+	export function stringify (this :void, rootTable :ReadonlyTable, options? :{
+		readonly newline? :'\n' | '\r\n'
+		readonly newlineAround? :'document' | 'section' | 'header' | 'pairs' | 'pair'
+		readonly indent? :string | number
+		readonly T? :'T' | ' '
+		readonly xNull? :boolean
+		readonly xBeforeNewlineInMultilineTable? :',' | ''
+	}) :string;
+	
+	export function Section<T extends ReadonlyTable> (this :void, table :T) :T;
+	export function inline<T extends ReadonlyTable | readonly ReadonlyValue[]> (this :void, value :T) :T;
+	export const multiline :{
+			<T extends ReadonlyTable>
+			(this :void, value :T) :T
+			(this :void, lines :string | readonly [ string, ...string[] ]) :Literal & readonly [ `"""`, ...string[], `${string}"""` ] | readonly [ `'''`, ...string[], `${string}'''` ] & Literal
+		readonly basic :{
+			(this :void, lines :string | readonly [ string, ...string[] ]) :Literal & readonly [ `"""`, ...string[], `${string}"""` ]
+		}
+	};
+	export function literal (this :void, literal :TemplateStringsArray, ...chars :string[]) :Literal & readonly [ string, ...string[] ];
+	export function literal (this :void, literal :string                                  ) :Literal & readonly [ string, ...string[] ];
+	export function commentFor (this :void, key :string) :symbol;
+	
+	export { OffsetDateTime, LocalDateTime, LocalDate, LocalTime };
 	
 	export { exports as default };
 	
-	export type { OffsetDateTime, LocalDateTime, LocalDate, LocalTime };
-	
+}
+
+declare class OffsetDateTime {
+	readonly toJSON :Date['toJSON'];
+	readonly toISOString :(this :Readonly<OffsetDateTime>) => `${number}-${number}-${number}T${number}:${number}:${number}${'' | `.${number}`}${'Z' | `${'+' | '-'}${number}:${number}`}`;
+	readonly valueOf :(this :Readonly<OffsetDateTime>) => `${number}${'' | `.${number}`}`;
+	private [OffsetDateTime_ISOString] :string;
+	private [OffsetDateTime_value] :string;
+	constructor (literal :`${number}-${number}-${number}${'T' | ' '}${number}:${number}:${number}${'' | `.${number}`}${'Z' | `${'+' | '-'}${number}:${number}`}`);
+	readonly getUTCFullYear :(this :Readonly<OffsetDateTime>) => _1_10000;
+	readonly getUTCMonth :(this :Readonly<OffsetDateTime>) => _0_11;
+	readonly getUTCDate :(this :Readonly<OffsetDateTime>) => _1_31;
+	readonly getUTCHours :(this :Readonly<OffsetDateTime>) => _0_23;
+	readonly getUTCMinutes :(this :Readonly<OffsetDateTime>) => _0_59;
+	readonly getUTCSeconds :(this :Readonly<OffsetDateTime>) => _0_59;
+	readonly getUTCMilliseconds :(this :Readonly<OffsetDateTime>) => _0_999;
+	readonly getUTCDay :(this :Readonly<OffsetDateTime>) => _0_6;
+	readonly getDay :(this :Readonly<OffsetDateTime>) => _0_6;
+	readonly getTimezoneOffset :(this :Readonly<OffsetDateTime>) => _1439_1439;
+	readonly setTimezoneOffset :(this :OffsetDateTime, _ :_1439_1439) => number;
+	readonly getTime :(this :Readonly<OffsetDateTime>) => number;
+	readonly setTime :(this :OffsetDateTime, time :number) => number;
+}
+declare class LocalDateTime {
+	readonly toJSON :Date['toJSON'];
+	readonly toISOString :(this :Readonly<LocalDateTime>) => `${number}-${number}-${number}T${number}:${number}:${number}${'' | `.${number}`}`;
+	readonly valueOf :(this :Readonly<LocalDateTime>) => `${number}`;
+	private [LocalDateTime_ISOString] :string;
+	private [LocalDateTime_value] :string;
+	constructor (literal :`${number}-${number}-${number}${'T' | ' '}${number}:${number}:${number}${'' | `.${number}`}`);
+	readonly getFullYear :(this :Readonly<LocalDateTime>) => _0_9999;
+	readonly setFullYear :(this :LocalDateTime, year :_0_9999) => number;
+	readonly getMonth :(this :Readonly<LocalDateTime>) => _0_11;
+	readonly setMonth :(this :LocalDateTime, month :_0_11) => number;
+	readonly getDate :(this :Readonly<LocalDateTime>) => _1_31;
+	readonly setDate :(this :LocalDateTime, date :_1_31) => number;
+	readonly getHours :(this :Readonly<LocalDateTime>) => _0_23;
+	readonly setHours :(this :LocalDateTime, hours :_0_23) => number;
+	readonly getMinutes :(this :Readonly<LocalDateTime>) => _0_59;
+	readonly setMinutes :(this :LocalDateTime, min :_0_59) => number;
+	readonly getSeconds :(this :Readonly<LocalDateTime>) => _0_59;
+	readonly setSeconds :(this :LocalDateTime, sec :_0_59) => number;
+	readonly getMilliseconds :(this :Readonly<LocalDateTime>) => _0_999;
+	readonly setMilliseconds :(this :LocalDateTime, ms :_0_999) => number;
+}
+declare class LocalDate {
+	readonly toJSON :Date['toJSON'];
+	readonly toISOString :(this :Readonly<LocalDate>) => `${number}-${number}-${number}`;
+	readonly valueOf :(this :Readonly<LocalDate>) => `${number}`;
+	private [LocalDate_ISOString] :string;
+	private [LocalDate_value] :string;
+	constructor (literal :`${number}-${number}-${number}`);
+	readonly getFullYear :(this :Readonly<LocalDate>) => _0_9999;
+	readonly setFullYear :(this :LocalDate, year :_0_9999) => number;
+	readonly getMonth :(this :Readonly<LocalDate>) => _0_11;
+	readonly setMonth :(this :LocalDate, month :_0_11) => number;
+	readonly getDate :(this :Readonly<LocalDate>) => _1_31;
+	readonly setDate :(this :LocalDate, date :_1_31) => number;
+}
+declare class LocalTime {
+	readonly toJSON :Date['toJSON'];
+	readonly toISOString :(this :Readonly<LocalTime>) => `${number}:${number}:${number}${'' | `.${number}`}`;
+	readonly valueOf :(this :Readonly<LocalTime>) => `${number}`;
+	private [LocalTime_ISOString] :string;
+	private [LocalTime_value] :string;
+	constructor (literal :`${number}:${number}:${number}${'' | `.${number}`}`);
+	readonly getHours :(this :Readonly<LocalTime>) => _0_23;
+	readonly setHours :(this :LocalTime, hours :_0_23) => number;
+	readonly getMinutes :(this :Readonly<LocalTime>) => _0_59;
+	readonly setMinutes :(this :LocalTime, min :_0_59) => number;
+	readonly getSeconds :(this :Readonly<LocalTime>) => _0_59;
+	readonly setSeconds :(this :LocalTime, sec :_0_59) => number;
+	readonly getMilliseconds :(this :Readonly<LocalTime>) => _0_999;
+	readonly setMilliseconds :(this :LocalTime, ms :_0_999) => number;
 }
 
 type Source = string | Buffer | {
@@ -65,6 +162,7 @@ type TypeAgnosticOptions = {
 	readonly exact? :boolean,// = false
 	readonly multi? :boolean,// = false
 	readonly longer? :boolean,// = false
+	readonly comment? :boolean,// = false
 };
 
 type Table<T> = object & { [key :string] :T };
@@ -125,51 +223,22 @@ interface ArrayOfArraysWithoutBigint_WithoutInlineTable_WithoutMoreDatetime exte
 interface ArrayOf<T> extends Array<T> {
 	0 :T
 }
-interface EmptyArray extends Array<undefined> {
-	length :0
-}
+type EmptyArray = [];
+
+interface ReadonlyTable { readonly [key :string] :ReadonlyValue | readonly ReadonlyTable[] | ReadonlyTable }
+type ReadonlyValue = null | boolean | bigint | number | string | Literal | Datetime | readonly ReadonlyValue[] | ReadonlyTable;
+declare class Literal { private [LITERAL] :void }
+declare const LITERAL :unique symbol;
 
 type Datetime = OffsetDateTime | LocalDateTime | LocalDate | LocalTime;
-type OffsetDateTime = LocalDateTime & Readonly<{
-	getUTCFullYear () :_1_10000
-	getUTCMonth () :_0_11
-	getUTCDate () :_1_31
-	getUTCHours () :_0_23
-	getUTCMinutes () :_0_59
-	getUTCSeconds () :_0_59
-	getUTCMilliseconds () :_0_999
-	getUTCDay () :_0_6
-	getDay () :_0_6
-	getTimezoneOffset () :_1439_1439
-	setTimezoneOffset (_ :_1439_1439) :number
-	getTime () :number
-	setTime (time :number) :number
-}>;
-type LocalDateTime = LocalDate & LocalTime;
-type LocalDate = DateTime & Readonly<{
-	getFullYear () :_0_9999
-	setFullYear (year :_0_9999) :number
-	getMonth () :_0_11
-	setMonth (month :_0_11) :number
-	getDate () :_1_31
-	setDate (date :_1_31) :number
-}>;
-type LocalTime = DateTime & Readonly<{
-	getHours () :_0_23
-	setHours (hours :_0_23) :number
-	getMinutes () :_0_59
-	setMinutes (min :_0_59) :number
-	getSeconds () :_0_59
-	setSeconds (sec :_0_59) :number
-	getMilliseconds () :_0_999
-	setMilliseconds (ms :_0_999) :number
-}>;
-type DateTime = Readonly<{
-	valueOf () :string
-	toISOString () :string
-	constructor :DateConstructor
-	toJSON :Date['toJSON']
-}>;
+declare const OffsetDateTime_ISOString :unique symbol;
+declare const OffsetDateTime_value :unique symbol;
+declare const LocalDateTime_ISOString :unique symbol;
+declare const LocalDateTime_value :unique symbol;
+declare const LocalDate_ISOString :unique symbol;
+declare const LocalDate_value :unique symbol;
+declare const LocalTime_ISOString :unique symbol;
+declare const LocalTime_value :unique symbol;
 
 type _1439_1439 = -1439 | number | 1439;
 type _1_10000   = -1 | number | 10000;

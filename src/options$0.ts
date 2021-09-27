@@ -21,10 +21,10 @@ import * as regexps$0 from './regexps$0';
 
 const THROW_WHILE_MEETING_MULTI = {
 	[Symbol.toPrimitive] () :never {
-		iterator$0.throws(Error(`TOML.parse(,,multiLineStringJoiner) must be passed, while the source including multi-line string` + iterator$0.where(', which is found at ')));
+		iterator$0.throws(Error(`TOML.parse(,,multilineStringJoiner) must be passed, while the source including multi-line string` + iterator$0.where(', which is found at ')));
 	}
 };
-export let useWhatToJoinMultiLineString = '';
+export let useWhatToJoinMultilineString = '';
 export let usingBigInt :boolean | null = true;
 export let IntegerMin = 0;
 export let IntegerMax = 0;
@@ -38,6 +38,7 @@ export type XOptions = undefined | null | boolean | Tag | {
 	exact? :boolean,
 	null? :boolean,
 	multi? :boolean,
+	comment? :boolean,
 };
 export let endsWithQuote :boolean;
 export let zeroDatetime :boolean;
@@ -51,7 +52,8 @@ export type Table = typesTable;
 export let Table :TableConstructor;
 export let allowLonger :boolean;
 export let enableNull :boolean;
-export let allowInlineTableMultiLineAndTrailingCommaEvenNoComma :boolean;
+export let allowInlineTableMultilineAndTrailingCommaEvenNoComma :boolean;
+export let preserveComment :boolean;
 const arrayTypes = new WeakMap<Array, As>();
 const arrayTypes_get = /*#__PURE__*/get.bind(arrayTypes) as (key :Array) => As | undefined;
 const arrayTypes_set = /*#__PURE__*/set.bind(arrayTypes) as (key :Array, value :As) => object;
@@ -140,7 +142,7 @@ export const clear = () :void => {
 	zeroDatetime = false;
 };
 
-export const use = (specificationVersion :unknown, multiLineStringJoiner :unknown, useBigInt :unknown, xOptions :XOptions) :void => {
+export const use = (specificationVersion :unknown, multilineStringJoiner :unknown, useBigInt :unknown, xOptions :XOptions) :void => {
 	
 	let mixed :boolean;
 	switch ( specificationVersion ) {
@@ -173,9 +175,9 @@ export const use = (specificationVersion :unknown, multiLineStringJoiner :unknow
 	}
 	regexps$0.switchRegExp(specificationVersion);
 	
-	if ( typeof multiLineStringJoiner==='string' ) { useWhatToJoinMultiLineString = multiLineStringJoiner; }
-	else if ( multiLineStringJoiner===undefined ) { useWhatToJoinMultiLineString = THROW_WHILE_MEETING_MULTI as never; }
-	else { throw TypeError('TOML.parse(,,multiLineStringJoiner)'); }
+	if ( typeof multilineStringJoiner==='string' ) { useWhatToJoinMultilineString = multilineStringJoiner; }
+	else if ( multilineStringJoiner===undefined ) { useWhatToJoinMultilineString = THROW_WHILE_MEETING_MULTI as never; }
+	else { throw TypeError('TOML.parse(,,multilineStringJoiner)'); }
 	
 	if ( useBigInt===undefined || useBigInt===true ) { usingBigInt = true; }
 	else if ( useBigInt===false ) { usingBigInt = false; }
@@ -190,29 +192,30 @@ export const use = (specificationVersion :unknown, multiLineStringJoiner :unknow
 	
 	if ( xOptions==null || xOptions===false ) {
 		Table = PlainTable;
-		sError = allowLonger = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = false;
+		sError = allowLonger = enableNull = allowInlineTableMultilineAndTrailingCommaEvenNoComma = false;
 		collect = collect_off;
 	}
 	else if ( xOptions===true ) {
 		Table = OrderedTable;
-		allowLonger = sError = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = true;
+		allowLonger = sError = enableNull = allowInlineTableMultilineAndTrailingCommaEvenNoComma = true;
 		collect = collect_off;
 	}
 	else if ( typeof xOptions==='function' ) {
 		Table = OrderedTable;
-		allowLonger = sError = enableNull = allowInlineTableMultiLineAndTrailingCommaEvenNoComma = true;
+		allowLonger = sError = enableNull = allowInlineTableMultilineAndTrailingCommaEvenNoComma = true;
 		if ( !mixed ) { throw TypeError('TOML.parse(,,,,tag) needs at least TOML 1.0 to support mixed type array'); }
 		processor = xOptions;
 		collect = collect_on;
 	}
 	else {
-		const { order, longer, exact, null: _null, multi, tag, ...unknown } = xOptions;
+		const { order, longer, exact, null: _null, multi, comment, tag, ...unknown } = xOptions;
 		if ( ownKeys(unknown).length ) { throw TypeError('TOML.parse(,,,,xOptions)'); }
 		Table = order ? OrderedTable : PlainTable;
 		allowLonger = !!longer;
 		sError = !!exact;
 		enableNull = !!_null;
-		allowInlineTableMultiLineAndTrailingCommaEvenNoComma = !!multi;
+		allowInlineTableMultilineAndTrailingCommaEvenNoComma = !!multi;
+		preserveComment = !!comment;
 		if ( tag ) {
 			if ( typeof tag!=='function' ) { throw TypeError('TOML.parse(,,,,xOptions.tag)'); }
 			if ( !mixed ) { throw TypeError('TOML.parse(,,,,xOptions) xOptions.tag needs at least TOML 1.0 to support mixed type array'); }
