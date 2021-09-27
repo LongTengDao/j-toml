@@ -262,8 +262,6 @@ declare function stringify (根表 :只读表, 选项? :{
 你也可以用 `multiline` 函数将表标记为多行模式的内联表（返回传入表），不过注意这并不是目前标准所允许的语法（记得在序列化时指定 `选项.xBeforeNewlineInMultilineTable` 以使此类标记不被忽略）。
 
 ```javascript
-const TOML = require('@ltd/j-toml');
-
 TOML.stringify({
     key: 'value',
     dotted: {
@@ -310,8 +308,6 @@ key = 'value'
 否则，数组默认被作为多行模式的静态数组看待。如果你希望单行表示，可以用 `inline` 函数进行标记。
 
 ```javascript
-const TOML = require('@ltd/j-toml');
-
 TOML.stringify({
     staticArray: [
         'string',
@@ -341,17 +337,15 @@ staticArray_singleline = [ 1.0, 2 ]
 现在，你可以在表中书写 `[commentFor(key)]` 键（这会得到一个 `symbol` 键，其键值应为注释内容字符串），这样，在最终的序列化结果中，`key` 键对应的键值后面就会跟上这个注释了！
 
 ```javascript
-const TOML = require('@ltd/j-toml');
-
 TOML.stringify({
-    [TOML.commentFor('key')]: ' 这是一个键值对',
+    [commentFor('key')]: ' 这是一个键值对',
     key: 'value',
     dotted: {
-        [TOML.commentFor('key')]: ' 这是一个点分隔键值对',
+        [commentFor('key')]: ' 这是一个点分隔键值对',
         key: 'value',
     },
     table: {
-        [TOML.commentFor('header')]: ' 这是一个表头（不能是表数组中的表）',
+        [commentFor('header')]: ' 这是一个表头（不能是表数组中的表）',
         header: Section({
         }),
     },
@@ -375,16 +369,14 @@ dotted.key = 'value' # 这是一个点分隔键值对
 当你需要直接序列化一个全新的临时数据时，直接使用 `literal` 来规定具体的书写形式：
 
 ```javascript
-const TOML = require('@ltd/j-toml');
-
 TOML.stringify({
-    underscore: TOML.literal`1_000`,
-    zero: TOML.literal`10.00`,
-    base: TOML.literal`0o777`,
-    mark: TOML.inline([ '+10e10', '+inf' ].map(TOML.literal)),
-    multilineString: TOML.literal`"""
+    underscore: literal`1_000`,
+    zero: literal`10.00`,
+    base: literal`0o777`,
+    mark: inline([ '+10e10', '+inf' ].map(literal)),
+    multilineString: literal`"""
 1\b2
-2"""`,
+3"""`,
 });
 ```
 
@@ -396,7 +388,7 @@ base = 0o777
 mark = [ +10e10, +inf ]
 multilineString = """
 1\b2
-2"""
+3"""
 
 ```
 
@@ -407,13 +399,11 @@ multilineString = """
 base = 0o777
 multilineString = """
 1\b2
-2"""
+3"""
 
 ```
 
 ```javascript
-const TOML = require('@ltd/j-toml');
-
 const table = TOML.parse('/path/to/example.toml', '\n');
 
 table.base = TOML.literal('0o' + table.base.toString(8).padStart(3, '0'));
@@ -427,7 +417,7 @@ TOML.stringify(table);
 base = 0o777
 multilineString = """
 1\b2
-2\b4"""
+3\b4"""
 
 ```
 
@@ -446,8 +436,6 @@ multilineString = """
 在频繁出现此场景的程序中，可以考虑将 `parse` 出的表转化为一个包含 `toTOML` 之类方法的类实例，在其中规定各属性的序列化方案，并在 `stringify` 时使用这个副本，这样可以大大改善体验：
 
 ```javascript
-const TOML = require('@ltd/j-toml');
-
 const model = new class {
     base;
     multilineString;
