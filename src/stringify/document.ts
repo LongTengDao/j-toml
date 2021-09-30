@@ -2,9 +2,10 @@ import TypeError from '.TypeError';
 import RangeError from '.RangeError';
 import SyntaxError from '.SyntaxError';
 import Array from '.Array';
-import test from '.RegExp.prototype.test';
 import isSafeInteger from '.Number.isSafeInteger';
 import Null from '.null';
+
+import { theRegExp } from '@ltd/j-regexp';
 
 import TOMLSection from './section';
 
@@ -16,7 +17,7 @@ const name2code = Null({
 	pair: 4,
 } as const);
 
-const IS_INDENT = /*#__PURE__*/test.bind(/^[\t ]*$/);
+const IS_INDENT = /*#__PURE__*/( () => theRegExp(/^[\t ]*$/).test )();
 
 export default class TOMLDocument extends Array<TOMLSection> {
 	

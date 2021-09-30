@@ -12,8 +12,7 @@ declare module '.BigInt' { export default BigInt; }
 
 declare module '.Boolean' { export default Boolean; }
 
-declare module '.Buffer.from?' { export default Buffer.from; }
-declare module '.Buffer.isBuffer?=' { export default Buffer.isBuffer; }
+declare module '.Buffer?' { export default Buffer; }
 
 declare module '.Date' { export default Date; }
 declare module '.Date.parse' { export default Date.parse; }
@@ -109,7 +108,6 @@ declare module '.Reflect.ownKeys' { export default ownKeys;
 }
 
 declare module '.RegExp' { export default RegExp; }
-declare module '.RegExp.prototype' { export default RegExp.prototype; }
 declare module '.RegExp.prototype.exec' { export default RegExp.prototype.exec; }
 declare module '.RegExp.prototype.test' { export default RegExp.prototype.test; }
 
@@ -124,6 +122,8 @@ declare module '.Symbol.toStringTag?' { export default Symbol.toStringTag; }
 declare module '.SyntaxError' { export default SyntaxError; }
 
 declare module '.TypeError' { export default TypeError; }
+
+declare module '.Uint8Array' { export default Uint8Array; }
 
 declare module '.WeakMap' { export default constructor;
 	class constructor<K extends object, V> extends WeakMap<K, V> { constructor (entries? :Iterable<{ readonly 0 :K, readonly 1 :V }>) }

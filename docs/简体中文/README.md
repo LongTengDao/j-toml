@@ -58,7 +58,10 @@ declare function parse (
     超级选项? :object,
 ) :表;
 
-type 源 = string | Buffer | { readonly path :string, readonly data? :string | Buffer };
+type 源 = string | ArrayBufferLike | Readonly<
+    | { path :string, data :string | ArrayBufferLike, require? :NodeRequire }
+    | { path :string,                                 require  :NodeRequire }
+>;
 type 遵循规范版本 = 1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1;
 type 表 = object;
 ```
@@ -67,19 +70,20 @@ type 表 = object;
 
 0.  #### `源`
     
-    *   类型：`string | Buffer | { readonly path :string, readonly data? :string | Buffer }`
+    *   类型：`string | ArrayBufferLike | Readonly<{ path :string, data :string | ArrayBufferLike, require? :NodeRequire } | { path :string, require :NodeRequire }>`
     *   必需
     
-    你可以传入 `string`，也可以传入文件原始的二进制 `Buffer`（UTF-8）作为源内容。
+    你可以传入 `string`，也可以传入 UTF-8 编码的文件原始二进制数据 `ArrayBufferLike`（`Buffer | Uint8Array | ArrayBuffer`）作为源内容。
     
     一个区别是，当传入 `string` 时，只会根据规范检查所有字符是否均为有效的 Unicode 字符（未配对的 UCS-4 字符码是无效的）；  
-    而传入 `Buffer` 时，还会额外检查是否存在未知码点（而这在 `string` 状态下已经被自动替换为 `U+FFFD`）。
+    而传入 `ArrayBufferLike` 时，还会额外检查是否存在未知码点（而这在 `string` 状态下已经被自动替换为 `U+FFFD`）。
     
-    另一个区别是，`Buffer` 允许以 UTF BOM（`U+FEFF`）开头，这会用于文件编码的确认（但它必须是 UTF-8 编码的，这不是技术问题，而是规范的要求），并在正式解析前跳过；  
+    另一个区别是，`ArrayBufferLike` 允许以 UTF BOM（`U+FEFF`）开头，这会用于文件编码的确认（但它必须是 UTF-8 编码的，这不是技术问题，而是规范的要求），并在正式解析前跳过；  
     而 `string` 不允许，因为 BOM 属于 UTF 而非 TOML。
     
-    如果你希望内容抛错时控制台信息更加友好，请传递一个 `{ path, data }` 对象，`path` 键是 `.toml` 文件的路径，`data` 键是源内容（`string` 或 `Buffer`）。  
-    你也可以省略 `data` 键，此时 `fs.readFileSync(源.path)` 将被自动调用。
+    如果你希望内容抛错时控制台信息更加友好，请传递一个 `{ path, data }` 对象，`path` 属性是 `.toml` 文件的路径，`data` 属性是文件的内容（`string` 或 `ArrayBufferLike`）。  
+    你也可以省略 `data` 属性，此时必须传入 `require` 属性，因为需要使用 `require('fs').readFileSync` 接口来读取。  
+    不论是否传入 `data`，只要能够获取到 `$ = require?.resolve?.paths?.('')?.[0]?.replace(/node_modules$/, '')`，都会通过 `require('path').resolve($, 源.path)` 来获取绝对路径。
     
 1.  #### `遵循规范版本`
     
@@ -157,14 +161,14 @@ TOML.stringify(根表[, 选项]);
 ```
 
 ```typescript
-declare function stringify (根表 :只读表, 选项? :{
-    readonly newline? :'\n' | '\r\n',
-    readonly newlineAround? :'document' | 'section' | 'header' | 'pairs' | 'pair',
-    readonly indent? :string | number,
-    readonly T? :'T' | ' ',
-    readonly xNull? :boolean,
-    readonly xBeforeNewlineInMultilineTable? :',' | '',
-}) :string | string[];
+declare function stringify (根表 :只读表, 选项? :Readonly<{
+    newline? :'\n' | '\r\n',
+    newlineAround? :'document' | 'section' | 'header' | 'pairs' | 'pair',
+    indent? :string | number,
+    T? :'T' | ' ',
+    xNull? :boolean,
+    xBeforeNewlineInMultilineTable? :',' | '',
+}>) :string | string[];
 ```
 
 ### `arguments`
@@ -285,6 +289,7 @@ TOML.stringify({
 
 ```toml
 
+
 key = 'value'
 dotted.key = 'value'
 inlineTable = { key = 'value' }
@@ -301,6 +306,7 @@ key = 'value'
 [table.table]
 
 key = 'value'
+
 
 ```
 
@@ -323,6 +329,7 @@ TOML.stringify({
 
 ```toml
 
+
 staticArray = [
     'string',
     { },
@@ -330,6 +337,7 @@ staticArray = [
 staticArray_singleline = [ 1.0, 2 ]
 
 [[arrayOfTables]]
+
 
 ```
 
@@ -354,10 +362,12 @@ TOML.stringify({
 
 ```toml
 
+
 key = 'value' # 这是一个键值对
 dotted.key = 'value' # 这是一个点分隔键值对
 
 [table.header] # 这是一个表头（不能是表数组中的表）
+
 
 ```
 
@@ -382,6 +392,7 @@ TOML.stringify({
 
 ```toml
 
+
 underscore = 1_000
 zero = 10.00
 base = 0o777
@@ -390,16 +401,19 @@ multilineString = """
 1\b2
 3"""
 
+
 ```
 
 其中，当多行字符串的内容来自一个变量时（比如 `parse` 出的历史结果），`multiline`（字符串场景）会起到作用：
 
 ```toml
 
+
 base = 0o777
 multilineString = """
 1\b2
 3"""
+
 
 ```
 
@@ -414,10 +428,12 @@ TOML.stringify(table);
 
 ```toml
 
+
 base = 0o777
 multilineString = """
 1\b2
 3\b4"""
+
 
 ```
 

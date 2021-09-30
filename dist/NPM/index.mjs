@@ -1,6 +1,4 @@
-﻿import { readFileSync } from 'fs';
-
-const version = '1.16.1';
+﻿const version = '1.17.0';
 
 const Error$1 = Error;
 
@@ -8,19 +6,7 @@ const TypeError$1 = TypeError;
 
 const assign$1 = Object.assign;
 
-const isBuffer = (
-	/*! j-globals: Buffer.isBuffer (polyfill) */
-	typeof Buffer==='function' ? Buffer.isBuffer : function isBuffer () { return false; }
-	/*¡ j-globals: Buffer.isBuffer (polyfill) */
-);
-
 const undefined$1 = void null;
-
-const from = (
-	/*! j-globals: Buffer.from (fallback) */
-	typeof Buffer==='function' && /*#__PURE__*/Buffer.hasOwnProperty('from') ? Buffer.from : undefined$1
-	/*¡ j-globals: Buffer.from (fallback) */
-);
 
 const bind = Function.prototype.bind;
 
@@ -233,27 +219,6 @@ var clearRegExp = '$_' in RegExp$1
 	};
 
 /*¡ j-regexp */
-
-const RegExp_prototype = RegExp.prototype;
-
-/*!@preserve@license
- * 模块名称：j-utf
- * 模块功能：UTF 相关共享实用程序。从属于“简计划”。
-   　　　　　UTF util. Belong to "Plan J".
- * 模块版本：4.0.0
- * 许可条款：LGPL-3.0
- * 所属作者：龙腾道 <LongTengDao@LongTengDao.com> (www.LongTengDao.com)
- * 问题反馈：https://GitHub.com/LongTengDao/j-utf/issues
- * 项目主页：https://GitHub.com/LongTengDao/j-utf/
- */
-
-var NON_SCALAR = (
-	'unicode' in RegExp_prototype
-		? RegExp$1('[\\uD800-\\uDFFF]', 'u')
-		: /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]/
-);
-
-/*¡ j-utf */
 
 //import * as options\$0 from './options\$0';
 
@@ -596,7 +561,7 @@ const MULTI_LINE_LITERAL_STRING_0 = /*#__PURE__*/( () => newRegExp.s           `
 	'''()
 	${Whitespace}*
 	(.*)`.exec )();
-let __MULTI_LINE_LITERAL_STRING_exec                                    ;
+let __MULTI_LINE_LITERAL_STRING_exec = MULTI_LINE_LITERAL_STRING_0;
 
 const SYM_WHITESPACE = /*#__PURE__*/( () => newRegExp.s`
 	^
@@ -634,45 +599,41 @@ const TAG_REST_exec = /*#__PURE__*/( () => newRegExp.s       `
 
 /* optimized (avoid overflow or lost) */
 
-const MULTI_LINE_BASIC_STRING = /(?<=^(?:[^\\"]+|\\.|""?(?!")))/s;/// .?
+const MULTI_LINE_BASIC_STRING = /*#__PURE__*/theRegExp(/(?:[^\\"]+|\\.|""?(?!")){1,10}/sy);/// .?
 const MULTI_LINE_BASIC_STRING_exec_0 = (_        )         => {
-	let count         = 0;
-	for ( let offset         = _.search(MULTI_LINE_BASIC_STRING); offset>0; ) {
-		offset = _.slice(count += offset).search(MULTI_LINE_BASIC_STRING);
-	}
-	return _.slice(0, count);
+	let lastIndex         = MULTI_LINE_BASIC_STRING.lastIndex = 0;
+	while ( MULTI_LINE_BASIC_STRING.test(_) ) { lastIndex = MULTI_LINE_BASIC_STRING.lastIndex; }
+	return _.slice(0, lastIndex);
 };
 
 const ESCAPED_EXCLUDE_CONTROL_CHARACTER_TAB______ = /[^\\\x00-\x08\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|[\t ]*\n[\t\n ]*|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})/g;
 const ESCAPED_EXCLUDE_CONTROL_CHARACTER__________ = /[^\\\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]| *\n[\n ]*|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})/g;
 const ESCAPED_EXCLUDE_CONTROL_CHARACTER_DEL______ = /[^\\\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\]|\n[\n ]*|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})/g;
 const ESCAPED_EXCLUDE_CONTROL_CHARACTER_DEL_SLASH = /[^\\\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\/]|\n[\n ]*|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})/g;
-let __ESCAPED_EXCLUDE_CONTROL_CHARACTER        ;
+let __ESCAPED_EXCLUDE_CONTROL_CHARACTER = ESCAPED_EXCLUDE_CONTROL_CHARACTER_TAB______;
 const ESCAPED_EXCLUDE_CONTROL_CHARACTER_test = (_        )          => !_.replace(__ESCAPED_EXCLUDE_CONTROL_CHARACTER, '');///
 
-const BASIC_STRING_TAB______ = /(?<=^(?:[^\\"\x00-\x08\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})))/;
-const BASIC_STRING__________ = /(?<=^(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})))/;
-const BASIC_STRING_DEL______ = /(?<=^(?:[^\\"\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\]|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})))/;
-const BASIC_STRING_DEL_SLASH = /(?<=^(?:[^\\"\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\/]|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})))/;
-let __BASIC_STRING                               ;
+const BASIC_STRING_TAB______ = /*#__PURE__*/theRegExp(/(?:[^\\"\x00-\x08\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})){1,10}/y);
+const BASIC_STRING__________ = /*#__PURE__*/theRegExp(/(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})){1,10}/y);
+const BASIC_STRING_DEL______ = /*#__PURE__*/theRegExp(/(?:[^\\"\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\]|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})){1,10}/y);
+const BASIC_STRING_DEL_SLASH = /*#__PURE__*/theRegExp(/(?:[^\\"\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\/]|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})){1,10}/y);
+let __BASIC_STRING = BASIC_STRING_DEL_SLASH;
 const BASIC_STRING_exec_1 = (line        )         => {
-	let count         = 1;
-	for ( let offset         = line.slice(1).search(__BASIC_STRING); offset>0; ) {
-		offset = line.slice(count += offset).search(__BASIC_STRING);
-	}
-	count!==line.length && line[count]==='"' || throws(SyntaxError$1(`Bad basic string` + where(' at ')));
-	return line.slice(1, count);
+	let lastIndex         = __BASIC_STRING.lastIndex = 1;
+	while ( __BASIC_STRING.test(line) ) { lastIndex = __BASIC_STRING.lastIndex; }
+	lastIndex!==line.length && line[lastIndex]==='"' || throws(SyntaxError$1(`Bad basic string` + where(' at ')));
+	return line.slice(1, lastIndex);
 };
 
 const IS_DOT_KEY = /*#__PURE__*/( () => theRegExp(/^[ \t]*\./).test )();
 const DOT_KEY = /^[ \t]*\.[ \t]*/;
 const BARE_KEY_STRICT = /*#__PURE__*/( () => theRegExp(/^[\w-]+/).exec )();
 const BARE_KEY_FREE = /*#__PURE__*/( () => theRegExp(/^[^ \t#=[\]'".]+(?:[ \t]+[^ \t#=[\]'".]+)*/).exec )();
-let __BARE_KEY_exec                      ;
+let __BARE_KEY_exec = BARE_KEY_FREE;
 const LITERAL_KEY____ = /*#__PURE__*/( () => theRegExp(/^'[^'\x00-\x08\x0B-\x1F\x7F]*'/).exec )();
 const LITERAL_KEY_DEL = /*#__PURE__*/( () => theRegExp(/^'[^'\x00-\x08\x0B-\x1F]*'/).exec )();
-let __LITERAL_KEY_exec                        ;
-let supportArrayOfTables         ;
+let __LITERAL_KEY_exec = LITERAL_KEY_DEL;
+let supportArrayOfTables = true;
 
 const TABLE_DEFINITION_exec_groups = (lineRest        , parseKeys                                                                                     )                                                                                                   => {
 	const asArrayItem          = lineRest[1]==='[';
@@ -701,7 +662,7 @@ const KEY_VALUE_PAIR_exec_groups = ({ leadingKeys, finalKey, lineRest }         
 
 const CONTROL_CHARACTER_EXCLUDE_TAB____ = /*#__PURE__*/( () => theRegExp(/[\x00-\x08\x0B-\x1F\x7F]/).test )();
 const CONTROL_CHARACTER_EXCLUDE_TAB_DEL = /*#__PURE__*/( () => theRegExp(/[\x00-\x08\x0B-\x1F]/).test )();
-let __CONTROL_CHARACTER_EXCLUDE_test                                         ;
+let __CONTROL_CHARACTER_EXCLUDE_test = CONTROL_CHARACTER_EXCLUDE_TAB____;
 
 const switchRegExp = (specificationVersion        )       => {
 	switch ( specificationVersion ) {
@@ -760,6 +721,7 @@ let IntegerMax = 0;
 	               
 	                
 	                  
+	                 
   
 let endsWithQuote         ;
 let zeroDatetime         ;
@@ -775,6 +737,7 @@ let allowLonger         ;
 let enableNull         ;
 let allowInlineTableMultilineAndTrailingCommaEvenNoComma         ;
 let preserveComment         ;
+let disableDigit         ;
 const arrayTypes = new WeakMap$1           ();
 const arrayTypes_get = /*#__PURE__*/get.bind(arrayTypes)                                  ;
 const arrayTypes_set = /*#__PURE__*/set.bind(arrayTypes)                                     ;
@@ -934,7 +897,7 @@ const use = (specificationVersion         , multilineStringJoiner         , useB
 		collect = collect_on;
 	}
 	else {
-		const { order, longer, exact, null: _null, multi, comment, tag, ...unknown } = xOptions;
+		const { order, longer, exact, null: _null, multi, comment, string, tag, ...unknown } = xOptions;
 		if ( ownKeys(unknown).length ) { throw TypeError$1('TOML.parse(,,,,xOptions)'); }
 		Table = order ? OrderedTable : PlainTable;
 		allowLonger = !!longer;
@@ -942,6 +905,7 @@ const use = (specificationVersion         , multilineStringJoiner         , useB
 		enableNull = !!_null;
 		allowInlineTableMultilineAndTrailingCommaEvenNoComma = !!multi;
 		preserveComment = !!comment;
+		disableDigit = !!string;
 		if ( tag ) {
 			if ( typeof tag!=='function' ) { throw TypeError$1('TOML.parse(,,,,xOptions.tag)'); }
 			if ( !mixed ) { throw TypeError$1('TOML.parse(,,,,xOptions) xOptions.tag needs at least TOML 1.0 to support mixed type array'); }
@@ -1441,9 +1405,10 @@ const IS_XOB_INTEGER = /*#__PURE__*/( () => theRegExp(/^0(?:x[\dA-Fa-f][_\dA-Fa-
 const BAD_XOB = /*#__PURE__*/( () => newRegExp`_(?![\dA-Fa-f])`.test )();
 const UNDERSCORES_SIGN = /_|^[-+]/g;
 
+const IS_INTEGER = (literal        )          => ( IS_D_INTEGER(literal) || /*options\$0.xob && */IS_XOB_INTEGER(literal) ) && !BAD_XOB(literal);
+
 const BigIntInteger = (literal        )         => {
-	( IS_D_INTEGER(literal) || /*options\$0.xob && */IS_XOB_INTEGER(literal) ) && !BAD_XOB(literal)
-	|| throws(SyntaxError$1(`Invalid Integer ${literal}` + where(' at ')));
+	IS_INTEGER(literal) || throws(SyntaxError$1(`Invalid Integer ${literal}` + where(' at ')));
 	let bigInt         = BigInt$1(literal.replace(UNDERSCORES_SIGN, ''));
 	if ( literal[0]==='-' ) { bigInt = -bigInt; }
 	allowLonger
@@ -1453,8 +1418,7 @@ const BigIntInteger = (literal        )         => {
 };
 
 const NumberInteger = (literal        )         => {
-	( IS_D_INTEGER(literal) || /*options\$0.xob && */IS_XOB_INTEGER(literal) ) && !BAD_XOB(literal)
-	|| throws(SyntaxError$1(`Invalid Integer ${literal}` + where(' at ')));
+	IS_INTEGER(literal) || throws(SyntaxError$1(`Invalid Integer ${literal}` + where(' at ')));
 	const number = literal[0]==='-'
 		? -literal.replace(UNDERSCORES_SIGN, '')
 		: +literal.replace(UNDERSCORES_SIGN, '');
@@ -1484,6 +1448,9 @@ const IS_FLOAT = /*#__PURE__*/( () => newRegExp`
 	$`.test )();
 const UNDERSCORES = /_/g;
 const IS_ZERO = /*#__PURE__*/( () => theRegExp(/^[-+]?0(?:\.[0_]+)?(?:[eE][-+]?0+)?$/).test )();
+
+const IS_XXX = /*#__PURE__*/( () => theRegExp(/^(?:-?(?:inf|nan)|true|false|null)$/).test )();
+const IS_FLOAT_OR_XXXX = (literal        )          => IS_FLOAT(literal) ? !BAD_D(literal) : IS_XXX(literal);
 
 const Float = (literal        )         => {
 	if ( !IS_FLOAT(literal) || BAD_D(literal) ) {
@@ -1680,7 +1647,8 @@ const getComment =                    (table                                    
 
 const IS_OFFSET$ = /*#__PURE__*/( () => theRegExp(OFFSET$).test )();
 
-const parseKeys = (lineRest        )                                                                => {
+const parseKeys = (rest        )                                                                => {
+	let lineRest         = rest;
 	const leadingKeys           = [];
 	let lastIndex         = -1;
 	for ( ; ; ) {
@@ -1698,6 +1666,10 @@ const parseKeys = (lineRest        )                                            
 		}
 		if ( IS_DOT_KEY(lineRest) ) { lineRest = lineRest.replace(DOT_KEY, ''); }
 		else { break; }
+	}
+	if ( disableDigit ) {
+		const keys = rest.slice(0, -lineRest.length);
+		( IS_INTEGER(keys) || IS_FLOAT_OR_XXXX(keys) ) && throws(SyntaxError$1(`Bad bare key disabled by xOptions.string` + where(' at ')));
 	}
 	if ( disallowEmptyKey ) {
 		let index         = lastIndex;
@@ -1974,39 +1946,151 @@ const Root = ()        => {
 	return rootTable;
 };
 
-const IS_NON_SCALAR = /*#__PURE__*/( () => theRegExp(NON_SCALAR).test )();
-const BOM = '\uFEFF';
-const buf2str = (buf        ) => {
-	const str = buf.toString();
-	if ( !from(str).equals(buf) ) { throw Error$1('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any unknown code point.'); }
-	return str && str[0]===BOM ? str.slice(1) : str;
-};
+const Uint8Array$1 = Uint8Array;
+
+const Buffer$1 = typeof Buffer==='undefined' ? undefined$1 : Buffer;
+
+const isArrayBufferLike = (value        )                       => 'byteLength' in value;
+
+const message = 'A TOML doc must be a (ful-scalar) valid UTF-8 file, without any unknown code point.';
+
+const arrayBufferLike2string                                             = Buffer$1
+	
+	? ( ({ isBuffer, [Symbol.species]: Buf, byteLength, allocUnsafe }) =>
+		(arrayBufferLike                                   )         => {
+			if ( !arrayBufferLike.byteLength ) { return ''; }
+			const buffer         = isBuffer(arrayBufferLike) ? arrayBufferLike : 'length' in arrayBufferLike ? new Buf(arrayBufferLike.buffer, arrayBufferLike.byteOffset, arrayBufferLike.length) : new Buf(arrayBufferLike);
+			const string         = buffer.toString();
+			const length         = byteLength(string);
+			if ( length===buffer.length ) {
+				const utf8 = allocUnsafe(length);
+				///@ts-ignore
+				utf8.utf8Write(string, 0, length);
+				if ( utf8.equals(buffer) ) { return string[0]==='\uFEFF' ? string.slice(1) : string; }
+			}
+			throw Error$1(message);
+		}
+	)(Buffer$1                                                                                                                         )///
+	
+	: (arrayBufferLike                          )         => {
+		if ( !arrayBufferLike.byteLength ) { return ''; }
+		const uint8Array             = 'length' in arrayBufferLike ? arrayBufferLike : new Uint8Array$1(arrayBufferLike);
+		const { length } = uint8Array;
+		const length_1 = length - 1;
+		const length_2 = length_1 - 1;
+		const length_3 = length_2 - 1;
+		const stringArray           = [];
+		let stringArray_length         = 0;
+		let index         = 0;
+		do {
+			let codePoint         = uint8Array[index] ;
+			if ( codePoint<0b1100_0000 ) {
+				if ( codePoint<0b1000_0000 ) {
+					stringArray[stringArray_length++] = fromCharCode(codePoint);
+					index += 1;
+					continue;
+				}
+			}
+			else if ( codePoint<0b1110_0000 ) {
+				if ( index<length_1 ) {
+					const secondByte         = uint8Array[index + 1] ;
+					if ( ( secondByte&0b1100_0000 )===0b1000_0000 ) {
+						codePoint = ( codePoint&0b0001_1111 )<<6|( secondByte&0b0011_1111 );
+						if ( 0b0111_1111<codePoint ) {
+							stringArray[stringArray_length++] = fromCharCode(codePoint);
+							index += 2;
+							continue;
+						}
+					}
+				}
+			}
+			else if ( codePoint<0b1111_0000 ) {
+				if ( index<length_2 ) {
+					const secondByte         = uint8Array[index + 1] ;
+					const thirdByte         = uint8Array[index + 2] ;
+					if ( ( secondByte&0b1100_0000 )===0b1000_0000 && ( thirdByte&0b1100_0000 )===0b1000_0000 ) {
+						codePoint = ( codePoint&0b0000_1111 )<<12|( secondByte&0b0011_1111 )<<6|( thirdByte&0b0011_1111 );
+						if ( ( codePoint<0xD800 ? 0x07FF : 0xDFFF )<codePoint ) {
+							stringArray[stringArray_length++] = fromCharCode(codePoint);
+							index += 3;
+							continue;
+						}
+					}
+				}
+			}
+			else {
+				if ( index<length_3 ) {
+					const secondByte         = uint8Array[index + 1] ;
+					const thirdByte         = uint8Array[index + 2] ;
+					const fourthByte         = uint8Array[index + 3] ;
+					if ( ( secondByte&0b1100_0000 )===0b1000_0000 && ( thirdByte&0b1100_0000 )===0b1000_0000 && ( fourthByte&0b1100_0000 )===0b1000_0000 ) {
+						codePoint = ( codePoint&0b0000_1111 )<<18|( secondByte&0b0011_1111 )<<12|( thirdByte&0b0011_1111 )<<6|( fourthByte&0b0011_1111 );
+						if ( 0xFFFF<codePoint && codePoint<0x11_0000 ) {
+							stringArray[stringArray_length++] = fromCodePoint(codePoint);
+							index += 4;
+							continue;
+						}
+					}
+				}
+			}
+			throw Error$1(message);
+		}
+		while ( index!==length );
+		const string = stringArray.join('');
+		return string[0]==='\uFEFF' ? string.slice(1) : string;
+	};
+
+const IS_NON_SCALAR = /*#__PURE__*/( () => theRegExp(/[\uD800-\uDFFF]/u).test )();
 
 let holding          = false;
-const parse = (source        , specificationVersion                                   , multilineStringJoiner        , useBigInt                   , xOptions                     )        => {
+
+const parse = (source        , specificationVersion                                   , multilineStringJoiner                                                                                                    , useBigInt                   , xOptions                     )        => {
 	if ( holding ) { throw Error$1('parse during parsing.'); }
 	holding = true;
 	let rootTable       ;
 	let process                   ;
 	try {
-		let sourcePath        ;
-		if ( isBuffer(source) ) {
-			source = buf2str(source);
-			sourcePath = '';
+		let sourcePath         = '';
+		if ( typeof source==='object' && source ) {
+			if ( isArrayBufferLike(source) ) { source = arrayBufferLike2string(source); }
+			else {
+				sourcePath = source.path;
+				if ( typeof sourcePath!=='string' ) { throw TypeError$1('TOML.parse(source.path)'); }
+				const { data, require: req = typeof require==='function' ? require : undefined$1 } = source;
+				if ( req ) {
+					const dirname_ = req.resolve?.paths?.('')?.[0]?.replace(/node_modules$/, '');
+					if ( dirname_ ) {
+						sourcePath = ( req                                          )('path').resolve(dirname_, sourcePath);
+						if ( typeof sourcePath!=='string' ) { throw TypeError$1(`TOML.parse(source.require('path').resolve)`); }
+					}
+					if ( data===undefined$1 ) {
+						const data = ( req                                      )('fs').readFileSync(sourcePath);
+						if ( typeof data==='object' && data && isArrayBufferLike(data) ) { source = arrayBufferLike2string(data); }
+						else { throw TypeError$1(`TOML.parse(source.require('fs').readFileSync)`); }
+					}
+					else if ( typeof data==='string' ) { source = data; }
+					else {
+						if ( typeof data==='object' && data && isArrayBufferLike(data) ) { source = arrayBufferLike2string(data); }
+						else { throw TypeError$1('TOML.parse(source.data)'); }
+					}
+				}
+				else {
+					if ( data===undefined$1 ) { throw TypeError$1('TOML.parse(source.data|source.require)'); }
+					else if ( typeof data==='string' ) { source = data; }
+					else {
+						if ( typeof data==='object' && data && isArrayBufferLike(data) ) { source = arrayBufferLike2string(data); }
+						else { throw TypeError$1('TOML.parse(source.data)'); }
+					}
+				}
+			}
 		}
-		else if ( typeof source==='object' && source ) {
-			sourcePath = source.path;
-			if ( typeof sourcePath!=='string' ) { throw TypeError$1('TOML.parse(source.path)'); }
-			const { data } = source;
-			if ( data===undefined$1 ) { source = buf2str(readFileSync(sourcePath)); }
-			else if ( isBuffer(data) ) { source = buf2str(data); }
-			else if ( typeof data==='string' ) { source = data; }
-			else { throw TypeError$1('TOML.parse(source.data)'); }
-		}
-		else if ( typeof source==='string' ) { sourcePath = ''; }
-		else { throw TypeError$1('TOML.parse(source)'); }
+		else if ( typeof source!=='string' ) { throw TypeError$1('TOML.parse(source)'); }
 		try {
 			if ( IS_NON_SCALAR(source) ) { throw Error$1('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any uncoupled UCS-4 character code.'); }
+			if ( typeof multilineStringJoiner==='object' && multilineStringJoiner ) {
+				if ( useBigInt!==undefined$1 || xOptions!==undefined$1 ) { throw TypeError$1('options mode ? args mode'); }
+				( { multilineStringJoiner, useBigInt, x: xOptions } = multilineStringJoiner );
+			}
 			try {
 				use(specificationVersion, multilineStringJoiner, useBigInt, xOptions);
 				todo(source, sourcePath);
@@ -2026,17 +2110,19 @@ const parse = (source        , specificationVersion                             
 };
 
 const parse$1 = /*#__PURE__*/assign$1(
-	(source        , specificationVersion                                   , multilineStringJoiner        , useBigInt                   , xOptions                     ) => typeof specificationVersion==='number'
-		? parse(source, specificationVersion, multilineStringJoiner, useBigInt, xOptions)
-		: parse(source, 1.0, specificationVersion          , multilineStringJoiner                                       , useBigInt                      ),
+	(source        , specificationVersion                                   , multilineStringJoiner         , useBigInt                   , xOptions                     ) =>
+		typeof specificationVersion==='number'
+			? parse(source, specificationVersion, multilineStringJoiner, useBigInt, xOptions)
+			: parse(source, 1.0, specificationVersion          , multilineStringJoiner                                       , useBigInt                      )
+	,
 	{
-		'1.0': (source        , multilineStringJoiner        , useBigInt                   , xOptions                     ) => parse(source, 0.1, multilineStringJoiner, useBigInt, xOptions),
-		1.0: (source        , multilineStringJoiner        , useBigInt                   , xOptions                     ) => parse(source, 1.0, multilineStringJoiner, useBigInt, xOptions),
-		0.5: (source        , multilineStringJoiner        , useBigInt                   , xOptions                     ) => parse(source, 0.5, multilineStringJoiner, useBigInt, xOptions),
-		0.4: (source        , multilineStringJoiner        , useBigInt                   , xOptions                     ) => parse(source, 0.4, multilineStringJoiner, useBigInt, xOptions),
-		0.3: (source        , multilineStringJoiner        , useBigInt                   , xOptions                     ) => parse(source, 0.3, multilineStringJoiner, useBigInt, xOptions),
-		0.2: (source        , multilineStringJoiner        , useBigInt                   , xOptions                     ) => parse(source, 0.2, multilineStringJoiner, useBigInt, xOptions),
-		0.1: (source        , multilineStringJoiner        , useBigInt                   , xOptions                     ) => parse(source, 0.1, multilineStringJoiner, useBigInt, xOptions),
+		'1.0': (source        , multilineStringJoiner         , useBigInt                   , xOptions                     ) => parse(source, 0.1, multilineStringJoiner, useBigInt, xOptions),
+		1.0: (source        , multilineStringJoiner         , useBigInt                   , xOptions                     ) => parse(source, 1.0, multilineStringJoiner, useBigInt, xOptions),
+		0.5: (source        , multilineStringJoiner         , useBigInt                   , xOptions                     ) => parse(source, 0.5, multilineStringJoiner, useBigInt, xOptions),
+		0.4: (source        , multilineStringJoiner         , useBigInt                   , xOptions                     ) => parse(source, 0.4, multilineStringJoiner, useBigInt, xOptions),
+		0.3: (source        , multilineStringJoiner         , useBigInt                   , xOptions                     ) => parse(source, 0.3, multilineStringJoiner, useBigInt, xOptions),
+		0.2: (source        , multilineStringJoiner         , useBigInt                   , xOptions                     ) => parse(source, 0.2, multilineStringJoiner, useBigInt, xOptions),
+		0.1: (source        , multilineStringJoiner         , useBigInt                   , xOptions                     ) => parse(source, 0.1, multilineStringJoiner, useBigInt, xOptions),
 	}
 );
 
@@ -2083,9 +2169,10 @@ const ESCAPED = Null$1        ({
 	'\x7F': '\\u007F',
 });
 
-const NEED_BASIC = /*#__PURE__*/test.bind(/[\x00-\x08\x0A-\x1F'\x7F]/);
+const NEED_BASIC = /*#__PURE__*/( () => theRegExp(/[\x00-\x08\x0A-\x1F'\x7F]/).test )();
 const BY_ESCAPE = /[^\x00-\x08\x0A-\x1F"\\\x7F]+|./gs;
-const NEED_ESCAPE = /*#__PURE__*/test.bind(/^[\x00-\x08\x0A-\x1F"\\\x7F]/);
+const NEED_ESCAPE = /*#__PURE__*/( () => theRegExp(/^[\x00-\x08\x0A-\x1F"\\\x7F]/).test )();
+const literalString = (value        )                => `'${value}'`;
 const singlelineString = (value        )                                => {
 	if ( NEED_BASIC(value) ) {
 		const parts = value.match(BY_ESCAPE) ;
@@ -2097,10 +2184,10 @@ const singlelineString = (value        )                                => {
 	return `'${value}'`;
 };
 
-const NEED_MULTILINE_BASIC = /*#__PURE__*/test.bind(/[\x00-\x08\x0A-\x1F\x7F]|'''/);
-const REAL_MULTILINE_ESCAPE = /*#__PURE__*/test.bind(/[\x00-\x08\x0A-\x1F\\\x7F]|"""/);
+const NEED_MULTILINE_BASIC = /*#__PURE__*/( () => theRegExp(/[\x00-\x08\x0A-\x1F\x7F]|'''/).test )();
+const REAL_MULTILINE_ESCAPE = /*#__PURE__*/( () => theRegExp(/[\x00-\x08\x0A-\x1F\\\x7F]|"""/).test )();
 const BY_MULTILINE_ESCAPE = /[^\x00-\x08\x0A-\x1F"\\\x7F]+|"""|./gs;
-const NEED_MULTILINE_ESCAPE = /*#__PURE__*/test.bind(/^(?:[\x00-\x08\x0A-\x1F\\\x7F]|""")/);
+const NEED_MULTILINE_ESCAPE = /*#__PURE__*/( () => theRegExp(/^(?:[\x00-\x08\x0A-\x1F\\\x7F]|""")/).test )();
 const escape_multiline = (lines          , lineIndex        ) => {
 	const line = lines[lineIndex] ;
 	if ( REAL_MULTILINE_ESCAPE(line) ) {
@@ -2145,15 +2232,18 @@ const multilineBasicString = (lines       )                                     
 };
 
 const _Infinity = -Infinity;
-const INTEGER_LIKE = /*#__PURE__*/test.bind(/^-?\d+$/);
+const INTEGER_LIKE = /*#__PURE__*/( () => theRegExp(/^-?\d+$/).test )();
 const ensureFloat = (literal        ) => INTEGER_LIKE(literal) ? literal + '.0' : literal;
 
 const float = (value        ) => value
 	? value===Infinity ? 'inf' : value===_Infinity ? '-inf' : ensureFloat('' + value)
 	: value===value ? is(value, 0) ? '0.0' : '-0.0' : 'nan';
 
-const BARE = /*#__PURE__*/test.bind(/^[\w-]+$/);
+const BARE = /*#__PURE__*/( () => theRegExp(/^[\w-]+$/).test )();
 const $Key$ = (key        )         => BARE(key) ? key : singlelineString(key);
+
+const FIRST = /[^.]+/;
+const $Keys = (keys        )         => IS_INTEGER(keys) || IS_FLOAT_OR_XXXX(keys) ? keys.replace(FIRST, literalString) : keys;
 
 class TOMLSection extends Array$1         {
 	
@@ -2218,7 +2308,7 @@ class TOMLSection extends Array$1         {
 				}
 			}
 			const sectionKeys = sectionKeys_ + $key$;
-			this.appendLine = sectionKeys + ' = ';
+			this.appendLine = $Keys(sectionKeys) + ' = ';
 			const keysIfDotted = this.value('', value, getOwnPropertyNames);
 			if ( keysIfDotted ) {
 				--this.length;
@@ -2340,7 +2430,7 @@ class TOMLSection extends Array$1         {
 		for ( const key of keys ) {
 			const value                 = inlineTable[key] ;
 			const keys = keys_ + $Key$(key);
-			const before_value = this.appendInline = keys + ' = ';
+			const before_value = this.appendInline = $Keys(keys) + ' = ';
 			const keysIfDotted = this.value(indent, value, getOwnPropertyNames);
 			if ( keysIfDotted ) {
 				this[this.length - 1] = this[this.length - 1] .slice(0, -before_value.length);
@@ -2354,7 +2444,7 @@ class TOMLSection extends Array$1         {
 		for ( const key of keys ) {
 			const value                 = inlineTable[key] ;
 			const keys = keys_ + $Key$(key);
-			this.appendLine = indent_ + keys + ' = ';
+			this.appendLine = indent_ + $Keys(keys) + ' = ';
 			const keysIfDotted = this.value(indent_, value, getOwnPropertyNames);
 			if ( keysIfDotted ) {
 				--this.length;
@@ -2378,7 +2468,7 @@ const name2code = Null$1({
 	pair: 4,
 }         );
 
-const IS_INDENT = /*#__PURE__*/test.bind(/^[\t ]*$/);
+const IS_INDENT = /*#__PURE__*/( () => theRegExp(/^[\t ]*$/).test )();
 
 class TOMLDocument extends Array$1              {
 	

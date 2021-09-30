@@ -20,30 +20,68 @@ require('../test/test.js')(async ({ build, 龙腾道, get, map, ful, put }) => {
 		NPM: {
 			description: `${en}／${zhs}`,
 			keywords: [ 'parse', 'stringify', 'TOML', '1.0.0', '0.5.0', '0.4.0', '0.3.0', '0.2.0', '0.1.0' ],
+			homepage: 'https://www.npmjs.com/package/@ltd/j-toml',
+			files: [
+				'package.json',
+				'index.d.ts',
+				'index.js',
+				'index.js.map',
+				'index.mjs',
+				'index.mjs.map',
+				'README.md',
+				'CHANGELOG.md',
+				'LICENSE',
+				'test.js',
+			],
+			scripts: {
+				'test': 'node ./test.js',
+			},
 		},
-		ESM: {
-			deps: [ 'fs' ],
-		},
+		ESM: true,
 		locate: {
 			'@ltd/j-orderify': ful('../../LongTengDao/j-orderify/dist/ESM/.j-orderify.js'),
 			'@ltd/j-regexp': ful('../../LongTengDao/j-regexp/dist/ESM/.j-regexp.js'),
-			'@ltd/j-utf': ful('../../LongTengDao/j-utf/dist/ESM/.j-utf.js'),
 		},
 		LICENSE_: true,
 	});
 	
 	await put('docs/README.md', BOM + i18n.map(lang => `[${lang}](./${lang}/)`).join(' | '));
 	await map('docs/English/README.md', Markdown(lang => `docs/${lang}/`), 'dist/NPM/README.md');
-	await map('CHANGELOG/English.md', Markdown(lang => `CHANGELOG/${lang}.md`), 'dist/NPM/CHANGELOG.md');
+	await map('CHANGELOG/English.md', Markdown(lang => `CHANGELOG/${lang}.md`, null), 'dist/NPM/CHANGELOG.md');
+	
+	await put('dist/NPM/test.js', `'use strict';
+
+var toml = \`
+[a.b] #
+
+c.d = { e.f = 0.0 } #
+\`;
+
+var TOML=$('TOML',()=>require('.'));
+var parsed=$('TOML.parse',()=>TOML.parse(toml,'',true,{comment:true}));
+var stringified=$('TOML.stringify',()=>TOML.stringify(parsed,{newline:'\\n'}));
+stringified===toml||$('TOML.stringify');
+
+function $(msg,fn){try{return fn();}catch{throw Error(\`@ltd/j-toml/package.json#scripts.test -- \${msg}\`);}}
+`);
 	
 });
 
-function Markdown (Path) {
+function Markdown (Path, npm = `
+![Downloads](https://img.shields.io/npm/dw/@ltd/j-toml)
+![License](https://img.shields.io/npm/l/@ltd/j-toml)
+![Version](https://img.shields.io/npm/v/@ltd/j-toml)
+![Activity: GitHub last commit](https://img.shields.io/github/last-commit/LongTengDao/j-toml)`.replace(/\n/g, ' ')) {
 	return (_English_) => {
 		if ( _English_.includes('\t') ) { throw Error(`.md 中存在 Tab`); }
 		return BOM +
 			i18n.map(lang => `[${lang}](https://GitHub.com/LongTengDao/j-toml/tree/master/${Path(lang)})`).join(' | ') + EOL +
 			'___' +  EOL +
-			_English_.replace(/^\uFEFF/, '').replace(/(?<=\n```+)[^`\r\n]+/g, '').replace(/(?<=\n\d\. {2})#+ +([^\r\n]*)/g, '**$1**');
+			_English_
+			.replace(/^\uFEFF/, '')
+			.replace(/(?=\r?\n=)/, () => npm ?? '')
+			.replace(/^(```+)toml\r?\n((?:\r?\n){2}.*?(?:\r?\n){2})\r?\n\1$/gms, (__, $1, $2) => `${$1}toml${$2}${$1}`)
+			.replace(/(?<=^```+)[^`\r\n]+/gm, '')
+			.replace(/(?<=^\d\. {2})#+ +(.*)/gm, (_, $1) => `**${$1}**`);
 	};
 }

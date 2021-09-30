@@ -28,6 +28,7 @@
     15. 0.  +   new feature: allow to omit the `multilineStringJoiner` parameter, as long as the final parsing does not actually encounter a multi-line string containing a newline to be preserved (not recommended)
     16. 0.  +   new feature: `stringify` method, and helpers `Section`, `inline`, `multiline`, `multiline.basic`, `literal`, `commentFor`
             +   new feature: export `OffsetDateTime`, `LocalDateTime`, `LocalDate`, `LocalTime` classes
+            +   new feature (experimental): add `xOptions.comment`, to retain some comment information in the parsing result
             *   bug fix: fix no error thrown when parsing some kind of incorrect Offset Date-Time literal
             *   bug fix: fix parsing stack overflow caused by too much escaping in base string again (also preventive out of memory)
             *   bug fix: ensure that in 1.0 parsing mode, Tab after "line ending backslash" is handled correctly, while in 0.4 or previous modes, even space after "line ending backslash" should not work anymore
@@ -36,3 +37,7 @@
             *   bug fix: fix the problem that `globalThis.require` doesn't exist actually
         1.  *   bug fix: make error position more exact
             *   bug fix: make `parse` more robust to eradicate broken by overlapped calling
+    17. 0.  +   new feature: add parameter `source.require`, avoid statically loading `fs` module, etc. (to read TOML file data for specified `source.path`)
+            +   new feature: add support to `Uint8Array` and `ArrayBuffer`
+            +   new feature (experimental): add `xOptions.string`, to disable keys shaped like numbers, etc.
+            +   new feature: quote keys shaped like number, etc., during `TOML.stringify`

@@ -13,8 +13,8 @@ import { INLINE, DIRECTLY } from '../types/Table';
 import { newArray, STATICALLY } from '../types/Array';
 import { OffsetDateTime, LocalDateTime, LocalDate, LocalTime, OFFSET$ } from '../types/Datetime';
 import { BasicString } from '../types/String';
-import { Integer } from '../types/Integer';
-import { Float } from '../types/Float';
+import { Integer, IS_INTEGER } from '../types/Integer';
+import { Float, IS_FLOAT_OR_XXXX } from '../types/Float';
 import * as options$0 from '../options$0';
 import * as regexps$0 from '../regexps$0';
 import { appendTable, prepareTable, prepareInlineTable, assignLiteralString, assignBasicString } from './on-the-spot';
@@ -24,7 +24,8 @@ import { beInline } from '../stringify/non-atom';
 
 const IS_OFFSET$ = /*#__PURE__*/( () => theRegExp(OFFSET$).test )();
 
-const parseKeys = (lineRest :string) :{ leadingKeys :string[], finalKey :string, lineRest :string } => {
+const parseKeys = (rest :string) :{ leadingKeys :string[], finalKey :string, lineRest :string } => {
+	let lineRest :string = rest;
 	const leadingKeys :string[] = [];
 	let lastIndex :number = -1;
 	for ( ; ; ) {
@@ -42,6 +43,10 @@ const parseKeys = (lineRest :string) :{ leadingKeys :string[], finalKey :string,
 		}
 		if ( regexps$0.IS_DOT_KEY(lineRest) ) { lineRest = lineRest.replace(regexps$0.DOT_KEY, ''); }
 		else { break; }
+	}
+	if ( options$0.disableDigit ) {
+		const keys = rest.slice(0, -lineRest.length);
+		( IS_INTEGER(keys) || IS_FLOAT_OR_XXXX(keys) ) && iterator$0.throws(SyntaxError(`Bad bare key disabled by xOptions.string` + iterator$0.where(' at ')));
 	}
 	if ( options$0.disallowEmptyKey ) {
 		let index :number = lastIndex;

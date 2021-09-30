@@ -15,9 +15,10 @@ const IS_XOB_INTEGER = /*#__PURE__*/( () => theRegExp(/^0(?:x[\dA-Fa-f][_\dA-Fa-
 const BAD_XOB = /*#__PURE__*/( () => newRegExp`_(?![\dA-Fa-f])`.test )();
 const UNDERSCORES_SIGN = /_|^[-+]/g;
 
+export const IS_INTEGER = (literal :string) :boolean => ( IS_D_INTEGER(literal) || /*options\$0.xob && */IS_XOB_INTEGER(literal) ) && !BAD_XOB(literal);
+
 const BigIntInteger = (literal :string) :bigint => {
-	( IS_D_INTEGER(literal) || /*options\$0.xob && */IS_XOB_INTEGER(literal) ) && !BAD_XOB(literal)
-	|| iterator$0.throws(SyntaxError(`Invalid Integer ${literal}` + iterator$0.where(' at ')));
+	IS_INTEGER(literal) || iterator$0.throws(SyntaxError(`Invalid Integer ${literal}` + iterator$0.where(' at ')));
 	let bigInt :bigint = BigInt(literal.replace(UNDERSCORES_SIGN, ''));
 	if ( literal[0]==='-' ) { bigInt = -bigInt; }
 	options$0.allowLonger
@@ -27,8 +28,7 @@ const BigIntInteger = (literal :string) :bigint => {
 };
 
 const NumberInteger = (literal :string) :number => {
-	( IS_D_INTEGER(literal) || /*options\$0.xob && */IS_XOB_INTEGER(literal) ) && !BAD_XOB(literal)
-	|| iterator$0.throws(SyntaxError(`Invalid Integer ${literal}` + iterator$0.where(' at ')));
+	IS_INTEGER(literal) || iterator$0.throws(SyntaxError(`Invalid Integer ${literal}` + iterator$0.where(' at ')));
 	const number = literal[0]==='-'
 		? -literal.replace(UNDERSCORES_SIGN, '')
 		: +literal.replace(UNDERSCORES_SIGN, '');

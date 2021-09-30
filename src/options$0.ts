@@ -34,6 +34,7 @@ export type XOptions = undefined | null | boolean | Tag | {
 	null? :boolean,
 	multi? :boolean,
 	comment? :boolean,
+	string? :boolean,
 };
 export let endsWithQuote :boolean;
 export let zeroDatetime :boolean;
@@ -49,6 +50,7 @@ export let allowLonger :boolean;
 export let enableNull :boolean;
 export let allowInlineTableMultilineAndTrailingCommaEvenNoComma :boolean;
 export let preserveComment :boolean;
+export let disableDigit :boolean;
 const arrayTypes = new WeakMap<Array, As>();
 const arrayTypes_get = /*#__PURE__*/get.bind(arrayTypes) as (key :Array) => As | undefined;
 const arrayTypes_set = /*#__PURE__*/set.bind(arrayTypes) as (key :Array, value :As) => object;
@@ -208,7 +210,7 @@ export const use = (specificationVersion :unknown, multilineStringJoiner :unknow
 		collect = collect_on;
 	}
 	else {
-		const { order, longer, exact, null: _null, multi, comment, tag, ...unknown } = xOptions;
+		const { order, longer, exact, null: _null, multi, comment, string, tag, ...unknown } = xOptions;
 		if ( ownKeys(unknown).length ) { throw TypeError('TOML.parse(,,,,xOptions)'); }
 		Table = order ? OrderedTable : PlainTable;
 		allowLonger = !!longer;
@@ -216,6 +218,7 @@ export const use = (specificationVersion :unknown, multilineStringJoiner :unknow
 		enableNull = !!_null;
 		allowInlineTableMultilineAndTrailingCommaEvenNoComma = !!multi;
 		preserveComment = !!comment;
+		disableDigit = !!string;
 		if ( tag ) {
 			if ( typeof tag!=='function' ) { throw TypeError('TOML.parse(,,,,xOptions.tag)'); }
 			if ( !mixed ) { throw TypeError('TOML.parse(,,,,xOptions) xOptions.tag needs at least TOML 1.0 to support mixed type array'); }

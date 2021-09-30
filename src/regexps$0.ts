@@ -40,7 +40,7 @@ const MULTI_LINE_LITERAL_STRING_0 = /*#__PURE__*/( () => newRegExp.s<1 | 2 | 3>`
 	${Whitespace}*
 	(.*)`.exec )();
 export
-let __MULTI_LINE_LITERAL_STRING_exec :typeof MULTI_LINE_LITERAL_STRING_0;
+let __MULTI_LINE_LITERAL_STRING_exec = MULTI_LINE_LITERAL_STRING_0;
 
 export const SYM_WHITESPACE = /*#__PURE__*/( () => newRegExp.s`
 	^
@@ -78,34 +78,30 @@ const TAG_REST_exec = /*#__PURE__*/( () => newRegExp.s<1 | 2>`
 
 /* optimized (avoid overflow or lost) */
 
-const MULTI_LINE_BASIC_STRING = /(?<=^(?:[^\\"]+|\\.|""?(?!")))/s;/// .?
+const MULTI_LINE_BASIC_STRING = /*#__PURE__*/theRegExp(/(?:[^\\"]+|\\.|""?(?!")){1,10}/sy);/// .?
 export const MULTI_LINE_BASIC_STRING_exec_0 = (_ :string) :string => {
-	let count :number = 0;
-	for ( let offset :number = _.search(MULTI_LINE_BASIC_STRING); offset>0; ) {
-		offset = _.slice(count += offset).search(MULTI_LINE_BASIC_STRING);
-	}
-	return _.slice(0, count);
+	let lastIndex :number = MULTI_LINE_BASIC_STRING.lastIndex = 0;
+	while ( MULTI_LINE_BASIC_STRING.test(_) ) { lastIndex = MULTI_LINE_BASIC_STRING.lastIndex; }
+	return _.slice(0, lastIndex);
 };
 
 const ESCAPED_EXCLUDE_CONTROL_CHARACTER_TAB______ = /[^\\\x00-\x08\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|[\t ]*\n[\t\n ]*|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})/g;
 const ESCAPED_EXCLUDE_CONTROL_CHARACTER__________ = /[^\\\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]| *\n[\n ]*|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})/g;
 const ESCAPED_EXCLUDE_CONTROL_CHARACTER_DEL______ = /[^\\\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\]|\n[\n ]*|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})/g;
 const ESCAPED_EXCLUDE_CONTROL_CHARACTER_DEL_SLASH = /[^\\\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\/]|\n[\n ]*|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})/g;
-let __ESCAPED_EXCLUDE_CONTROL_CHARACTER :RegExp;
+let __ESCAPED_EXCLUDE_CONTROL_CHARACTER = ESCAPED_EXCLUDE_CONTROL_CHARACTER_TAB______;
 export const ESCAPED_EXCLUDE_CONTROL_CHARACTER_test = (_ :string) :boolean => !_.replace(__ESCAPED_EXCLUDE_CONTROL_CHARACTER, '');///
 
-const BASIC_STRING_TAB______ = /(?<=^(?:[^\\"\x00-\x08\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})))/;
-const BASIC_STRING__________ = /(?<=^(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})))/;
-const BASIC_STRING_DEL______ = /(?<=^(?:[^\\"\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\]|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})))/;
-const BASIC_STRING_DEL_SLASH = /(?<=^(?:[^\\"\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\/]|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})))/;
-let __BASIC_STRING :typeof BASIC_STRING_DEL_SLASH;
+const BASIC_STRING_TAB______ = /*#__PURE__*/theRegExp(/(?:[^\\"\x00-\x08\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})){1,10}/y);
+const BASIC_STRING__________ = /*#__PURE__*/theRegExp(/(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})){1,10}/y);
+const BASIC_STRING_DEL______ = /*#__PURE__*/theRegExp(/(?:[^\\"\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\]|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})){1,10}/y);
+const BASIC_STRING_DEL_SLASH = /*#__PURE__*/theRegExp(/(?:[^\\"\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\/]|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})){1,10}/y);
+let __BASIC_STRING = BASIC_STRING_DEL_SLASH;
 export const BASIC_STRING_exec_1 = (line :string) :string => {
-	let count :number = 1;
-	for ( let offset :number = line.slice(1).search(__BASIC_STRING); offset>0; ) {
-		offset = line.slice(count += offset).search(__BASIC_STRING);
-	}
-	count!==line.length && line[count]==='"' || iterator$0.throws(SyntaxError(`Bad basic string` + iterator$0.where(' at ')));
-	return line.slice(1, count);
+	let lastIndex :number = __BASIC_STRING.lastIndex = 1;
+	while ( __BASIC_STRING.test(line) ) { lastIndex = __BASIC_STRING.lastIndex; }
+	lastIndex!==line.length && line[lastIndex]==='"' || iterator$0.throws(SyntaxError(`Bad basic string` + iterator$0.where(' at ')));
+	return line.slice(1, lastIndex);
 };
 
 export
@@ -115,12 +111,12 @@ const DOT_KEY = /^[ \t]*\.[ \t]*/;
 const BARE_KEY_STRICT = /*#__PURE__*/( () => theRegExp(/^[\w-]+/).exec )();
 const BARE_KEY_FREE = /*#__PURE__*/( () => theRegExp(/^[^ \t#=[\]'".]+(?:[ \t]+[^ \t#=[\]'".]+)*/).exec )();
 export
-let __BARE_KEY_exec :typeof BARE_KEY_FREE;
+let __BARE_KEY_exec = BARE_KEY_FREE;
 const LITERAL_KEY____ = /*#__PURE__*/( () => theRegExp(/^'[^'\x00-\x08\x0B-\x1F\x7F]*'/).exec )();
 const LITERAL_KEY_DEL = /*#__PURE__*/( () => theRegExp(/^'[^'\x00-\x08\x0B-\x1F]*'/).exec )();
 export
-let __LITERAL_KEY_exec :typeof LITERAL_KEY_DEL;
-let supportArrayOfTables :boolean;
+let __LITERAL_KEY_exec = LITERAL_KEY_DEL;
+let supportArrayOfTables = true;
 
 export const TABLE_DEFINITION_exec_groups = (lineRest :string, parseKeys :(lineRest :string) => { leadingKeys :string[], finalKey :string, lineRest :string }) :{ leadingKeys :string[], finalKey :string, asArrayItem :boolean, tag :string, lineRest :string } => {
 	const asArrayItem :boolean = lineRest[1]==='[';
@@ -150,7 +146,7 @@ export const KEY_VALUE_PAIR_exec_groups = ({ leadingKeys, finalKey, lineRest } :
 const CONTROL_CHARACTER_EXCLUDE_TAB____ = /*#__PURE__*/( () => theRegExp(/[\x00-\x08\x0B-\x1F\x7F]/).test )();
 const CONTROL_CHARACTER_EXCLUDE_TAB_DEL = /*#__PURE__*/( () => theRegExp(/[\x00-\x08\x0B-\x1F]/).test )();
 export
-let __CONTROL_CHARACTER_EXCLUDE_test :(this :void, string :string) => boolean;
+let __CONTROL_CHARACTER_EXCLUDE_test = CONTROL_CHARACTER_EXCLUDE_TAB____;
 
 export const switchRegExp = (specificationVersion :number) :void => {
 	switch ( specificationVersion ) {

@@ -1,8 +1,9 @@
 import Array from '.Array';
-import test from '.RegExp.prototype.test';
 import fromCharCode from '.String.fromCharCode';
 import fromEntries from '.Object.fromEntries';
 import Null from '.null';
+
+import { theRegExp } from '@ltd/j-regexp';
 
 import { beLiteral } from './literal';
 
@@ -19,9 +20,10 @@ const ESCAPED = Null<string>({
 	'\x7F': '\\u007F',
 });
 
-const NEED_BASIC = /*#__PURE__*/test.bind(/[\x00-\x08\x0A-\x1F'\x7F]/);
+const NEED_BASIC = /*#__PURE__*/( () => theRegExp(/[\x00-\x08\x0A-\x1F'\x7F]/).test )();
 const BY_ESCAPE = /[^\x00-\x08\x0A-\x1F"\\\x7F]+|./gs;
-const NEED_ESCAPE = /*#__PURE__*/test.bind(/^[\x00-\x08\x0A-\x1F"\\\x7F]/);
+const NEED_ESCAPE = /*#__PURE__*/( () => theRegExp(/^[\x00-\x08\x0A-\x1F"\\\x7F]/).test )();
+export const literalString = (value :string) :`'${string}'` => `'${value}'`;
 export const singlelineString = (value :string) :`"${string}"` | `'${string}'` => {
 	if ( NEED_BASIC(value) ) {
 		const parts = value.match(BY_ESCAPE)!;
@@ -33,10 +35,10 @@ export const singlelineString = (value :string) :`"${string}"` | `'${string}'` =
 	return `'${value}'`;
 };
 
-const NEED_MULTILINE_BASIC = /*#__PURE__*/test.bind(/[\x00-\x08\x0A-\x1F\x7F]|'''/);
-const REAL_MULTILINE_ESCAPE = /*#__PURE__*/test.bind(/[\x00-\x08\x0A-\x1F\\\x7F]|"""/);
+const NEED_MULTILINE_BASIC = /*#__PURE__*/( () => theRegExp(/[\x00-\x08\x0A-\x1F\x7F]|'''/).test )();
+const REAL_MULTILINE_ESCAPE = /*#__PURE__*/( () => theRegExp(/[\x00-\x08\x0A-\x1F\\\x7F]|"""/).test )();
 const BY_MULTILINE_ESCAPE = /[^\x00-\x08\x0A-\x1F"\\\x7F]+|"""|./gs;
-const NEED_MULTILINE_ESCAPE = /*#__PURE__*/test.bind(/^(?:[\x00-\x08\x0A-\x1F\\\x7F]|""")/);
+const NEED_MULTILINE_ESCAPE = /*#__PURE__*/( () => theRegExp(/^(?:[\x00-\x08\x0A-\x1F\\\x7F]|""")/).test )();
 const escape_multiline = (lines :string[], lineIndex :number) => {
 	const line = lines[lineIndex]!;
 	if ( REAL_MULTILINE_ESCAPE(line) ) {

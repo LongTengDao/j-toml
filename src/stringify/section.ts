@@ -6,19 +6,26 @@ import Number from '.Number';
 import Symbol_ from '.Symbol';
 import Array from '.Array';
 import TOMLDatetime from '.Date';
-import test from '.RegExp.prototype.test';
 import getOwnPropertyNames from '.Object.getOwnPropertyNames';
 import isArray from '.Array.isArray';
 import undefined from '.undefined';
 
+import { theRegExp } from '@ltd/j-regexp';
+
+import { IS_INTEGER } from '../types/Integer';
+import { IS_FLOAT_OR_XXXX } from '../types/Float';
+
 import { getComment } from './comment';
 import { isLiteral } from './literal';
-import { singlelineString } from './string';
+import { literalString, singlelineString } from './string';
 import { float } from './float';
 import { isSection, ofInline } from './non-atom';
 
-const BARE = /*#__PURE__*/test.bind(/^[\w-]+$/);
+const BARE = /*#__PURE__*/( () => theRegExp(/^[\w-]+$/).test )();
 const $Key$ = (key :string) :string => BARE(key) ? key : singlelineString(key);
+
+const FIRST = /[^.]+/;
+const $Keys = (keys :string) :string => IS_INTEGER(keys) || IS_FLOAT_OR_XXXX(keys) ? keys.replace(FIRST, literalString) : keys;
 
 export default class TOMLSection extends Array<string> {
 	
@@ -83,7 +90,7 @@ export default class TOMLSection extends Array<string> {
 				}
 			}
 			const sectionKeys = sectionKeys_ + $key$;
-			this.appendLine = sectionKeys + ' = ';
+			this.appendLine = $Keys(sectionKeys) + ' = ';
 			const keysIfDotted = this.value('', value, getOwnPropertyNames);
 			if ( keysIfDotted ) {
 				--this.length;
@@ -205,7 +212,7 @@ export default class TOMLSection extends Array<string> {
 		for ( const key of keys ) {
 			const value :READONLY.Value = inlineTable[key]!;
 			const keys = keys_ + $Key$(key);
-			const before_value = this.appendInline = keys + ' = ';
+			const before_value = this.appendInline = $Keys(keys) + ' = ';
 			const keysIfDotted = this.value(indent, value, getOwnPropertyNames);
 			if ( keysIfDotted ) {
 				this[this.length - 1] = this[this.length - 1]!.slice(0, -before_value.length);
@@ -219,7 +226,7 @@ export default class TOMLSection extends Array<string> {
 		for ( const key of keys ) {
 			const value :READONLY.Value = inlineTable[key]!;
 			const keys = keys_ + $Key$(key);
-			this.appendLine = indent_ + keys + ' = ';
+			this.appendLine = indent_ + $Keys(keys) + ' = ';
 			const keysIfDotted = this.value(indent_, value, getOwnPropertyNames);
 			if ( keysIfDotted ) {
 				--this.length;

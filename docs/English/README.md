@@ -58,7 +58,10 @@ declare function parse (
     xOptions? :object,
 ) :Table;
 
-type Source = string | Buffer | { readonly path :string, readonly data? :string | Buffer };
+type Source = string | ArrayBufferLike | Readonly<
+    | { path :string, data :string | ArrayBufferLike, require? :NodeRequire }
+    | { path :string,                                 require  :NodeRequire }
+>;
 type SpecificationVersion = 1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1;
 type Table = object;
 ```
@@ -67,19 +70,20 @@ type Table = object;
 
 0.  #### `source`
     
-    *   type: `string | Buffer | { readonly path :string, readonly data? :string | Buffer }`
+    *   type: `string | ArrayBufferLike | Readonly<{ path :string, data :string | ArrayBufferLike, require? :NodeRequire } | { path :string, require :NodeRequire }>`
     *   required
     
-    You can pass in `string` or the original binary `Buffer` (UTF-8) of the file as the source content.
+    You can pass in `string` or the UTF-8 encoding file original binary data `ArrayBufferLike` (`Buffer | Uint8Array | ArrayBuffer`) as the source content.
     
     One difference is that when passing in `string`, parser will only check whether all characters are valid Unicode characters according to the specification (uncoupled UCS-4 character code is invalid);  
-    When `Buffer` is passed in, an additional check is made to see whether there is unknown code point (which has been automatically replaced by `U+FFFD` in the `string` state).
+    When `ArrayBufferLike` is passed in, an additional check is made to see whether there is unknown code point (which has been automatically replaced by `U+FFFD` in the `string` state).
     
-    Another difference is that `Buffer` can start with UTF BOM (`U+FEFF`), which is used for validation of file encoding (but it must be UTF-8 encoding, which is not a technical limit, but a specification requirement), and skipped before real parsing;  
+    Another difference is that `ArrayBufferLike` can start with UTF BOM (`U+FEFF`), which is used for validation of file encoding (but it must be UTF-8 encoding, which is not a technical limit, but a specification requirement), and skipped before real parsing;  
     But `string` can't, because BOM belongs to UTF, not TOML.
     
-    If you want to be more console friendly when something of source content goes wrong, pass an object where the `path` key is the path of that `.toml` file, and the key `data` is the source content (`string` or `Buffer`).  
-    You can also omit the `data` key and `fs.readFileSync(source.path)` will be called automatically.
+    If you want to be more console friendly when something of source content goes wrong, pass an object where the property `path` is the path of that `.toml` file, and the property `data` is the source content (`string` or `ArrayBufferLike`).  
+    You can also omit the property `data`, the property `require` must be passed in at this time, because the `require('fs').readFileSync` interface needs to be used to read it.  
+    Regardless of whether `data` is passed in, if `$ = require?.resolve?.paths?.('')?.[0]?.replace(/node_modules$/, '')` can be obtained, the absolute path will be obtained through `require('path').resolve($, source.path)`.
     
 1.  #### `specificationVersion`
     
@@ -157,14 +161,14 @@ TOML.stringify(rootTable[, options]);
 ```
 
 ```typescript
-declare function stringify (rootTable :ReadonlyTable, options? :{
-    readonly newline? :'\n' | '\r\n',
-    readonly newlineAround? :'document' | 'section' | 'header' | 'pairs' | 'pair',
-    readonly indent? :string | number,
-    readonly T? :'T' | ' ',
-    readonly xNull? :boolean,
-    readonly xBeforeNewlineInMultilineTable? :',' | '',
-}) :string | string[];
+declare function stringify (rootTable :ReadonlyTable, options? :Readonly<{
+    newline? :'\n' | '\r\n',
+    newlineAround? :'document' | 'section' | 'header' | 'pairs' | 'pair',
+    indent? :string | number,
+    T? :'T' | ' ',
+    xNull? :boolean,
+    xBeforeNewlineInMultilineTable? :',' | '',
+}>) :string | string[];
 ```
 
 ### `arguments`
@@ -285,6 +289,7 @@ TOML.stringify({
 
 ```toml
 
+
 key = 'value'
 dotted.key = 'value'
 inlineTable = { key = 'value' }
@@ -301,6 +306,7 @@ key = 'value'
 [table.table]
 
 key = 'value'
+
 
 ```
 
@@ -323,6 +329,7 @@ TOML.stringify({
 
 ```toml
 
+
 staticArray = [
     'string',
     { },
@@ -330,6 +337,7 @@ staticArray = [
 staticArray_singleline = [ 1.0, 2 ]
 
 [[arrayOfTables]]
+
 
 ```
 
@@ -354,10 +362,12 @@ TOML.stringify({
 
 ```toml
 
+
 key = 'value' # this is a key/value pair
 dotted.key = 'value' # this is a dotted key/value pair
 
 [table.header] # this is a table header (but it cannot be a table in an array of tables)
+
 
 ```
 
@@ -382,6 +392,7 @@ TOML.stringify({
 
 ```toml
 
+
 underscore = 1_000
 zero = 10.00
 base = 0o777
@@ -390,16 +401,19 @@ multilineString = """
 1\b2
 3"""
 
+
 ```
 
 Here, `multiline` (string case) would help when the multi-line string comes from a variable (e.g., data from `parse`):
 
 ```toml
 
+
 base = 0o777
 multilineString = """
 1\b2
 3"""
+
 
 ```
 
@@ -414,10 +428,12 @@ TOML.stringify(table);
 
 ```toml
 
+
 base = 0o777
 multilineString = """
 1\b2
 3\b4"""
+
 
 ```
 

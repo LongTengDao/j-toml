@@ -147,10 +147,41 @@ declare class LocalTime {
 	readonly setMilliseconds :(this :LocalTime, ms :_0_999) => number;
 }
 
-type Source = string | Buffer | {
-	readonly path  :string,
-	readonly data? :string | Buffer,
-};
+type Source = string | ArrayBufferLike
+	| {
+		readonly path :string,
+		readonly data? :undefined,
+		readonly require :
+			| {
+				readonly resolve? :{ readonly paths? :undefined }
+				(this :void, id :'fs') :{
+					readonly readFileSync :(this :void, path :string) => ArrayBufferLike
+				}
+			}
+			| {
+				readonly resolve :{ readonly paths :(this :void, request :string) => null | string[] }
+				(this :void, id :'path') :{
+					readonly resolve :(this :void, dirname :string, filename :string) => string
+				}
+				(this :void, id :'fs') :{
+					readonly readFileSync :(this :void, path :string) => ArrayBufferLike
+				}
+			},
+	}
+	| {
+		readonly path :string,
+		readonly data :string | ArrayBufferLike,
+		readonly require? :
+			| {
+				readonly resolve? :{ readonly paths? :undefined }
+			}
+			| {
+				readonly resolve :{ readonly paths :(this :void, request :string) => null | string[] }
+				(this :void, id :'path') :{
+					readonly resolve :(this :void, dirname :string, filename :string) => string
+				}
+			},
+	};
 
 type TagProcessor<CustomValue> = (this :void, each :TagOnTable<CustomValue> | TagOnArray<CustomValue> | TagOnTables<CustomValue>) => void;
 type TagOnTable <CV> = { table :Table<CV>, key :string,                                    tag :string };
@@ -162,6 +193,7 @@ type TypeAgnosticOptions = {
 	readonly exact? :boolean,// = false
 	readonly multi? :boolean,// = false
 	readonly longer? :boolean,// = false
+	readonly string? :boolean,// = false
 	readonly comment? :boolean,// = false
 };
 

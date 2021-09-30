@@ -1,5 +1,14 @@
 'use strict';module.exports=({ stringify, Section, inline, multiline, literal, commentFor }, newline)=>
 	stringify({
+		0: {
+			0: inline({ '-1': { '1e1': 2n } }),
+		},
+		3: {
+			3: {
+				3: -0,
+			},
+		},
+		true: false,
 		[commentFor('c')]: ' comment',
 		c: true,
 		e: literal`0b0000_0000`,

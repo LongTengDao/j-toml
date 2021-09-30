@@ -23,6 +23,9 @@ const IS_FLOAT = /*#__PURE__*/( () => newRegExp`
 const UNDERSCORES = /_/g;
 const IS_ZERO = /*#__PURE__*/( () => theRegExp(/^[-+]?0(?:\.[0_]+)?(?:[eE][-+]?0+)?$/).test )();
 
+const IS_XXX = /*#__PURE__*/( () => theRegExp(/^(?:-?(?:inf|nan)|true|false|null)$/).test )();
+export const IS_FLOAT_OR_XXXX = (literal :string) :boolean => IS_FLOAT(literal) ? !BAD_D(literal) : IS_XXX(literal);
+
 export const Float = (literal :string) :number => {
 	if ( !IS_FLOAT(literal) || BAD_D(literal) ) {
 		//if ( options\$0.sFloat ) {

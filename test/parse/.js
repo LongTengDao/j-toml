@@ -2,6 +2,8 @@
 	
 	TOML.parse(``, 1.0, '\n');
 	
+	TOML.parse(Buffer.from(`#二进制`), 1.0, '\n');
+	
 	const toml = TOML.parse(await get('./test/parse/sample.toml'), 1.0, '\n', true);
 	const expect = require('./expect');
 	if ( not(expect)(toml) ) {
@@ -33,14 +35,16 @@
 		throw Error('!multilineStringJoiner');
 	}
 	
-	console.log('overflow&time&memory:');
-	console.time('overflow&time&memory');
-	TOML.parse(`["${'bt\\b\\t'.repeat(10000_0.00)}${'\\b\\t'.repeat(10000_0.00)}"]`, 1.0, '\n');
-	console.timeEnd('overflow&time&memory');
-	
-	console.log('overflow&time:');
-	console.time('overflow&time');
-	TOML.parse('k=[{'.repeat(20000.0) + '}]'.repeat(20000.0), 1.0, '\n');// loop (67ms) ≈ JSON (114ms) ≪ generator+Symbol (46s) ≈ closure+WeakMap (48s)
-	console.timeEnd('overflow&time');
+	time('overflow&time&memory:', () => `["${'bt\\b\\t'.repeat(10000_0.00)}${'\\b\\t'.repeat(10000_0.00)}"]`);
+	time('overflow&time', () => 'k=[{'.repeat(20000.0) + '}]'.repeat(20000.0));/// loop (67ms) ≈ JSON (114ms) ≪ generator+Symbol (46s) ≈ closure+WeakMap (48s)
+	function time (label, Toml) {
+		console.log(label + ':');
+		const toml = Toml();
+		Number(toml);
+		console.time(label);
+		TOML.parse(toml, '\n');
+		console.timeEnd(label);
+		return toml;
+	}
 	
 };
