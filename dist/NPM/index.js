@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '1.18.0';
+const version = '1.19.0';
 
 const Error$1 = Error;
 
@@ -83,7 +83,7 @@ const Default = (
  * 模块名称：j-regexp
  * 模块功能：可读性更好的正则表达式创建方式。从属于“简计划”。
    　　　　　More readable way for creating RegExp. Belong to "Plan J".
- * 模块版本：8.0.0
+ * 模块版本：8.0.1
  * 许可条款：LGPL-3.0
  * 所属作者：龙腾道 <LongTengDao@LongTengDao.com> (www.LongTengDao.com)
  * 问题反馈：https://GitHub.com/LongTengDao/j-regexp/issues
@@ -158,10 +158,10 @@ function RE (               template                      ) {
 	var test = re.test = Test(re);
 	var exec = re.exec = Exec(re);
 	test.source = exec.source = source;
-	test.unicode = exec.unicode = U;
-	test.ignoreCase = exec.ignoreCase = I;
-	test.multiline = exec.multiline = includes(source, '^') || includes(source, '$') ? M : null;
-	test.dotAll = exec.dotAll = includes(source, '.') ? S : null;
+	test.unicode = exec.unicode = !U;
+	test.ignoreCase = exec.ignoreCase = !I;
+	test.multiline = exec.multiline = includes(source, '^') || includes(source, '$') ? !M : null;
+	test.dotAll = exec.dotAll = includes(source, '.') ? !S : null;
 	return re;
 }
 
@@ -705,6 +705,40 @@ const switchRegExp = (specificationVersion        )       => {
 			supportArrayOfTables = false;
 	}
 };
+
+const NUM = /*#__PURE__*/( () => newRegExp`
+	(?:
+		0
+		(?:
+			b[01][_01]*
+		|
+			o[0-7][_0-7]*
+		|
+			x[\dA-Fa-f][_\dA-Fa-f]*
+		|
+			(?:\.\d[_\d]*)?(?:[Ee]-?\d[_\d]*)?
+		)
+	|
+		[1-9][_\d]*
+		(?:\.\d[_\d]*)?(?:[Ee]-?\d[_\d]*)?
+	|
+		inf
+	|
+		nan
+	)
+` )();
+const IS_AMAZING = /*#__PURE__*/( () => newRegExp`
+	^(?:
+		-?${NUM}
+		(?:-${NUM})*
+	|
+		true
+	|
+		false
+	)$
+`.test )();
+const BAD_DXOB = /*#__PURE__*/( () => newRegExp`_(?![\dA-Fa-f])`.test )();
+const isAmazing = (keys        )          => IS_AMAZING(keys) && !BAD_DXOB(keys);
 
 /* options */
 
@@ -1451,9 +1485,6 @@ const IS_FLOAT = /*#__PURE__*/( () => newRegExp`
 const UNDERSCORES = /_/g;
 const IS_ZERO = /*#__PURE__*/( () => theRegExp(/^[-+]?0(?:\.[0_]+)?(?:[eE][-+]?0+)?$/).test )();
 
-const IS_XXX = /*#__PURE__*/( () => theRegExp(/^(?:-?(?:inf|nan)|true|false|null)$/).test )();
-const IS_FLOAT_OR_XXXX = (literal        )          => IS_FLOAT(literal) ? !BAD_D(literal) : IS_XXX(literal);
-
 const Float = (literal        )         => {
 	if ( !IS_FLOAT(literal) || BAD_D(literal) ) {
 		//if ( options\$0.sFloat ) {
@@ -1671,7 +1702,7 @@ const parseKeys = (rest        )                                                
 	}
 	if ( disableDigit ) {
 		const keys = rest.slice(0, -lineRest.length);
-		( IS_INTEGER(keys) || IS_FLOAT_OR_XXXX(keys) ) && throws(SyntaxError$1(`Bad bare key disabled by xOptions.string` + where(' at ')));
+		( isAmazing(keys) || enableNull && keys==='null' ) && throws(SyntaxError$1(`Bad bare key disabled by xOptions.string` + where(' at ')));
 	}
 	if ( disallowEmptyKey ) {
 		let index         = lastIndex;
@@ -2247,7 +2278,7 @@ const BARE = /*#__PURE__*/( () => theRegExp(/^[\w-]+$/).test )();
 const $Key$ = (key        )         => BARE(key) ? key : singlelineString(key);
 
 const FIRST = /[^.]+/;
-const $Keys = (keys        )         => IS_INTEGER(keys) || IS_FLOAT_OR_XXXX(keys) ? keys.replace(FIRST, literalString) : keys;
+const $Keys = (keys        )         => isAmazing(keys) ? keys.replace(FIRST, literalString) : keys==='null' ? `'null'` : keys;
 
 class TOMLSection extends Array$1         {
 	
@@ -2572,6 +2603,7 @@ const _export = /*#__PURE__*/Default({
 	stringify,
 	Section, inline, multiline, literal, commentFor,
 	OffsetDateTime, LocalDateTime, LocalDate, LocalTime,
+	isInline, isSection,
 });
 
 module.exports = _export;

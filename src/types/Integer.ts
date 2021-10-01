@@ -15,7 +15,7 @@ const IS_XOB_INTEGER = /*#__PURE__*/( () => theRegExp(/^0(?:x[\dA-Fa-f][_\dA-Fa-
 const BAD_XOB = /*#__PURE__*/( () => newRegExp`_(?![\dA-Fa-f])`.test )();
 const UNDERSCORES_SIGN = /_|^[-+]/g;
 
-export const IS_INTEGER = (literal :string) :boolean => ( IS_D_INTEGER(literal) || /*options\$0.xob && */IS_XOB_INTEGER(literal) ) && !BAD_XOB(literal);
+const IS_INTEGER = (literal :string) :boolean => ( IS_D_INTEGER(literal) || /*options\$0.xob && */IS_XOB_INTEGER(literal) ) && !BAD_XOB(literal);
 
 const BigIntInteger = (literal :string) :bigint => {
 	IS_INTEGER(literal) || iterator$0.throws(SyntaxError(`Invalid Integer ${literal}` + iterator$0.where(' at ')));

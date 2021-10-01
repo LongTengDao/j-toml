@@ -90,10 +90,10 @@ type Table = object;
 
 0.  #### `source`
     
-    *   type: `string | ArrayBufferLike | Readonly<{ path :string, data :string | ArrayBufferLike, require? :NodeRequire } | { path :string, require :NodeRequire }>`
+    *   type: `string` / `ArrayBufferLike` / `Readonly<{ path :string, data :string | ArrayBufferLike, require? :NodeRequire }>` / `Readonly<{ path :string, require :NodeRequire }>`
     *   required
     
-    You can pass in `string` or the UTF-8 encoding file original binary data `ArrayBufferLike` (`Buffer | Uint8Array | ArrayBuffer`) as the source content.
+    You can pass in `string` or the UTF-8 encoding file original binary data `ArrayBufferLike` (`Buffer` / `Uint8Array` / `ArrayBuffer`) as the source content.
     
     One difference is that when passing in `string`, parser will only check whether all characters are valid Unicode characters according to the specification (uncoupled UCS-4 character code is invalid);  
     When `ArrayBufferLike` is passed in, an additional check is made to see whether there is unknown code point (which has been automatically replaced by `U+FFFD` in the `string` state).
@@ -107,7 +107,7 @@ type Table = object;
     
 1.  #### `specificationVersion`
     
-    *   type: `1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1`
+    *   type: `1.0` / `0.5` / `0.4` / `0.3` / `0.2` / `0.1`
     *   default: `1.0`
     *   deprecated: use `TOML.parse[specificationVersion]` instead would be better
     
@@ -133,7 +133,7 @@ type Table = object;
     
 3.  #### `useBigInt`
     
-    *   type: `boolean | number`
+    *   type: `boolean` / `number`
     *   default: `true`
     
     Specify whether you want or not to use `BigInt` for integer type value. A `number` type argument allows you to control it by a max limit, like `Number.MAX_SAFE_INTEGER` (and the min limit from `-useBigInt`, if `useBigInt>=0`; otherwise as the min limit, and the max limit is `-useBigInt-1`).
@@ -227,13 +227,13 @@ declare function stringify (rootTable :ReadonlyTable, options? :Readonly<{
     
     -   ##### `options.newline`
         
-        *   type: `'\n' | '\r\n'`
+        *   type: `'\n'` / `'\r\n'`
         
         What to use as the newline for serialization. If this parameter is not specified, the function will return an array of strings (representing each line) instead of a whole string.
         
     -   ##### `options.newlineAround`
         
-        *   type: `'document' | 'section' | 'header' | 'pairs' | 'pair'`
+        *   type: `'document'` / `'section'` / `'header'` / `'pairs'` / `'pair'`
         *   default: `'header'`
         
         When serializing, where to insert empty lines to improve readability.
@@ -248,7 +248,7 @@ declare function stringify (rootTable :ReadonlyTable, options? :Readonly<{
         
     -   ##### `options.indent`
         
-        *   type: `string | number`
+        *   type: `string` / `number`
         *   default: `'\t'`
         
         How to indent items in a static array which is in multi-line mode.
@@ -259,7 +259,7 @@ declare function stringify (rootTable :ReadonlyTable, options? :Readonly<{
         
     -   ##### `options.T`
         
-        *   type: `'T' | ' '`
+        *   type: `'T'` / `' '`
         *   default: `'T'`
         
         The delimiter between date and time.
@@ -275,7 +275,7 @@ declare function stringify (rootTable :ReadonlyTable, options? :Readonly<{
         
     -   ##### `options.xBeforeNewlineInMultilineTable`
         
-        *   type: `',' | ''`
+        *   type: `','` / `''`
         
         For inline tables marked multi-line mode, whether to use a comma before the newline.
         
@@ -283,7 +283,7 @@ declare function stringify (rootTable :ReadonlyTable, options? :Readonly<{
 
 ### `return`
 
-*   type: `string | string[]`
+*   type: `string` / `string[]`
 
 Returns a TOML document string, or an array of line-by-line strings. This depends on whether `option.newline` is specified.
 

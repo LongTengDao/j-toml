@@ -12,20 +12,19 @@ import undefined from '.undefined';
 
 import { theRegExp } from '@ltd/j-regexp';
 
-import { IS_INTEGER } from '../types/Integer';
-import { IS_FLOAT_OR_XXXX } from '../types/Float';
+import * as regexps$0 from '../regexps$0';
 
-import { getComment } from './comment';
+import { getComment } from '../types/comment';
 import { isLiteral } from './literal';
 import { literalString, singlelineString } from './string';
 import { float } from './float';
-import { isSection, ofInline } from './non-atom';
+import { isSection, ofInline } from '../types/non-atom';
 
 const BARE = /*#__PURE__*/( () => theRegExp(/^[\w-]+$/).test )();
 const $Key$ = (key :string) :string => BARE(key) ? key : singlelineString(key);
 
 const FIRST = /[^.]+/;
-const $Keys = (keys :string) :string => IS_INTEGER(keys) || IS_FLOAT_OR_XXXX(keys) ? keys.replace(FIRST, literalString) : keys;
+const $Keys = (keys :string) :string => regexps$0.isAmazing(keys) ? keys.replace(FIRST, literalString) : keys==='null' ? `'null'` : keys;
 
 export default class TOMLSection extends Array<string> {
 	

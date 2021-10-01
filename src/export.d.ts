@@ -62,6 +62,9 @@ export function stringify (this :void, rootTable :ReadonlyTable, options? :{
 	readonly xBeforeNewlineInMultilineTable? :',' | ''
 }) :string;
 
+export function isSection (this :void, table :ReadonlyTable) :boolean;
+export function isInline (this :void, table :ReadonlyTable) :boolean;
+
 export function Section<T extends ReadonlyTable> (this :void, table :T) :T;
 export function inline<T extends ReadonlyTable | readonly ReadonlyValue[]> (this :void, value :T) :T;
 export const multiline :{

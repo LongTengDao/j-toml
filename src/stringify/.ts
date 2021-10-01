@@ -16,12 +16,11 @@ export default (rootTable :READONLY.Table, options :READONLY.Options) :string | 
 	return document.newline ? document.join(document.newline) : document.flat();
 };
 
-export { commentFor } from './comment';
 export { literal } from './literal';
-export { inline, Section } from './non-atom';
+export { inline, Section } from '../types/non-atom';
 
 import { Lines, multilineString, multilineBasicString } from './string';
-import { multilineTable } from './non-atom';
+import { multilineTable } from '../types/non-atom';
 export const multiline = /*#__PURE__*/( () => {
 	const multiline = (value :READONLY.InlineTable | string | readonly [ ...string[], string ] & { readonly raw? :readonly [ string, ...string[] ] }) =>
 		typeof value==='string' ? multilineString(( '\n' + value ).split('\n') as Lines) :

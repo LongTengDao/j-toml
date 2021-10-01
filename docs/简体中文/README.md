@@ -88,10 +88,10 @@ type 表 = object;
 
 0.  #### `源`
     
-    *   类型：`string | ArrayBufferLike | Readonly<{ path :string, data :string | ArrayBufferLike, require? :NodeRequire } | { path :string, require :NodeRequire }>`
+    *   类型：`string` / `ArrayBufferLike` / `Readonly<{ path :string, data :string | ArrayBufferLike, require? :NodeRequire }>` / `Readonly<{ path :string, require :NodeRequire }>`
     *   必需
     
-    你可以传入 `string`，也可以传入 UTF-8 编码的文件原始二进制数据 `ArrayBufferLike`（`Buffer | Uint8Array | ArrayBuffer`）作为源内容。
+    你可以传入 `string`，也可以传入 UTF-8 编码的文件原始二进制数据 `ArrayBufferLike`（`Buffer` / `Uint8Array` / `ArrayBuffer`）作为源内容。
     
     一个区别是，当传入 `string` 时，只会根据规范检查所有字符是否均为有效的 Unicode 字符（未配对的 UCS-4 字符码是无效的）；  
     而传入 `ArrayBufferLike` 时，还会额外检查是否存在未知码点（而这在 `string` 状态下已经被自动替换为 `U+FFFD`）。
@@ -105,7 +105,7 @@ type 表 = object;
     
 1.  #### `规范版本`
     
-    *   类型：`1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1`
+    *   类型：`1.0` / `0.5` / `0.4` / `0.3` / `0.2` / `0.1`
     *   默认值：`1.0`
     *   不推荐：请改用 `TOML.parse[规范版本]`
     
@@ -131,7 +131,7 @@ type 表 = object;
     
 3.  #### `使用BigInt`
     
-    *   类型：`boolean | number`
+    *   类型：`boolean` / `number`
     *   默认值：`true`
     
     指定你是否要用 `BigInt` 来实现整数类型的值。`number` 类型的参数允许你精确控制超过多少才使用 `BigInt`，例如 `Number.MAX_SAFE_INTEGER`（自动通过 `-使用BigInt` 获取负向界限，如果 `使用BigInt>=0`；否则通过 `-使用BigInt-1` 获取正向界限）。
@@ -225,13 +225,13 @@ declare function stringify (根表 :只读表, 选项? :Readonly<{
     
     -   ##### `选项.newline`
         
-        *   类型：`'\n' | '\r\n'`
+        *   类型：`'\n'` / `'\r\n'`
         
         用什么作为序列化时的换行符。如果不指定该参数，函数的返回结果会是一个字符串数组（代表每一行），而不是一个字符串。
         
     -   ##### `选项.newlineAround`
         
-        *   类型：`'document' | 'section' | 'header' | 'pairs' | 'pair'`
+        *   类型：`'document'` / `'section'` / `'header'` / `'pairs'` / `'pair'`
         *   默认值：`'header'`
         
         序列化时，于何处增加空行，以增进可读性。
@@ -246,7 +246,7 @@ declare function stringify (根表 :只读表, 选项? :Readonly<{
         
     -   ##### `选项.indent`
         
-        *   类型：`string | number`
+        *   类型：`string` / `number`
         *   默认值：`'\t'`
         
         对于多行模式下的静态数组，如何对数组项进行缩进。
@@ -257,7 +257,7 @@ declare function stringify (根表 :只读表, 选项? :Readonly<{
         
     -   ##### `选项.T`
         
-        *   类型：`'T' | ' '`
+        *   类型：`'T'` / `' '`
         *   默认值：`'T'`
         
         序列化时，用什么来分隔日期与时刻。
@@ -273,7 +273,7 @@ declare function stringify (根表 :只读表, 选项? :Readonly<{
         
     -   ##### `选项.xBeforeNewlineInMultilineTable`
         
-        *   类型：`',' | ''`
+        *   类型：`','` / `''`
         
         对于被标记为多行模式的内联表，是否在换行符前使用逗号。
         
@@ -281,7 +281,7 @@ declare function stringify (根表 :只读表, 选项? :Readonly<{
 
 ### `return`
 
-*   类型：`string | string[]`
+*   类型：`string` / `string[]`
 
 返回 TOML 文档的字符串，或逐行字符串所构成的数组。具体取决于上文 `选项.newline` 是否被指定。
 

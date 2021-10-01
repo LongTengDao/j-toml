@@ -187,3 +187,37 @@ export const switchRegExp = (specificationVersion :number) :void => {
 			supportArrayOfTables = false;
 	}
 };
+
+const NUM = /*#__PURE__*/( () => newRegExp`
+	(?:
+		0
+		(?:
+			b[01][_01]*
+		|
+			o[0-7][_0-7]*
+		|
+			x[\dA-Fa-f][_\dA-Fa-f]*
+		|
+			(?:\.\d[_\d]*)?(?:[Ee]-?\d[_\d]*)?
+		)
+	|
+		[1-9][_\d]*
+		(?:\.\d[_\d]*)?(?:[Ee]-?\d[_\d]*)?
+	|
+		inf
+	|
+		nan
+	)
+` )();
+const IS_AMAZING = /*#__PURE__*/( () => newRegExp`
+	^(?:
+		-?${NUM}
+		(?:-${NUM})*
+	|
+		true
+	|
+		false
+	)$
+`.test )();
+const BAD_DXOB = /*#__PURE__*/( () => newRegExp`_(?![\dA-Fa-f])`.test )();
+export const isAmazing = (keys :string) :boolean => IS_AMAZING(keys) && !BAD_DXOB(keys);

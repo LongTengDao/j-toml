@@ -13,14 +13,14 @@ import { INLINE, DIRECTLY } from '../types/Table';
 import { newArray, STATICALLY } from '../types/Array';
 import { OffsetDateTime, LocalDateTime, LocalDate, LocalTime, OFFSET$ } from '../types/Datetime';
 import { BasicString } from '../types/String';
-import { Integer, IS_INTEGER } from '../types/Integer';
-import { Float, IS_FLOAT_OR_XXXX } from '../types/Float';
+import { Integer } from '../types/Integer';
+import { Float } from '../types/Float';
 import * as options$0 from '../options$0';
 import * as regexps$0 from '../regexps$0';
 import { appendTable, prepareTable, prepareInlineTable, assignLiteralString, assignBasicString } from './on-the-spot';
 
-import { commentFor } from '../stringify/comment';
-import { beInline } from '../stringify/non-atom';
+import { commentFor } from '../types/comment';
+import { beInline } from '../types/non-atom';
 
 const IS_OFFSET$ = /*#__PURE__*/( () => theRegExp(OFFSET$).test )();
 
@@ -46,7 +46,7 @@ const parseKeys = (rest :string) :{ leadingKeys :string[], finalKey :string, lin
 	}
 	if ( options$0.disableDigit ) {
 		const keys = rest.slice(0, -lineRest.length);
-		( IS_INTEGER(keys) || IS_FLOAT_OR_XXXX(keys) ) && iterator$0.throws(SyntaxError(`Bad bare key disabled by xOptions.string` + iterator$0.where(' at ')));
+		( regexps$0.isAmazing(keys) || options$0.enableNull && keys==='null' ) && iterator$0.throws(SyntaxError(`Bad bare key disabled by xOptions.string` + iterator$0.where(' at ')));
 	}
 	if ( options$0.disallowEmptyKey ) {
 		let index :number = lastIndex;

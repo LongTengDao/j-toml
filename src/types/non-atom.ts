@@ -30,4 +30,4 @@ export const Section = <T extends READONLY.Table> (table :T) :T => {
 	return table;
 };
 
-import type * as READONLY from './readonly';
+import type * as READONLY from '../stringify/readonly';

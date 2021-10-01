@@ -6,9 +6,9 @@ import Null from '.null';
 
 import { Null as orderify_Null } from '@ltd/j-orderify';
 
-import { beInline, beSection } from '../stringify/non-atom';
+import { beInline, beSection } from './non-atom';
 
-export { isInline } from '../stringify/non-atom';
+export { isInline } from './non-atom';
 export const INLINE = true;
 
 const tables = new WeakSet<Table>();

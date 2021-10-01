@@ -44,3 +44,4 @@ ___
             +   new feature (experimental): add `xOptions.string`, to disable keys shaped like numbers, etc.
             +   new feature: quote keys shaped like number, etc., during `TOML.stringify`
     18. 0.  +   new feature: allow passing rest arguments of `TOML.parse` via an options object
+    19. 0.  +   new feature: export helpers `isSection`, `isInline`

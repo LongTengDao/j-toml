@@ -8,6 +8,7 @@
 				3: -0,
 			},
 		},
+		'1-1': 1n,
 		true: false,
 		[commentFor('c')]: ' comment',
 		c: true,
