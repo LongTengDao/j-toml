@@ -14,7 +14,7 @@ const IS_NON_SCALAR = /*#__PURE__*/( () => theRegExp(/[\uD800-\uDFFF]/u).test )(
 
 let holding :boolean = false;
 
-const parse = (source :Source, specificationVersion :1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1, multilineStringJoiner? :string | { multilineStringJoiner? :string, useBigInt? :boolean | number, x? :options$0.XOptions }, useBigInt? :boolean | number, xOptions? :options$0.XOptions) :Table => {
+const parse = (source :Source, specificationVersion :1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1, multilineStringJoiner? :string | { joiner? :string, bigint? :boolean | number, x? :options$0.XOptions }, useBigInt? :boolean | number, xOptions? :options$0.XOptions) :Table => {
 	if ( holding ) { throw Error('parse during parsing.'); }
 	holding = true;
 	let rootTable :Table;
@@ -59,12 +59,13 @@ const parse = (source :Source, specificationVersion :1.0 | 0.5 | 0.4 | 0.3 | 0.2
 			if ( IS_NON_SCALAR(source) ) { throw Error('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any uncoupled UCS-4 character code.'); }
 			if ( typeof multilineStringJoiner==='object' && multilineStringJoiner ) {
 				if ( useBigInt!==undefined || xOptions!==undefined ) { throw TypeError('options mode ? args mode'); }
-				( { multilineStringJoiner, useBigInt, x: xOptions } = multilineStringJoiner );
+				( { joiner: multilineStringJoiner, bigint: useBigInt, x: xOptions } = multilineStringJoiner );
 			}
 			try {
 				options$0.use(specificationVersion, multilineStringJoiner, useBigInt, xOptions);
 				iterator$0.todo(source, sourcePath);
 				try {
+					source && source[0]==='\uFEFF' && iterator$0.throws(TypeError(`TOML content (string) should not start with BOM (U+FEFF)` + iterator$0.where(' at ')));
 					rootTable = Root();
 					process = options$0.Process();
 				}

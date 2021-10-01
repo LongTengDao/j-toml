@@ -11,11 +11,11 @@ which is the best config format he had ever seen.
 Node.js
 -------
 
-```
+```shell
 npm install @ltd/j-toml
 ```
 
-```
+```javascript
 const TOML = require('@ltd/j-toml');
 
 const source  = `
@@ -40,37 +40,55 @@ Object.keys(rootTable)   // [ 'I_am_normal', 'hasOwnProperty', 'constructor', '_
 ------------
 
 ```
-TOML.parse(source, specificationVersion, multilineStringJoiner[, useBigInt = true[, xOptions]]);
-TOML.parse(source,                       multilineStringJoiner[, useBigInt = true[, xOptions]]);
+TOML.parse(source                      [, options                                              ]);
+TOML.parse(source                      [, multilineStringJoiner[, useBigInt = true[, xOptions]]]);
+TOML.parse(source, specificationVersion[, multilineStringJoiner[, useBigInt = true[, xOptions]]]);
 ```
 
-```
-declare function parse (
-    source :Source,
-    specificationVersion :SpecificationVersion,
-    multilineStringJoiner :string,
+```typescript
+declare function parse (source :Source, options? :{
+    joiner? :string,
+    bigint? :boolean | number,
+    x? :XOptions,
+}) :Table;
+
+declare function parse (source :Source,
+    multilineStringJoiner? :string,
     useBigInt? :boolean | number,
-    xOptions? :object,
+    xOptions? :XOptions,
 ) :Table;
 
-declare function parse (
-    source :Source,
-    multilineStringJoiner :string,
+declare function parse (source :Source, specificationVersion :1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1,
+    multilineStringJoiner? :string,
     useBigInt? :boolean | number,
-    xOptions? :object,
+    xOptions? :XOptions,
 ) :Table;
 
 type Source = string | ArrayBufferLike | Readonly<
     | { path :string, data :string | ArrayBufferLike, require? :NodeRequire }
     | { path :string,                                 require  :NodeRequire }
 >;
-type SpecificationVersion = 1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1;
+type XOptions = object;
 type Table = object;
 ```
 
-### `arguments`
+### `arguments` (object style)
 
-0.  **`source`**
+0.  #### `source`
+    
+    See `source` in "traditional style" under.
+    
+1.  #### `options`
+    
+    A readonly object, the options it contains is as follows:
+    
+    -   **`options.joiner`**: see `multilineStringJoiner` in "traditional style" under.
+    -   **`options.bigint`**: see `useBigInt` in "traditional style" under.
+    -   **`options.x`**: see `xOptions` in "traditional style" under.
+
+### `arguments` (traditional style)
+
+0.  #### `source`
     
     *   type: `string | ArrayBufferLike | Readonly<{ path :string, data :string | ArrayBufferLike, require? :NodeRequire } | { path :string, require :NodeRequire }>`
     *   required
@@ -87,31 +105,40 @@ type Table = object;
     You can also omit the property `data`, the property `require` must be passed in at this time, because the `require('fs').readFileSync` interface needs to be used to read it.  
     Regardless of whether `data` is passed in, if `$ = require?.resolve?.paths?.('')?.[0]?.replace(/node_modules$/, '')` can be obtained, the absolute path will be obtained through `require('path').resolve($, source.path)`.
     
-1.  **`specificationVersion`**
+1.  #### `specificationVersion`
     
     *   type: `1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1`
     *   default: `1.0`
+    *   deprecated: use `TOML.parse[specificationVersion]` instead would be better
     
     If there is no special reason (e.g. the downstream program could not deal with `Infinity`、`NaN`、fractional seconds and edge Datetime values, Local Date-Time / Local Date / Local Time types, empty string key name, mixed type array even array of tables / table under array of arrays structure yet), the latest version is recommended.
     
-    If you skip this argument, the rest arguments must be moved one position to the left.
+    Note: if you skip this argument, the rest arguments must be moved one position to the left.
     
-2.  **`multilineStringJoiner`**
+2.  #### `multilineStringJoiner`
     
     *   type: `string`
-    *   required
     
-    For the multi-line strings, use what to join the lines for result.  
-    Note that TOML always use `'\n'` or `'\r\n'` split the source lines while parsing, which defined in TOML specification.
+    For the multi-line basic strings and multi-line literal strings, what will be used to join the lines for parsing result.  
+    Note: TOML always use `'\n'` or `'\r\n'` to split the document lines while parsing, which defined in TOML specification, it has nothing to do with this parameter, so don't be mixed up.
+
+    If this parameter is not passed in, the parsing process will throw an error where it is actually needed (a multi-line string containing a non-ignored newline):
     
-3.  **`useBigInt`**
+    ```toml
+    error = """
+    In this sample, the first and second newlines are ignored, \
+    the third newline will trigger an error.
+    """
+    ```
+    
+3.  #### `useBigInt`
     
     *   type: `boolean | number`
     *   default: `true`
     
     Specify whether you want or not to use `BigInt` for integer type value. A `number` type argument allows you to control it by a max limit, like `Number.MAX_SAFE_INTEGER` (and the min limit from `-useBigInt`, if `useBigInt>=0`; otherwise as the min limit, and the max limit is `-useBigInt-1`).
     
-4.  **`xOptions`**
+4.  #### `xOptions`
     
     The extensional features not in the specification.  
     Include keeping the key/value pairs order of tables, integers larger than `signed long`, multi-line inline table with trailing comma even no comma, `null` value, custom constructor, etc.  
@@ -136,22 +163,34 @@ This library will not cause stack overflow error unexpectedly due to too deep ta
 -----------------------------------------------------------------------------------------------------------
 
 ```
-TOML.parse[1.0](source, multilineStringJoiner[, useBigInt = true[, xOptions]]);
-TOML.parse[0.5](source, multilineStringJoiner[, useBigInt = true[, xOptions]]);
-TOML.parse[0.4](source, multilineStringJoiner[, useBigInt = true[, xOptions]]);
-TOML.parse[0.3](source, multilineStringJoiner[, useBigInt = true[, xOptions]]);
-TOML.parse[0.2](source, multilineStringJoiner[, useBigInt = true[, xOptions]]);
-TOML.parse[0.1](source, multilineStringJoiner[, useBigInt = true[, xOptions]]);
+TOML.parse[1.0](source[, options                                              ]);
+TOML.parse[0.5](source[, options                                              ]);
+TOML.parse[0.4](source[, options                                              ]);
+TOML.parse[0.3](source[, options                                              ]);
+TOML.parse[0.2](source[, options                                              ]);
+TOML.parse[0.1](source[, options                                              ]);
+TOML.parse[1.0](source[, multilineStringJoiner[, useBigInt = true[, xOptions]]]);
+TOML.parse[0.5](source[, multilineStringJoiner[, useBigInt = true[, xOptions]]]);
+TOML.parse[0.4](source[, multilineStringJoiner[, useBigInt = true[, xOptions]]]);
+TOML.parse[0.3](source[, multilineStringJoiner[, useBigInt = true[, xOptions]]]);
+TOML.parse[0.2](source[, multilineStringJoiner[, useBigInt = true[, xOptions]]]);
+TOML.parse[0.1](source[, multilineStringJoiner[, useBigInt = true[, xOptions]]]);
 ```
 
-```
+```typescript
 declare const parse :{
-    readonly [SpecificationVersion in 1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1] :(
-        source :Source,
-        multilineStringJoiner :string,
-        useBigInt? :boolean | number,
-        xOptions? :object,
-    ) => Table
+    readonly [SpecificationVersion in 1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1] :{
+        (source :Source, options? :{
+            joiner? :string,
+            bigint? :boolean | number,
+            x? :XOptions,
+        }) :Table;
+        (source :Source,
+            multilineStringJoiner? :string,
+            useBigInt? :boolean | number,
+            xOptions? :XOptions,
+        ) :Table;
+    }
 };
 ```
 
@@ -162,7 +201,7 @@ declare const parse :{
 TOML.stringify(rootTable[, options]);
 ```
 
-```
+```typescript
 declare function stringify (rootTable :ReadonlyTable, options? :Readonly<{
     newline? :'\n' | '\r\n',
     newlineAround? :'document' | 'section' | 'header' | 'pairs' | 'pair',
@@ -175,14 +214,14 @@ declare function stringify (rootTable :ReadonlyTable, options? :Readonly<{
 
 ### `arguments`
 
-0.  **`rootTable`**
+0.  #### `rootTable`
     
     *   type: `ReadonlyTable`
     *   required
     
     A readonly object, its own string keys can only contain valid TOML types.
     
-1.  **`options`**
+1.  #### `options`
     
     A readonly object, the options it contains is as follows.
     
@@ -267,7 +306,7 @@ Considering how JS code is read and written, the default mode for this library t
 You can use the `Section` function to mark a table as a block table (and return the input table), or use the `inline` function to mark the table as an inline table (return the input table as well).  
 You can also use `multiline` function to mark a table as a multiline mode inline table (and return it), but note that this is not the specification allowed currently (remember to specify `options.xBeforeNewlineInMultilineTable` to make such marking will not be ignored when serializing).
 
-```
+```javascript
 TOML.stringify({
     key: 'value',
     dotted: {
@@ -289,7 +328,7 @@ TOML.stringify({
 });
 ```
 
-```
+```toml
 
 key = 'value'
 dotted.key = 'value'
@@ -313,7 +352,7 @@ key = 'value'
 A non-empty array, whose item is table that marked by `Section`, will be serialized as "array of tables".  
 Otherwise, arrays are treated as static and multi-line by default. If you want single-line mode, you can use the `inline` function to mark it.
 
-```
+```javascript
 TOML.stringify({
     staticArray: [
         'string',
@@ -327,7 +366,7 @@ TOML.stringify({
 });
 ```
 
-```
+```toml
 
 staticArray = [
     'string',
@@ -342,7 +381,7 @@ staticArray_singleline = [ 1.0, 2 ]
 Another sore point is comment. Obviously we don't want a configuration file that contains comments lose all comment information after being modified by programs.  
 Now you can write `[commentFor(key)]` as key in your tables (this gives you a `symbol` as key, and the value should be the comment content string), so that the comment is after the value belong the `key` in the final serialization!
 
-```
+```javascript
 TOML.stringify({
     [commentFor('key')]: ' this is a key/value pair',
     key: 'value',
@@ -358,7 +397,7 @@ TOML.stringify({
 });
 ```
 
-```
+```toml
 
 key = 'value' # this is a key/value pair
 dotted.key = 'value' # this is a dotted key/value pair
@@ -374,7 +413,7 @@ This library provides several helper functions for this purpose, including `lite
 
 When you need to serialize a brand new temporary data directly, use `literal` to specify the writing style:
 
-```
+```javascript
 TOML.stringify({
     underscore: literal`1_000`,
     zero: literal`10.00`,
@@ -386,7 +425,7 @@ TOML.stringify({
 });
 ```
 
-```
+```toml
 
 underscore = 1_000
 zero = 10.00
@@ -400,7 +439,7 @@ multilineString = """
 
 Here, `multiline` (string case) would help when the multi-line string comes from a variable (e.g., data from `parse`):
 
-```
+```toml
 
 base = 0o777
 multilineString = """
@@ -409,7 +448,7 @@ multilineString = """
 
 ```
 
-```
+```javascript
 const table = TOML.parse('/path/to/example.toml', '\n');
 
 table.base = TOML.literal('0o' + table.base.toString(8).padStart(3, '0'));
@@ -418,7 +457,7 @@ table.multilineString = TOML.multiline(table.multilineString + '\b4');
 TOML.stringify(table);
 ```
 
-```
+```toml
 
 base = 0o777
 multilineString = """
@@ -430,7 +469,7 @@ multilineString = """
 By default, `multiline` (string case) splits the input string with `'\n'`, for example `'1\b2\n3\b4'` will be treated as `[ '1\b2 ', '3\b4' ]`.  
 But if your requirements are very tricky, such as if your data is parsed by `TOML.parse(source, '\b')`, you can directly the split string array `'1\b2\n3\b4'.split('\b')` (viz `[ '1', '2\n3', '4' ]`), the final serialization result will be:
 
-```
+```toml
 multilineString = """
 1
 2\n3
@@ -441,7 +480,7 @@ Note that `literal` or `multiline` (string case) or `multiline.basic` does not r
 It was a bit of a hassle, what's worse, you had to mark all other unmodified atom value at the same time, the experience will be really bad.  
 In applications where this behaviour occurs frequently, consider converting the table from `parse` into an instance of a class containing methods like `toTOML` that specify the serialization choice for each property, and use the returned copy for 'stringify', that will improve the experience greatly:
 
-```
+```javascript
 const model = new class {
     base;
     multilineString;

@@ -1,6 +1,6 @@
 ﻿'use strict';
 
-const version = '1.17.0';
+const version = '1.18.0';
 
 const Error$1 = Error;
 
@@ -1963,14 +1963,15 @@ const arrayBufferLike2string                                             = Buffe
 			if ( !arrayBufferLike.byteLength ) { return ''; }
 			const buffer         = isBuffer(arrayBufferLike) ? arrayBufferLike : 'length' in arrayBufferLike ? new Buf(arrayBufferLike.buffer, arrayBufferLike.byteOffset, arrayBufferLike.length) : new Buf(arrayBufferLike);
 			const string         = buffer.toString();
-			const length         = byteLength(string);
-			if ( length===buffer.length ) {
+			if ( string.includes('\uFFFD') ) {
+				const length         = byteLength(string);
+				if ( length!==buffer.length ) { throw Error$1(message); }
 				const utf8 = allocUnsafe(length);
 				///@ts-ignore
 				utf8.utf8Write(string, 0, length);
-				if ( utf8.equals(buffer) ) { return string[0]==='\uFEFF' ? string.slice(1) : string; }
+				if ( !utf8.equals(buffer) ) { throw Error$1(message); }
 			}
-			throw Error$1(message);
+			return string[0]==='\uFEFF' ? string.slice(1) : string;
 		}
 	)(Buffer$1                                                                                                                         )///
 	
@@ -2046,7 +2047,7 @@ const IS_NON_SCALAR = /*#__PURE__*/( () => theRegExp(/[\uD800-\uDFFF]/u).test )(
 
 let holding          = false;
 
-const parse = (source        , specificationVersion                                   , multilineStringJoiner                                                                                                    , useBigInt                   , xOptions                     )        => {
+const parse = (source        , specificationVersion                                   , multilineStringJoiner                                                                                  , useBigInt                   , xOptions                     )        => {
 	if ( holding ) { throw Error$1('parse during parsing.'); }
 	holding = true;
 	let rootTable       ;
@@ -2091,12 +2092,13 @@ const parse = (source        , specificationVersion                             
 			if ( IS_NON_SCALAR(source) ) { throw Error$1('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any uncoupled UCS-4 character code.'); }
 			if ( typeof multilineStringJoiner==='object' && multilineStringJoiner ) {
 				if ( useBigInt!==undefined$1 || xOptions!==undefined$1 ) { throw TypeError$1('options mode ? args mode'); }
-				( { multilineStringJoiner, useBigInt, x: xOptions } = multilineStringJoiner );
+				( { joiner: multilineStringJoiner, bigint: useBigInt, x: xOptions } = multilineStringJoiner );
 			}
 			try {
 				use(specificationVersion, multilineStringJoiner, useBigInt, xOptions);
 				todo(source, sourcePath);
 				try {
+					source && source[0]==='\uFEFF' && throws(TypeError$1(`TOML content (string) should not start with BOM (U+FEFF)` + where(' at ')));
 					rootTable = Root();
 					process = Process();
 				}

@@ -38,35 +38,53 @@ Object.keys(根表)   // [ '一个普通的键名', 'hasOwnProperty', 'construct
 ------------
 
 ```
-TOML.parse(源, 遵循规范版本, 多行字符串拼接字符[, 使用BigInt = true[, 超级选项]]);
-TOML.parse(源,               多行字符串拼接字符[, 使用BigInt = true[, 超级选项]]);
+TOML.parse(源          [, 选项                                               ]);
+TOML.parse(源          [, 多行字符串拼接字符[, 使用BigInt = true[, 超级选项]]]);
+TOML.parse(源, 规范版本[, 多行字符串拼接字符[, 使用BigInt = true[, 超级选项]]]);
 ```
 
 ```typescript
-declare function parse (
-    源 :源,
-    遵循规范版本 :遵循规范版本,
-    多行字符串拼接字符 :string,
+declare function parse (源 :源, 选项? :{
+    joiner? :string,
+    bigint? :boolean | number,
+    x? :超级选项,
+}) :表;
+
+declare function parse (源 :源,
+    多行字符串拼接字符? :string,
     使用BigInt? :boolean | number,
-    超级选项? :object,
+    超级选项? :超级选项,
 ) :表;
 
-declare function parse (
-    源 :源,
-    多行字符串拼接字符 :string,
+declare function parse (源 :源, 规范版本 :1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1,
+    多行字符串拼接字符? :string,
     使用BigInt? :boolean | number,
-    超级选项? :object,
+    超级选项? :超级选项,
 ) :表;
 
 type 源 = string | ArrayBufferLike | Readonly<
     | { path :string, data :string | ArrayBufferLike, require? :NodeRequire }
     | { path :string,                                 require  :NodeRequire }
 >;
-type 遵循规范版本 = 1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1;
+type 超级选项 = object;
 type 表 = object;
 ```
 
-### `arguments`
+### `arguments`（对象模式）
+
+0.  #### `源`
+    
+    见下文“传统模式”的 `源`。
+    
+1.  #### `选项`
+    
+    一个只读对象，其所包含的选项如下：
+    
+    -   **`选项.joiner`**：见下文“传统模式”的 `多行字符串拼接字符`。
+    -   **`选项.bigint`**：见下文“传统模式”的 `使用BigInt`。
+    -   **`选项.x`**：见下文“传统模式”的 `超级选项`。
+
+### `arguments`（传统模式）
 
 0.  #### `源`
     
@@ -85,22 +103,31 @@ type 表 = object;
     你也可以省略 `data` 属性，此时必须传入 `require` 属性，因为需要使用 `require('fs').readFileSync` 接口来读取。  
     不论是否传入 `data`，只要能够获取到 `$ = require?.resolve?.paths?.('')?.[0]?.replace(/node_modules$/, '')`，都会通过 `require('path').resolve($, 源.path)` 来获取绝对路径。
     
-1.  #### `遵循规范版本`
+1.  #### `规范版本`
     
     *   类型：`1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1`
     *   默认值：`1.0`
+    *   不推荐：请改用 `TOML.parse[规范版本]`
     
     如果没有特殊理由（例如下游程序尚不能妥善处置 `Infinity`、`NaN`、小数秒和极端时间值，各地日期时刻、各地日期、各地时刻类型，空字符串键名，混合类型的数组甚至表数组、数组数组下的表结构），建议使用最新的版本。
     
-    当不指定此参数时，后续参数均需往前移动一位。
+    注意：当不指定此参数时，后续参数均需往前移动一位。
     
 2.  #### `多行字符串拼接字符`
     
     *   类型：`string`
-    *   必需
     
-    对于多行字符串，用什么来拼接各行。  
-    注意在解析 TOML 源时，按照 TOML 规范的要求，行分隔符总是 `'\n'` 或 `'\r\n'`。
+    对于多行基础字符串和多行字面量字符串，用什么来拼接各行、生成解析结果。  
+    注意，在解析 TOML 源时，按照规范的要求，文档的行分隔符总是 `'\n'` 或 `'\r\n'`，与此参数无关，不要混淆。
+    
+    如果没有传入该参数，那么解析过程将在遇到需要该参数的位置（包含不被忽略的换行的多行字符串）抛出错误：
+    
+    ```toml
+    error = """
+    此例中前两个换行没事，\
+    第三个换行会触发报错。
+    """
+    ```
     
 3.  #### `使用BigInt`
     
@@ -134,22 +161,34 @@ type 表 = object;
 -----------------------------------------------------------------------------------------------------------
 
 ```
-TOML.parse[1.0](源, 多行字符串拼接字符[, 使用BigInt = true[, 超级选项]]);
-TOML.parse[0.5](源, 多行字符串拼接字符[, 使用BigInt = true[, 超级选项]]);
-TOML.parse[0.4](源, 多行字符串拼接字符[, 使用BigInt = true[, 超级选项]]);
-TOML.parse[0.3](源, 多行字符串拼接字符[, 使用BigInt = true[, 超级选项]]);
-TOML.parse[0.2](源, 多行字符串拼接字符[, 使用BigInt = true[, 超级选项]]);
-TOML.parse[0.1](源, 多行字符串拼接字符[, 使用BigInt = true[, 超级选项]]);
+TOML.parse[1.0](源[, 选项                                               ]);
+TOML.parse[0.5](源[, 选项                                               ]);
+TOML.parse[0.4](源[, 选项                                               ]);
+TOML.parse[0.3](源[, 选项                                               ]);
+TOML.parse[0.2](源[, 选项                                               ]);
+TOML.parse[0.1](源[, 选项                                               ]);
+TOML.parse[1.0](源[, 多行字符串拼接字符[, 使用BigInt = true[, 超级选项]]]);
+TOML.parse[0.5](源[, 多行字符串拼接字符[, 使用BigInt = true[, 超级选项]]]);
+TOML.parse[0.4](源[, 多行字符串拼接字符[, 使用BigInt = true[, 超级选项]]]);
+TOML.parse[0.3](源[, 多行字符串拼接字符[, 使用BigInt = true[, 超级选项]]]);
+TOML.parse[0.2](源[, 多行字符串拼接字符[, 使用BigInt = true[, 超级选项]]]);
+TOML.parse[0.1](源[, 多行字符串拼接字符[, 使用BigInt = true[, 超级选项]]]);
 ```
 
 ```typescript
 declare const parse :{
-    readonly [遵循规范版本 in 1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1] :(
-        源 :源,
-        多行字符串拼接字符 :string,
-        使用BigInt? :boolean | number,
-        超级选项? :object,
-    ) => 表
+    readonly [规范版本 in 1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1] :{
+        (源 :源, 选项? :{
+            joiner? :string,
+            bigint? :boolean | number,
+            x? :超级选项,
+        }) :表;
+        (源 :源,
+            多行字符串拼接字符? :string,
+            使用BigInt? :boolean | number,
+            超级选项? :超级选项,
+        ) :表;
+    }
 };
 ```
 

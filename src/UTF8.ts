@@ -15,14 +15,15 @@ export const arrayBufferLike2string :(this :void, value :ArrayBuffer) => string 
 			if ( !arrayBufferLike.byteLength ) { return ''; }
 			const buffer :Buffer = isBuffer(arrayBufferLike) ? arrayBufferLike : 'length' in arrayBufferLike ? new Buf(arrayBufferLike.buffer, arrayBufferLike.byteOffset, arrayBufferLike.length) : new Buf(arrayBufferLike);
 			const string :string = buffer.toString();
-			const length :number = byteLength(string);
-			if ( length===buffer.length ) {
+			if ( string.includes('\uFFFD') ) {
+				const length :number = byteLength(string);
+				if ( length!==buffer.length ) { throw Error(message); }
 				const utf8 = allocUnsafe(length);
 				///@ts-ignore
 				utf8.utf8Write(string, 0, length);
-				if ( utf8.equals(buffer) ) { return string[0]==='\uFEFF' ? string.slice(1) : string; }
+				if ( !utf8.equals(buffer) ) { throw Error(message); }
 			}
-			throw Error(message);
+			return string[0]==='\uFEFF' ? string.slice(1) : string;
 		}
 	)(Buffer as typeof Buffer & { [Symbol.species] :{ new (buffer :ArrayBufferLike, byteOffset? :number, length? :number) :Buffer } })///
 	

@@ -38,35 +38,53 @@ Object.keys(rootTable)   // [ 'I_am_normal', 'hasOwnProperty', 'constructor', '_
 ------------
 
 ```
-TOML.parse(source, specificationVersion, multilineStringJoiner[, useBigInt = true[, xOptions]]);
-TOML.parse(source,                       multilineStringJoiner[, useBigInt = true[, xOptions]]);
+TOML.parse(source                      [, options                                              ]);
+TOML.parse(source                      [, multilineStringJoiner[, useBigInt = true[, xOptions]]]);
+TOML.parse(source, specificationVersion[, multilineStringJoiner[, useBigInt = true[, xOptions]]]);
 ```
 
 ```typescript
-declare function parse (
-    source :Source,
-    specificationVersion :SpecificationVersion,
-    multilineStringJoiner :string,
+declare function parse (source :Source, options? :{
+    joiner? :string,
+    bigint? :boolean | number,
+    x? :XOptions,
+}) :Table;
+
+declare function parse (source :Source,
+    multilineStringJoiner? :string,
     useBigInt? :boolean | number,
-    xOptions? :object,
+    xOptions? :XOptions,
 ) :Table;
 
-declare function parse (
-    source :Source,
-    multilineStringJoiner :string,
+declare function parse (source :Source, specificationVersion :1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1,
+    multilineStringJoiner? :string,
     useBigInt? :boolean | number,
-    xOptions? :object,
+    xOptions? :XOptions,
 ) :Table;
 
 type Source = string | ArrayBufferLike | Readonly<
     | { path :string, data :string | ArrayBufferLike, require? :NodeRequire }
     | { path :string,                                 require  :NodeRequire }
 >;
-type SpecificationVersion = 1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1;
+type XOptions = object;
 type Table = object;
 ```
 
-### `arguments`
+### `arguments` (object style)
+
+0.  #### `source`
+    
+    See `source` in "traditional style" under.
+    
+1.  #### `options`
+    
+    A readonly object, the options it contains is as follows:
+    
+    -   **`options.joiner`**: see `multilineStringJoiner` in "traditional style" under.
+    -   **`options.bigint`**: see `useBigInt` in "traditional style" under.
+    -   **`options.x`**: see `xOptions` in "traditional style" under.
+
+### `arguments` (traditional style)
 
 0.  #### `source`
     
@@ -89,18 +107,27 @@ type Table = object;
     
     *   type: `1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1`
     *   default: `1.0`
+    *   deprecated: use `TOML.parse[specificationVersion]` instead would be better
     
     If there is no special reason (e.g. the downstream program could not deal with `Infinity`、`NaN`、fractional seconds and edge Datetime values, Local Date-Time / Local Date / Local Time types, empty string key name, mixed type array even array of tables / table under array of arrays structure yet), the latest version is recommended.
     
-    If you skip this argument, the rest arguments must be moved one position to the left.
+    Note: if you skip this argument, the rest arguments must be moved one position to the left.
     
 2.  #### `multilineStringJoiner`
     
     *   type: `string`
-    *   required
     
-    For the multi-line strings, use what to join the lines for result.  
-    Note that TOML always use `'\n'` or `'\r\n'` split the source lines while parsing, which defined in TOML specification.
+    For the multi-line basic strings and multi-line literal strings, what will be used to join the lines for parsing result.  
+    Note: TOML always use `'\n'` or `'\r\n'` to split the document lines while parsing, which defined in TOML specification, it has nothing to do with this parameter, so don't be mixed up.
+
+    If this parameter is not passed in, the parsing process will throw an error where it is actually needed (a multi-line string containing a non-ignored newline):
+    
+    ```toml
+    error = """
+    In this sample, the first and second newlines are ignored, \
+    the third newline will trigger an error.
+    """
+    ```
     
 3.  #### `useBigInt`
     
@@ -134,22 +161,34 @@ This library will not cause stack overflow error unexpectedly due to too deep ta
 -----------------------------------------------------------------------------------------------------------
 
 ```
-TOML.parse[1.0](source, multilineStringJoiner[, useBigInt = true[, xOptions]]);
-TOML.parse[0.5](source, multilineStringJoiner[, useBigInt = true[, xOptions]]);
-TOML.parse[0.4](source, multilineStringJoiner[, useBigInt = true[, xOptions]]);
-TOML.parse[0.3](source, multilineStringJoiner[, useBigInt = true[, xOptions]]);
-TOML.parse[0.2](source, multilineStringJoiner[, useBigInt = true[, xOptions]]);
-TOML.parse[0.1](source, multilineStringJoiner[, useBigInt = true[, xOptions]]);
+TOML.parse[1.0](source[, options                                              ]);
+TOML.parse[0.5](source[, options                                              ]);
+TOML.parse[0.4](source[, options                                              ]);
+TOML.parse[0.3](source[, options                                              ]);
+TOML.parse[0.2](source[, options                                              ]);
+TOML.parse[0.1](source[, options                                              ]);
+TOML.parse[1.0](source[, multilineStringJoiner[, useBigInt = true[, xOptions]]]);
+TOML.parse[0.5](source[, multilineStringJoiner[, useBigInt = true[, xOptions]]]);
+TOML.parse[0.4](source[, multilineStringJoiner[, useBigInt = true[, xOptions]]]);
+TOML.parse[0.3](source[, multilineStringJoiner[, useBigInt = true[, xOptions]]]);
+TOML.parse[0.2](source[, multilineStringJoiner[, useBigInt = true[, xOptions]]]);
+TOML.parse[0.1](source[, multilineStringJoiner[, useBigInt = true[, xOptions]]]);
 ```
 
 ```typescript
 declare const parse :{
-    readonly [SpecificationVersion in 1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1] :(
-        source :Source,
-        multilineStringJoiner :string,
-        useBigInt? :boolean | number,
-        xOptions? :object,
-    ) => Table
+    readonly [SpecificationVersion in 1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1] :{
+        (source :Source, options? :{
+            joiner? :string,
+            bigint? :boolean | number,
+            x? :XOptions,
+        }) :Table;
+        (source :Source,
+            multilineStringJoiner? :string,
+            useBigInt? :boolean | number,
+            xOptions? :XOptions,
+        ) :Table;
+    }
 };
 ```
 
