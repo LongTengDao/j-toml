@@ -77,10 +77,8 @@ function Markdown (Path, npm = `
 		return BOM +
 			i18n.map(lang => `[${lang}](https://GitHub.com/LongTengDao/j-toml/tree/master/${Path(lang)})`).join(' | ') + EOL +
 			'___' +  EOL +
-			_English_
+			( npm ? _English_.replace(/(?=\r?\n=)/, () => npm ) : _English_ )
 			.replace(/^\uFEFF/, '')
-			.replace(/(?=\r?\n=)/, () => npm ?? '')
-			.replace(/^(```+)toml\r?\n((?:\r?\n){2}.*?(?:\r?\n){2})\r?\n\1$/gms, (__, $1, $2) => `${$1}toml${$2}${$1}`)
 			//.replace(/(?<=^(?: {4})?```+)[^`\r\n]+/gm, '')
 			//.replace(/(?<=^(?: {4})?(?:\d\.|- ) {2})#+ +(.*)/gm, (_, $1) => `**${$1}**`)
 			;

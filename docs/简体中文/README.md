@@ -328,7 +328,6 @@ TOML.stringify({
 
 ```toml
 
-
 key = 'value'
 dotted.key = 'value'
 inlineTable = { key = 'value' }
@@ -345,7 +344,6 @@ key = 'value'
 [table.table]
 
 key = 'value'
-
 
 ```
 
@@ -368,7 +366,6 @@ TOML.stringify({
 
 ```toml
 
-
 staticArray = [
     'string',
     { },
@@ -376,7 +373,6 @@ staticArray = [
 staticArray_singleline = [ 1.0, 2 ]
 
 [[arrayOfTables]]
-
 
 ```
 
@@ -401,12 +397,10 @@ TOML.stringify({
 
 ```toml
 
-
 key = 'value' # 这是一个键值对
 dotted.key = 'value' # 这是一个点分隔键值对
 
 [table.header] # 这是一个表头（不能是表数组中的表）
-
 
 ```
 
@@ -431,7 +425,6 @@ TOML.stringify({
 
 ```toml
 
-
 underscore = 1_000
 zero = 10.00
 base = 0o777
@@ -440,19 +433,16 @@ multilineString = """
 1\b2
 3"""
 
-
 ```
 
 其中，当多行字符串的内容来自一个变量时（比如 `parse` 出的历史结果），`multiline`（字符串场景）会起到作用：
 
 ```toml
 
-
 base = 0o777
 multilineString = """
 1\b2
 3"""
-
 
 ```
 
@@ -467,12 +457,10 @@ TOML.stringify(table);
 
 ```toml
 
-
 base = 0o777
 multilineString = """
 1\b2
 3\b4"""
-
 
 ```
 

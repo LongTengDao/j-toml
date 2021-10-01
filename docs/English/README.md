@@ -328,7 +328,6 @@ TOML.stringify({
 
 ```toml
 
-
 key = 'value'
 dotted.key = 'value'
 inlineTable = { key = 'value' }
@@ -345,7 +344,6 @@ key = 'value'
 [table.table]
 
 key = 'value'
-
 
 ```
 
@@ -368,7 +366,6 @@ TOML.stringify({
 
 ```toml
 
-
 staticArray = [
     'string',
     { },
@@ -376,7 +373,6 @@ staticArray = [
 staticArray_singleline = [ 1.0, 2 ]
 
 [[arrayOfTables]]
-
 
 ```
 
@@ -401,12 +397,10 @@ TOML.stringify({
 
 ```toml
 
-
 key = 'value' # this is a key/value pair
 dotted.key = 'value' # this is a dotted key/value pair
 
 [table.header] # this is a table header (but it cannot be a table in an array of tables)
-
 
 ```
 
@@ -431,7 +425,6 @@ TOML.stringify({
 
 ```toml
 
-
 underscore = 1_000
 zero = 10.00
 base = 0o777
@@ -440,19 +433,16 @@ multilineString = """
 1\b2
 3"""
 
-
 ```
 
 Here, `multiline` (string case) would help when the multi-line string comes from a variable (e.g., data from `parse`):
 
 ```toml
 
-
 base = 0o777
 multilineString = """
 1\b2
 3"""
-
 
 ```
 
@@ -467,12 +457,10 @@ TOML.stringify(table);
 
 ```toml
 
-
 base = 0o777
 multilineString = """
 1\b2
 3\b4"""
-
 
 ```
 
