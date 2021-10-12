@@ -19,7 +19,7 @@ require('../test/test.js')(async ({ build, 龙腾道, get, map, ful, put }) => {
 		ES: 6,
 		NPM: {
 			description: `${en}／${zhs}`,
-			keywords: [ 'parse', 'stringify', 'TOML', '1.0.0', '0.5.0', '0.4.0', '0.3.0', '0.2.0', '0.1.0' ],
+			keywords: [ 'TOML', 'stringify', 'parse', '1.0.0', '0.5.0', '0.4.0', '0.3.0', '0.2.0', '0.1.0' ],
 			homepage: 'https://www.npmjs.com/package/@ltd/j-toml',
 			files: [
 				'package.json',
@@ -37,6 +37,7 @@ require('../test/test.js')(async ({ build, 龙腾道, get, map, ful, put }) => {
 				'test': 'node ./test.js',
 			},
 		},
+		UMD: { main_global: 'TOML' },
 		ESM: true,
 		locate: {
 			'@ltd/j-orderify': ful('../../LongTengDao/j-orderify/dist/ESM/.j-orderify.js'),
@@ -68,10 +69,10 @@ function $(msg,fn){try{return fn();}catch{throw Error(\`@ltd/j-toml/package.json
 });
 
 function Markdown (Path, npm = `
-![Downloads](https://img.shields.io/npm/dw/@ltd/j-toml)
-![License](https://img.shields.io/npm/l/@ltd/j-toml)
-![Version](https://img.shields.io/npm/v/@ltd/j-toml)
-![Activity: GitHub last commit](https://img.shields.io/github/last-commit/LongTengDao/j-toml)`.replace(/\n/g, ' ')) {
+![](https://img.shields.io/npm/dw/@ltd/j-toml "Downloads")
+![](https://img.shields.io/npm/l/@ltd/j-toml "License")
+![](https://img.shields.io/npm/v/@ltd/j-toml "Version")
+![](https://img.shields.io/github/last-commit/LongTengDao/j-toml "Activity: GitHub last commit")`.replace(/\n/g, ' ')) {
 	return (_English_) => {
 		if ( _English_.includes('\t') ) { throw Error(`.md 中存在 Tab`); }
 		return BOM +

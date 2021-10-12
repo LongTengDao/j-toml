@@ -1,6 +1,10 @@
-﻿'use strict';
+﻿(function (global, factory) {
+typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+typeof define === 'function' && define.amd ? define(factory) :
+(global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.TOML = factory());
+}(this, (function () { 'use strict';
 
-const version = '1.19.0';
+const version = '1.20.0';
 
 const Error$1 = Error;
 
@@ -2606,6 +2610,8 @@ const _export = /*#__PURE__*/Default({
 	isInline, isSection,
 });
 
-module.exports = _export;
+return _export;
+
+})));
 
 //# sourceMappingURL=index.js.map

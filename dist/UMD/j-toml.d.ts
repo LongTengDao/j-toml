@@ -1,3 +1,4 @@
+export as namespace TOML;
 export = exports;
 
 declare namespace exports {

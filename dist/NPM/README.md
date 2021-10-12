@@ -1,7 +1,7 @@
 ﻿[English](https://GitHub.com/LongTengDao/j-toml/tree/master/docs/English/) | [简体中文](https://GitHub.com/LongTengDao/j-toml/tree/master/docs/简体中文/)
 ___
 
-`@ltd/j-toml` ![Downloads](https://img.shields.io/npm/dw/@ltd/j-toml) ![License](https://img.shields.io/npm/l/@ltd/j-toml) ![Version](https://img.shields.io/npm/v/@ltd/j-toml) ![Activity: GitHub last commit](https://img.shields.io/github/last-commit/LongTengDao/j-toml)
+`@ltd/j-toml` ![](https://img.shields.io/npm/dw/@ltd/j-toml "Downloads") ![](https://img.shields.io/npm/l/@ltd/j-toml "License") ![](https://img.shields.io/npm/v/@ltd/j-toml "Version") ![](https://img.shields.io/github/last-commit/LongTengDao/j-toml "Activity: GitHub last commit")
 =============
 
 `@ltd/j-toml` is an implementation of [TOML](https://TOML.io/) ("Tom's Obvious, Minimal Language") written by LongTengDao,  
