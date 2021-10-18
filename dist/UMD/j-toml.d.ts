@@ -3,7 +3,7 @@ export = exports;
 
 declare namespace exports {
 	
-	export const version :'1.20.0';
+	export const version :'1.21.0';
 	
 	export const parse :
 		& {
@@ -59,6 +59,7 @@ declare namespace exports {
 		}>;
 	
 	export function stringify (this :void, rootTable :ReadonlyTable, options? :{
+		readonly integer? :number
 		readonly newline? :'\n' | '\r\n'
 		readonly newlineAround? :'document' | 'section' | 'header' | 'pairs' | 'pair'
 		readonly indent? :string | number

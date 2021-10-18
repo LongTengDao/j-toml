@@ -1,15 +1,13 @@
-import Error from '.Error';
 import SyntaxError from '.SyntaxError';
 import RangeError from '.RangeError';
 import TypeError from '.TypeError';
+import BigInt from '.BigInt';
 import WeakMap from '.WeakMap';
 import get from '.WeakMap.prototype.get';
 import set from '.WeakMap.prototype.set';
 import create from '.Object.create';
 import isSafeInteger from '.Number.isSafeInteger';
 import ownKeys from '.Reflect.ownKeys';
-import MAX_SAFE_INTEGER from '.Number.MAX_SAFE_INTEGER';
-import MIN_SAFE_INTEGER from '.Number.MIN_SAFE_INTEGER';
 import undefined from '.undefined';
 import NULL from '.null.prototype';
 
@@ -21,8 +19,8 @@ import * as regexps$0 from './regexps$0';
 
 export let useWhatToJoinMultilineString :string | null = null;
 export let usingBigInt :boolean | null = true;
-export let IntegerMin = 0;
-export let IntegerMax = 0;
+export let IntegerMin :bigint = 0n;
+export let IntegerMax :bigint = 0n;
 
 /* xOptions */
 
@@ -115,7 +113,7 @@ const collect_on = (tag :string, array :null | Array, table :null | Table, key? 
 	}
 	collection[collection_length++] = each;
 };
-const collect_off = () :never => { iterator$0.throws(SyntaxError(`xOptions.tag is not enabled, but found tag syntax` + iterator$0.where(' at '))); };
+const collect_off = () :never => { throw iterator$0.throws(SyntaxError(`xOptions.tag is not enabled, but found tag syntax` + iterator$0.where(' at '))); };
 export let collect :(tag :string, ...rest :[ null, Table, string ] | [ Array, null ] | [ Array<Table>, Table, string ]) => void = collect_off;
 export type Process = ( (this :void) => void ) | null;
 export const Process = () :Process => {
@@ -187,9 +185,8 @@ export const use = (specificationVersion :unknown, multilineStringJoiner :unknow
 		if ( typeof useBigInt!=='number' ) { throw TypeError('TOML.parse(,,,useBigInt)'); }
 		if ( !isSafeInteger(useBigInt) ) { throw RangeError('TOML.parse(,,,useBigInt)'); }
 		usingBigInt = null;
-		if ( useBigInt>=0 ) { IntegerMin = -( IntegerMax = useBigInt ); }
-		else { IntegerMax = -( IntegerMin = useBigInt )-1; }
-		if ( IntegerMin < MIN_SAFE_INTEGER || MAX_SAFE_INTEGER < IntegerMax ) { throw RangeError('TOML.parse(,,,useBigInt)'); }
+		if ( useBigInt>=0 ) { IntegerMin = -( IntegerMax = BigInt(useBigInt) ); }
+		else { IntegerMax = -( IntegerMin = BigInt(useBigInt) ) - 1n; }
 	}
 	
 	if ( xOptions==null || xOptions===false ) {

@@ -7,6 +7,7 @@ import Symbol_ from '.Symbol';
 import Array from '.Array';
 import TOMLDatetime from '.Date';
 import getOwnPropertyNames from '.Object.getOwnPropertyNames';
+import is from '.Object.is';
 import isArray from '.Array.isArray';
 import undefined from '.undefined';
 
@@ -154,7 +155,7 @@ export default class TOMLSection extends Array<string> {
 				this.appendInline = '' + value;
 				break;
 			case 'number':
-				this.appendInline = float(value);
+				this.appendInline = this.document.asInteger(value) ? is(value, -0) ? '-0' : '' + value : float(value);
 				break;
 			case 'string':
 				this.appendInline = singlelineString(value);

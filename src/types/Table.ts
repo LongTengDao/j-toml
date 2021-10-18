@@ -33,7 +33,7 @@ const pairs_add = /*#__PURE__*/add.bind(pairs);
 export const fromPair = /*#__PURE__*/has.bind(pairs) as (this :void, value :Table) => boolean;
 export const PAIR = true;
 
-export const PlainTable = Null(class Table extends Null<any> {
+export const PlainTable = /*#__PURE__*/Null(class Table extends Null<any> {
 	[commentForKey :symbol] :string;
 	constructor (isDirect? :boolean, isInline$fromPair? :boolean) {
 		super();
@@ -45,7 +45,7 @@ export const PlainTable = Null(class Table extends Null<any> {
 	}
 });
 
-export const OrderedTable = Null(class Table extends orderify_Null<any> {
+export const OrderedTable = /*#__PURE__*/Null(class Table extends orderify_Null<any> {
 	[commentForKey :symbol] :string;
 	constructor (isDirect? :boolean, isInline$fromPair? :boolean) {
 		super();

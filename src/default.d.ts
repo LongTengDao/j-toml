@@ -58,6 +58,7 @@ declare namespace exports {
 		}>;
 	
 	export function stringify (this :void, rootTable :ReadonlyTable, options? :{
+		readonly integer? :number
 		readonly newline? :'\n' | '\r\n'
 		readonly newlineAround? :'document' | 'section' | 'header' | 'pairs' | 'pair'
 		readonly indent? :string | number

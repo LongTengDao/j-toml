@@ -7,7 +7,7 @@ import { theRegExp } from '@ltd/j-regexp';
 
 import { beLiteral } from './literal';
 
-const ESCAPED = Null<string>({
+const ESCAPED = /*#__PURE__*/Null<string>({
 	.../*#__PURE__*/fromEntries(/*#__PURE__*/[ ...Array(0x20) ].map((_, charCode) => [ fromCharCode(charCode), '\\u' + charCode.toString(16).toUpperCase().padStart(4, '0') ])),
 	'\b': '\\b',
 	'\t': '\\t',

@@ -30,7 +30,6 @@ declare module '.NaN' { export default NaN; }
 
 declare module '.Number' { export default Number; }
 declare module '.Number.MAX_SAFE_INTEGER' { export default Number.MAX_SAFE_INTEGER; }
-declare module '.Number.MIN_SAFE_INTEGER' { export default Number.MIN_SAFE_INTEGER; }
 declare module '.Number.isSafeInteger' { export default Number.isSafeInteger; }
 
 declare module '.Object' { export default O;

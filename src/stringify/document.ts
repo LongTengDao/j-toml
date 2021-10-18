@@ -3,13 +3,14 @@ import RangeError from '.RangeError';
 import SyntaxError from '.SyntaxError';
 import Array from '.Array';
 import isSafeInteger from '.Number.isSafeInteger';
+import MAX_SAFE_INTEGER from '.Number.MAX_SAFE_INTEGER';
 import Null from '.null';
 
 import { theRegExp } from '@ltd/j-regexp';
 
 import TOMLSection from './section';
 
-const name2code = Null({
+const name2code = /*#__PURE__*/Null({
 	document: 0,
 	section: 1,
 	header: 2,
@@ -19,12 +20,15 @@ const name2code = Null({
 
 const IS_INDENT = /*#__PURE__*/( () => theRegExp(/^[\t ]*$/).test )();
 
+const return_false = () => false;
+
 export default class TOMLDocument extends Array<TOMLSection> {
 	
 	override get ['constructor'] () { return Array; }
 	
 	0 = new TOMLSection(this);
 	
+	readonly asInteger :(this :void, number :number) => boolean;
 	readonly newline :'' | '\n' | '\r\n';
 	readonly newlineUnderSection :boolean;
 	readonly newlineUnderSectionButPair :boolean;
@@ -40,6 +44,16 @@ export default class TOMLDocument extends Array<TOMLSection> {
 	
 	constructor (options :READONLY.Options) {
 		super();
+		const integer = options?.integer;
+		if ( integer===undefined ) { this.asInteger = return_false; }
+		else if ( integer===MAX_SAFE_INTEGER ) { this.asInteger = isSafeInteger; }
+		else if ( typeof integer==='number' ) {
+			if ( !isSafeInteger(integer) ) { throw RangeError(`TOML.stringify(,{integer}) can only be a safe integer`); }
+			const max = integer>=0 ? integer : -integer - 1;
+			const min = integer>=0 ? -integer : integer;
+			this.asInteger = (number :number) => isSafeInteger(number) && min<=number && number<=max;
+		}
+		else { throw TypeError(`TOML.stringify(,{integer}) can only be number`); }
 		const newline = options?.newline;
 		if ( newline===undefined || newline==='\n' || newline==='\r\n' ) { this.newline = newline ?? ''; }
 		else {

@@ -201,6 +201,7 @@ TOML.stringify(根表[, 选项]);
 
 ```typescript
 declare function stringify (根表 :只读表, 选项? :Readonly<{
+    integer? :number,
     newline? :'\n' | '\r\n',
     newlineAround? :'document' | 'section' | 'header' | 'pairs' | 'pair',
     indent? :string | number,
@@ -223,6 +224,12 @@ declare function stringify (根表 :只读表, 选项? :Readonly<{
     
     一个只读对象，其所包含的选项的约定如下。
     
+    -   ##### `选项.integer`
+        
+        *   类型：`number`
+        
+        指定是否要将某个范围内的 `number` 类型的整数值序列化为 TOML 整数。该参数允许你精确控制这个范围，例如 `Number.MAX_SAFE_INTEGER`（自动通过 `-选项.integer` 获取负向界限，如果 `选项.integer>=0`；否则通过 `-选项.integer-1` 获取正向界限）。
+        
     -   ##### `选项.newline`
         
         *   类型：`'\n'` / `'\r\n'`

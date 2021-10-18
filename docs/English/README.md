@@ -201,6 +201,7 @@ TOML.stringify(rootTable[, options]);
 
 ```typescript
 declare function stringify (rootTable :ReadonlyTable, options? :Readonly<{
+    integer? :number,
     newline? :'\n' | '\r\n',
     newlineAround? :'document' | 'section' | 'header' | 'pairs' | 'pair',
     indent? :string | number,
@@ -223,6 +224,12 @@ declare function stringify (rootTable :ReadonlyTable, options? :Readonly<{
     
     A readonly object, the options it contains is as follows.
     
+    -   ##### `options.integer`
+        
+        *   type: `number`
+        
+        Specify a range, then the integer `number` type value in that will be serialized to TOML Integer. This argument allows you to control the max limit exactly, like `Number.MAX_SAFE_INTEGER` (and the min limit from `-options.integer`, if `options.integer>=0`; otherwise as the min limit, and the max limit is `-options.integer-1`).
+        
     -   ##### `options.newline`
         
         *   type: `'\n'` / `'\r\n'`

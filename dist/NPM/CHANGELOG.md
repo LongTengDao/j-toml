@@ -46,3 +46,4 @@ ___
     18. 0.  +   new feature: allow passing rest arguments of `TOML.parse` via an options object
     19. 0.  +   new feature: export helpers `isSection`, `isInline`
     20. 0.  +   new feature: add `UMD` format support to dist
+    21. 0.  +   new feature: add `TOML.stringify` option to specify a integer range to serialize `number` type to TOML Integer

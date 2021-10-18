@@ -2,9 +2,9 @@
 typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
 typeof define === 'function' && define.amd ? define(factory) :
 (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.TOML = factory());
-}(this, (function () { 'use strict';
+})(this, (function () { 'use strict';
 
-const version = '1.20.0';
+const version = '1.21.0';
 
 const Error$1 = Error;
 
@@ -87,7 +87,7 @@ const Default = (
  * 模块名称：j-regexp
  * 模块功能：可读性更好的正则表达式创建方式。从属于“简计划”。
    　　　　　More readable way for creating RegExp. Belong to "Plan J".
- * 模块版本：8.0.1
+ * 模块版本：8.1.0
  * 许可条款：LGPL-3.0
  * 所属作者：龙腾道 <LongTengDao@LongTengDao.com> (www.LongTengDao.com)
  * 问题反馈：https://GitHub.com/LongTengDao/j-regexp/issues
@@ -196,16 +196,31 @@ var newRegExp = Proxy$1
 	: /*#__PURE__*/function () {
 		RE.apply = RE.apply;
 		var newRegExp = function () { return RE.apply(CONTEXT, arguments       ); }       ;
-		for ( var flags = 63; flags--; ) {
+		var d = 1;
+		var g = d*2;
+		var i = g*2;
+		var m = i*2;
+		var s = i*2;
+		var u = s*2;
+		var y = u*2;
+		var flags = y*2 - 1;
+		while ( flags-- ) {
 			( function (context) {
 				newRegExp[context.flags] = function () { return RE.apply(context, arguments       ); };
 			} )(Context(
-				( flags & 32 ? '' : 'g' ) +
-				( flags & 16 ? '' : 'i' ) +
-				( flags &  8 ? '' : 'm' ) +
-				( flags &  4 ? '' : 's' ) +
-				( flags &  2 ? '' : 'u' ) +
-				( flags &  1 ? '' : 'y' )
+				( flags & d ? '' : 'd' )
+				+
+				( flags & g ? '' : 'g' )
+				+
+				( flags & i ? '' : 'i' )
+				+
+				( flags & m ? '' : 'm' )
+				+
+				( flags & s ? '' : 's' )
+				+
+				( flags & u ? '' : 'u' )
+				+
+				( flags & y ? '' : 'y' )
 			));
 		}
 		return freeze ? freeze(newRegExp) : newRegExp;
@@ -281,6 +296,8 @@ const done = ()       => {
 
 const RangeError$1 = RangeError;
 
+const BigInt$1 = BigInt;
+
 const WeakMap$1 = WeakMap;
 
 const get = WeakMap.prototype.get;
@@ -290,10 +307,6 @@ const set = WeakMap.prototype.set;
 const isSafeInteger = Number.isSafeInteger;
 
 const ownKeys = Reflect.ownKeys;
-
-const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER;
-
-const MIN_SAFE_INTEGER = Number.MIN_SAFE_INTEGER;
 
 const WeakSet$1 = WeakSet;
 
@@ -508,7 +521,7 @@ const pairs_add = /*#__PURE__*/set_add.bind(pairs);
 const fromPair = /*#__PURE__*/set_has.bind(pairs)                                         ;
 const PAIR = true;
 
-const PlainTable = Null$1(class Table extends Null$1      {
+const PlainTable = /*#__PURE__*/Null$1(class Table extends Null$1      {
 	                                
 	constructor (isDirect          , isInline$fromPair          ) {
 		super();
@@ -520,7 +533,7 @@ const PlainTable = Null$1(class Table extends Null$1      {
 	}
 });
 
-const OrderedTable = Null$1(class Table extends Null      {
+const OrderedTable = /*#__PURE__*/Null$1(class Table extends Null      {
 	                                
 	constructor (isDirect          , isInline$fromPair          ) {
 		super();
@@ -748,8 +761,8 @@ const isAmazing = (keys        )          => IS_AMAZING(keys) && !BAD_DXOB(keys)
 
 let useWhatToJoinMultilineString                = null;
 let usingBigInt                 = true;
-let IntegerMin = 0;
-let IntegerMax = 0;
+let IntegerMin         = 0n;
+let IntegerMax         = 0n;
 
               
 
@@ -842,7 +855,7 @@ const collect_on = (tag        , array              , table              , key  
 	}
 	collection[collection_length++] = each;
 };
-const collect_off = ()        => { throws(SyntaxError$1(`xOptions.tag is not enabled, but found tag syntax` + where(' at '))); };
+const collect_off = ()        => { throw throws(SyntaxError$1(`xOptions.tag is not enabled, but found tag syntax` + where(' at '))); };
 let collect                                                                                                              = collect_off;
                                                       
 const Process = ()          => {
@@ -914,9 +927,8 @@ const use = (specificationVersion         , multilineStringJoiner         , useB
 		if ( typeof useBigInt!=='number' ) { throw TypeError$1('TOML.parse(,,,useBigInt)'); }
 		if ( !isSafeInteger(useBigInt) ) { throw RangeError$1('TOML.parse(,,,useBigInt)'); }
 		usingBigInt = null;
-		if ( useBigInt>=0 ) { IntegerMin = -( IntegerMax = useBigInt ); }
-		else { IntegerMax = -( IntegerMin = useBigInt )-1; }
-		if ( IntegerMin < MIN_SAFE_INTEGER || MAX_SAFE_INTEGER < IntegerMax ) { throw RangeError$1('TOML.parse(,,,useBigInt)'); }
+		if ( useBigInt>=0 ) { IntegerMin = -( IntegerMax = BigInt$1(useBigInt) ); }
+		else { IntegerMax = -( IntegerMin = BigInt$1(useBigInt) ) - 1n; }
 	}
 	
 	if ( xOptions==null || xOptions===false ) {
@@ -1436,8 +1448,6 @@ const MultilineBasicString = (literal        , useWhatToJoinMultilineString     
 	return parts.join('');
 };
 
-const BigInt$1 = BigInt;
-
 const INTEGER_D = /[-+]?(?:0|[1-9][_\d]*)/;
 const BAD_D = /*#__PURE__*/( () => newRegExp`_(?!\d)`.test )();
 const IS_D_INTEGER = /*#__PURE__*/( () => newRegExp`^${INTEGER_D}$`.test )();
@@ -1664,7 +1674,7 @@ const assignBasicString = ( (table       , finalKey        , literal        )   
 
 const Symbol_ = Symbol;
 
-const KEYS = Null$1(null)                                                    ;
+const KEYS = /*#__PURE__*/Null$1(null)                                                    ;
 const Sym = (key        ) => {
 	const sym = Symbol_(key);
 	KEYS[sym] = key;
@@ -2167,6 +2177,8 @@ const parse$1 = /*#__PURE__*/assign$1(
 
 const getOwnPropertyNames = Object.getOwnPropertyNames;
 
+const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER;
+
 const Boolean$1 = Boolean;
 
 const String$1 = String;
@@ -2195,7 +2207,7 @@ const literal = (literal                               , ...chars          )    
 	return lines;
 };
 
-const ESCAPED = Null$1        ({
+const ESCAPED = /*#__PURE__*/Null$1        ({
 	.../*#__PURE__*/fromEntries(/*#__PURE__*/[ ...Array$1(0x20) ].map((_, charCode) => [ fromCharCode(charCode), '\\u' + charCode.toString(16).toUpperCase().padStart(4, '0') ])),
 	'\b': '\\b',
 	'\t': '\\t',
@@ -2412,7 +2424,7 @@ class TOMLSection extends Array$1         {
 				this.appendInline = '' + value;
 				break;
 			case 'number':
-				this.appendInline = float(value);
+				this.appendInline = this.document.asInteger(value) ? is(value, -0) ? '-0' : '' + value : float(value);
 				break;
 			case 'string':
 				this.appendInline = singlelineString(value);
@@ -2499,7 +2511,7 @@ class TOMLSection extends Array$1         {
 	
 }
 
-const name2code = Null$1({
+const name2code = /*#__PURE__*/Null$1({
 	document: 0,
 	section: 1,
 	header: 2,
@@ -2509,12 +2521,15 @@ const name2code = Null$1({
 
 const IS_INDENT = /*#__PURE__*/( () => theRegExp(/^[\t ]*$/).test )();
 
+const return_false = () => false;
+
 class TOMLDocument extends Array$1              {
 	
 	         get ['constructor'] () { return Array$1; }
 	
 	0 = new TOMLSection(this);
 	
+	         asInteger                                         ;
 	         newline                    ;
 	         newlineUnderSection         ;
 	         newlineUnderSectionButPair         ;
@@ -2530,6 +2545,16 @@ class TOMLDocument extends Array$1              {
 	
 	constructor (options                  ) {
 		super();
+		const integer = options?.integer;
+		if ( integer===undefined ) { this.asInteger = return_false; }
+		else if ( integer===MAX_SAFE_INTEGER ) { this.asInteger = isSafeInteger; }
+		else if ( typeof integer==='number' ) {
+			if ( !isSafeInteger(integer) ) { throw RangeError$1(`TOML.stringify(,{integer}) can only be a safe integer`); }
+			const max = integer>=0 ? integer : -integer - 1;
+			const min = integer>=0 ? -integer : integer;
+			this.asInteger = (number        ) => isSafeInteger(number) && min<=number && number<=max;
+		}
+		else { throw TypeError$1(`TOML.stringify(,{integer}) can only be number`); }
 		const newline = options?.newline;
 		if ( newline===undefined || newline==='\n' || newline==='\r\n' ) { this.newline = newline ?? ''; }
 		else {
@@ -2612,6 +2637,6 @@ const _export = /*#__PURE__*/Default({
 
 return _export;
 
-})));
+}));
 
 //# sourceMappingURL=index.js.map

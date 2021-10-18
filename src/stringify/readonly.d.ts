@@ -22,6 +22,7 @@ export interface Datetime { toISOString () :string }
 export type Literal = readonly [ string, ...string[] ];
 
 export type Options = undefined | {
+	readonly integer? :number
 	readonly newline? :'\n' | '\r\n'
 	readonly newlineAround? :'document' | 'section' | 'header' | 'pairs' | 'pair'
 	readonly indent? :string | number

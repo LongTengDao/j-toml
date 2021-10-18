@@ -2,7 +2,7 @@ import TypeError from '.TypeError';
 import Symbol from '.Symbol';
 import Null from '.null';
 
-const KEYS = Null(null) as { [key :string] :symbol, [sym :symbol] :string };
+const KEYS = /*#__PURE__*/Null(null) as { [key :string] :symbol, [sym :symbol] :string };
 const Sym = (key :string) => {
 	const sym = Symbol(key);
 	KEYS[sym] = key;
