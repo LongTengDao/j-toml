@@ -1,4 +1,4 @@
-﻿const version = '1.21.0';
+﻿const version = '1.22.0';
 
 const Error$1 = Error;
 
@@ -58,6 +58,16 @@ var hasOwn = /*#__PURE__*/function () {
 }();// && object!=null
 
 var create = Object.create;
+function Descriptor (source) {
+	var target = create(NULL);
+	if ( hasOwn(source, 'value') ) { target.value = source.value; }
+	if ( hasOwn(source, 'writable') ) { target.writable = source.writable; }
+	if ( hasOwn(source, 'get') ) { target.get = source.get; }
+	if ( hasOwn(source, 'set') ) { target.set = source.set; }
+	if ( hasOwn(source, 'enumerable') ) { target.enumerable = source.enumerable; }
+	if ( hasOwn(source, 'configurable') ) { target.configurable = source.configurable; }
+	return target;
+}
 
 const Default = (
 	/*! j-globals: default (internal) */
@@ -310,7 +320,7 @@ const set_add = WeakSet.prototype.add;
 
 const del = WeakSet.prototype['delete'];
 
-const Object_keys = Object.keys;
+const keys = Object.keys;
 
 const getOwnPropertySymbols = Object.getOwnPropertySymbols;
 
@@ -318,14 +328,14 @@ const Null$1 = (
 	/*! j-globals: null (internal) */
 	/*#__PURE__*/function () {
 		var assign = Object.assign || function assign (target, source) {
-			var keys, index, key;
-			for ( keys = Object_keys(source), index = 0; index<keys.length;++index ) {
-				key = keys[index];
+			var keys$1, index, key;
+			for ( keys$1 = keys(source), index = 0; index<keys$1.length;++index ) {
+				key = keys$1[index];
 				target[key] = source[key];
 			}
 			if ( getOwnPropertySymbols ) {
-				for ( keys = getOwnPropertySymbols(source), index = 0; index<keys.length;++index ) {
-					key = keys[index];
+				for ( keys$1 = getOwnPropertySymbols(source), index = 0; index<keys$1.length;++index ) {
+					key = keys$1[index];
 					if ( isEnum(source, key) ) { [key] = source[key]; }
 				}
 			}
@@ -353,6 +363,8 @@ const Null$1 = (
 );
 
 const is = Object.is;
+
+const Object_defineProperties = Object.defineProperties;
 
 const fromEntries = Object.fromEntries;
 
@@ -469,25 +481,34 @@ const Null = /*#__PURE__*/function () {
 
 const map_has = WeakMap.prototype.has;
 
-const INLINES = new WeakMap$1;
-const isInline = /*#__PURE__*/map_has.bind(INLINES)                                      ;
-const ofInline = /*#__PURE__*/get.bind(INLINES)                                                                 ;
+const map_del = WeakMap.prototype['delete'];
+
+const INLINES = new WeakMap$1                                                     ();
+const SECTIONS = new WeakSet$1                ();
+
+const deInline = /*#__PURE__*/map_del.bind(INLINES)                                                  ;
+const deSection = /*#__PURE__*/del.bind(SECTIONS)                                                  ;
+
+const isInline = /*#__PURE__*/map_has.bind(INLINES)                                                  ;
+const ofInline = /*#__PURE__*/get.bind(INLINES)                                                      ;
 const beInline = /*#__PURE__*/set.bind(INLINES)                                                                                                        ;
 const inline =                                                         (value   )    => {
 	beInline(value, true);
+	isArray$1(value) || deSection(value);
 	return value;
 };
 const multilineTable =                                  (value   )    => {
 	beInline(value, false);
+	deSection(value);
 	return value;
 };
 
-const SECTIONS = new WeakSet$1;
 const isSection = /*#__PURE__*/set_has.bind(SECTIONS)                                                                  ;
 const beSection = /*#__PURE__*/set_add.bind(SECTIONS)                                                 ;
 const Section =                            (table   )    => {
 	if ( isArray$1(table) ) { throw TypeError$1(`array can not be section, maybe you want to use it on the tables in it`); }
 	beSection(table);
+	deInline(table);
 	return table;
 };
 
@@ -1022,6 +1043,29 @@ const parse$2 = Date.parse;
 
 const preventExtensions = Object.preventExtensions;
 
+const getOwnPropertyDescriptors = Object.getOwnPropertyDescriptors;
+
+const defineProperties = (
+	/*! j-globals: null.defineProperties (internal) */
+	function defineProperties (object, descriptorMap) {
+		var created = create$1(NULL);
+		var names = keys(descriptorMap);
+		for ( var length = names.length, index = 0; index<length; ++index ) {
+			var name = names[index];
+			created[name] = Descriptor(descriptorMap[name]);
+		}
+		if ( getOwnPropertySymbols ) {
+			var symbols = getOwnPropertySymbols(descriptorMap);
+			for ( length = symbols.length, index = 0; index<length; ++index ) {
+				var symbol = symbols[index];
+				if ( isEnum(descriptorMap, symbol) ) { created[symbol] = Descriptor(descriptorMap[symbol]); }
+			}
+		}
+		return Object_defineProperties(object, created);
+	}
+	/*¡ j-globals: null.defineProperties (internal) */
+);
+
 const fpc =                      (c   )    => {
 	freeze(freeze(c).prototype);
 	return c;
@@ -1140,7 +1184,7 @@ const Value = (ISOString        )        => ISOString.replace(ZERO, '').replace(
 
 const leap = (literal        ) => literal.slice(5, 10)!=='02-29' || +literal.slice(0, 4)%4===0 && literal.slice(2, 4)!=='00';
 
-const DATE = new TOMLDatetime(0);
+const DATE             = /*#__PURE__*/defineProperties(new TOMLDatetime(0), /*#__PURE__*/getOwnPropertyDescriptors(TOMLDatetime.prototype));
 
 const OffsetDateTime_ISOString = Symbol('OffsetDateTime_ISOString');
 const OffsetDateTime_value = Symbol('OffsetDateTime_value');
@@ -1148,13 +1192,12 @@ const OffsetDateTime_use = (that                                     , $        
 	DATE.setTime(+that[OffsetDateTime_value] + $);
 	return DATE;
 };
-const OffsetDateTime_get = (that                                     , start        , end        ) => +that[OffsetDateTime_ISOString].slice(start, end);
-const OffsetDateTime_set = (that                                     , start        , end        , value        )         => {
+/*const OffsetDateTime_get = (that :InstanceType<typeof OffsetDateTime>, start :number, end :number) => +that[OffsetDateTime_ISOString].slice(start, end);
+const OffsetDateTime_set = (that :InstanceType<typeof OffsetDateTime>, start :number, end :number, value :number) => {
 	if ( end ) { that[OffsetDateTime_ISOString] = that[OffsetDateTime_ISOString].slice(0, start) + ( '' + value ).padStart(end - start, '0') + that[OffsetDateTime_ISOString].slice(end); }
-	const time = parse$2(that[OffsetDateTime_ISOString]);
-	that[OffsetDateTime_value] = ( '' + time ).padStart(15, '0') + that[OffsetDateTime_value].slice(15);
-	return time;
-};
+	const time = parse(that[OffsetDateTime_ISOString]);
+	return that[OffsetDateTime_value] = ( '' + time ).padStart(15, '0') + that[OffsetDateTime_value].slice(15);///time
+};*///
 const OffsetDateTime = /*#__PURE__*/fpc(class OffsetDateTime extends Datetime {
 	
 	[OffsetDateTime_ISOString]        ;
@@ -1172,40 +1215,38 @@ const OffsetDateTime = /*#__PURE__*/fpc(class OffsetDateTime extends Datetime {
 	}
 	
 	getUTCFullYear (                    )           { return OffsetDateTime_use(this).getUTCFullYear(); }
-	getFullYear (                    )           { return OffsetDateTime_get(this, 0, 4); }
-	setFullYear (                      value          ) { return OffsetDateTime_set(this, 0, 4, value); }
+	///getFullYear (this :OffsetDateTime) :FullYear { return OffsetDateTime_get(this, 0, 4); }
+	///setFullYear (this :OffsetDateTime, value :FullYear) :void { OffsetDateTime_set(this, 0, 4, value); }
 	getUTCMonth (                    )        { return OffsetDateTime_use(this).getUTCMonth(); }
-	getMonth (                    )        { return OffsetDateTime_get(this, 5, 7) - 1; }
-	setMonth (                      value       ) { return OffsetDateTime_set(this, 5, 7, value + 1); }
+	///getMonth (this :OffsetDateTime) :Month { return OffsetDateTime_get(this, 5, 7) - 1; }
+	///setMonth (this :OffsetDateTime, value :Month) :void { OffsetDateTime_set(this, 5, 7, value + 1); }
 	getUTCDate (                    )       { return OffsetDateTime_use(this).getUTCDate(); }
-	getDate (                    )       { return OffsetDateTime_get(this, 8, 10); }
-	setDate (                      value      ) { return OffsetDateTime_set(this, 8, 10, value); }
+	///getDate (this :OffsetDateTime) :Date { return OffsetDateTime_get(this, 8, 10); }
+	///setDate (this :OffsetDateTime, value :Date) :void { OffsetDateTime_set(this, 8, 10, value); }
 	
 	getUTCHours (                    )        { return OffsetDateTime_use(this).getUTCHours(); }
-	getHours (                    )        { return OffsetDateTime_get(this, 11, 13); }
-	setHours (                      value       ) { return OffsetDateTime_set(this, 11, 13, value); }
+	///getHours (this :OffsetDateTime) :Hours { return OffsetDateTime_get(this, 11, 13); }
+	///setHours (this :OffsetDateTime, value :Hours) :void { OffsetDateTime_set(this, 11, 13, value); }
 	getUTCMinutes (                    )          { return OffsetDateTime_use(this).getUTCMinutes(); }
-	getMinutes (                    )          { return OffsetDateTime_get(this, 14, 16); }
-	setMinutes (                      value         ) { return OffsetDateTime_set(this, 14, 16, value); }
+	///getMinutes (this :OffsetDateTime) :Minutes { return OffsetDateTime_get(this, 14, 16); }
+	///setMinutes (this :OffsetDateTime, value :Minutes) :void { OffsetDateTime_set(this, 14, 16, value); }
 	getUTCSeconds (                    )          { return OffsetDateTime_use(this).getUTCSeconds(); }
-	getSeconds (                    )          { return OffsetDateTime_get(this, 17, 19); }
-	setSeconds (                      value         ) { return OffsetDateTime_set(this, 17, 19, value); }
+	///getSeconds (this :OffsetDateTime) :Seconds { return OffsetDateTime_get(this, 17, 19); }
+	///setSeconds (this :OffsetDateTime, value :Seconds) :void { OffsetDateTime_set(this, 17, 19, value); }
 	getUTCMilliseconds (                    )               { return OffsetDateTime_use(this).getUTCMilliseconds(); }///
-	getMilliseconds (                    )               { return +this[OffsetDateTime_value].slice(12, 15); }///
-	setMilliseconds (                      value              ) {
+	///getMilliseconds (this :OffsetDateTime) :Milliseconds { return +this[OffsetDateTime_value].slice(12, 15); }///
+	/*setMilliseconds (this :OffsetDateTime, value :Milliseconds) :void {
 		this[OffsetDateTime_ISOString] = this[OffsetDateTime_ISOString].slice(0, 19) + ( value ? ( '.' + ( '' + value ).padStart(3, '0') ).replace(DOT_ZERO, '') : '' ) + this[OffsetDateTime_ISOString].slice(this[OffsetDateTime_ISOString].search(OFFSET$));
-		return OffsetDateTime_set(this, 0, 0, 0);
-	}
+		OffsetDateTime_set(this, 0, 0, 0);
+	}*///
 	
 	getUTCDay (                    )      { return OffsetDateTime_use(this).getUTCDay(); }
-	getDay (                    )      {
-		return OffsetDateTime_use(this, this.getTimezoneOffset()*60000).getUTCDay();
-	}
+	///getDay (this :OffsetDateTime) :Day { return OffsetDateTime_use(this, this.getTimezoneOffset()*60000).getUTCDay(); }
 	getTimezoneOffset (                    )                 {
 		const z = Z_exec(this[OffsetDateTime_ISOString]);
 		return z ? +z[1]*60 + +( z[2] + z[3] ) : 0;
 	}
-	setTimezoneOffset (                      value                ) {
+	/*setTimezoneOffset (this :OffsetDateTime, value :TimezoneOffset) {
 		value = +value;
 		let string = OffsetDateTime_use(this, value*60000).toISOString().slice(0, -1);
 		if ( value ) {
@@ -1219,23 +1260,23 @@ const OffsetDateTime = /*#__PURE__*/fpc(class OffsetDateTime extends Datetime {
 			this[OffsetDateTime_ISOString] = string + ( h>9 ? h : '0' + h ) + ( m>9 ? ':' + m : ':0' + m );
 		}
 		else { this[OffsetDateTime_ISOString] = string + ( is(value, 0) ? 'Z' : '-00:00' ); }
-	}
+	}*///
 	getTime (                    )       { return +this[OffsetDateTime_value].slice(0, 15); }///
-	setTime (                      value      ) {
+	/*setTime (this :OffsetDateTime, value :Time) :void {
 		value = DATE.setTime(value);
 		const z = Z_exec(this[OffsetDateTime_ISOString]);
 		DATE.setTime(value + ( z ? +z[1]*60 + +( z[2] + z[3] ) : 0 )*60000);
 		this[OffsetDateTime_ISOString] = z ? DATE.toISOString().slice(0, -1) + z[0] : DATE.toISOString();
 		this[OffsetDateTime_value] = ( '' + value ).padStart(15, '0');
-		return value;
-	}
+		///return value;
+	}*/
 	
 });
 
 const LocalDateTime_ISOString = Symbol('LocalDateTime_ISOString');
 const LocalDateTime_value = Symbol('LocalDateTime_value');
 const LocalDateTime_get = (that                                    , start        , end        ) => +that[LocalDateTime_ISOString].slice(start, end);
-const LocalDateTime_set = (that                                    , start        , end        , value        ) => {
+const LocalDateTime_set = (that                                    , start        , end        , value        )       => {
 	that[LocalDateTime_value] = Value(
 		that[LocalDateTime_ISOString] = that[LocalDateTime_ISOString].slice(0, start) + ( '' + value ).padStart(end - start, '0') + that[LocalDateTime_ISOString].slice(end)
 	);
@@ -1258,20 +1299,20 @@ const LocalDateTime = /*#__PURE__*/fpc(class LocalDateTime extends Datetime {
 	}
 	
 	getFullYear (                   )           { return LocalDateTime_get(this, 0, 4); }
-	setFullYear (                     value          ) { return LocalDateTime_set(this, 0, 4, value); }
+	setFullYear (                     value          )       { LocalDateTime_set(this, 0, 4, value); }
 	getMonth (                   )        { return LocalDateTime_get(this, 5, 7) - 1; }
-	setMonth (                     value       ) { return LocalDateTime_set(this, 5, 7, value + 1); }
+	setMonth (                     value       )       { LocalDateTime_set(this, 5, 7, value + 1); }
 	getDate (                   )       { return LocalDateTime_get(this, 8, 10); }
-	setDate (                     value      ) { return LocalDateTime_set(this, 8, 10, value); }
+	setDate (                     value      )       { LocalDateTime_set(this, 8, 10, value); }
 	
 	getHours (                   )        { return LocalDateTime_get(this, 11, 13); }
-	setHours (                     value       ) { return LocalDateTime_set(this, 11, 13, value); }
+	setHours (                     value       )       { LocalDateTime_set(this, 11, 13, value); }
 	getMinutes (                   )          { return LocalDateTime_get(this, 14, 16); }
-	setMinutes (                     value         ) { return LocalDateTime_set(this, 14, 16, value); }
+	setMinutes (                     value         )       { LocalDateTime_set(this, 14, 16, value); }
 	getSeconds (                   )          { return LocalDateTime_get(this, 17, 19); }
-	setSeconds (                     value         ) { return LocalDateTime_set(this, 17, 19, value); }
+	setSeconds (                     value         )       { LocalDateTime_set(this, 17, 19, value); }
 	getMilliseconds (                   )               { return +this[LocalDateTime_value].slice(14, 17).padEnd(3, '0'); }///
-	setMilliseconds (                     value              ) {
+	setMilliseconds (                     value              )       {
 		this[LocalDateTime_value] = Value(
 			this[LocalDateTime_ISOString] = this[LocalDateTime_ISOString].slice(0, 19) + ( value ? ( '.' + ( '' + value ).padStart(3, '0') ).replace(DOT_ZERO, '') : '' )
 		);
@@ -1282,11 +1323,10 @@ const LocalDateTime = /*#__PURE__*/fpc(class LocalDateTime extends Datetime {
 const LocalDate_ISOString = Symbol('LocalDate_ISOString');
 const LocalDate_value = Symbol('LocalDate_value');
 const LocalDate_get = (that                                , start        , end        ) => +that[LocalDate_ISOString].slice(start, end);
-const LocalDate_set = (that                                , start        , end        , value        ) => {
+const LocalDate_set = (that                                , start        , end        , value        ) =>
 	that[LocalDate_value] = Value(
 		that[LocalDate_ISOString] = that[LocalDate_ISOString].slice(0, start) + ( '' + value ).padStart(end - start, '0') + that[LocalDate_ISOString].slice(end)
 	);
-};
 const LocalDate = /*#__PURE__*/fpc(class LocalDate extends Datetime {
 	
 	[LocalDate_ISOString]        ;
@@ -1305,22 +1345,21 @@ const LocalDate = /*#__PURE__*/fpc(class LocalDate extends Datetime {
 	}
 	
 	getFullYear (               )           { return LocalDate_get(this, 0, 4); }
-	setFullYear (                 value          ) { return LocalDate_set(this, 0, 4, value); }
+	setFullYear (                 value          )       { LocalDate_set(this, 0, 4, value); }
 	getMonth (               )        { return LocalDate_get(this, 5, 7) - 1; }
-	setMonth (                 value       ) { return LocalDate_set(this, 5, 7, value + 1); }
+	setMonth (                 value       )       { LocalDate_set(this, 5, 7, value + 1); }
 	getDate (               )       { return LocalDate_get(this, 8, 10); }
-	setDate (                 value      ) { return LocalDate_set(this, 8, 10, value); }
+	setDate (                 value      )       { LocalDate_set(this, 8, 10, value); }
 	
 });
 
 const LocalTime_ISOString = Symbol('LocalTime_ISOString');
 const LocalTime_value = Symbol('LocalTime_value');
 const LocalTime_get = (that                                , start        , end        ) => +that[LocalTime_ISOString].slice(start, end);
-const LocalTime_set = (that                                , start        , end        , value        ) => {
+const LocalTime_set = (that                                , start        , end        , value        ) =>
 	that[LocalTime_value] = Value(
 		that[LocalTime_ISOString] = that[LocalTime_ISOString].slice(0, start) + ( '' + value ).padStart(2, '0') + that[LocalTime_ISOString].slice(end)
 	);
-};
 const LocalTime = /*#__PURE__*/fpc(class LocalTime extends Datetime {
 	
 	[LocalTime_ISOString]        ;
@@ -1339,13 +1378,13 @@ const LocalTime = /*#__PURE__*/fpc(class LocalTime extends Datetime {
 	}
 	
 	getHours (               )        { return LocalTime_get(this, 0, 2); }
-	setHours (                 value       ) { return LocalTime_set(this, 0, 2, value); }
+	setHours (                 value       )       { LocalTime_set(this, 0, 2, value); }
 	getMinutes (               )          { return LocalTime_get(this, 3, 5); }
-	setMinutes (                 value         ) { return LocalTime_set(this, 3, 5, value); }
+	setMinutes (                 value         )       { LocalTime_set(this, 3, 5, value); }
 	getSeconds (               )          { return LocalTime_get(this, 6, 8); }
-	setSeconds (                 value         ) { return LocalTime_set(this, 6, 8, value); }
+	setSeconds (                 value         )       { LocalTime_set(this, 6, 8, value); }
 	getMilliseconds (               )               { return +this[LocalTime_value].slice(6, 9).padEnd(3, '0'); }///
-	setMilliseconds (                 value              ) {
+	setMilliseconds (                 value              )       {
 		this[LocalTime_value] = Value(
 			this[LocalTime_ISOString] = this[LocalTime_ISOString].slice(0, 8) + ( value ? ( '.' + ( '' + value ).padStart(3, '0') ).replace(DOT_ZERO, '') : '' )
 		);

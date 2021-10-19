@@ -47,3 +47,6 @@ ___
     19. 0.  +   new feature: export helpers `isSection`, `isInline`
     20. 0.  +   new feature: add `UMD` format support to dist
     21. 0.  +   new feature: add `TOML.stringify` option to specify a integer range to serialize `number` type to TOML Integer
+    22. 0.  *   the finalized `OffsetDateTime`, `LocalDateTime`, `LocalDate`, `LocalTime` class methods are officially launched in the document
+            *   officially launch helpers `isSection`, `isInline` in the document
+            *   bug fix: fix the issue when `inline` a table, the mutually-exclusive `Section` state is not removed

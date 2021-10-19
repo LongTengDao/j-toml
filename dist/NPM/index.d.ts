@@ -2,7 +2,7 @@ export = exports;
 
 declare namespace exports {
 	
-	export const version :'1.21.0';
+	export const version :'1.22.0';
 	
 	export const parse :
 		& {
@@ -91,77 +91,101 @@ declare namespace exports {
 }
 
 declare class OffsetDateTime {
+	
 	readonly toJSON :Date['toJSON'];
+	
 	readonly toISOString :(this :Readonly<OffsetDateTime>) => `${number}-${number}-${number}T${number}:${number}:${number}${'' | `.${number}`}${'Z' | `${'+' | '-'}${number}:${number}`}`;
 	readonly valueOf :(this :Readonly<OffsetDateTime>) => `${number}${'' | `.${number}`}`;
+	
 	private [OffsetDateTime_ISOString] :string;
 	private [OffsetDateTime_value] :string;
+	
 	constructor (literal :`${number}-${number}-${number}${'T' | ' '}${number}:${number}:${number}${'' | `.${number}`}${'Z' | `${'+' | '-'}${number}:${number}`}`);
+	
 	readonly getUTCFullYear :(this :Readonly<OffsetDateTime>) => _1_10000;
 	readonly getUTCMonth :(this :Readonly<OffsetDateTime>) => _0_11;
 	readonly getUTCDate :(this :Readonly<OffsetDateTime>) => _1_31;
+	
 	readonly getUTCHours :(this :Readonly<OffsetDateTime>) => _0_23;
 	readonly getUTCMinutes :(this :Readonly<OffsetDateTime>) => _0_59;
 	readonly getUTCSeconds :(this :Readonly<OffsetDateTime>) => _0_59;
 	readonly getUTCMilliseconds :(this :Readonly<OffsetDateTime>) => _0_999;
+	
 	readonly getUTCDay :(this :Readonly<OffsetDateTime>) => _0_6;
-	readonly getDay :(this :Readonly<OffsetDateTime>) => _0_6;
 	readonly getTimezoneOffset :(this :Readonly<OffsetDateTime>) => _1439_1439;
-	readonly setTimezoneOffset :(this :OffsetDateTime, _ :_1439_1439) => number;
 	readonly getTime :(this :Readonly<OffsetDateTime>) => number;
-	readonly setTime :(this :OffsetDateTime, time :number) => number;
+	
 }
 declare class LocalDateTime {
+	
 	readonly toJSON :Date['toJSON'];
+	
 	readonly toISOString :(this :Readonly<LocalDateTime>) => `${number}-${number}-${number}T${number}:${number}:${number}${'' | `.${number}`}`;
 	readonly valueOf :(this :Readonly<LocalDateTime>) => `${number}`;
+	
 	private [LocalDateTime_ISOString] :string;
 	private [LocalDateTime_value] :string;
+	
 	constructor (literal :`${number}-${number}-${number}${'T' | ' '}${number}:${number}:${number}${'' | `.${number}`}`);
+	
 	readonly getFullYear :(this :Readonly<LocalDateTime>) => _0_9999;
-	readonly setFullYear :(this :LocalDateTime, year :_0_9999) => number;
+	readonly setFullYear :(this :LocalDateTime, year :_0_9999) => void;
 	readonly getMonth :(this :Readonly<LocalDateTime>) => _0_11;
-	readonly setMonth :(this :LocalDateTime, month :_0_11) => number;
+	readonly setMonth :(this :LocalDateTime, month :_0_11) => void;
 	readonly getDate :(this :Readonly<LocalDateTime>) => _1_31;
-	readonly setDate :(this :LocalDateTime, date :_1_31) => number;
+	readonly setDate :(this :LocalDateTime, date :_1_31) => void;
+	
 	readonly getHours :(this :Readonly<LocalDateTime>) => _0_23;
-	readonly setHours :(this :LocalDateTime, hours :_0_23) => number;
+	readonly setHours :(this :LocalDateTime, hours :_0_23) => void;
 	readonly getMinutes :(this :Readonly<LocalDateTime>) => _0_59;
-	readonly setMinutes :(this :LocalDateTime, min :_0_59) => number;
+	readonly setMinutes :(this :LocalDateTime, min :_0_59) => void;
 	readonly getSeconds :(this :Readonly<LocalDateTime>) => _0_59;
-	readonly setSeconds :(this :LocalDateTime, sec :_0_59) => number;
+	readonly setSeconds :(this :LocalDateTime, sec :_0_59) => void;
 	readonly getMilliseconds :(this :Readonly<LocalDateTime>) => _0_999;
-	readonly setMilliseconds :(this :LocalDateTime, ms :_0_999) => number;
+	readonly setMilliseconds :(this :LocalDateTime, ms :_0_999) => void;
+	
 }
 declare class LocalDate {
+	
 	readonly toJSON :Date['toJSON'];
+	
 	readonly toISOString :(this :Readonly<LocalDate>) => `${number}-${number}-${number}`;
 	readonly valueOf :(this :Readonly<LocalDate>) => `${number}`;
+	
 	private [LocalDate_ISOString] :string;
 	private [LocalDate_value] :string;
+	
 	constructor (literal :`${number}-${number}-${number}`);
+	
 	readonly getFullYear :(this :Readonly<LocalDate>) => _0_9999;
-	readonly setFullYear :(this :LocalDate, year :_0_9999) => number;
+	readonly setFullYear :(this :LocalDate, year :_0_9999) => void;
 	readonly getMonth :(this :Readonly<LocalDate>) => _0_11;
-	readonly setMonth :(this :LocalDate, month :_0_11) => number;
+	readonly setMonth :(this :LocalDate, month :_0_11) => void;
 	readonly getDate :(this :Readonly<LocalDate>) => _1_31;
-	readonly setDate :(this :LocalDate, date :_1_31) => number;
+	readonly setDate :(this :LocalDate, date :_1_31) => void;
+	
 }
 declare class LocalTime {
+	
 	readonly toJSON :Date['toJSON'];
+	
 	readonly toISOString :(this :Readonly<LocalTime>) => `${number}:${number}:${number}${'' | `.${number}`}`;
 	readonly valueOf :(this :Readonly<LocalTime>) => `${number}`;
+	
 	private [LocalTime_ISOString] :string;
 	private [LocalTime_value] :string;
+	
 	constructor (literal :`${number}:${number}:${number}${'' | `.${number}`}`);
+	
 	readonly getHours :(this :Readonly<LocalTime>) => _0_23;
-	readonly setHours :(this :LocalTime, hours :_0_23) => number;
+	readonly setHours :(this :LocalTime, hours :_0_23) => void;
 	readonly getMinutes :(this :Readonly<LocalTime>) => _0_59;
-	readonly setMinutes :(this :LocalTime, min :_0_59) => number;
+	readonly setMinutes :(this :LocalTime, min :_0_59) => void;
 	readonly getSeconds :(this :Readonly<LocalTime>) => _0_59;
-	readonly setSeconds :(this :LocalTime, sec :_0_59) => number;
+	readonly setSeconds :(this :LocalTime, sec :_0_59) => void;
 	readonly getMilliseconds :(this :Readonly<LocalTime>) => _0_999;
-	readonly setMilliseconds :(this :LocalTime, ms :_0_999) => number;
+	readonly setMilliseconds :(this :LocalTime, ms :_0_999) => void;
+	
 }
 
 type Source = string | ArrayBufferLike
@@ -289,10 +313,10 @@ declare const LocalDate_value :unique symbol;
 declare const LocalTime_ISOString :unique symbol;
 declare const LocalTime_value :unique symbol;
 
-type _1439_1439 = -1439 | number | 1439;
-type _1_10000   = -1 | number | 10000;
-type _0_9999    = 0 | number | 9999;
-type _0_999     = 0 | number | 999;
+type _1439_1439 = -1439 | {} & number | 1439;
+type _1_10000   = -1 | {} & number | 10000;
+type _0_9999    = 0 | {} & number | 9999;
+type _0_999     = 0 | {} & number | 999;
 type _0_6  = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 type _0_11 = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
 type _0_23 = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23;

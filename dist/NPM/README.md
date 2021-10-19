@@ -111,7 +111,7 @@ type Table = object;
     *   default: `1.0`
     *   deprecated: use `TOML.parse[specificationVersion]` instead would be better
     
-    If there is no special reason (e.g. the downstream program could not deal with `Infinity`、`NaN`、fractional seconds and edge Datetime values, Local Date-Time / Local Date / Local Time types, empty string key name, mixed type array even array of tables / table under array of arrays structure yet), the latest version is recommended.
+    If there is no special reason (e.g. the downstream program could not deal with `Infinity`、`NaN`、fractional seconds and edge date-time values, Local Date-Time / Local Date / Local Time types, empty string key name, mixed type array even array of tables / table under array of arrays structure yet), the latest version is recommended.
     
     Note: if you skip this argument, the rest arguments must be moved one position to the left.
     
@@ -150,6 +150,8 @@ type Table = object;
 *   type: `Table`
 
 Return the root table (tables parsed by this implementation are objects without any extended properties).
+
+Note: the requirements of 4 types TOML date-time do not fully correspond to the native `Date` type, they are implemented by this library on the basis of `Date`, see the `.d.ts` file (`OffsetDateTime`, `LocalDateTime`, `LocalDate`, `LocalTime`) for details.
 
 ### `throw`
 
@@ -302,8 +304,8 @@ An error is thrown if the options does not meet the requirements, or there is an
 
 This library will not cause stack overflow error unexpectedly due to too deep tables or arrays.
 
-`TOML.Section` `TOML.inline` `TOML.multiline` `TOML.literal` `TOML.commentFor`
-------------------------------------------------------------------------------
+`TOML.Section` `TOML.inline` `TOML.multiline` `TOML.literal` `TOML.commentFor` `TOML.isSection` `TOML.isInline`
+---------------------------------------------------------------------------------------------------------------
 
 Due to the flexibility of TOML syntax, while it greatly meeting the needs of reading and writing directly, it also causes great difficulty for serialization solution.
 
@@ -413,7 +415,8 @@ dotted.key = 'value' # this is a dotted key/value pair
 
 ```
 
-Data from `parse` of this library retains the memory of the writing style above, which means there is no need to manually mark them again when reserialize the modified data.
+Data from `parse` of this library retains the memory of the writing style above, which means there is no need to manually mark them again when reserialize the modified data.  
+You can transparently tell what style the table from `parse` is written in by `isSection` and `isInline`.
 
 There still left string, integer and float. Their writing choices, just as gymnastics scoring points, has no perfect solution to be specified (without solving problem by creating more); and they are atom values, no good way to preserve their preferences in the data producted by `parse`.  
 This library provides several helper functions for this purpose, including `literal`, `multiline` (string case) and `multiline.basic` (which enforces the use of multi-line basic string rather than the multi-line literal string tried in preference).

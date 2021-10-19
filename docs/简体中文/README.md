@@ -149,6 +149,8 @@ type 表 = object;
 
 返回根表（本实现解析出的表，是没有任何继承属性的对象）。
 
+注意：TOML 四类日期时刻的需求并不能完全对应原生的 `Date` 类型，它们是本库在 `Date` 的基础上实现的，详见 `.d.ts` 文件（`OffsetDateTime`、`LocalDateTime`、`LocalDate`、`LocalTime`）。
+
 ### `throw`
 
 *   类型：`Error`
@@ -300,8 +302,8 @@ declare function stringify (根表 :只读表, 选项? :Readonly<{
 
 本库不会因为表或数组嵌套层数过深，而意外地造成爆栈错误。
 
-`TOML.Section` `TOML.inline` `TOML.multiline` `TOML.literal` `TOML.commentFor`
-------------------------------------------------------------------------------
+`TOML.Section` `TOML.inline` `TOML.multiline` `TOML.literal` `TOML.commentFor` `TOML.isSection` `TOML.isInline`
+---------------------------------------------------------------------------------------------------------------
 
 由于 TOML 语法的灵活性，在极大地满足了人直接阅读和书写的需求的同时，一度给序列化方案造成了巨大的困难。
 
@@ -411,7 +413,8 @@ dotted.key = 'value' # 这是一个点分隔键值对
 
 ```
 
-本库中 `parse` 出来的数据，会保留对以上书写形式的记忆，不必在修改后的重新序列化时再次全部手动标记。
+本库中 `parse` 出来的数据，会保留对以上书写形式的记忆，不必在修改后的重新序列化时再次全部手动标记。  
+你可以透明地通过 `isSection` 和 `isInline`，得知所 `parse` 出的表是以何种形式书写的。
 
 最后剩下了字符串、整数和浮点数。它们的书写选择过于细碎，目前没有比较完美的针对性（而不使得事情更加麻烦）的方案来标记；同时它们属于原子值，也没有较好的方式在 `parse` 出的数据中保留这些偏好。  
 本库为此提供了 `literal` 和 `multiline`（字符串场景）、`multiline.basic`（强制使用多行基础字符串，而不是优先尝试的多行字面量字符串） 几个辅助函数。

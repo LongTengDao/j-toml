@@ -70,6 +70,7 @@ declare module '.Object.fromEntries' { export default fromEntries;
 declare module '.Object.getOwnPropertyDescriptor' { export default getOwnPropertyDescriptor;
 	function getOwnPropertyDescriptor<O extends {}, P extends string | symbol> (o :O, p :P) :P extends keyof O ? { value :O[P], writable :boolean, enumerable :boolean, configurable :boolean } | { get? () :O[P], set? (v :O[P]) :void, enumerable :boolean, configurable :boolean } : undefined;
 }
+declare module '.Object.getOwnPropertyDescriptors' { export default Object.getOwnPropertyDescriptors; }
 declare module '.Object.getOwnPropertyNames' { export default getOwnPropertyNames;
 	function getOwnPropertyNames<T extends {}> (nonNullable :T) :Extract<keyof T, string>[];
 }
@@ -127,6 +128,7 @@ declare module '.Uint8Array' { export default Uint8Array; }
 declare module '.WeakMap' { export default constructor;
 	class constructor<K extends object, V> extends WeakMap<K, V> { constructor (entries? :Iterable<{ readonly 0 :K, readonly 1 :V }>) }
 }
+declare module '.WeakMap.prototype.delete' { export default WeakMap.prototype.delete; }
 declare module '.WeakMap.prototype.get' { export default WeakMap.prototype.get; }
 declare module '.WeakMap.prototype.has' { export default WeakMap.prototype.has; }
 declare module '.WeakMap.prototype.set' { export default WeakMap.prototype.set; }
@@ -184,6 +186,10 @@ declare module '.null' { export default Null;
 		__proto__? :ValueType
 		['constructor']? :ValueType
 	}
+}
+declare module '.null.defineProperties' { export default defineProperties;
+	function defineProperties<O extends object, OO extends PropertyDescriptorMap> (object :O, descriptorMap :OO) :( OO extends TypedPropertyDescriptorMap<infer O> ? O : never ) & O;
+	type TypedPropertyDescriptorMap<O> = { [k in keyof O] :TypedPropertyDescriptor<O[k]> };
 }
 declare module '.null.prototype' { export default NULL;
 	const NULL :object | null;
