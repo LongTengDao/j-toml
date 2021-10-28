@@ -1151,7 +1151,7 @@ const IS_LOCAL_TIME = /*#__PURE__*/( () => newRegExp`
 
 const DOT_ZERO = /\.?0+$/;
 const DELIMITER_DOT = /[-T:.]/g;
-const ZERO = /(?<=\.\d*)0+$/;
+const ZERO = /(^\d+\.\d*[1-9])(0+$)|(\.0+$)/gm;
 
 const Datetime = /*#__PURE__*/( () => {
 	const Datetime = function (            ) {
@@ -1186,7 +1186,7 @@ const Datetime = /*#__PURE__*/( () => {
                              
                              
 
-const Value = (ISOString        )        => ISOString.replace(ZERO, '').replace(DELIMITER_DOT, '');
+const Value = (ISOString        )        => ISOString.replace(ZERO, '$1').replace(DELIMITER_DOT, '');
 
 const leap = (literal        ) => literal.slice(5, 10)!=='02-29' || +literal.slice(0, 4)%4===0 && literal.slice(2, 4)!=='00';
 
