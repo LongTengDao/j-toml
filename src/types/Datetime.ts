@@ -94,7 +94,8 @@ const IS_LOCAL_TIME = /*#__PURE__*/( () => newRegExp`
 
 const DOT_ZERO = /\.?0+$/;
 const DELIMITER_DOT = /[-T:.]/g;
-const ZERO = /(?<=\.\d*)0+$/;
+const ZERO = /\.(\d*?)0+$/;
+const zeroReplacer = (match :string, p1 :string) => p1;
 
 const Datetime = /*#__PURE__*/( () => {
 	const Datetime = function (this :object) {
@@ -129,7 +130,7 @@ type TimezoneOffset = -1439 | number | 1439;
 type Time           = number;
 type Value          = string;
 
-const Value = (ISOString :string) :Value => ISOString.replace(ZERO, '').replace(DELIMITER_DOT, '');
+const Value = (ISOString :string) :Value => ISOString.replace(ZERO, zeroReplacer).replace(DELIMITER_DOT, '');
 
 const leap = (literal :string) => literal.slice(5, 10)!=='02-29' || +literal.slice(0, 4)%4===0 && literal.slice(2, 4)!=='00';
 

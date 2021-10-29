@@ -1,4 +1,4 @@
-export const version :'1.22.0';
+export const version :'1.23.0';
 
 export const parse :
 	& {

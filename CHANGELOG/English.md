@@ -48,3 +48,6 @@
     22. 0.  *   the finalized `OffsetDateTime`, `LocalDateTime`, `LocalDate`, `LocalTime` class methods are officially launched in the document
             *   officially launch helpers `isSection`, `isInline` in the document
             *   bug fix: fix the issue when `inline` a table, the mutually-exclusive `Section` state is not removed
+    23. 0.  *   based on TypeScript 4.5 new features `.d.mts` extension name and `types` category in `exports` field of `package.json`, provide own type declaration file `index.d.mts` for ESM mode of NPM edition
+            *   ensure when Node.js engine changes its internal implementation, the fast code could fall back to normal
+            *   remove lookbehind syntax in RegExp for Safari compatibility

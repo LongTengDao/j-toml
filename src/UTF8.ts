@@ -10,22 +10,37 @@ const message = 'A TOML doc must be a (ful-scalar) valid UTF-8 file, without any
 
 export const arrayBufferLike2string :(this :void, value :ArrayBuffer) => string = Buffer
 	
-	? ( ({ isBuffer, [Symbol.species]: Buf, byteLength, allocUnsafe }) =>
-		(arrayBufferLike :Buffer | Uint8Array | ArrayBuffer) :string => {
+	? /*#__PURE__*/( ({ isBuffer, [Symbol.species]: Buf, byteLength, allocUnsafe, from }) => {
+		// @ts-ignore
+		if ( typeof Buffer.prototype.utf8Write==='function' ) {
+			const utf8 = Buffer.alloc(7);
+			// @ts-ignore
+			utf8.utf8Write('𠮷利', 0, 7);
+			if ( utf8.equals(from('𠮷利')) ) {
+				return (arrayBufferLike :Buffer | Uint8Array | ArrayBuffer) :string => {
+					if ( !arrayBufferLike.byteLength ) { return ''; }
+					const buffer :Buffer = isBuffer(arrayBufferLike) ? arrayBufferLike : 'length' in arrayBufferLike ? new Buf(arrayBufferLike.buffer, arrayBufferLike.byteOffset, arrayBufferLike.length) : new Buf(arrayBufferLike);
+					const string :string = buffer.toString();
+					if ( string.includes('\uFFFD') ) {
+						const length :number = byteLength(string);
+						if ( length!==buffer.length ) { throw Error(message); }
+						const utf8 = allocUnsafe(length);
+						// @ts-ignore
+						utf8.utf8Write(string, 0, length);
+						if ( !utf8.equals(buffer) ) { throw Error(message); }
+					}
+					return string[0]==='\uFEFF' ? string.slice(1) : string;
+				};
+			}
+		}
+		return (arrayBufferLike :Buffer | Uint8Array | ArrayBuffer) :string => {
 			if ( !arrayBufferLike.byteLength ) { return ''; }
 			const buffer :Buffer = isBuffer(arrayBufferLike) ? arrayBufferLike : 'length' in arrayBufferLike ? new Buf(arrayBufferLike.buffer, arrayBufferLike.byteOffset, arrayBufferLike.length) : new Buf(arrayBufferLike);
 			const string :string = buffer.toString();
-			if ( string.includes('\uFFFD') ) {
-				const length :number = byteLength(string);
-				if ( length!==buffer.length ) { throw Error(message); }
-				const utf8 = allocUnsafe(length);
-				///@ts-ignore
-				utf8.utf8Write(string, 0, length);
-				if ( !utf8.equals(buffer) ) { throw Error(message); }
-			}
+			if ( string.includes('\uFFFD') && !from(string).equals(buffer) ) { throw Error(message); }
 			return string[0]==='\uFEFF' ? string.slice(1) : string;
-		}
-	)(Buffer as typeof Buffer & { [Symbol.species] :{ new (buffer :ArrayBufferLike, byteOffset? :number, length? :number) :Buffer } })///
+		};
+	})(Buffer as typeof Buffer & { readonly [Symbol.species] :new (buffer :ArrayBufferLike, byteOffset? :number, length? :number) => Buffer })
 	
 	: (arrayBufferLike :Uint8Array | ArrayBuffer) :string => {
 		if ( !arrayBufferLike.byteLength ) { return ''; }

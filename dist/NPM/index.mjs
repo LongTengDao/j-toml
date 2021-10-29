@@ -1,4 +1,4 @@
-﻿const version = '1.22.0';
+﻿const version = '1.23.0';
 
 const Error$1 = Error;
 
@@ -1145,7 +1145,8 @@ const IS_LOCAL_TIME = /*#__PURE__*/( () => newRegExp`
 
 const DOT_ZERO = /\.?0+$/;
 const DELIMITER_DOT = /[-T:.]/g;
-const ZERO = /(?<=\.\d*)0+$/;
+const ZERO = /\.(\d*?)0+$/;
+const zeroReplacer = (match        , p1        ) => p1;
 
 const Datetime = /*#__PURE__*/( () => {
 	const Datetime = function (            ) {
@@ -1180,7 +1181,7 @@ const Datetime = /*#__PURE__*/( () => {
                              
                              
 
-const Value = (ISOString        )        => ISOString.replace(ZERO, '').replace(DELIMITER_DOT, '');
+const Value = (ISOString        )        => ISOString.replace(ZERO, zeroReplacer).replace(DELIMITER_DOT, '');
 
 const leap = (literal        ) => literal.slice(5, 10)!=='02-29' || +literal.slice(0, 4)%4===0 && literal.slice(2, 4)!=='00';
 
@@ -2036,22 +2037,37 @@ const message = 'A TOML doc must be a (ful-scalar) valid UTF-8 file, without any
 
 const arrayBufferLike2string                                             = Buffer$1
 	
-	? ( ({ isBuffer, [Symbol.species]: Buf, byteLength, allocUnsafe }) =>
-		(arrayBufferLike                                   )         => {
+	? /*#__PURE__*/( ({ isBuffer, [Symbol.species]: Buf, byteLength, allocUnsafe, from }) => {
+		// @ts-ignore
+		if ( typeof Buffer$1.prototype.utf8Write==='function' ) {
+			const utf8 = Buffer$1.alloc(7);
+			// @ts-ignore
+			utf8.utf8Write('𠮷利', 0, 7);
+			if ( utf8.equals(from('𠮷利')) ) {
+				return (arrayBufferLike                                   )         => {
+					if ( !arrayBufferLike.byteLength ) { return ''; }
+					const buffer         = isBuffer(arrayBufferLike) ? arrayBufferLike : 'length' in arrayBufferLike ? new Buf(arrayBufferLike.buffer, arrayBufferLike.byteOffset, arrayBufferLike.length) : new Buf(arrayBufferLike);
+					const string         = buffer.toString();
+					if ( string.includes('\uFFFD') ) {
+						const length         = byteLength(string);
+						if ( length!==buffer.length ) { throw Error$1(message); }
+						const utf8 = allocUnsafe(length);
+						// @ts-ignore
+						utf8.utf8Write(string, 0, length);
+						if ( !utf8.equals(buffer) ) { throw Error$1(message); }
+					}
+					return string[0]==='\uFEFF' ? string.slice(1) : string;
+				};
+			}
+		}
+		return (arrayBufferLike                                   )         => {
 			if ( !arrayBufferLike.byteLength ) { return ''; }
 			const buffer         = isBuffer(arrayBufferLike) ? arrayBufferLike : 'length' in arrayBufferLike ? new Buf(arrayBufferLike.buffer, arrayBufferLike.byteOffset, arrayBufferLike.length) : new Buf(arrayBufferLike);
 			const string         = buffer.toString();
-			if ( string.includes('\uFFFD') ) {
-				const length         = byteLength(string);
-				if ( length!==buffer.length ) { throw Error$1(message); }
-				const utf8 = allocUnsafe(length);
-				///@ts-ignore
-				utf8.utf8Write(string, 0, length);
-				if ( !utf8.equals(buffer) ) { throw Error$1(message); }
-			}
+			if ( string.includes('\uFFFD') && !from(string).equals(buffer) ) { throw Error$1(message); }
 			return string[0]==='\uFEFF' ? string.slice(1) : string;
-		}
-	)(Buffer$1                                                                                                                         )///
+		};
+	})(Buffer$1                                                                                                                                )
 	
 	: (arrayBufferLike                          )         => {
 		if ( !arrayBufferLike.byteLength ) { return ''; }

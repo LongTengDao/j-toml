@@ -5,12 +5,11 @@ module.exports = require('j-dev')(__dirname + '/..')(async ({ import_default, ge
 	const { not } = require('@ltd/j-validator');
 	
 	{
-		const string = '𠮷利';
-		const buffer = Buffer.from(string);
-		const utf8 = Buffer.allocUnsafe(buffer.length);
+		if ( !Buffer.hasOwnProperty(Symbol.species) || ( Buffer[Symbol.species] ?? Buffer )===Buffer ) { throw Error(`node engine changed`); }
+		const utf8 = Buffer.alloc(7);
 		///@ts-ignore
-		utf8.utf8Write(string, 0, buffer.length);
-		if ( !utf8.equals(buffer) ) { throw Error(`node engine changed`); }
+		utf8.utf8Write('𠮷利', 0, 7);
+		if ( !utf8.equals(Buffer.from('𠮷利')) ) { throw Error(`node engine changed`); }
 	}
 	
 	const TOML = await import_default('src/default', {
