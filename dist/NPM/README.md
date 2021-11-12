@@ -40,9 +40,7 @@ Object.keys(rootTable)   // [ 'I_am_normal', 'hasOwnProperty', 'constructor', '_
 ------------
 
 ```
-TOML.parse(source                      [, options                                              ]);
-TOML.parse(source                      [, multilineStringJoiner[, useBigInt = true[, xOptions]]]);
-TOML.parse(source, specificationVersion[, multilineStringJoiner[, useBigInt = true[, xOptions]]]);
+TOML.parse(source[, options]);
 ```
 
 ```typescript
@@ -51,18 +49,6 @@ declare function parse (source :Source, options? :{
     bigint? :boolean | number,
     x? :XOptions,
 }) :Table;
-
-declare function parse (source :Source,
-    multilineStringJoiner? :string,
-    useBigInt? :boolean | number,
-    xOptions? :XOptions,
-) :Table;
-
-declare function parse (source :Source, specificationVersion :1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1,
-    multilineStringJoiner? :string,
-    useBigInt? :boolean | number,
-    xOptions? :XOptions,
-) :Table;
 
 type Source = string | ArrayBufferLike | Readonly<
     | { path :string, data :string | ArrayBufferLike, require? :NodeRequire }
@@ -73,20 +59,6 @@ type Table = object;
 ```
 
 ### `arguments` (object style)
-
-0.  #### `source`
-    
-    See `source` in "traditional style" under.
-    
-1.  #### `options`
-    
-    A readonly object, the options it contains is as follows:
-    
-    -   **`options.joiner`**: see `multilineStringJoiner` in "traditional style" under.
-    -   **`options.bigint`**: see `useBigInt` in "traditional style" under.
-    -   **`options.x`**: see `xOptions` in "traditional style" under.
-
-### `arguments` (traditional style)
 
 0.  #### `source`
     
@@ -105,45 +77,65 @@ type Table = object;
     You can also omit the property `data`, the property `require` must be passed in at this time, because the `require('fs').readFileSync` interface needs to be used to read it.  
     Regardless of whether `data` is passed in, if `$ = require?.resolve?.paths?.('')?.[0]?.replace(/node_modules$/, '')` can be obtained, the absolute path will be obtained through `require('path').resolve($, source.path)`.
     
+1.  #### `options`
+    
+    A readonly object, the options it contains is as follows:
+    
+    -   ##### `options.joiner`
+        
+        *   type: `string`
+        
+        For the multi-line basic strings and multi-line literal strings, what will be used to join the lines for parsing result.  
+        Note: TOML always use `'\n'` or `'\r\n'` to split the document lines while parsing, which defined in TOML specification, it has nothing to do with this parameter, so don't be mixed up.
+        
+        If this parameter is not passed in, the parsing process will throw an error where it is actually needed (a multi-line string containing a non-ignored newline):
+        
+        ```toml
+        error = """
+        In this sample, the first and second newlines are ignored, \
+        the third newline will trigger an error.
+        """
+        ```
+        
+    -   ##### `options.bigint`
+        
+        *   type: `boolean` / `number`
+        *   default: `true`
+        
+        Specify whether you want or not to use `BigInt` for integer type value. A `number` type argument allows you to control it by a max limit, like `Number.MAX_SAFE_INTEGER` (and the min limit from `-options.bigint`, if `options.bigint>=0`; otherwise as the min limit, and the max limit is `-options.bigint-1`).
+    
+    -   ##### `options.x`
+        
+        The extensional features not in the specification.  
+        Include keeping the key/value pairs order of tables, integers larger than `signed long`, multi-line inline table with trailing comma even no comma, `null` value, custom constructor, etc.  
+        They are private experimental discouraged features.  
+        See [xOptions](https://GitHub.com/LongTengDao/j-toml/blob/master/docs/English/xOptions.md).
+
+### `arguments` (traditional style)
+
+0.  #### `source`
+    
+    See `source` in "object style" above.
+    
 1.  #### `specificationVersion`
     
     *   type: `1.0` / `0.5` / `0.4` / `0.3` / `0.2` / `0.1`
     *   default: `1.0`
     *   deprecated: use `TOML.parse[specificationVersion]` instead would be better
     
-    If there is no special reason (e.g. the downstream program could not deal with `Infinity`、`NaN`、fractional seconds and edge date-time values, Local Date-Time / Local Date / Local Time types, empty string key name, mixed type array even array of tables / table under array of arrays structure yet), the latest version is recommended.
-    
     Note: if you skip this argument, the rest arguments must be moved one position to the left.
     
 2.  #### `multilineStringJoiner`
     
-    *   type: `string`
-    
-    For the multi-line basic strings and multi-line literal strings, what will be used to join the lines for parsing result.  
-    Note: TOML always use `'\n'` or `'\r\n'` to split the document lines while parsing, which defined in TOML specification, it has nothing to do with this parameter, so don't be mixed up.
-
-    If this parameter is not passed in, the parsing process will throw an error where it is actually needed (a multi-line string containing a non-ignored newline):
-    
-    ```toml
-    error = """
-    In this sample, the first and second newlines are ignored, \
-    the third newline will trigger an error.
-    """
-    ```
+    See `options.joiner` in "object style" above.
     
 3.  #### `useBigInt`
     
-    *   type: `boolean` / `number`
-    *   default: `true`
-    
-    Specify whether you want or not to use `BigInt` for integer type value. A `number` type argument allows you to control it by a max limit, like `Number.MAX_SAFE_INTEGER` (and the min limit from `-useBigInt`, if `useBigInt>=0`; otherwise as the min limit, and the max limit is `-useBigInt-1`).
+    See `options.bigint` in "object style" above.
     
 4.  #### `xOptions`
     
-    The extensional features not in the specification.  
-    Include keeping the key/value pairs order of tables, integers larger than `signed long`, multi-line inline table with trailing comma even no comma, `null` value, custom constructor, etc.  
-    They are private experimental discouraged features.  
-    See [xOptions](https://GitHub.com/LongTengDao/j-toml/blob/master/docs/English/xOptions.md).
+    See `options.x` in "object style" above.
 
 ### `return`
 
@@ -164,37 +156,43 @@ This library will not cause stack overflow error unexpectedly due to too deep ta
 `TOML.parse[1.0]` `TOML.parse[0.5]` `TOML.parse[0.4]` `TOML.parse[0.3]` `TOML.parse[0.2]` `TOML.parse[0.1]`
 -----------------------------------------------------------------------------------------------------------
 
-```
-TOML.parse[1.0](source[, options                                              ]);
-TOML.parse[0.5](source[, options                                              ]);
-TOML.parse[0.4](source[, options                                              ]);
-TOML.parse[0.3](source[, options                                              ]);
-TOML.parse[0.2](source[, options                                              ]);
-TOML.parse[0.1](source[, options                                              ]);
-TOML.parse[1.0](source[, multilineStringJoiner[, useBigInt = true[, xOptions]]]);
-TOML.parse[0.5](source[, multilineStringJoiner[, useBigInt = true[, xOptions]]]);
-TOML.parse[0.4](source[, multilineStringJoiner[, useBigInt = true[, xOptions]]]);
-TOML.parse[0.3](source[, multilineStringJoiner[, useBigInt = true[, xOptions]]]);
-TOML.parse[0.2](source[, multilineStringJoiner[, useBigInt = true[, xOptions]]]);
-TOML.parse[0.1](source[, multilineStringJoiner[, useBigInt = true[, xOptions]]]);
-```
+If there is no special reason (e.g. the downstream program could not deal with `Infinity`、`NaN`、fractional seconds and edge date-time values, Local Date-Time / Local Date / Local Time types, empty string key name, mixed type array even array of tables / table under array of arrays structure yet), the latest version is recommended.
 
-```typescript
-declare const parse :{
-    readonly [SpecificationVersion in 1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1] :{
-        (source :Source, options? :{
-            joiner? :string,
-            bigint? :boolean | number,
-            x? :XOptions,
-        }) :Table;
-        (source :Source,
-            multilineStringJoiner? :string,
-            useBigInt? :boolean | number,
-            xOptions? :XOptions,
-        ) :Table;
-    }
-};
-```
+### `arguments` (object style)
+
+0.  #### `source`
+    
+    Vide `TOML.parse` above.
+    
+1.  #### `options`
+    
+    Vide `TOML.parse` above.
+
+### `arguments` (traditional style)
+
+0.  #### `source`
+    
+    Vide `TOML.parse` above.
+    
+1.  #### `multilineStringJoiner`
+    
+    Vide `TOML.parse` above.
+    
+2.  #### `useBigInt`
+    
+    Vide `TOML.parse` above.
+    
+3.  #### `xOptions`
+    
+    Vide `TOML.parse` above.
+
+### `return`
+
+Vide `TOML.parse` above.
+
+### `throw`
+
+Vide `TOML.parse` above.
 
 `TOML.stringify`
 ----------------

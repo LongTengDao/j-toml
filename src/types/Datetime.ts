@@ -1,4 +1,5 @@
 import SyntaxError from '.SyntaxError';
+import RangeError from '.RangeError';
 import NativeDate from '.Date';
 import parse from '.Date.parse';
 import ownKeys from '.Reflect.ownKeys';
@@ -12,8 +13,8 @@ import Null from '.null';
 
 import { newRegExp, theRegExp } from '@ltd/j-regexp';
 
-import * as options$0 from '../options$0';
-import * as iterator$0 from '../iterator$0';
+import * as options from '../options';
+import * as iterator from '../iterator';
 
 const fpc = <T extends Function> (c :T) :T => {
 	freeze(freeze(c).prototype);
@@ -144,7 +145,12 @@ const OffsetDateTime_use = (that :InstanceType<typeof OffsetDateTime>, $ :number
 };
 /*const OffsetDateTime_get = (that :InstanceType<typeof OffsetDateTime>, start :number, end :number) => +that[OffsetDateTime_ISOString].slice(start, end);
 const OffsetDateTime_set = (that :InstanceType<typeof OffsetDateTime>, start :number, end :number, value :number) => {
-	if ( end ) { that[OffsetDateTime_ISOString] = that[OffsetDateTime_ISOString].slice(0, start) + ( '' + value ).padStart(end - start, '0') + that[OffsetDateTime_ISOString].slice(end); }
+	if ( end ) {
+		const string = '' + value;
+		const size = end - start;
+		if ( string.length>size ) { throw RangeError(); }///
+		that[OffsetDateTime_ISOString] = that[OffsetDateTime_ISOString].slice(0, start) + string.padStart(size, '0') + that[OffsetDateTime_ISOString].slice(end);
+	}
 	const time = parse(that[OffsetDateTime_ISOString]);
 	return that[OffsetDateTime_value] = ( '' + time ).padStart(15, '0') + that[OffsetDateTime_value].slice(15);///time
 };*///
@@ -157,7 +163,7 @@ export const OffsetDateTime = /*#__PURE__*/fpc(class OffsetDateTime extends Date
 	toISOString (this :OffsetDateTime) :string { return this[OffsetDateTime_ISOString]; }
 	
 	constructor (literal :string) {
-		const { 1: more } = leap(literal) && ( options$0.zeroDatetime ? OFFSET_DATETIME_ZERO_exec : OFFSET_DATETIME_exec )(literal) || iterator$0.throws(SyntaxError(`Invalid Offset Date-Time ${literal}` + iterator$0.where(' at ')));
+		const { 1: more } = leap(literal) && ( options.zeroDatetime ? OFFSET_DATETIME_ZERO_exec : OFFSET_DATETIME_exec )(literal) || iterator.throws(SyntaxError(`Invalid Offset Date-Time ${literal}` + iterator.where(' at ')));
 		super();
 		this[OffsetDateTime_ISOString] = literal.replace(' ', 'T');
 		this[OffsetDateTime_value] = ( '' + parse(this[OffsetDateTime_ISOString]) ).padStart(15, '0') + ( more ? '.' + more : '' );
@@ -165,51 +171,45 @@ export const OffsetDateTime = /*#__PURE__*/fpc(class OffsetDateTime extends Date
 	}
 	
 	getUTCFullYear (this :OffsetDateTime) :FullYear { return OffsetDateTime_use(this).getUTCFullYear(); }
-	///getFullYear (this :OffsetDateTime) :FullYear { return OffsetDateTime_get(this, 0, 4); }
-	///setFullYear (this :OffsetDateTime, value :FullYear) :void { OffsetDateTime_set(this, 0, 4, value); }
+	///get year () :FullYear { return OffsetDateTime_get(this, 0, 4); }
+	///set year (value :FullYear) { OffsetDateTime_set(this, 0, 4, value); }
 	getUTCMonth (this :OffsetDateTime) :Month { return OffsetDateTime_use(this).getUTCMonth(); }
-	///getMonth (this :OffsetDateTime) :Month { return OffsetDateTime_get(this, 5, 7) - 1; }
-	///setMonth (this :OffsetDateTime, value :Month) :void { OffsetDateTime_set(this, 5, 7, value + 1); }
+	///get month () { return OffsetDateTime_get(this, 5, 7); }
+	///set month (value) { OffsetDateTime_set(this, 5, 7, value); }
 	getUTCDate (this :OffsetDateTime) :Date { return OffsetDateTime_use(this).getUTCDate(); }
-	///getDate (this :OffsetDateTime) :Date { return OffsetDateTime_get(this, 8, 10); }
-	///setDate (this :OffsetDateTime, value :Date) :void { OffsetDateTime_set(this, 8, 10, value); }
+	///get day () :Date { return OffsetDateTime_get(this, 8, 10); }
+	///set day (value :Date) { OffsetDateTime_set(this, 8, 10, value); }
 	
 	getUTCHours (this :OffsetDateTime) :Hours { return OffsetDateTime_use(this).getUTCHours(); }
-	///getHours (this :OffsetDateTime) :Hours { return OffsetDateTime_get(this, 11, 13); }
-	///setHours (this :OffsetDateTime, value :Hours) :void { OffsetDateTime_set(this, 11, 13, value); }
+	///get hour () :Hours { return OffsetDateTime_get(this, 11, 13); }
+	///set hour (value :Hours) { OffsetDateTime_set(this, 11, 13, value); }
 	getUTCMinutes (this :OffsetDateTime) :Minutes { return OffsetDateTime_use(this).getUTCMinutes(); }
-	///getMinutes (this :OffsetDateTime) :Minutes { return OffsetDateTime_get(this, 14, 16); }
-	///setMinutes (this :OffsetDateTime, value :Minutes) :void { OffsetDateTime_set(this, 14, 16, value); }
+	///get minute () :Minutes { return OffsetDateTime_get(this, 14, 16); }
+	///set minute (value :Minutes) { OffsetDateTime_set(this, 14, 16, value); }
 	getUTCSeconds (this :OffsetDateTime) :Seconds { return OffsetDateTime_use(this).getUTCSeconds(); }
-	///getSeconds (this :OffsetDateTime) :Seconds { return OffsetDateTime_get(this, 17, 19); }
-	///setSeconds (this :OffsetDateTime, value :Seconds) :void { OffsetDateTime_set(this, 17, 19, value); }
+	///get second () :Seconds { return OffsetDateTime_get(this, 17, 19); }
+	///set second (value :Seconds) { OffsetDateTime_set(this, 17, 19, value); }
 	getUTCMilliseconds (this :OffsetDateTime) :Milliseconds { return OffsetDateTime_use(this).getUTCMilliseconds(); }///
-	///getMilliseconds (this :OffsetDateTime) :Milliseconds { return +this[OffsetDateTime_value].slice(12, 15); }///
-	/*setMilliseconds (this :OffsetDateTime, value :Milliseconds) :void {
+	///get millisecond () :Milliseconds { return +this[OffsetDateTime_value].slice(12, 15); }///
+	/*set millisecond (value :Milliseconds) {
 		this[OffsetDateTime_ISOString] = this[OffsetDateTime_ISOString].slice(0, 19) + ( value ? ( '.' + ( '' + value ).padStart(3, '0') ).replace(DOT_ZERO, '') : '' ) + this[OffsetDateTime_ISOString].slice(this[OffsetDateTime_ISOString].search(OFFSET$));
 		OffsetDateTime_set(this, 0, 0, 0);
 	}*///
+	///get microsecond () :Milliseconds
+	///set microsecond (value :Milliseconds)
+	///get nanosecond () :Milliseconds
+	///set nanosecond (value :Milliseconds)
 	
 	getUTCDay (this :OffsetDateTime) :Day { return OffsetDateTime_use(this).getUTCDay(); }
-	///getDay (this :OffsetDateTime) :Day { return OffsetDateTime_use(this, this.getTimezoneOffset()*60000).getUTCDay(); }
+	///get dayOfWeek () { return OffsetDateTime_use(this, this.getTimezoneOffset()*60000).getUTCDay() || 7; }
 	getTimezoneOffset (this :OffsetDateTime) :TimezoneOffset {
 		const z = Z_exec(this[OffsetDateTime_ISOString]);
 		return z ? +z[1]*60 + +( z[2] + z[3] ) : 0;
 	}
-	/*setTimezoneOffset (this :OffsetDateTime, value :TimezoneOffset) {
-		value = +value;
-		let string = OffsetDateTime_use(this, value*60000).toISOString().slice(0, -1);
-		if ( value ) {
-			if ( value>0 ) { string += '+'; }
-			else {
-				string += '-';
-				value = -value;
-			}
-			const m = value%60;
-			const h = ( value - m )/60;
-			this[OffsetDateTime_ISOString] = string + ( h>9 ? h : '0' + h ) + ( m>9 ? ':' + m : ':0' + m );
-		}
-		else { this[OffsetDateTime_ISOString] = string + ( is(value, 0) ? 'Z' : '-00:00' ); }
+	///get offset () { return this[OffsetDateTime_ISOString].endsWith('Z') ? 'Z' : this[OffsetDateTime_ISOString].slice(-6); }
+	/*set offset (value) {
+		this[OffsetDateTime_ISOString] = this[OffsetDateTime_ISOString].slice(0, this[OffsetDateTime_ISOString].endsWith('Z') ? -1 : -6) + value;
+		OffsetDateTime_set(this, 0, 0, 0);
 	}*///
 	getTime (this :OffsetDateTime) :Time { return +this[OffsetDateTime_value].slice(0, 15); }///
 	/*setTime (this :OffsetDateTime, value :Time) :void {
@@ -227,8 +227,11 @@ const LocalDateTime_ISOString = Symbol('LocalDateTime_ISOString');
 const LocalDateTime_value = Symbol('LocalDateTime_value');
 const LocalDateTime_get = (that :InstanceType<typeof LocalDateTime>, start :number, end :number) => +that[LocalDateTime_ISOString].slice(start, end);
 const LocalDateTime_set = (that :InstanceType<typeof LocalDateTime>, start :number, end :number, value :number) :void => {
+	const string = '' + value;
+	const size = end - start;
+	if ( string.length>size ) { throw RangeError(); }///
 	that[LocalDateTime_value] = Value(
-		that[LocalDateTime_ISOString] = that[LocalDateTime_ISOString].slice(0, start) + ( '' + value ).padStart(end - start, '0') + that[LocalDateTime_ISOString].slice(end)
+		that[LocalDateTime_ISOString] = that[LocalDateTime_ISOString].slice(0, start) + string.padStart(size, '0') + that[LocalDateTime_ISOString].slice(end)
 	);
 };
 export const LocalDateTime = /*#__PURE__*/fpc(class LocalDateTime extends Datetime {
@@ -240,7 +243,7 @@ export const LocalDateTime = /*#__PURE__*/fpc(class LocalDateTime extends Dateti
 	toISOString (this :LocalDateTime) :string { return this[LocalDateTime_ISOString]; }
 	
 	constructor (literal :string) {
-		IS_LOCAL_DATETIME(literal) && leap(literal) || iterator$0.throws(SyntaxError(`Invalid Local Date-Time ${literal}` + iterator$0.where(' at ')));
+		IS_LOCAL_DATETIME(literal) && leap(literal) || iterator.throws(SyntaxError(`Invalid Local Date-Time ${literal}` + iterator.where(' at ')));
 		super();
 		this[LocalDateTime_value] = Value(
 			this[LocalDateTime_ISOString] = literal.replace(' ', 'T')
@@ -273,10 +276,14 @@ export const LocalDateTime = /*#__PURE__*/fpc(class LocalDateTime extends Dateti
 const LocalDate_ISOString = Symbol('LocalDate_ISOString');
 const LocalDate_value = Symbol('LocalDate_value');
 const LocalDate_get = (that :InstanceType<typeof LocalDate>, start :number, end :number) => +that[LocalDate_ISOString].slice(start, end);
-const LocalDate_set = (that :InstanceType<typeof LocalDate>, start :number, end :number, value :number) =>
+const LocalDate_set = (that :InstanceType<typeof LocalDate>, start :number, end :number, value :number) :void => {
+	const string = '' + value;
+	const size = end - start;
+	if ( string.length>size ) { throw RangeError(); }///
 	that[LocalDate_value] = Value(
-		that[LocalDate_ISOString] = that[LocalDate_ISOString].slice(0, start) + ( '' + value ).padStart(end - start, '0') + that[LocalDate_ISOString].slice(end)
+		that[LocalDate_ISOString] = that[LocalDate_ISOString].slice(0, start) + string.padStart(size, '0') + that[LocalDate_ISOString].slice(end)
 	);
+};
 export const LocalDate = /*#__PURE__*/fpc(class LocalDate extends Datetime {
 	
 	[LocalDate_ISOString] :string;
@@ -286,7 +293,7 @@ export const LocalDate = /*#__PURE__*/fpc(class LocalDate extends Datetime {
 	toISOString (this :LocalDate) :string { return this[LocalDate_ISOString]; }
 	
 	constructor (literal :string) {
-		IS_LOCAL_DATE(literal) && leap(literal) || iterator$0.throws(SyntaxError(`Invalid Local Date ${literal}` + iterator$0.where(' at ')));
+		IS_LOCAL_DATE(literal) && leap(literal) || iterator.throws(SyntaxError(`Invalid Local Date ${literal}` + iterator.where(' at ')));
 		super();
 		this[LocalDate_value] = Value(
 			this[LocalDate_ISOString] = literal
@@ -306,10 +313,14 @@ export const LocalDate = /*#__PURE__*/fpc(class LocalDate extends Datetime {
 const LocalTime_ISOString = Symbol('LocalTime_ISOString');
 const LocalTime_value = Symbol('LocalTime_value');
 const LocalTime_get = (that :InstanceType<typeof LocalTime>, start :number, end :number) => +that[LocalTime_ISOString].slice(start, end);
-const LocalTime_set = (that :InstanceType<typeof LocalTime>, start :number, end :number, value :number) =>
+const LocalTime_set = (that :InstanceType<typeof LocalTime>, start :number, end :number, value :number) :void => {
+	const string = '' + value;
+	const size = end - start;
+	if ( string.length>size ) { throw RangeError(); }///
 	that[LocalTime_value] = Value(
-		that[LocalTime_ISOString] = that[LocalTime_ISOString].slice(0, start) + ( '' + value ).padStart(2, '0') + that[LocalTime_ISOString].slice(end)
+		that[LocalTime_ISOString] = that[LocalTime_ISOString].slice(0, start) + string.padStart(2, '0') + that[LocalTime_ISOString].slice(end)
 	);
+};
 export const LocalTime = /*#__PURE__*/fpc(class LocalTime extends Datetime {
 	
 	[LocalTime_ISOString] :string;
@@ -319,7 +330,7 @@ export const LocalTime = /*#__PURE__*/fpc(class LocalTime extends Datetime {
 	toISOString (this :LocalTime) :string { return this[LocalTime_ISOString]; }
 	
 	constructor (literal :string) {
-		IS_LOCAL_TIME(literal) || iterator$0.throws(SyntaxError(`Invalid Local Time ${literal}` + iterator$0.where(' at ')));
+		IS_LOCAL_TIME(literal) || iterator.throws(SyntaxError(`Invalid Local Time ${literal}` + iterator.where(' at ')));
 		super();
 		this[LocalTime_value] = Value(
 			this[LocalTime_ISOString] = literal

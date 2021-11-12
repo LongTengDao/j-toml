@@ -38,9 +38,7 @@ Object.keys(根表)   // [ '一个普通的键名', 'hasOwnProperty', 'construct
 ------------
 
 ```
-TOML.parse(源          [, 选项                                               ]);
-TOML.parse(源          [, 多行字符串拼接字符[, 使用BigInt = true[, 超级选项]]]);
-TOML.parse(源, 规范版本[, 多行字符串拼接字符[, 使用BigInt = true[, 超级选项]]]);
+TOML.parse(源[, 选项]);
 ```
 
 ```typescript
@@ -49,18 +47,6 @@ declare function parse (源 :源, 选项? :{
     bigint? :boolean | number,
     x? :超级选项,
 }) :表;
-
-declare function parse (源 :源,
-    多行字符串拼接字符? :string,
-    使用BigInt? :boolean | number,
-    超级选项? :超级选项,
-) :表;
-
-declare function parse (源 :源, 规范版本 :1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1,
-    多行字符串拼接字符? :string,
-    使用BigInt? :boolean | number,
-    超级选项? :超级选项,
-) :表;
 
 type 源 = string | ArrayBufferLike | Readonly<
     | { path :string, data :string | ArrayBufferLike, require? :NodeRequire }
@@ -71,20 +57,6 @@ type 表 = object;
 ```
 
 ### `arguments`（对象模式）
-
-0.  #### `源`
-    
-    见下文“传统模式”的 `源`。
-    
-1.  #### `选项`
-    
-    一个只读对象，其所包含的选项如下：
-    
-    -   **`选项.joiner`**：见下文“传统模式”的 `多行字符串拼接字符`。
-    -   **`选项.bigint`**：见下文“传统模式”的 `使用BigInt`。
-    -   **`选项.x`**：见下文“传统模式”的 `超级选项`。
-
-### `arguments`（传统模式）
 
 0.  #### `源`
     
@@ -103,45 +75,65 @@ type 表 = object;
     你也可以省略 `data` 属性，此时必须传入 `require` 属性，因为需要使用 `require('fs').readFileSync` 接口来读取。  
     不论是否传入 `data`，只要能够获取到 `$ = require?.resolve?.paths?.('')?.[0]?.replace(/node_modules$/, '')`，都会通过 `require('path').resolve($, 源.path)` 来获取绝对路径。
     
+1.  #### `选项`
+    
+    一个只读对象，其所包含的选项如下：
+    
+    -   ##### `选项.joiner`
+        
+        *   类型：`string`
+        
+        对于多行基础字符串和多行字面量字符串，用什么来拼接各行、生成解析结果。  
+        注意，在解析 TOML 源时，按照规范的要求，文档的行分隔符总是 `'\n'` 或 `'\r\n'`，与此参数无关，不要混淆。
+        
+        如果没有传入该参数，那么解析过程将在遇到需要该参数的位置（包含不被忽略的换行的多行字符串）抛出错误：
+        
+        ```toml
+        error = """
+        此例中前两个换行没事，\
+        第三个换行会触发报错。
+        """
+        ```
+        
+    -   ##### `选项.bigint`
+        
+        *   类型：`boolean` / `number`
+        *   默认值：`true`
+        
+        指定你是否要用 `BigInt` 来实现整数类型的值。`number` 类型的参数允许你精确控制超过多少才使用 `BigInt`，例如 `Number.MAX_SAFE_INTEGER`（自动通过 `-选项.bigint` 获取负向界限，如果 `选项.bigint>=0`；否则通过 `-选项.bigint-1` 获取正向界限）。
+        
+    -   ##### `选项.x`
+        
+        标准中所没有的扩展功能。  
+        包括保持表中键值对的顺序、超出有符号长整型的整数、跨行行内表及尾逗号甚至省略逗号、`null` 值、自定义构造器等。  
+        私有实验期功能，不建议随意使用。  
+        详见[超级选项](https://GitHub.com/LongTengDao/j-toml/blob/master/docs/简体中文/xOptions.md)。
+
+### `arguments`（传统模式）
+
+0.  #### `源`
+    
+    见前文“对象模式”的 `源`。
+    
 1.  #### `规范版本`
     
     *   类型：`1.0` / `0.5` / `0.4` / `0.3` / `0.2` / `0.1`
     *   默认值：`1.0`
     *   不推荐：请改用 `TOML.parse[规范版本]`
     
-    如果没有特殊理由（例如下游程序尚不能妥善处置 `Infinity`、`NaN`、小数秒和极端时间值，各地日期时刻、各地日期、各地时刻类型，空字符串键名，混合类型的数组甚至表数组、数组数组下的表结构），建议使用最新的版本。
-    
     注意：当不指定此参数时，后续参数均需往前移动一位。
     
 2.  #### `多行字符串拼接字符`
     
-    *   类型：`string`
-    
-    对于多行基础字符串和多行字面量字符串，用什么来拼接各行、生成解析结果。  
-    注意，在解析 TOML 源时，按照规范的要求，文档的行分隔符总是 `'\n'` 或 `'\r\n'`，与此参数无关，不要混淆。
-    
-    如果没有传入该参数，那么解析过程将在遇到需要该参数的位置（包含不被忽略的换行的多行字符串）抛出错误：
-    
-    ```toml
-    error = """
-    此例中前两个换行没事，\
-    第三个换行会触发报错。
-    """
-    ```
+    见前文“对象模式”的 `选项.joiner`。
     
 3.  #### `使用BigInt`
     
-    *   类型：`boolean` / `number`
-    *   默认值：`true`
-    
-    指定你是否要用 `BigInt` 来实现整数类型的值。`number` 类型的参数允许你精确控制超过多少才使用 `BigInt`，例如 `Number.MAX_SAFE_INTEGER`（自动通过 `-使用BigInt` 获取负向界限，如果 `使用BigInt>=0`；否则通过 `-使用BigInt-1` 获取正向界限）。
+    见前文“对象模式”的 `选项.bigint`。
     
 4.  #### `超级选项`
     
-    标准中所没有的扩展功能。  
-    包括保持表中键值对的顺序、超出有符号长整型的整数、跨行行内表及尾逗号甚至省略逗号、`null` 值、自定义构造器等。  
-    私有实验期功能，不建议随意使用。  
-    详见[超级选项](https://GitHub.com/LongTengDao/j-toml/blob/master/docs/简体中文/xOptions.md)。
+    见前文“对象模式”的 `选项.x`。
 
 ### `return`
 
@@ -162,37 +154,43 @@ type 表 = object;
 `TOML.parse[1.0]` `TOML.parse[0.5]` `TOML.parse[0.4]` `TOML.parse[0.3]` `TOML.parse[0.2]` `TOML.parse[0.1]`
 -----------------------------------------------------------------------------------------------------------
 
-```
-TOML.parse[1.0](源[, 选项                                               ]);
-TOML.parse[0.5](源[, 选项                                               ]);
-TOML.parse[0.4](源[, 选项                                               ]);
-TOML.parse[0.3](源[, 选项                                               ]);
-TOML.parse[0.2](源[, 选项                                               ]);
-TOML.parse[0.1](源[, 选项                                               ]);
-TOML.parse[1.0](源[, 多行字符串拼接字符[, 使用BigInt = true[, 超级选项]]]);
-TOML.parse[0.5](源[, 多行字符串拼接字符[, 使用BigInt = true[, 超级选项]]]);
-TOML.parse[0.4](源[, 多行字符串拼接字符[, 使用BigInt = true[, 超级选项]]]);
-TOML.parse[0.3](源[, 多行字符串拼接字符[, 使用BigInt = true[, 超级选项]]]);
-TOML.parse[0.2](源[, 多行字符串拼接字符[, 使用BigInt = true[, 超级选项]]]);
-TOML.parse[0.1](源[, 多行字符串拼接字符[, 使用BigInt = true[, 超级选项]]]);
-```
+如果没有特殊理由（例如下游程序尚不能妥善处置 `Infinity`、`NaN`、小数秒和极端时间值，各地日期时刻、各地日期、各地时刻类型，空字符串键名，混合类型的数组甚至表数组、数组数组下的表结构），建议使用最新的版本。
 
-```typescript
-declare const parse :{
-    readonly [规范版本 in 1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1] :{
-        (源 :源, 选项? :{
-            joiner? :string,
-            bigint? :boolean | number,
-            x? :超级选项,
-        }) :表;
-        (源 :源,
-            多行字符串拼接字符? :string,
-            使用BigInt? :boolean | number,
-            超级选项? :超级选项,
-        ) :表;
-    }
-};
-```
+### `arguments`（对象模式）
+
+0.  #### `源`
+    
+    参见前文 `TOML.parse`。
+    
+1.  #### `选项`
+    
+    参见前文 `TOML.parse`。
+
+### `arguments`（传统模式）
+
+0.  #### `源`
+    
+    参见前文 `TOML.parse`。
+    
+1.  #### `多行字符串拼接字符`
+    
+    参见前文 `TOML.parse`。
+    
+2.  #### `使用BigInt`
+    
+    参见前文 `TOML.parse`。
+    
+3.  #### `超级选项`
+    
+    参见前文 `TOML.parse`。
+
+### `return`
+
+参见前文 `TOML.parse`。
+
+### `throw`
+
+参见前文 `TOML.parse`。
 
 `TOML.stringify`
 ----------------

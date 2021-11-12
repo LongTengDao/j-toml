@@ -3,7 +3,8 @@ import parseInt from '.parseInt';
 import fromCharCode from '.String.fromCharCode';
 import fromCodePoint from '.String.fromCodePoint';
 
-import * as iterator$0 from '../iterator$0';
+import * as iterator from '../iterator';
+import * as options from '../options';
 
 const ESCAPED_IN_SINGLE_LINE = /[^\\]+|\\(?:[\\"btnfr/]|u.{4}|U.{8})/gs;
 const ESCAPED_IN_MULTI_LINE = /[^\n\\]+|\n|\\(?:[\t ]*\n[\t\n ]*|[\\"btnfr/]|u.{4}|U.{8})/gs;
@@ -26,14 +27,14 @@ export const BasicString = (literal :string) :string => {
 				case 'r': parts[index] = '\r'; break;
 				case 'u':
 					const charCode :number = parseInt(part.slice(2), 16);
-					0xD7FF<charCode && charCode<0xE000
-					&& iterator$0.throws(RangeError(`Invalid Unicode Scalar ${part}` + iterator$0.where(' at ')));
+					options.mustScalar && 0xD7FF<charCode && charCode<0xE000
+					&& iterator.throws(RangeError(`Invalid Unicode Scalar ${part}` + iterator.where(' at ')));
 					parts[index] = fromCharCode(charCode);
 					break;
 				case 'U':
 					const codePoint :number = parseInt(part.slice(2), 16);
-					( 0xD7FF<codePoint && codePoint<0xE000 || 0x10FFFF<codePoint )
-					&& iterator$0.throws(RangeError(`Invalid Unicode Scalar ${part}` + iterator$0.where(' at ')));
+					( options.mustScalar && 0xD7FF<codePoint && codePoint<0xE000 || 0x10FFFF<codePoint )
+					&& iterator.throws(RangeError(`Invalid Unicode Scalar ${part}` + iterator.where(' at ')));
 					parts[index] = fromCodePoint(codePoint);
 					break;
 				case '/': parts[index] = '/'; break;
@@ -72,14 +73,14 @@ export const MultilineBasicString = (literal :string, useWhatToJoinMultilineStri
 				case 'r': parts[index] = '\r'; break;
 				case 'u':
 					const charCode :number = parseInt(part.slice(2), 16);
-					0xD7FF<charCode && charCode<0xE000
-					&& iterator$0.throws(RangeError(`Invalid Unicode Scalar ${part}` + iterator$0.where(' at ', iterator$0.lineIndex + n)));
+					options.mustScalar && 0xD7FF<charCode && charCode<0xE000
+					&& iterator.throws(RangeError(`Invalid Unicode Scalar ${part}` + iterator.where(' at ', iterator.lineIndex + n)));
 					parts[index] = fromCharCode(charCode);
 					break;
 				case 'U':
 					const codePoint :number = parseInt(part.slice(2), 16);
-					( 0xD7FF<codePoint && codePoint<0xE000 || 0x10FFFF<codePoint )
-					&& iterator$0.throws(RangeError(`Invalid Unicode Scalar ${part}` + iterator$0.where(' at ', iterator$0.lineIndex + n)));
+					( options.mustScalar && 0xD7FF<codePoint && codePoint<0xE000 || 0x10FFFF<codePoint )
+					&& iterator.throws(RangeError(`Invalid Unicode Scalar ${part}` + iterator.where(' at ', iterator.lineIndex + n)));
 					parts[index] = fromCodePoint(codePoint);
 					break;
 				case '/': parts[index] = '/'; break;

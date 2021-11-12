@@ -5,8 +5,8 @@ import undefined from '.undefined';
 
 import { clearRegExp, theRegExp } from '@ltd/j-regexp';
 
-import * as iterator$0 from '../iterator$0';
-import * as options$0 from '../options$0';
+import * as iterator from '../iterator';
+import * as options from '../options';
 import Root from './level-loop';
 import { isArrayBufferLike, arrayBufferLike2string } from '../UTF8';
 
@@ -14,11 +14,11 @@ const IS_NON_SCALAR = /*#__PURE__*/( () => theRegExp(/[\uD800-\uDFFF]/u).test )(
 
 let holding :boolean = false;
 
-const parse = (source :Source, specificationVersion :1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1, multilineStringJoiner? :string | { joiner? :string, bigint? :boolean | number, x? :options$0.XOptions }, useBigInt? :boolean | number, xOptions? :options$0.XOptions) :Table => {
+const parse = (source :Source, specificationVersion :1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1, multilineStringJoiner? :string | { joiner? :string, bigint? :boolean | number, x? :options.XOptions }, useBigInt? :boolean | number, xOptions? :options.XOptions) :Table => {
 	if ( holding ) { throw Error('parse during parsing.'); }
 	holding = true;
 	let rootTable :Table;
-	let process :options$0.Process;
+	let process :options.Process;
 	try {
 		let sourcePath :string = '';
 		if ( typeof source==='object' && source ) {
@@ -62,16 +62,16 @@ const parse = (source :Source, specificationVersion :1.0 | 0.5 | 0.4 | 0.3 | 0.2
 				( { joiner: multilineStringJoiner, bigint: useBigInt, x: xOptions } = multilineStringJoiner );
 			}
 			try {
-				options$0.use(specificationVersion, multilineStringJoiner, useBigInt, xOptions);
-				iterator$0.todo(source, sourcePath);
+				options.use(specificationVersion, multilineStringJoiner, useBigInt, xOptions);
+				iterator.todo(source, sourcePath);
 				try {
-					source && source[0]==='\uFEFF' && iterator$0.throws(TypeError(`TOML content (string) should not start with BOM (U+FEFF)` + iterator$0.where(' at ')));
+					source && source[0]==='\uFEFF' && iterator.throws(TypeError(`TOML content (string) should not start with BOM (U+FEFF)` + iterator.where(' at ')));
 					rootTable = Root();
-					process = options$0.Process();
+					process = options.Process();
 				}
-				finally { iterator$0.done(); }//clearWeakSets();
+				finally { iterator.done(); }//clearWeakSets();
 			}
-			finally { options$0.clear(); }
+			finally { options.clear(); }
 		}
 		finally { clearRegExp(); }
 	}
@@ -81,19 +81,19 @@ const parse = (source :Source, specificationVersion :1.0 | 0.5 | 0.4 | 0.3 | 0.2
 };
 
 export default /*#__PURE__*/assign(
-	(source :Source, specificationVersion :1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1, multilineStringJoiner? :string, useBigInt? :boolean | number, xOptions? :options$0.XOptions) =>
+	(source :Source, specificationVersion :1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1, multilineStringJoiner? :string, useBigInt? :boolean | number, xOptions? :options.XOptions) =>
 		typeof specificationVersion==='number'
 			? parse(source, specificationVersion, multilineStringJoiner, useBigInt, xOptions)
-			: parse(source, 1.0, specificationVersion as string, multilineStringJoiner as any as undefined | boolean | number, useBigInt as options$0.XOptions)
+			: parse(source, 1.0, specificationVersion as string, multilineStringJoiner as any as undefined | boolean | number, useBigInt as options.XOptions)
 	,
 	{
-		'1.0': (source :Source, multilineStringJoiner? :string, useBigInt? :boolean | number, xOptions? :options$0.XOptions) => parse(source, 0.1, multilineStringJoiner, useBigInt, xOptions),
-		1.0: (source :Source, multilineStringJoiner? :string, useBigInt? :boolean | number, xOptions? :options$0.XOptions) => parse(source, 1.0, multilineStringJoiner, useBigInt, xOptions),
-		0.5: (source :Source, multilineStringJoiner? :string, useBigInt? :boolean | number, xOptions? :options$0.XOptions) => parse(source, 0.5, multilineStringJoiner, useBigInt, xOptions),
-		0.4: (source :Source, multilineStringJoiner? :string, useBigInt? :boolean | number, xOptions? :options$0.XOptions) => parse(source, 0.4, multilineStringJoiner, useBigInt, xOptions),
-		0.3: (source :Source, multilineStringJoiner? :string, useBigInt? :boolean | number, xOptions? :options$0.XOptions) => parse(source, 0.3, multilineStringJoiner, useBigInt, xOptions),
-		0.2: (source :Source, multilineStringJoiner? :string, useBigInt? :boolean | number, xOptions? :options$0.XOptions) => parse(source, 0.2, multilineStringJoiner, useBigInt, xOptions),
-		0.1: (source :Source, multilineStringJoiner? :string, useBigInt? :boolean | number, xOptions? :options$0.XOptions) => parse(source, 0.1, multilineStringJoiner, useBigInt, xOptions),
+		'1.0': (source :Source, multilineStringJoiner? :string, useBigInt? :boolean | number, xOptions? :options.XOptions) => parse(source, 0.1, multilineStringJoiner, useBigInt, xOptions),
+		1.0: (source :Source, multilineStringJoiner? :string, useBigInt? :boolean | number, xOptions? :options.XOptions) => parse(source, 1.0, multilineStringJoiner, useBigInt, xOptions),
+		0.5: (source :Source, multilineStringJoiner? :string, useBigInt? :boolean | number, xOptions? :options.XOptions) => parse(source, 0.5, multilineStringJoiner, useBigInt, xOptions),
+		0.4: (source :Source, multilineStringJoiner? :string, useBigInt? :boolean | number, xOptions? :options.XOptions) => parse(source, 0.4, multilineStringJoiner, useBigInt, xOptions),
+		0.3: (source :Source, multilineStringJoiner? :string, useBigInt? :boolean | number, xOptions? :options.XOptions) => parse(source, 0.3, multilineStringJoiner, useBigInt, xOptions),
+		0.2: (source :Source, multilineStringJoiner? :string, useBigInt? :boolean | number, xOptions? :options.XOptions) => parse(source, 0.2, multilineStringJoiner, useBigInt, xOptions),
+		0.1: (source :Source, multilineStringJoiner? :string, useBigInt? :boolean | number, xOptions? :options.XOptions) => parse(source, 0.1, multilineStringJoiner, useBigInt, xOptions),
 	}
 );
 

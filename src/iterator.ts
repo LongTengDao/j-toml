@@ -2,7 +2,7 @@ import Error from '.Error';
 import TypeError from '.TypeError';
 import SyntaxError from '.SyntaxError';
 
-//import * as options\$0 from './options\$0';
+//import * as options from './options';
 
 const NONE :ArrayLike<string> = [];
 let sourcePath :string = '';
@@ -11,7 +11,7 @@ let lastLineIndex :number = -1;
 export let lineIndex :number = -1;
 
 export const throws = (error :Error) :never => {
-	//if ( sourceLines!==NONE ) { done(); options\$0.clear(); }
+	//if ( sourceLines!==NONE ) { done(); options.clear(); }
 	throw error;
 };
 
@@ -42,7 +42,7 @@ export class mark {
 		return sourceLines[++lineIndex]!;
 	}
 	nowrap (this :mark) :never {
-		throws(Error(`TOML.parse(,,multilineStringJoiner) must be passed, while the source including multi-line string` + where(', which started from ', this.lineIndex, sourceLines[this.lineIndex]!.length - this.restColumn + 1)));
+		throw throws(Error(`TOML.parse(,,multilineStringJoiner) must be passed, while the source including multi-line string` + where(', which started from ', this.lineIndex, sourceLines[this.lineIndex]!.length - this.restColumn + 1)));
 	}
 };
 

@@ -14,7 +14,7 @@ const NEWLINE = /\r?\n/g;
 export const getComment = <T extends string> (table :{ [Key in T] :unknown } & { [keyComment :symbol] :unknown }, key :T) :` #${string}` | `` => {
 	if ( key in KEYS && KEYS[key]! in table ) {
 		const comment = table[KEYS[key]!]!;
-		if ( typeof comment==='string' ) { return ' #' + comment.replace(NEWLINE, '') as ` #${string}`; }///
+		if ( typeof comment==='string' ) { return ` #${comment.replace(NEWLINE, '')}`; }///
 		throw TypeError(`the value of commentKey must be "string" type, while "${comment===null ? 'null' : typeof comment}" is found`);
 	}
 	return '';

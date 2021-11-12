@@ -51,3 +51,5 @@
     23. 0.  *   based on TypeScript 4.5 new features `.d.mts` extension name and `types` category in `exports` field of `package.json`, provide own type declaration file `index.d.mts` for ESM mode of NPM edition
             *   ensure when Node.js engine changes its internal implementation, the fast code could fall back to normal
             *   remove lookbehind syntax in RegExp for Safari compatibility
+    24. 0.  *   supplement the docs that the object style arguments of `TOML.parse` which was added since 1.18.0, also applies for the version sub functions of `TOML.parse`
+            *   no longer error in 0.4 and previous version for whitespace after "line ending backslash" (revert the corresponding change in 1.16.0), no longer error in 0.5 and previous version for Tab literal in Basic String, no longer error in 0.5 and previous version for 1 or 2 quotation marks at the end of a multi-line string, no longer error in 0.2 and previous version for non-scalar values of `\u****` in Basic String, because this libarary's support policy for previous versions of the TOML specification is consistent with the principle of not causing unnecessary errors

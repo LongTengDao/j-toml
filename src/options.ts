@@ -12,8 +12,10 @@ import undefined from '.undefined';
 import NULL from '.null.prototype';
 
 import { PlainTable, OrderedTable } from './types/Table';
-import * as iterator$0 from './iterator$0';
-import * as regexps$0 from './regexps$0';
+import * as iterator from './iterator';
+import * as regexps from './regexps';
+
+export let mustScalar :boolean = true;
 
 /* options */
 
@@ -34,7 +36,6 @@ export type XOptions = undefined | null | boolean | Tag | {
 	comment? :boolean,
 	string? :boolean,
 };
-export let endsWithQuote :boolean;
 export let zeroDatetime :boolean;
 export let inlineTable :boolean;
 export let moreDatetime :boolean;
@@ -57,7 +58,7 @@ const As = () :As => {
 	const as = (array :Array) :Array => {
 		const got = arrayTypes_get(array);
 		got
-			? got===as || iterator$0.throws(TypeError(`Types in Array must be same` + iterator$0.where('. Check ')))
+			? got===as || iterator.throws(TypeError(`Types in Array must be same` + iterator.where('. Check ')))
 			: arrayTypes_set(array, as);
 		return array;
 	};
@@ -113,7 +114,7 @@ const collect_on = (tag :string, array :null | Array, table :null | Table, key? 
 	}
 	collection[collection_length++] = each;
 };
-const collect_off = () :never => { throw iterator$0.throws(SyntaxError(`xOptions.tag is not enabled, but found tag syntax` + iterator$0.where(' at '))); };
+const collect_off = () :never => { throw iterator.throws(SyntaxError(`xOptions.tag is not enabled, but found tag syntax` + iterator.where(' at '))); };
 export let collect :(tag :string, ...rest :[ null, Table, string ] | [ Array, null ] | [ Array<Table>, Table, string ]) => void = collect_off;
 export type Process = ( (this :void) => void ) | null;
 export const Process = () :Process => {
@@ -147,33 +148,33 @@ export const use = (specificationVersion :unknown, multilineStringJoiner :unknow
 	let mixed :boolean;
 	switch ( specificationVersion ) {
 		case 1.0:
-			mixed = endsWithQuote = moreDatetime = sFloat = inlineTable = true;
+			mustScalar = mixed = moreDatetime = sFloat = inlineTable = true;
 			zeroDatetime = disallowEmptyKey = false;
 			break;
 		case 0.5:
-			moreDatetime = sFloat = inlineTable = true;
-			mixed = endsWithQuote = zeroDatetime = disallowEmptyKey = false;
+			mustScalar = moreDatetime = sFloat = inlineTable = true;
+			mixed = zeroDatetime = disallowEmptyKey = false;
 			break;
 		case 0.4:
-			disallowEmptyKey = inlineTable = true;
-			mixed = endsWithQuote = zeroDatetime = moreDatetime = sFloat = false;
+			mustScalar = disallowEmptyKey = inlineTable = true;
+			mixed = zeroDatetime = moreDatetime = sFloat = false;
 			break;
 		case 0.3:
-			disallowEmptyKey = true;
-			mixed = endsWithQuote = zeroDatetime = moreDatetime = sFloat = inlineTable = false;
+			mustScalar = disallowEmptyKey = true;
+			mixed = zeroDatetime = moreDatetime = sFloat = inlineTable = false;
 			break;
 		case 0.2:
 			zeroDatetime = disallowEmptyKey = true;
-			mixed = endsWithQuote = moreDatetime = sFloat = inlineTable = false;
+			mustScalar = mixed = moreDatetime = sFloat = inlineTable = false;
 			break;
 		case 0.1:
 			zeroDatetime = disallowEmptyKey = true;
-			mixed = endsWithQuote = moreDatetime = sFloat = inlineTable = false;
+			mustScalar = mixed = moreDatetime = sFloat = inlineTable = false;
 			break;
 		default:
 			throw RangeError('TOML.parse(,specificationVersion)');
 	}
-	regexps$0.switchRegExp(specificationVersion);
+	regexps.switchRegExp(specificationVersion);
 	
 	if ( typeof multilineStringJoiner==='string' ) { useWhatToJoinMultilineString = multilineStringJoiner; }
 	else if ( multilineStringJoiner===undefined ) { useWhatToJoinMultilineString = null; }

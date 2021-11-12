@@ -5,7 +5,8 @@ import BigInt from '.BigInt';
 import Number from '.Number';
 import Symbol_ from '.Symbol';
 import Array from '.Array';
-import TOMLDatetime from '.Date';
+import DATE from '.Date.prototype';
+import isPrototypeOf from '.Object.prototype.isPrototypeOf';
 import getOwnPropertyNames from '.Object.getOwnPropertyNames';
 import is from '.Object.is';
 import isArray from '.Array.isArray';
@@ -13,7 +14,7 @@ import undefined from '.undefined';
 
 import { theRegExp } from '@ltd/j-regexp';
 
-import * as regexps$0 from '../regexps$0';
+import * as regexps from '../regexps';
 
 import { getComment } from '../types/comment';
 import { isLiteral } from './literal';
@@ -21,11 +22,13 @@ import { literalString, singlelineString } from './string';
 import { float } from './float';
 import { isSection, ofInline } from '../types/non-atom';
 
+const isDate = /*#__PURE__*/isPrototypeOf.bind(DATE) as (this :void, value :object) => value is Date;
+
 const BARE = /*#__PURE__*/( () => theRegExp(/^[\w-]+$/).test )();
 const $Key$ = (key :string) :string => BARE(key) ? key : singlelineString(key);
 
 const FIRST = /[^.]+/;
-const $Keys = (keys :string) :string => regexps$0.isAmazing(keys) ? keys.replace(FIRST, literalString) : keys==='null' ? `'null'` : keys;
+const $Keys = (keys :string) :string => regexps.isAmazing(keys) ? keys.replace(FIRST, literalString) : keys==='null' ? `'null'` : keys;
 
 export default class TOMLSection extends Array<string> {
 	
@@ -132,7 +135,7 @@ export default class TOMLSection extends Array<string> {
 						: this.multilineTable(indent, value as READONLY.InlineTable, this.document.multilineTableComma);
 					break;
 				}
-				if ( value instanceof TOMLDatetime ) {
+				if ( isDate(value) ) {
 					this.appendInline = this.document._ ? value.toISOString().replace('T', ' ') : value.toISOString();
 					break;
 				}

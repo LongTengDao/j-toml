@@ -2,7 +2,7 @@ import getOwnPropertyNames from '.Object.getOwnPropertyNames';
 import freeze from '.Object.freeze';
 import isArray from '.Array.isArray';
 
-import { x } from '../j-lexer';///
+import { x } from '../j-lexer';/// external
 
 import TOMLDocument from './document';
 

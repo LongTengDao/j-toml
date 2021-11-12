@@ -16,6 +16,7 @@ declare module '.Buffer?' { export default Buffer; }
 
 declare module '.Date' { export default Date; }
 declare module '.Date.parse' { export default Date.parse; }
+declare module '.Date.prototype' { export default Date.prototype; }
 
 declare module '.Error' { export default Error; }
 
@@ -77,6 +78,9 @@ declare module '.Object.getOwnPropertyNames' { export default getOwnPropertyName
 declare module '.Object.getOwnPropertySymbols?' { export default getOwnPropertySymbols;
 	function getOwnPropertySymbols<T extends {}> (nonNullable :T) :Extract<keyof T, symbol>[];
 }
+declare module '.Object.hasOwn?=' { export default hasOwn;
+	function hasOwn<Key extends string | symbol> (object :{}, key :Key) :object is { readonly [K in Key] :unknown };
+}
 declare module '.Object.is' { export default Object.is; }
 declare module '.Object.keys' { export default keys;
 	function keys<T extends {}> (nonNullable :T) :Extract<keyof T, string>[];
@@ -84,6 +88,7 @@ declare module '.Object.keys' { export default keys;
 declare module '.Object.preventExtensions' { export default Object.preventExtensions; }
 declare module '.Object.prototype' { export default Object.prototype; }
 declare module '.Object.prototype.hasOwnProperty' { export default Object.prototype.hasOwnProperty; }
+declare module '.Object.prototype.isPrototypeOf' { export default Object.prototype.isPrototypeOf; }
 declare module '.Object.prototype.propertyIsEnumerable' { export default Object.prototype.propertyIsEnumerable; }
 declare module '.Object.prototype.toString' { export default Object.prototype.toString; }
 

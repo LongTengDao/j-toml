@@ -1,4 +1,4 @@
-﻿const version = '1.23.0';
+﻿const version = '1.24.0';
 
 const Error$1 = Error;
 
@@ -27,11 +27,11 @@ const Proxy$1 = Proxy;
 const create$1 = Object.create;
 
 const NULL = (
-	/*! j-globals: null.prototype (internal) */
+	/* j-globals: null.prototype (internal) */
 	Object.seal
 		? /*#__PURE__*/Object.preventExtensions(Object.create(null))
 		: null
-	/*¡ j-globals: null.prototype (internal) */
+	/* j-globals: null.prototype (internal) */
 );
 
 const toStringTag = typeof Symbol==='undefined' ? undefined$1 : Symbol.toStringTag;
@@ -51,11 +51,15 @@ const hasOwnProperty = Object.prototype.hasOwnProperty;
 const propertyIsEnumerable = Object.prototype.propertyIsEnumerable;
 
 var isEnum = /*#__PURE__*/propertyIsEnumerable.call.bind(propertyIsEnumerable);
-var hasOwn = /*#__PURE__*/function () {
-	return hasOwnProperty.bind
-		? hasOwnProperty.call.bind(hasOwnProperty)
-		: function (object, key) { return hasOwnProperty.call(object, key); };
-}();// && object!=null
+var hasOwn = (
+	/* j-globals: Object.hasOwn (polyfill) */
+	Object.hasOwn || /*#__PURE__*/function () {
+		return hasOwnProperty.bind
+			? hasOwnProperty.call.bind(hasOwnProperty)
+			: function hasOwn (object, key) { return hasOwnProperty.call(object, key); };
+	}()
+	/* j-globals: Object.hasOwn (polyfill) */
+);
 
 var create = Object.create;
 function Descriptor (source) {
@@ -70,7 +74,7 @@ function Descriptor (source) {
 }
 
 const Default = (
-	/*! j-globals: default (internal) */
+	/* j-globals: default (internal) */
 	function Default (exports, addOnOrigin) {
 		if ( !addOnOrigin ) { addOnOrigin = exports; exports = create$1(NULL); }
 		if ( assign$1 ) { assign$1(exports, addOnOrigin); }
@@ -84,7 +88,7 @@ const Default = (
 		typeof exports==='function' && exports.prototype && freeze(exports.prototype);
 		return freeze(exports);
 	}
-	/*¡ j-globals: default (internal) */
+	/* j-globals: default (internal) */
 );
 
 /*!@preserve@license
@@ -245,7 +249,7 @@ var clearRegExp = '$_' in RegExp$1
 
 /*¡ j-regexp */
 
-//import * as options\$0 from './options\$0';
+//import * as options from './options';
 
 const NONE                    = [];
 let sourcePath         = '';
@@ -254,7 +258,7 @@ let lastLineIndex         = -1;
 let lineIndex         = -1;
 
 const throws = (error       )        => {
-	//if ( sourceLines!==NONE ) { done(); options\$0.clear(); }
+	//if ( sourceLines!==NONE ) { done(); options.clear(); }
 	throw error;
 };
 
@@ -285,7 +289,7 @@ class mark {
 		return sourceLines[++lineIndex] ;
 	}
 	nowrap (          )        {
-		throws(Error$1(`TOML.parse(,,multilineStringJoiner) must be passed, while the source including multi-line string` + where(', which started from ', this.lineIndex, sourceLines[this.lineIndex] .length - this.restColumn + 1)));
+		throw throws(Error$1(`TOML.parse(,,multilineStringJoiner) must be passed, while the source including multi-line string` + where(', which started from ', this.lineIndex, sourceLines[this.lineIndex] .length - this.restColumn + 1)));
 	}
 }
 const where = (pre        , rowIndex         = lineIndex, columnNumber         = 0)         => sourceLines===NONE ? '' :
@@ -325,7 +329,7 @@ const keys = Object.keys;
 const getOwnPropertySymbols = Object.getOwnPropertySymbols;
 
 const Null$1 = (
-	/*! j-globals: null (internal) */
+	/* j-globals: null (internal) */
 	/*#__PURE__*/function () {
 		var assign = Object.assign || function assign (target, source) {
 			var keys$1, index, key;
@@ -359,7 +363,7 @@ const Null$1 = (
 		freeze(Null);
 		return Null;
 	}()
-	/*¡ j-globals: null (internal) */
+	/* j-globals: null (internal) */
 );
 
 const is = Object.is;
@@ -641,16 +645,16 @@ const MULTI_LINE_BASIC_STRING_exec_0 = (_        )         => {
 };
 
 const ESCAPED_EXCLUDE_CONTROL_CHARACTER_TAB______ = /[^\\\x00-\x08\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|[\t ]*\n[\t\n ]*|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})/g;
-const ESCAPED_EXCLUDE_CONTROL_CHARACTER__________ = /[^\\\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]| *\n[\n ]*|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})/g;
-const ESCAPED_EXCLUDE_CONTROL_CHARACTER_DEL______ = /[^\\\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\]|\n[\n ]*|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})/g;
-const ESCAPED_EXCLUDE_CONTROL_CHARACTER_DEL_SLASH = /[^\\\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\/]|\n[\n ]*|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})/g;
+const ESCAPED_EXCLUDE_CONTROL_CHARACTER__________ = /[^\\\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|[\t ]*\n[\t\n ]*|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})/g;/// Tab
+const ESCAPED_EXCLUDE_CONTROL_CHARACTER_DEL______ = /[^\\\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\]|[\t ]*\n[\t\n ]*|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})/g;/// Tab \<ws>newline
+const ESCAPED_EXCLUDE_CONTROL_CHARACTER_DEL_SLASH = /[^\\\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\/]|[\t ]*\n[\t\n ]*|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})/g;/// not \<ws>newline
 let __ESCAPED_EXCLUDE_CONTROL_CHARACTER = ESCAPED_EXCLUDE_CONTROL_CHARACTER_TAB______;
-const ESCAPED_EXCLUDE_CONTROL_CHARACTER_test = (_        )          => !_.replace(__ESCAPED_EXCLUDE_CONTROL_CHARACTER, '');///
+const ESCAPED_EXCLUDE_CONTROL_CHARACTER_test = (_        )          => !_.replace(__ESCAPED_EXCLUDE_CONTROL_CHARACTER, '');/// op?
 
 const BASIC_STRING_TAB______ = /*#__PURE__*/theRegExp(/(?:[^\\"\x00-\x08\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})){1,10}/y);
-const BASIC_STRING__________ = /*#__PURE__*/theRegExp(/(?:[^\\"\x00-\x09\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})){1,10}/y);
-const BASIC_STRING_DEL______ = /*#__PURE__*/theRegExp(/(?:[^\\"\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\]|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})){1,10}/y);
-const BASIC_STRING_DEL_SLASH = /*#__PURE__*/theRegExp(/(?:[^\\"\x00-\x09\x0B-\x1F]+|\\(?:[btnfr"\\/]|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})){1,10}/y);
+const BASIC_STRING__________ = /*#__PURE__*/theRegExp(/(?:[^\\"\x00-\x08\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})){1,10}/y);/// Tab
+const BASIC_STRING_DEL______ = /*#__PURE__*/theRegExp(/(?:[^\\"\x00-\x08\x0B-\x1F]+|\\(?:[btnfr"\\]|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})){1,10}/y);/// Tab
+const BASIC_STRING_DEL_SLASH = /*#__PURE__*/theRegExp(/(?:[^\\"\x00-\x08\x0B-\x1F]+|\\(?:[btnfr"\\/]|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})){1,10}/y);/// Tab
 let __BASIC_STRING = BASIC_STRING_DEL_SLASH;
 const BASIC_STRING_exec_1 = (line        )         => {
 	let lastIndex         = __BASIC_STRING.lastIndex = 1;
@@ -772,6 +776,8 @@ const IS_AMAZING = /*#__PURE__*/( () => newRegExp`
 const BAD_DXOB = /*#__PURE__*/( () => newRegExp`_(?![\dA-Fa-f])`.test )();
 const isAmazing = (keys        )          => IS_AMAZING(keys) && !BAD_DXOB(keys);
 
+let mustScalar          = true;
+
 /* options */
 
 let useWhatToJoinMultilineString                = null;
@@ -791,7 +797,6 @@ let IntegerMax         = 0n;
 	                  
 	                 
   
-let endsWithQuote         ;
 let zeroDatetime         ;
 let inlineTable         ;
 let moreDatetime         ;
@@ -904,28 +909,28 @@ const use = (specificationVersion         , multilineStringJoiner         , useB
 	let mixed         ;
 	switch ( specificationVersion ) {
 		case 1.0:
-			mixed = endsWithQuote = moreDatetime = sFloat = inlineTable = true;
+			mustScalar = mixed = moreDatetime = sFloat = inlineTable = true;
 			zeroDatetime = disallowEmptyKey = false;
 			break;
 		case 0.5:
-			moreDatetime = sFloat = inlineTable = true;
-			mixed = endsWithQuote = zeroDatetime = disallowEmptyKey = false;
+			mustScalar = moreDatetime = sFloat = inlineTable = true;
+			mixed = zeroDatetime = disallowEmptyKey = false;
 			break;
 		case 0.4:
-			disallowEmptyKey = inlineTable = true;
-			mixed = endsWithQuote = zeroDatetime = moreDatetime = sFloat = false;
+			mustScalar = disallowEmptyKey = inlineTable = true;
+			mixed = zeroDatetime = moreDatetime = sFloat = false;
 			break;
 		case 0.3:
-			disallowEmptyKey = true;
-			mixed = endsWithQuote = zeroDatetime = moreDatetime = sFloat = inlineTable = false;
+			mustScalar = disallowEmptyKey = true;
+			mixed = zeroDatetime = moreDatetime = sFloat = inlineTable = false;
 			break;
 		case 0.2:
 			zeroDatetime = disallowEmptyKey = true;
-			mixed = endsWithQuote = moreDatetime = sFloat = inlineTable = false;
+			mustScalar = mixed = moreDatetime = sFloat = inlineTable = false;
 			break;
 		case 0.1:
 			zeroDatetime = disallowEmptyKey = true;
-			mixed = endsWithQuote = moreDatetime = sFloat = inlineTable = false;
+			mustScalar = mixed = moreDatetime = sFloat = inlineTable = false;
 			break;
 		default:
 			throw RangeError$1('TOML.parse(,specificationVersion)');
@@ -1037,7 +1042,7 @@ const newArray = (isStatic         )        => {
 	return array;
 };
 
-const TOMLDatetime = Date;
+const NativeDate = Date;
 
 const parse$2 = Date.parse;
 
@@ -1046,7 +1051,7 @@ const preventExtensions = Object.preventExtensions;
 const getOwnPropertyDescriptors = Object.getOwnPropertyDescriptors;
 
 const defineProperties = (
-	/*! j-globals: null.defineProperties (internal) */
+	/* j-globals: null.defineProperties (internal) */
 	function defineProperties (object, descriptorMap) {
 		var created = create$1(NULL);
 		var names = keys(descriptorMap);
@@ -1063,7 +1068,7 @@ const defineProperties = (
 		}
 		return Object_defineProperties(object, created);
 	}
-	/*¡ j-globals: null.defineProperties (internal) */
+	/* j-globals: null.defineProperties (internal) */
 );
 
 const fpc =                      (c   )    => {
@@ -1159,13 +1164,13 @@ const Datetime = /*#__PURE__*/( () => {
 	const descriptors = Null$1(null)                                         ;
 	{
 		const descriptor = Null$1(null);
-		for ( const key of ownKeys(TOMLDatetime.prototype                                         ) ) {
+		for ( const key of ownKeys(NativeDate.prototype                                         ) ) {
 			key==='constructor' ||
 			key==='toJSON' ||
 			( descriptors[key] = descriptor );
 		}
 	}
-	Datetime.prototype = preventExtensions(create$1(TOMLDatetime.prototype, descriptors));
+	Datetime.prototype = preventExtensions(create$1(NativeDate.prototype, descriptors));
 	return freeze(Datetime);
 } )();
 
@@ -1185,17 +1190,22 @@ const Value = (ISOString        )        => ISOString.replace(ZERO, zeroReplacer
 
 const leap = (literal        ) => literal.slice(5, 10)!=='02-29' || +literal.slice(0, 4)%4===0 && literal.slice(2, 4)!=='00';
 
-const DATE             = /*#__PURE__*/defineProperties(new TOMLDatetime(0), /*#__PURE__*/getOwnPropertyDescriptors(TOMLDatetime.prototype));
+const DATE$1             = /*#__PURE__*/defineProperties(new NativeDate(0), /*#__PURE__*/getOwnPropertyDescriptors(NativeDate.prototype));
 
 const OffsetDateTime_ISOString = Symbol('OffsetDateTime_ISOString');
 const OffsetDateTime_value = Symbol('OffsetDateTime_value');
 const OffsetDateTime_use = (that                                     , $         = 0) => {
-	DATE.setTime(+that[OffsetDateTime_value] + $);
-	return DATE;
+	DATE$1.setTime(+that[OffsetDateTime_value] + $);
+	return DATE$1;
 };
 /*const OffsetDateTime_get = (that :InstanceType<typeof OffsetDateTime>, start :number, end :number) => +that[OffsetDateTime_ISOString].slice(start, end);
 const OffsetDateTime_set = (that :InstanceType<typeof OffsetDateTime>, start :number, end :number, value :number) => {
-	if ( end ) { that[OffsetDateTime_ISOString] = that[OffsetDateTime_ISOString].slice(0, start) + ( '' + value ).padStart(end - start, '0') + that[OffsetDateTime_ISOString].slice(end); }
+	if ( end ) {
+		const string = '' + value;
+		const size = end - start;
+		if ( string.length>size ) { throw RangeError(); }///
+		that[OffsetDateTime_ISOString] = that[OffsetDateTime_ISOString].slice(0, start) + string.padStart(size, '0') + that[OffsetDateTime_ISOString].slice(end);
+	}
 	const time = parse(that[OffsetDateTime_ISOString]);
 	return that[OffsetDateTime_value] = ( '' + time ).padStart(15, '0') + that[OffsetDateTime_value].slice(15);///time
 };*///
@@ -1216,51 +1226,45 @@ const OffsetDateTime = /*#__PURE__*/fpc(class OffsetDateTime extends Datetime {
 	}
 	
 	getUTCFullYear (                    )           { return OffsetDateTime_use(this).getUTCFullYear(); }
-	///getFullYear (this :OffsetDateTime) :FullYear { return OffsetDateTime_get(this, 0, 4); }
-	///setFullYear (this :OffsetDateTime, value :FullYear) :void { OffsetDateTime_set(this, 0, 4, value); }
+	///get year () :FullYear { return OffsetDateTime_get(this, 0, 4); }
+	///set year (value :FullYear) { OffsetDateTime_set(this, 0, 4, value); }
 	getUTCMonth (                    )        { return OffsetDateTime_use(this).getUTCMonth(); }
-	///getMonth (this :OffsetDateTime) :Month { return OffsetDateTime_get(this, 5, 7) - 1; }
-	///setMonth (this :OffsetDateTime, value :Month) :void { OffsetDateTime_set(this, 5, 7, value + 1); }
+	///get month () { return OffsetDateTime_get(this, 5, 7); }
+	///set month (value) { OffsetDateTime_set(this, 5, 7, value); }
 	getUTCDate (                    )       { return OffsetDateTime_use(this).getUTCDate(); }
-	///getDate (this :OffsetDateTime) :Date { return OffsetDateTime_get(this, 8, 10); }
-	///setDate (this :OffsetDateTime, value :Date) :void { OffsetDateTime_set(this, 8, 10, value); }
+	///get day () :Date { return OffsetDateTime_get(this, 8, 10); }
+	///set day (value :Date) { OffsetDateTime_set(this, 8, 10, value); }
 	
 	getUTCHours (                    )        { return OffsetDateTime_use(this).getUTCHours(); }
-	///getHours (this :OffsetDateTime) :Hours { return OffsetDateTime_get(this, 11, 13); }
-	///setHours (this :OffsetDateTime, value :Hours) :void { OffsetDateTime_set(this, 11, 13, value); }
+	///get hour () :Hours { return OffsetDateTime_get(this, 11, 13); }
+	///set hour (value :Hours) { OffsetDateTime_set(this, 11, 13, value); }
 	getUTCMinutes (                    )          { return OffsetDateTime_use(this).getUTCMinutes(); }
-	///getMinutes (this :OffsetDateTime) :Minutes { return OffsetDateTime_get(this, 14, 16); }
-	///setMinutes (this :OffsetDateTime, value :Minutes) :void { OffsetDateTime_set(this, 14, 16, value); }
+	///get minute () :Minutes { return OffsetDateTime_get(this, 14, 16); }
+	///set minute (value :Minutes) { OffsetDateTime_set(this, 14, 16, value); }
 	getUTCSeconds (                    )          { return OffsetDateTime_use(this).getUTCSeconds(); }
-	///getSeconds (this :OffsetDateTime) :Seconds { return OffsetDateTime_get(this, 17, 19); }
-	///setSeconds (this :OffsetDateTime, value :Seconds) :void { OffsetDateTime_set(this, 17, 19, value); }
+	///get second () :Seconds { return OffsetDateTime_get(this, 17, 19); }
+	///set second (value :Seconds) { OffsetDateTime_set(this, 17, 19, value); }
 	getUTCMilliseconds (                    )               { return OffsetDateTime_use(this).getUTCMilliseconds(); }///
-	///getMilliseconds (this :OffsetDateTime) :Milliseconds { return +this[OffsetDateTime_value].slice(12, 15); }///
-	/*setMilliseconds (this :OffsetDateTime, value :Milliseconds) :void {
+	///get millisecond () :Milliseconds { return +this[OffsetDateTime_value].slice(12, 15); }///
+	/*set millisecond (value :Milliseconds) {
 		this[OffsetDateTime_ISOString] = this[OffsetDateTime_ISOString].slice(0, 19) + ( value ? ( '.' + ( '' + value ).padStart(3, '0') ).replace(DOT_ZERO, '') : '' ) + this[OffsetDateTime_ISOString].slice(this[OffsetDateTime_ISOString].search(OFFSET$));
 		OffsetDateTime_set(this, 0, 0, 0);
 	}*///
+	///get microsecond () :Milliseconds
+	///set microsecond (value :Milliseconds)
+	///get nanosecond () :Milliseconds
+	///set nanosecond (value :Milliseconds)
 	
 	getUTCDay (                    )      { return OffsetDateTime_use(this).getUTCDay(); }
-	///getDay (this :OffsetDateTime) :Day { return OffsetDateTime_use(this, this.getTimezoneOffset()*60000).getUTCDay(); }
+	///get dayOfWeek () { return OffsetDateTime_use(this, this.getTimezoneOffset()*60000).getUTCDay() || 7; }
 	getTimezoneOffset (                    )                 {
 		const z = Z_exec(this[OffsetDateTime_ISOString]);
 		return z ? +z[1]*60 + +( z[2] + z[3] ) : 0;
 	}
-	/*setTimezoneOffset (this :OffsetDateTime, value :TimezoneOffset) {
-		value = +value;
-		let string = OffsetDateTime_use(this, value*60000).toISOString().slice(0, -1);
-		if ( value ) {
-			if ( value>0 ) { string += '+'; }
-			else {
-				string += '-';
-				value = -value;
-			}
-			const m = value%60;
-			const h = ( value - m )/60;
-			this[OffsetDateTime_ISOString] = string + ( h>9 ? h : '0' + h ) + ( m>9 ? ':' + m : ':0' + m );
-		}
-		else { this[OffsetDateTime_ISOString] = string + ( is(value, 0) ? 'Z' : '-00:00' ); }
+	///get offset () { return this[OffsetDateTime_ISOString].endsWith('Z') ? 'Z' : this[OffsetDateTime_ISOString].slice(-6); }
+	/*set offset (value) {
+		this[OffsetDateTime_ISOString] = this[OffsetDateTime_ISOString].slice(0, this[OffsetDateTime_ISOString].endsWith('Z') ? -1 : -6) + value;
+		OffsetDateTime_set(this, 0, 0, 0);
 	}*///
 	getTime (                    )       { return +this[OffsetDateTime_value].slice(0, 15); }///
 	/*setTime (this :OffsetDateTime, value :Time) :void {
@@ -1278,8 +1282,11 @@ const LocalDateTime_ISOString = Symbol('LocalDateTime_ISOString');
 const LocalDateTime_value = Symbol('LocalDateTime_value');
 const LocalDateTime_get = (that                                    , start        , end        ) => +that[LocalDateTime_ISOString].slice(start, end);
 const LocalDateTime_set = (that                                    , start        , end        , value        )       => {
+	const string = '' + value;
+	const size = end - start;
+	if ( string.length>size ) { throw RangeError$1(); }///
 	that[LocalDateTime_value] = Value(
-		that[LocalDateTime_ISOString] = that[LocalDateTime_ISOString].slice(0, start) + ( '' + value ).padStart(end - start, '0') + that[LocalDateTime_ISOString].slice(end)
+		that[LocalDateTime_ISOString] = that[LocalDateTime_ISOString].slice(0, start) + string.padStart(size, '0') + that[LocalDateTime_ISOString].slice(end)
 	);
 };
 const LocalDateTime = /*#__PURE__*/fpc(class LocalDateTime extends Datetime {
@@ -1324,10 +1331,14 @@ const LocalDateTime = /*#__PURE__*/fpc(class LocalDateTime extends Datetime {
 const LocalDate_ISOString = Symbol('LocalDate_ISOString');
 const LocalDate_value = Symbol('LocalDate_value');
 const LocalDate_get = (that                                , start        , end        ) => +that[LocalDate_ISOString].slice(start, end);
-const LocalDate_set = (that                                , start        , end        , value        ) =>
+const LocalDate_set = (that                                , start        , end        , value        )       => {
+	const string = '' + value;
+	const size = end - start;
+	if ( string.length>size ) { throw RangeError$1(); }///
 	that[LocalDate_value] = Value(
-		that[LocalDate_ISOString] = that[LocalDate_ISOString].slice(0, start) + ( '' + value ).padStart(end - start, '0') + that[LocalDate_ISOString].slice(end)
+		that[LocalDate_ISOString] = that[LocalDate_ISOString].slice(0, start) + string.padStart(size, '0') + that[LocalDate_ISOString].slice(end)
 	);
+};
 const LocalDate = /*#__PURE__*/fpc(class LocalDate extends Datetime {
 	
 	[LocalDate_ISOString]        ;
@@ -1357,10 +1368,14 @@ const LocalDate = /*#__PURE__*/fpc(class LocalDate extends Datetime {
 const LocalTime_ISOString = Symbol('LocalTime_ISOString');
 const LocalTime_value = Symbol('LocalTime_value');
 const LocalTime_get = (that                                , start        , end        ) => +that[LocalTime_ISOString].slice(start, end);
-const LocalTime_set = (that                                , start        , end        , value        ) =>
+const LocalTime_set = (that                                , start        , end        , value        )       => {
+	const string = '' + value;
+	const size = end - start;
+	if ( string.length>size ) { throw RangeError$1(); }///
 	that[LocalTime_value] = Value(
-		that[LocalTime_ISOString] = that[LocalTime_ISOString].slice(0, start) + ( '' + value ).padStart(2, '0') + that[LocalTime_ISOString].slice(end)
+		that[LocalTime_ISOString] = that[LocalTime_ISOString].slice(0, start) + string.padStart(2, '0') + that[LocalTime_ISOString].slice(end)
 	);
+};
 const LocalTime = /*#__PURE__*/fpc(class LocalTime extends Datetime {
 	
 	[LocalTime_ISOString]        ;
@@ -1418,13 +1433,13 @@ const BasicString = (literal        )         => {
 				case 'r': parts[index] = '\r'; break;
 				case 'u':
 					const charCode         = parseInt$1(part.slice(2), 16);
-					0xD7FF<charCode && charCode<0xE000
+					mustScalar && 0xD7FF<charCode && charCode<0xE000
 					&& throws(RangeError$1(`Invalid Unicode Scalar ${part}` + where(' at ')));
 					parts[index] = fromCharCode(charCode);
 					break;
 				case 'U':
 					const codePoint         = parseInt$1(part.slice(2), 16);
-					( 0xD7FF<codePoint && codePoint<0xE000 || 0x10FFFF<codePoint )
+					( mustScalar && 0xD7FF<codePoint && codePoint<0xE000 || 0x10FFFF<codePoint )
 					&& throws(RangeError$1(`Invalid Unicode Scalar ${part}` + where(' at ')));
 					parts[index] = fromCodePoint(codePoint);
 					break;
@@ -1464,13 +1479,13 @@ const MultilineBasicString = (literal        , useWhatToJoinMultilineString     
 				case 'r': parts[index] = '\r'; break;
 				case 'u':
 					const charCode         = parseInt$1(part.slice(2), 16);
-					0xD7FF<charCode && charCode<0xE000
+					mustScalar && 0xD7FF<charCode && charCode<0xE000
 					&& throws(RangeError$1(`Invalid Unicode Scalar ${part}` + where(' at ', lineIndex + n)));
 					parts[index] = fromCharCode(charCode);
 					break;
 				case 'U':
 					const codePoint         = parseInt$1(part.slice(2), 16);
-					( 0xD7FF<codePoint && codePoint<0xE000 || 0x10FFFF<codePoint )
+					( mustScalar && 0xD7FF<codePoint && codePoint<0xE000 || 0x10FFFF<codePoint )
 					&& throws(RangeError$1(`Invalid Unicode Scalar ${part}` + where(' at ', lineIndex + n)));
 					parts[index] = fromCodePoint(codePoint);
 					break;
@@ -1489,7 +1504,7 @@ const IS_XOB_INTEGER = /*#__PURE__*/( () => theRegExp(/^0(?:x[\dA-Fa-f][_\dA-Fa-
 const BAD_XOB = /*#__PURE__*/( () => newRegExp`_(?![\dA-Fa-f])`.test )();
 const UNDERSCORES_SIGN = /_|^[-+]/g;
 
-const IS_INTEGER = (literal        )          => ( IS_D_INTEGER(literal) || /*options\$0.xob && */IS_XOB_INTEGER(literal) ) && !BAD_XOB(literal);
+const IS_INTEGER = (literal        )          => ( IS_D_INTEGER(literal) || /*options.xob && */IS_XOB_INTEGER(literal) ) && !BAD_XOB(literal);
 
 const BigIntInteger = (literal        )         => {
 	IS_INTEGER(literal) || throws(SyntaxError$1(`Invalid Integer ${literal}` + where(' at ')));
@@ -1535,12 +1550,12 @@ const IS_ZERO = /*#__PURE__*/( () => theRegExp(/^[-+]?0(?:\.[0_]+)?(?:[eE][-+]?0
 
 const Float = (literal        )         => {
 	if ( !IS_FLOAT(literal) || BAD_D(literal) ) {
-		//if ( options\$0.sFloat ) {
+		//if ( options.sFloat ) {
 		//	if ( literal==='inf' || literal==='+inf' ) { return Infinity; }
 		//	if ( literal==='-inf' ) { return -Infinity; }
 		//	if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) { return NaN; }
 		//}
-		throws(SyntaxError$1(`Invalid Float ${literal}` + where(' at ')));
+		throw throws(SyntaxError$1(`Invalid Float ${literal}` + where(' at ')));
 	}
 	const number = +literal.replace(UNDERSCORES, '');
 	if ( sError ) {
@@ -1564,7 +1579,7 @@ const prepareTable = (table       , keys               )        => {
 				isStatic(table) && throws(Error$1(`Trying to append value to Static Array` + where(' at ')));
 				table = table[( table          ).length - 1];
 			}
-			else { throws(Error$1(`Trying to define Table under non-Table value` + where(' at '))); }
+			else { throw throws(Error$1(`Trying to define Table under non-Table value` + where(' at '))); }
 		}
 		else {
 			table = table[key] = new Table(IMPLICITLY);
@@ -1670,7 +1685,7 @@ const assignBasicString = ( (table       , finalKey        , literal        )   
 	if ( literal.startsWith('"""', length) ) {
 		ESCAPED_EXCLUDE_CONTROL_CHARACTER_test($) || throws(SyntaxError$1(`Bad multi-line basic string` + where(' at ')));
 		length += 3;
-		table[finalKey] = BasicString($) + ( endsWithQuote ? literal[length]==='"' ? literal[++length]==='"' ? ( ++length, '""' ) : '"' : '' : '' );
+		table[finalKey] = BasicString($) + ( literal[length]==='"' ? literal[++length]==='"' ? ( ++length, '""' ) : '"' : '' );
 		return literal.slice(length).replace(PRE_WHITESPACE, '');
 	}
 	const start = new mark('Multi-line Basic String', literal.length + 3);
@@ -1682,7 +1697,7 @@ const assignBasicString = ( (table       , finalKey        , literal        )   
 		if ( literal.startsWith('"""', length) ) {
 			ESCAPED_EXCLUDE_CONTROL_CHARACTER_test($) || throws(SyntaxError$1(`Bad multi-line basic string` + where(' at ')));
 			length += 3;
-			table[finalKey] = MultilineBasicString($, useWhatToJoinMultilineString , skipped) + ( endsWithQuote ? literal[length]==='"' ? literal[++length]==='"' ? ( ++length, '""' ) : '"' : '' : '' );
+			table[finalKey] = MultilineBasicString($, useWhatToJoinMultilineString , skipped) + ( literal[length]==='"' ? literal[++length]==='"' ? ( ++length, '""' ) : '"' : '' );
 			return literal.slice(length).replace(PRE_WHITESPACE, '');
 		}
 	}
@@ -1695,7 +1710,7 @@ const assignBasicString = ( (table       , finalKey        , literal        )   
 		if ( line.startsWith('"""', length) ) {
 			ESCAPED_EXCLUDE_CONTROL_CHARACTER_test($) || throws(SyntaxError$1(`Bad multi-line basic string` + where(' at ')));
 			length += 3;
-			table[finalKey] = MultilineBasicString(lines.join('') + $, useWhatToJoinMultilineString , skipped) + ( endsWithQuote ? line[length]==='"' ? line[++length]==='"' ? ( ++length, '""' ) : '"' : '' : '' );
+			table[finalKey] = MultilineBasicString(lines.join('') + $, useWhatToJoinMultilineString , skipped) + ( line[length]==='"' ? line[++length]==='"' ? ( ++length, '""' ) : '"' : '' );
 			return line.slice(length).replace(PRE_WHITESPACE, '');
 		}
 		ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(line += '\n') || throws(SyntaxError$1(`Bad multi-line basic string` + where(' at ')));
@@ -1720,7 +1735,7 @@ const NEWLINE = /\r?\n/g;
 const getComment =                    (table                                                             , key   )                     => {
 	if ( key in KEYS && KEYS[key]  in table ) {
 		const comment = table[KEYS[key] ] ;
-		if ( typeof comment==='string' ) { return ' #' + comment.replace(NEWLINE, '')                 ; }///
+		if ( typeof comment==='string' ) { return ` #${comment.replace(NEWLINE, '')}`; }///
 		throw TypeError$1(`the value of commentKey must be "string" type, while "${comment===null ? 'null' : typeof comment}" is found`);
 	}
 	return '';
@@ -1859,7 +1874,7 @@ const equalStaticArray = function * (            table       , finalKey        ,
 		}
 		else {
 			if ( lineRest[0]===']' ) { break; }
-			throws(SyntaxError$1(`Unexpect character in static array item value` + where(', which is found at ')));
+			throw throws(SyntaxError$1(`Unexpect character in static array item value` + where(', which is found at ')));
 		}
 	}
 	inline && beInline(staticArray, true);
@@ -2005,8 +2020,8 @@ const Root = ()        => {
 				const { leadingKeys, finalKey, asArrayItem, tag, lineRest } = TABLE_DEFINITION_exec_groups(line, parseKeys);
 				const table        = prepareTable(rootTable, leadingKeys);
 				if ( lineRest ) {
-					if ( lineRest[0]==='#' ) { if ( preserveComment && !asArrayItem ) { table[commentFor(finalKey)] = lineRest.slice(1); } }
-					else { throws(SyntaxError$1(`Unexpect charachtor after table header` + where(' at '))); }
+					lineRest[0]==='#' || throws(SyntaxError$1(`Unexpect charachtor after table header` + where(' at ')));
+					if ( preserveComment && !asArrayItem ) { table[commentFor(finalKey)] = lineRest.slice(1); }
 				}
 				lastSectionTable = appendTable(table, finalKey, asArrayItem, tag);
 			}
@@ -2018,8 +2033,8 @@ const Root = ()        => {
 				let rest             = assign(forComment);
 				typeof rest==='string' || ( rest = x        (rest) );
 				if ( rest ) {
-					if ( rest[0]==='#' ) { if ( preserveComment ) { forComment.table[commentFor(forComment.finalKey)] = rest.slice(1); } }
-					else { throws(SyntaxError$1(`Unexpect charachtor after key/value pair` + where(' at '))); }
+					rest[0]==='#' || throws(SyntaxError$1(`Unexpect charachtor after key/value pair` + where(' at ')));
+					if ( preserveComment ) { forComment.table[commentFor(forComment.finalKey)] = rest.slice(1); }
 				}
 			}
 		}
@@ -2031,7 +2046,7 @@ const Uint8Array$1 = Uint8Array;
 
 const Buffer$1 = typeof Buffer==='undefined' ? undefined$1 : Buffer;
 
-const isArrayBufferLike = (value        )                       => 'byteLength' in value;
+const isArrayBufferLike = (value        )                       => 'byteLength' in value;///
 
 const message = 'A TOML doc must be a (ful-scalar) valid UTF-8 file, without any unknown code point.';
 
@@ -2046,7 +2061,11 @@ const arrayBufferLike2string                                             = Buffe
 			if ( utf8.equals(from('𠮷利')) ) {
 				return (arrayBufferLike                                   )         => {
 					if ( !arrayBufferLike.byteLength ) { return ''; }
-					const buffer         = isBuffer(arrayBufferLike) ? arrayBufferLike : 'length' in arrayBufferLike ? new Buf(arrayBufferLike.buffer, arrayBufferLike.byteOffset, arrayBufferLike.length) : new Buf(arrayBufferLike);
+					const buffer         = isBuffer(arrayBufferLike)
+						? arrayBufferLike
+						: 'length' in arrayBufferLike/// isView
+							? new Buf(arrayBufferLike.buffer, arrayBufferLike.byteOffset, arrayBufferLike.byteLength)
+							: new Buf(arrayBufferLike);
 					const string         = buffer.toString();
 					if ( string.includes('\uFFFD') ) {
 						const length         = byteLength(string);
@@ -2062,16 +2081,24 @@ const arrayBufferLike2string                                             = Buffe
 		}
 		return (arrayBufferLike                                   )         => {
 			if ( !arrayBufferLike.byteLength ) { return ''; }
-			const buffer         = isBuffer(arrayBufferLike) ? arrayBufferLike : 'length' in arrayBufferLike ? new Buf(arrayBufferLike.buffer, arrayBufferLike.byteOffset, arrayBufferLike.length) : new Buf(arrayBufferLike);
+			const buffer         =
+				isBuffer(arrayBufferLike)
+					? arrayBufferLike
+					: 'length' in arrayBufferLike/// isView
+						? new Buf(arrayBufferLike.buffer, arrayBufferLike.byteOffset, arrayBufferLike.byteLength)
+						: new Buf(arrayBufferLike);
 			const string         = buffer.toString();
 			if ( string.includes('\uFFFD') && !from(string).equals(buffer) ) { throw Error$1(message); }
 			return string[0]==='\uFEFF' ? string.slice(1) : string;
 		};
-	})(Buffer$1                                                                                                                                )
+	})(Buffer$1                                                                                                                                    )
 	
 	: (arrayBufferLike                          )         => {
 		if ( !arrayBufferLike.byteLength ) { return ''; }
-		const uint8Array             = 'length' in arrayBufferLike ? arrayBufferLike : new Uint8Array$1(arrayBufferLike);
+		const uint8Array             =
+			'length' in arrayBufferLike/// isView
+				? arrayBufferLike
+				: new Uint8Array$1(arrayBufferLike);
 		const { length } = uint8Array;
 		const length_1 = length - 1;
 		const length_2 = length_1 - 1;
@@ -2141,11 +2168,11 @@ const IS_NON_SCALAR = /*#__PURE__*/( () => theRegExp(/[\uD800-\uDFFF]/u).test )(
 
 let holding          = false;
 
-const parse = (source        , specificationVersion                                   , multilineStringJoiner                                                                                  , useBigInt                   , xOptions                     )        => {
+const parse = (source        , specificationVersion                                   , multilineStringJoiner                                                                                , useBigInt                   , xOptions                   )        => {
 	if ( holding ) { throw Error$1('parse during parsing.'); }
 	holding = true;
 	let rootTable       ;
-	let process                   ;
+	let process                 ;
 	try {
 		let sourcePath         = '';
 		if ( typeof source==='object' && source ) {
@@ -2208,19 +2235,19 @@ const parse = (source        , specificationVersion                             
 };
 
 const parse$1 = /*#__PURE__*/assign$1(
-	(source        , specificationVersion                                   , multilineStringJoiner         , useBigInt                   , xOptions                     ) =>
+	(source        , specificationVersion                                   , multilineStringJoiner         , useBigInt                   , xOptions                   ) =>
 		typeof specificationVersion==='number'
 			? parse(source, specificationVersion, multilineStringJoiner, useBigInt, xOptions)
-			: parse(source, 1.0, specificationVersion          , multilineStringJoiner                                       , useBigInt                      )
+			: parse(source, 1.0, specificationVersion          , multilineStringJoiner                                       , useBigInt                    )
 	,
 	{
-		'1.0': (source        , multilineStringJoiner         , useBigInt                   , xOptions                     ) => parse(source, 0.1, multilineStringJoiner, useBigInt, xOptions),
-		1.0: (source        , multilineStringJoiner         , useBigInt                   , xOptions                     ) => parse(source, 1.0, multilineStringJoiner, useBigInt, xOptions),
-		0.5: (source        , multilineStringJoiner         , useBigInt                   , xOptions                     ) => parse(source, 0.5, multilineStringJoiner, useBigInt, xOptions),
-		0.4: (source        , multilineStringJoiner         , useBigInt                   , xOptions                     ) => parse(source, 0.4, multilineStringJoiner, useBigInt, xOptions),
-		0.3: (source        , multilineStringJoiner         , useBigInt                   , xOptions                     ) => parse(source, 0.3, multilineStringJoiner, useBigInt, xOptions),
-		0.2: (source        , multilineStringJoiner         , useBigInt                   , xOptions                     ) => parse(source, 0.2, multilineStringJoiner, useBigInt, xOptions),
-		0.1: (source        , multilineStringJoiner         , useBigInt                   , xOptions                     ) => parse(source, 0.1, multilineStringJoiner, useBigInt, xOptions),
+		'1.0': (source        , multilineStringJoiner         , useBigInt                   , xOptions                   ) => parse(source, 0.1, multilineStringJoiner, useBigInt, xOptions),
+		1.0: (source        , multilineStringJoiner         , useBigInt                   , xOptions                   ) => parse(source, 1.0, multilineStringJoiner, useBigInt, xOptions),
+		0.5: (source        , multilineStringJoiner         , useBigInt                   , xOptions                   ) => parse(source, 0.5, multilineStringJoiner, useBigInt, xOptions),
+		0.4: (source        , multilineStringJoiner         , useBigInt                   , xOptions                   ) => parse(source, 0.4, multilineStringJoiner, useBigInt, xOptions),
+		0.3: (source        , multilineStringJoiner         , useBigInt                   , xOptions                   ) => parse(source, 0.3, multilineStringJoiner, useBigInt, xOptions),
+		0.2: (source        , multilineStringJoiner         , useBigInt                   , xOptions                   ) => parse(source, 0.2, multilineStringJoiner, useBigInt, xOptions),
+		0.1: (source        , multilineStringJoiner         , useBigInt                   , xOptions                   ) => parse(source, 0.1, multilineStringJoiner, useBigInt, xOptions),
 	}
 );
 
@@ -2233,6 +2260,10 @@ const Boolean$1 = Boolean;
 const String$1 = String;
 
 const Number$1 = Number;
+
+const DATE = Date.prototype;
+
+const isPrototypeOf = Object.prototype.isPrototypeOf;
 
 const LITERAL = new WeakSet$1;
 
@@ -2338,6 +2369,8 @@ const ensureFloat = (literal        ) => INTEGER_LIKE(literal) ? literal + '.0' 
 const float = (value        ) => value
 	? value===Infinity ? 'inf' : value===_Infinity ? '-inf' : ensureFloat('' + value)
 	: value===value ? is(value, 0) ? '0.0' : '-0.0' : 'nan';
+
+const isDate = /*#__PURE__*/isPrototypeOf.bind(DATE)                                                ;
 
 const BARE = /*#__PURE__*/( () => theRegExp(/^[\w-]+$/).test )();
 const $Key$ = (key        )         => BARE(key) ? key : singlelineString(key);
@@ -2450,7 +2483,7 @@ class TOMLSection extends Array$1         {
 						: this.multilineTable(indent, value                        , this.document.multilineTableComma);
 					break;
 				}
-				if ( value instanceof TOMLDatetime ) {
+				if ( isDate(value) ) {
 					this.appendInline = this.document._ ? value.toISOString().replace('T', ' ') : value.toISOString();
 					break;
 				}
