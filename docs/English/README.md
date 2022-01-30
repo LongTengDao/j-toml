@@ -316,7 +316,7 @@ This library provides several helper functions to try to terminate this trouble.
 
 ---
 
-首先是**表**和**数组**。
+Let's start with **table** and **array**.
 
 Considering how JS code is read and written, the default mode for this library to treat unmarked tables is dotted key/value pairs (unless the table is empty or at somewhere such operation is impossible, in which cases it will be serialized in inline mode automatically).  
 You can use the `Section` function to mark a table as a block table (and return the input table), or use the `inline` function to mark the table as an inline table (return the input table as well).  
