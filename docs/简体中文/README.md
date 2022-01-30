@@ -479,12 +479,12 @@ multilineString = """
 ```
 
 ```javascript
-const table = TOML.parse('/path/to/example.toml', '\n');
+const 表 = TOML.parse(源, { joiner: '\n' });
 
-table.base = TOML.literal('0o' + table.base.toString(8).padStart(3, '0'));
-table.multilineString = TOML.multiline(table.multilineString + '\b4');
+表.base = TOML.literal('0o' + 表.base.toString(8).padStart(3, '0'));
+表.multilineString = TOML.multiline(表.multilineString + '\b4');
 
-TOML.stringify(table);
+TOML.stringify(表);
 ```
 
 ```toml
