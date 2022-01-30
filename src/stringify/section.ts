@@ -1,9 +1,5 @@
 import TypeError from '.TypeError';
-import Boolean from '.Boolean';
-import String from '.String';
-import BigInt from '.BigInt';
-import Number from '.Number';
-import Symbol_ from '.Symbol';
+import Symbol from '.Symbol';
 import Array from '.Array';
 import DATE from '.Date.prototype';
 import isPrototypeOf from '.Object.prototype.isPrototypeOf';
@@ -11,23 +7,28 @@ import getOwnPropertyNames from '.Object.getOwnPropertyNames';
 import is from '.Object.is';
 import isArray from '.Array.isArray';
 import undefined from '.undefined';
+import isString from '.class.isString';
+import isNumber from '.class.isNumber';
+import isBigInt from '.class.isBigInt';
+import isBoolean from '.class.isBoolean';
 
 import { theRegExp } from '@ltd/j-regexp';
 
 import * as regexps from '../regexps';
 
-import { getComment } from '../types/comment';
-import { isLiteral } from './literal';
-import { literalString, singlelineString } from './string';
+import { commentForThis, getCOMMENT, getComment } from '../types/comment';
+import { singlelineString } from './string';
 import { float } from './float';
 import { isSection, ofInline } from '../types/non-atom';
+import { _literal } from '../types/atom';
 
 const isDate = /*#__PURE__*/isPrototypeOf.bind(DATE) as (this :void, value :object) => value is Date;
 
-const BARE = /*#__PURE__*/( () => theRegExp(/^[\w-]+$/).test )();
+const { test: BARE } = theRegExp(/^[\w-]+$/);
 const $Key$ = (key :string) :string => BARE(key) ? key : singlelineString(key);
 
 const FIRST = /[^.]+/;
+const literalString = (value :string) :`'${string}'` => `'${value}'`;
 const $Keys = (keys :string) :string => regexps.isAmazing(keys) ? keys.replace(FIRST, literalString) : keys==='null' ? `'null'` : keys;
 
 export default class TOMLSection extends Array<string> {
@@ -57,29 +58,43 @@ export default class TOMLSection extends Array<string> {
 			const $key$ = $Key$(tableKey);
 			const documentKeys = documentKeys_ + $key$;
 			if ( isArray(value) ) {
-				if ( value.length && isSection(value[0]) ) {
-					const tableHeader = `[[${documentKeys}]]` as const;
-					const documentKeys_ = documentKeys + '.' as `${string}.`;
-					for ( const table of value as READONLY.ArrayOfTables ) {
-						const section = document.appendSection();
-						section[0] = tableHeader;
-						if ( newlineUnderHeader ) {
-							section[1] = '';
-							yield section.assignBlock(documentKeys_, ``, table, getOwnPropertyNames(table));
-							newlineUnderSectionButPair && section.length!==2 && section.appendNewline();
+				const { length } = value;
+				if ( length ) {
+					let firstItem = value[0];
+					if ( isSection(firstItem) ) {
+						const tableHeader = `[[${documentKeys}]]` as const;
+						const documentKeys_ = documentKeys + '.' as `${string}.`;
+						let index = 0;
+						let table :READONLY.Table = firstItem;
+						for ( ; ; ) {
+							const section = document.appendSection();
+							section[0] = tableHeader + getCOMMENT(table, commentForThis);
+							if ( newlineUnderHeader ) {
+								section[1] = '';
+								yield section.assignBlock(documentKeys_, ``, table, getOwnPropertyNames(table));
+								newlineUnderSectionButPair && section.length!==2 && section.appendNewline();
+							}
+							else {
+								yield section.assignBlock(documentKeys_, ``, table, getOwnPropertyNames(table));
+								newlineUnderSectionButPair && section.appendNewline();
+							}
+							if ( ++index===length ) { break; }
+							table = ( value as READONLY.ArrayOfTables )[index]!;
+							///if ( !isSection(table) ) { throw TypeError(`the first table item marked by Section() means the parent array is an array of tables, which can not include other types or table not marked by Section() any more in the rest items`); }
 						}
-						else {
-							yield section.assignBlock(documentKeys_, ``, table, getOwnPropertyNames(table));
-							newlineUnderSectionButPair && section.appendNewline();
-						}
+						continue;
 					}
-					continue;
+					///else { let index = 1; while ( index!==length ) { if ( isSection(value[index++]!) ) { throw TypeError(``); } } }
 				}
 			}
 			else {
 				if ( isSection(value) ) {
 					const section = document.appendSection();
-					section[0] = `[${documentKeys}]${getComment(table, tableKey)}`;
+					section[0] = `[${documentKeys}]${
+						document.preferCommentForThis
+							? getCOMMENT(value, commentForThis) || getComment(table, tableKey)
+							: getComment(table, tableKey) || getCOMMENT(value, commentForThis)
+					}`;
 					if ( newlineUnderHeader ) {
 						section[1] = '';
 						yield section.assignBlock(documentKeys + '.' as `${string}.`, ``, value, getOwnPropertyNames(value));
@@ -94,10 +109,10 @@ export default class TOMLSection extends Array<string> {
 			}
 			const sectionKeys = sectionKeys_ + $key$;
 			this.appendLine = $Keys(sectionKeys) + ' = ';
-			const keysIfDotted = this.value('', value, getOwnPropertyNames);
-			if ( keysIfDotted ) {
+			const valueKeysIfValueIsDottedTable = this.value('', value, true);
+			if ( valueKeysIfValueIsDottedTable ) {
 				--this.length;
-				yield this.assignBlock(documentKeys + '.' as `${string}.`, sectionKeys + '.' as `${string}.`, value as unknown as READONLY.InlineTable, keysIfDotted);
+				yield this.assignBlock(documentKeys + '.' as `${string}.`, sectionKeys + '.' as `${string}.`, value as unknown as READONLY.InlineTable, valueKeysIfValueIsDottedTable);
 				newlineAfterDotted && this.appendNewline();
 			}
 			else {
@@ -107,19 +122,12 @@ export default class TOMLSection extends Array<string> {
 		}
 	}
 	
-	private value (indent :string, value :READONLY.Value, getOwnPropertyNames? :(this :void, object :READONLY.InlineTable) => string[]) {
+	private value (indent :string, value :READONLY.Value, returnValueKeysIfValueIsDottedTable :boolean) :string[] | null {
 		switch ( typeof value ) {
 			case 'object':
 				if ( value===null ) {
 					if ( this.document.nullDisabled ) { throw TypeError(`toml can not stringify "null" type value without truthy options.xNull`); }
 					this.appendInline = 'null';
-					break;
-				}
-				if ( isLiteral(value) ) {
-					const { length } = value;
-					this.appendInline = value[0];
-					let index = 1;
-					while ( index!==length ) { this.appendLine = value[index++]!; }
 					break;
 				}
 				const inlineMode = ofInline(value);
@@ -139,21 +147,34 @@ export default class TOMLSection extends Array<string> {
 					this.appendInline = this.document._ ? value.toISOString().replace('T', ' ') : value.toISOString();
 					break;
 				}
-				if ( value instanceof String ) { throw TypeError(`TOML.stringify refuse to handle [object String]`); }
-				if ( getOwnPropertyNames ) {
+				if ( _literal in value ) {
+					const literal = ( value as { readonly [_literal] :string | readonly [ string, ...string[] ] } )[_literal];
+					if ( typeof literal==='string' ) { this.appendInline = literal; }
+					else if ( isArray(literal) ) {
+						const { length } = literal;
+						if ( length ) {
+							this.appendInline = literal[0];
+							let index = 1;
+							while ( index!==length ) { this.appendLine = literal[index++]!; }
+						}
+						else { throw TypeError(`literal value is broken`); }
+					}
+					else { throw TypeError(`literal value is broken`); }
+					break;
+				}
+				if ( isString(value) ) { throw TypeError(`TOML.stringify refuse to handle [object String]`); }
+				if ( isNumber(value) ) { throw TypeError(`TOML.stringify refuse to handle [object Number]`); }
+				if ( isBigInt(value) ) { throw TypeError(`TOML.stringify refuse to handle [object BigInt]`); }
+				if ( isBoolean(value) ) { throw TypeError(`TOML.stringify refuse to handle [object Boolean]`); }
+				if ( returnValueKeysIfValueIsDottedTable ) {
 					const keys = getOwnPropertyNames(value as READONLY.InlineTable);
 					if ( keys.length ) { return keys; }
 					this.appendInline = '{ }';
-					break;
 				}
 				else {
-					if ( value instanceof BigInt ) { throw TypeError(`TOML.stringify refuse to handle [object BigInt]`); }
-					if ( value instanceof Number ) { throw TypeError(`TOML.stringify refuse to handle [object Number]`); }
-					if ( value instanceof Boolean ) { throw TypeError(`TOML.stringify refuse to handle [object Boolean]`); }
-					if ( value instanceof Symbol_ ) { throw TypeError(`TOML.stringify refuse to handle [object Symbol]`); }
 					this.inlineTable(indent, value as READONLY.InlineTable);
-					break;
 				}
+				break;
 			case 'bigint':
 				this.appendInline = '' + value;
 				break;
@@ -176,11 +197,11 @@ export default class TOMLSection extends Array<string> {
 		const { length } = staticArray;
 		if ( length ) {
 			this.appendInline = '[ ';
-			this.value(indent, staticArray[0]!);
+			this.value(indent, staticArray[0]!, false);
 			let index = 1;
 			while ( index!==length ) {
 				this.appendInline = ', ';
-				this.value(indent, staticArray[index++]!);
+				this.value(indent, staticArray[index++]!, false);
 			}
 			this.appendInline = ' ]';
 		}
@@ -189,9 +210,11 @@ export default class TOMLSection extends Array<string> {
 	private staticArray (indent :string, staticArray :READONLY.StaticArray) {
 		this.appendInline = '[';
 		const indent_ = indent + this.document.indent;
-		for ( const item of staticArray ) {
+		const { length } = staticArray;
+		let index = 0;
+		while ( index!==length ) {
 			this.appendLine = indent_;
-			this.value(indent_, item);
+			this.value(indent_, staticArray[index++]!, false);
 			this.appendInline = ',';
 		}
 		this.appendLine = indent + ']';
@@ -216,10 +239,10 @@ export default class TOMLSection extends Array<string> {
 			const value :READONLY.Value = inlineTable[key]!;
 			const keys = keys_ + $Key$(key);
 			const before_value = this.appendInline = $Keys(keys) + ' = ';
-			const keysIfDotted = this.value(indent, value, getOwnPropertyNames);
-			if ( keysIfDotted ) {
+			const valueKeysIfValueIsDottedTable = this.value(indent, value, true);
+			if ( valueKeysIfValueIsDottedTable ) {
 				this[this.length - 1] = this[this.length - 1]!.slice(0, -before_value.length);
-				this.assignInline(indent, value as READONLY.InlineTable, keys + '.' as `${string}.`, keysIfDotted);
+				this.assignInline(indent, value as READONLY.InlineTable, keys + '.' as `${string}.`, valueKeysIfValueIsDottedTable);
 			}
 			else { this.appendInline = ', '; }
 		}
@@ -230,10 +253,10 @@ export default class TOMLSection extends Array<string> {
 			const value :READONLY.Value = inlineTable[key]!;
 			const keys = keys_ + $Key$(key);
 			this.appendLine = indent_ + $Keys(keys) + ' = ';
-			const keysIfDotted = this.value(indent_, value, getOwnPropertyNames);
-			if ( keysIfDotted ) {
+			const valueKeysIfValueIsDottedTable = this.value(indent_, value, true);
+			if ( valueKeysIfValueIsDottedTable ) {
 				--this.length;
-				this.assignMultiline(indent, value as READONLY.InlineTable, keys + '.' as `${string}.`, keysIfDotted, comma);
+				this.assignMultiline(indent, value as READONLY.InlineTable, keys + '.' as `${string}.`, valueKeysIfValueIsDottedTable, comma);
 			}
 			else {
 				comma

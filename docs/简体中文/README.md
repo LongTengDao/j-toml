@@ -23,7 +23,7 @@ const 源               = `
       __proto__        = '...'
 `;
 
-const 根表 = TOML.parse(源, '\n');
+const 根表 = TOML.parse(源);
 
 根表.一个普通的键名 // '...'
 根表.hasOwnProperty // '...'
@@ -269,6 +269,13 @@ declare function stringify (根表 :只读表, 选项? :Readonly<{
         
         序列化时，用什么来分隔日期与时刻。
         
+    -   ##### `选项.preferCommentFor`
+        
+        *   类型：`'key'` / `'this'`
+        *   默认值：`'key'`
+        
+        详见后文**注释**部分。
+        
     -   ##### `选项.xNull`
         
         *   类型：`boolean`
@@ -300,19 +307,23 @@ declare function stringify (根表 :只读表, 选项? :Readonly<{
 
 本库不会因为表或数组嵌套层数过深，而意外地造成爆栈错误。
 
-`TOML.Section` `TOML.inline` `TOML.multiline` `TOML.literal` `TOML.commentFor` `TOML.isSection` `TOML.isInline`
----------------------------------------------------------------------------------------------------------------
+`TOML.Section` `TOML.inline` `TOML.multiline` `TOML.multiline.basic` `TOML.basic` `TOML.literal` `TOML.commentFor` `TOML.commentForThis` `TOML.isSection` `TOML.isInline`
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 由于 TOML 语法的灵活性，在极大地满足了人直接阅读和书写的需求的同时，一度给序列化方案造成了巨大的困难。
 
 本库提供了几个辅助函数，以尝试终结这个难题。
 
-考虑到 JS 代码阅读和书写形态，本库对待未作标记的表对象的默认形式，是点分隔键值对（除非该表位于不可能如此操作的层级，或者表是一个空表，这些情况下会默认序列化为内联表）。  
+---
+
+首先是**表**和**数组**。
+
+考虑到 JS 代码阅读和书写形态，本库对待未作标记的表的默认形式，是点分隔键值对（除非该表是一个空表或位于不可能如此操作的层级，这些情况下会自动序列化为内联表）。  
 你可以用 `Section` 函数将表标记为独立的小节（并返回所传入的表），或用 `inline` 函数将表标记为内联表（返回值同样是所传入的表）。  
 你也可以用 `multiline` 函数将表标记为多行模式的内联表（返回传入表），不过注意这并不是目前标准所允许的语法（记得在序列化时指定 `选项.xBeforeNewlineInMultilineTable` 以使此类标记不被忽略）。
 
 ```javascript
-TOML.stringify({
+stringify({
     key: 'value',
     dotted: {
         key: 'value',
@@ -358,7 +369,7 @@ key = 'value'
 否则，数组默认被作为多行模式的静态数组看待。如果你希望单行表示，可以用 `inline` 函数进行标记。
 
 ```javascript
-TOML.stringify({
+stringify({
     staticArray: [
         'string',
         { },
@@ -383,22 +394,34 @@ staticArray_singleline = [ 1.0, 2 ]
 
 ```
 
-另一个痛点是注释。我们显然不希望一份包含注释的配置文档，在经过了程序的修改后，丢失了全部的注释信息。  
-现在，你可以在表中书写 `[commentFor(key)]` 键（这会得到一个 `symbol` 键，其键值应为注释内容字符串），这样，在最终的序列化结果中，`key` 键对应的键值后面就会跟上这个注释了！
+本库中 `parse` 出来的数据，会保留对以上书写形式的记忆，不必在修改后的重新序列化时再次全部手动标记。  
+你可以透明地通过 `isSection` 和 `isInline`，得知所 `parse` 出的表是以何种形式书写的。
+
+---
+
+另一个痛点是**注释**。我们显然不希望一份包含注释的配置文档，在经过了程序的修改后，丢失了全部的注释信息。  
+不过注释性质上终究是注释，`parse` 时这一功能默认是关闭的，你需要通过 `超级选项.comment` 来明确地要求这样做。
+
+如果是全新的数据，你可以在表中显式地书写 `[commentFor(key)]` 键（这会得到一个 `symbol` 键，其键值应为注释内容字符串，`parse` 时保留注释的功能也是基于同样的机制），这样，在最终的序列化结果中，`key` 键对应的键值后面就会跟上这个注释了！（注意注释中不能包含换行，否则会报错。）
 
 ```javascript
-TOML.stringify({
-    [commentFor('key')]: ' 这是一个键值对',
-    key: 'value',
+stringify({
+    
+    key: 'value', [commentFor('key')]: ' 这是一个键值对',
     dotted: {
-        [commentFor('key')]: ' 这是一个点分隔键值对',
-        key: 'value',
+        key: 'value', [commentFor('key')]: ' 这是一个点分隔键值对',
     },
-    table: {
-        [commentFor('header')]: ' 这是一个表头（不能是表数组中的表）',
-        header: Section({
+    
+    [commentFor('table')]: ' 这是一个表头',
+    table: Section({ [commentForThis]: '也可以把表头注释写在里面',
+    }),
+    // 但两种写法同时存在且值不同时，以 `选项.preferCommentFor` 指定的写法的值为准
+    
+    tables: [
+        Section({ [commentForThis]: ' 这是一个表数组中的表头',
         }),
-    },
+    ],
+    
 });
 ```
 
@@ -407,20 +430,21 @@ TOML.stringify({
 key = 'value' # 这是一个键值对
 dotted.key = 'value' # 这是一个点分隔键值对
 
-[table.header] # 这是一个表头（不能是表数组中的表）
+[table] # 这是一个表头
+
+[[tables]] # 这是一个表数组中的表头
 
 ```
 
-本库中 `parse` 出来的数据，会保留对以上书写形式的记忆，不必在修改后的重新序列化时再次全部手动标记。  
-你可以透明地通过 `isSection` 和 `isInline`，得知所 `parse` 出的表是以何种形式书写的。
+---
 
-最后剩下了字符串、整数和浮点数。它们的书写选择过于细碎，目前没有比较完美的针对性（而不使得事情更加麻烦）的方案来标记；同时它们属于原子值，也没有较好的方式在 `parse` 出的数据中保留这些偏好。  
-本库为此提供了 `literal` 和 `multiline`（字符串场景）、`multiline.basic`（强制使用多行基础字符串，而不是优先尝试的多行字面量字符串） 几个辅助函数。
+最后剩下了**字符串**、**整数**和**浮点数**。它们的书写可能性细碎得如同体操，目前没有比较完美的针对性（而不使得事情更加麻烦）的方案来标记；同时它们属于原子值，也没有较好的方式在 `parse` 出的数据中保留这些偏好。  
+本库为此提供了 `literal` 和 `multiline`（字符串场景）、`multiline.basic`（强制使用多行基础字符串，而不是优先尝试的多行字面量字符串）几个辅助函数。
 
 当你需要直接序列化一个全新的临时数据时，直接使用 `literal` 来规定具体的书写形式：
 
 ```javascript
-TOML.stringify({
+stringify({
     underscore: literal`1_000`,
     zero: literal`10.00`,
     base: literal`0o777`,
@@ -473,7 +497,7 @@ multilineString = """
 ```
 
 `multiline`（字符串场景）默认会将传入的字符串以 `'\n'` 做行切割，比如 `'1\b2\n3\b4'` 会被理解为 `[ '1\b2', '3\b4' ]`。  
-但是如果你的需求非常刁钻，比如你的数据是以 `TOML.parse(源, '\b')` 的方式解析的，那么你可以直接传入已经分隔好行的字符串数组 `'1\b2\n3\b4'.split('\b')`（即 `[ '1', '2\n3', '4' ]`），最终的序列化结果将是：
+但是如果你的需求非常刁钻，比如你的数据是以 `TOML.parse(源, { joiner: '\b' })` 的方式解析的，那么你可以直接传入已经分隔好行的字符串数组 `'1\b2\n3\b4'.split('\b')`（即 `[ '1', '2\n3', '4' ]`），最终的序列化结果将是：
 
 ```toml
 multilineString = """
@@ -482,28 +506,9 @@ multilineString = """
 4"""
 ```
 
-需要注意的是，`literal` 或 `multiline`（字符串场景）、`multiline.basic` 返回的并不是一个原子值，而是一个占位对象，这意味着这份数据将仅能用于 `stringify`，而不能再做其它用途。  
-这确实有些麻烦，再加上还需要一并标记其它未经修改的数据，体验确实非常糟糕。  
-在频繁出现此场景的程序中，可以考虑将 `parse` 出的表转化为一个包含 `toTOML` 之类方法的类实例，在其中规定各属性的序列化方案，并在 `stringify` 时使用这个副本，这样可以大大改善体验：
+`multiline.basic` 可以强制生成多行基础字符串，即便实际值只需要默认首选的多行字面量字符串就能够表示。  
+类似地，`basic` 可以强制生成（单行）基础字符串，即便实际值只需要默认首选的（单行）字面量字符串就能够表示。
 
-```javascript
-const model = new class {
-    base;
-    multilineString;
-    constructor (table) {
-        this.base = table.base;
-        this.multilineString = table.multilineString;
-        return this;
-    }
-    toTOML () {
-        return {
-            base: TOML.literal('0o' + this.base.toString(8).padStart(3, '0')),
-            multilineString: TOML.multiline(this.multilineString),
-        };
-    }
-}(TOML.parse('/path/to/example.toml', '\n'));
-
-model.multilineString += '\b4';
-
-TOML.stringify(model.toTOML());
-```
+需要注意的是，`literal` 或 `multiline`（字符串场景）、`multiline.basic`、`basic` 返回的并不是一个原子值，而是一个记录着序列化信息的占位对象。  
+在满足一些条件的情况下（详见 `.d.ts` 文件），它是该原子类型对应的对象类型，这样除可供 `stringify` 外，还可以满足常见的运算需求。
+`parse` 时，需要开启 `超级选项.literal`，才会基于相同的原理保留原子值的书写方式信息，以供重新 `stringify` 时，尽可能地保留书写偏好。

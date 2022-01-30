@@ -7,7 +7,7 @@ c = true # comment
 e = 0b0000_0000
 s = ''
 b = "\b"
-d.d = 0
+d.d = 0 # comment
 d.o = 0
 d.t.e = 1
 d.t.d = 1
@@ -25,18 +25,18 @@ _sub.k = 'v'
 
 [_sub.section]
 
-[sub]
+[sub] # comment
 
 k = 'v'
 
-[sub.section]
+[sub.section] # comment
 
 [[arrayOfTables]]
 
 '' = 1.0
 
-[[arrayOfTables]]
+[[arrayOfTables]] # comment
 
 [[arrayOfTables]]
 
-[arrayOfTables.sub]
+[arrayOfTables.sub] # comment

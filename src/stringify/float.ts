@@ -4,7 +4,7 @@ import Infinity from '.Infinity';
 import { theRegExp } from '@ltd/j-regexp';
 
 const _Infinity = -Infinity;
-const INTEGER_LIKE = /*#__PURE__*/( () => theRegExp(/^-?\d+$/).test )();
+const { test: INTEGER_LIKE } = theRegExp(/^-?\d+$/);
 const ensureFloat = (literal :string) => INTEGER_LIKE(literal) ? literal + '.0' : literal;
 
 export const float = (value :number) => value

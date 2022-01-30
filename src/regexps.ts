@@ -8,10 +8,10 @@ import * as iterator from './iterator';
 
 const Whitespace = /[ \t]/;
 
-export const PRE_WHITESPACE = /*#__PURE__*/( () => newRegExp`
-	^${Whitespace}+` )();
+export const PRE_WHITESPACE = /*#__PURE__*/newRegExp`
+	^${Whitespace}+`.valueOf();
 
-export const VALUE_REST_exec = /*#__PURE__*/( () => newRegExp.s<1 | 2>`
+export const { exec: VALUE_REST_exec } = /*#__PURE__*/newRegExp.s<1 | 2>`
 	^
 	(
 		(?:\d\d\d\d-\d\d-\d\d \d)?
@@ -19,38 +19,38 @@ export const VALUE_REST_exec = /*#__PURE__*/( () => newRegExp.s<1 | 2>`
 	)
 	${Whitespace}*
 	(.*)
-	$`.exec )();
+	$`.valueOf();
 
-export const LITERAL_STRING_exec = /*#__PURE__*/( () => newRegExp.s<1 | 2>`
+export const { exec: LITERAL_STRING_exec } = /*#__PURE__*/newRegExp.s<1 | 2>`
 	^
 	'([^']*)'
 	${Whitespace}*
-	(.*)`.exec )();
+	(.*)`.valueOf();
 
-const MULTI_LINE_LITERAL_STRING_0_1_2 = /*#__PURE__*/( () => newRegExp.s<1 | 2 | 3>`
+const { exec: MULTI_LINE_LITERAL_STRING_0_1_2 } = /*#__PURE__*/newRegExp.s<1 | 2 | 3>`
 	^
 	(.*?)
 	'''('{0,2})
 	${Whitespace}*
-	(.*)`.exec )();
-const MULTI_LINE_LITERAL_STRING_0 = /*#__PURE__*/( () => newRegExp.s<1 | 2 | 3>`
+	(.*)`.valueOf();
+const { exec: MULTI_LINE_LITERAL_STRING_0 } = /*#__PURE__*/newRegExp.s<1 | 2 | 3>`
 	^
 	(.*?)
 	'''()
 	${Whitespace}*
-	(.*)`.exec )();
+	(.*)`.valueOf();
 export
 let __MULTI_LINE_LITERAL_STRING_exec = MULTI_LINE_LITERAL_STRING_0;
 
-export const SYM_WHITESPACE = /*#__PURE__*/( () => newRegExp.s`
+export const SYM_WHITESPACE = /*#__PURE__*/newRegExp.s`
 	^
 	.
-	${Whitespace}*` )();
+	${Whitespace}*`.valueOf();
 
 
 export const Tag = /[^\x00-\x1F"#'()<>[\\\]`{}\x7F]+/;
 
-const KEY_VALUE_PAIR_exec = /*#__PURE__*/( () => newRegExp.s<2>`
+const { exec: KEY_VALUE_PAIR_exec } = /*#__PURE__*/newRegExp.s<2>`
 	^
 	${Whitespace}*
 	=
@@ -60,29 +60,29 @@ const KEY_VALUE_PAIR_exec = /*#__PURE__*/( () => newRegExp.s<2>`
 		${Whitespace}*
 	)?
 	(.*)
-	$`.exec )();
+	$`.valueOf();
 
-export const _VALUE_PAIR_exec = /*#__PURE__*/( () => newRegExp.s<1 | 2>`
+export const { exec: _VALUE_PAIR_exec } = /*#__PURE__*/newRegExp.s<1 | 2>`
 	^
 	<(${Tag})>
 	${Whitespace}*
 	(.*)
-	$`.exec )();
+	$`.valueOf();
 
-const TAG_REST_exec = /*#__PURE__*/( () => newRegExp.s<1 | 2>`
+const { exec: TAG_REST_exec } = /*#__PURE__*/newRegExp.s<1 | 2>`
 	^
 	<(${Tag})>
 	${Whitespace}*
 	(.*)
-	$`.exec )();
+	$`.valueOf();
 
 /* optimized (avoid overflow or lost) */
 
-const MULTI_LINE_BASIC_STRING = /*#__PURE__*/theRegExp(/(?:[^\\"]+|\\.|""?(?!")){1,10}/sy);/// .?
-export const MULTI_LINE_BASIC_STRING_exec_0 = (_ :string) :string => {
-	let lastIndex :number = MULTI_LINE_BASIC_STRING.lastIndex = 0;
+const MULTI_LINE_BASIC_STRING = theRegExp(/[^\\"]+|\\.?|"(?!"")"?/sy);
+export const MULTI_LINE_BASIC_STRING_exec_0_length = (_ :string) :number => {
+	let lastIndex :number = /*MULTI_LINE_BASIC_STRING.lastIndex = */0;
 	while ( MULTI_LINE_BASIC_STRING.test(_) ) { lastIndex = MULTI_LINE_BASIC_STRING.lastIndex; }
-	return _.slice(0, lastIndex);
+	return lastIndex;
 };
 
 const ESCAPED_EXCLUDE_CONTROL_CHARACTER_TAB______ = /[^\\\x00-\x08\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|[\t ]*\n[\t\n ]*|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})/g;
@@ -92,33 +92,33 @@ const ESCAPED_EXCLUDE_CONTROL_CHARACTER_DEL_SLASH = /[^\\\x00-\x09\x0B-\x1F]+|\\
 let __ESCAPED_EXCLUDE_CONTROL_CHARACTER = ESCAPED_EXCLUDE_CONTROL_CHARACTER_TAB______;
 export const ESCAPED_EXCLUDE_CONTROL_CHARACTER_test = (_ :string) :boolean => !_.replace(__ESCAPED_EXCLUDE_CONTROL_CHARACTER, '');/// op?
 
-const BASIC_STRING_TAB______ = /*#__PURE__*/theRegExp(/(?:[^\\"\x00-\x08\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})){1,10}/y);
-const BASIC_STRING__________ = /*#__PURE__*/theRegExp(/(?:[^\\"\x00-\x08\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})){1,10}/y);/// Tab
-const BASIC_STRING_DEL______ = /*#__PURE__*/theRegExp(/(?:[^\\"\x00-\x08\x0B-\x1F]+|\\(?:[btnfr"\\]|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})){1,10}/y);/// Tab
-const BASIC_STRING_DEL_SLASH = /*#__PURE__*/theRegExp(/(?:[^\\"\x00-\x08\x0B-\x1F]+|\\(?:[btnfr"\\/]|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})){1,10}/y);/// Tab
+const BASIC_STRING_TAB______ = theRegExp(/[^\\"\x00-\x08\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})/y);
+const BASIC_STRING__________ = theRegExp(/[^\\"\x00-\x08\x0B-\x1F\x7F]+|\\(?:[btnfr"\\]|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})/y);/// Tab
+const BASIC_STRING_DEL______ = theRegExp(/[^\\"\x00-\x08\x0B-\x1F]+|\\(?:[btnfr"\\]|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})/y);/// Tab
+const BASIC_STRING_DEL_SLASH = theRegExp(/[^\\"\x00-\x08\x0B-\x1F]+|\\(?:[btnfr"\\/]|u[\dA-Fa-f]{4}|U[\dA-Fa-f]{8})/y);/// Tab
 let __BASIC_STRING = BASIC_STRING_DEL_SLASH;
-export const BASIC_STRING_exec_1 = (line :string) :string => {
+export const BASIC_STRING_exec_1_endIndex = (line :string) :number => {
 	let lastIndex :number = __BASIC_STRING.lastIndex = 1;
 	while ( __BASIC_STRING.test(line) ) { lastIndex = __BASIC_STRING.lastIndex; }
 	lastIndex!==line.length && line[lastIndex]==='"' || iterator.throws(SyntaxError(`Bad basic string` + iterator.where(' at ')));
-	return line.slice(1, lastIndex);
+	return lastIndex;
 };
 
 export
-const IS_DOT_KEY = /*#__PURE__*/( () => theRegExp(/^[ \t]*\./).test )();
+const { test: IS_DOT_KEY } = theRegExp(/^[ \t]*\./);
 export
 const DOT_KEY = /^[ \t]*\.[ \t]*/;
-const BARE_KEY_STRICT = /*#__PURE__*/( () => theRegExp(/^[\w-]+/).exec )();
-const BARE_KEY_FREE = /*#__PURE__*/( () => theRegExp(/^[^ \t#=[\]'".]+(?:[ \t]+[^ \t#=[\]'".]+)*/).exec )();
+const { exec: BARE_KEY_STRICT } = theRegExp(/^[\w-]+/);
+const { exec: BARE_KEY_FREE } = theRegExp(/^[^ \t#=[\]'".]+(?:[ \t]+[^ \t#=[\]'".]+)*/);
 export
 let __BARE_KEY_exec = BARE_KEY_FREE;
-const LITERAL_KEY____ = /*#__PURE__*/( () => theRegExp(/^'[^'\x00-\x08\x0B-\x1F\x7F]*'/).exec )();
-const LITERAL_KEY_DEL = /*#__PURE__*/( () => theRegExp(/^'[^'\x00-\x08\x0B-\x1F]*'/).exec )();
+const { exec: LITERAL_KEY____ } = theRegExp(/^'[^'\x00-\x08\x0B-\x1F\x7F]*'/);
+const { exec: LITERAL_KEY_DEL } = theRegExp(/^'[^'\x00-\x08\x0B-\x1F]*'/);
 export
 let __LITERAL_KEY_exec = LITERAL_KEY_DEL;
 let supportArrayOfTables = true;
 
-export const TABLE_DEFINITION_exec_groups = (lineRest :string, parseKeys :(lineRest :string) => { leadingKeys :string[], finalKey :string, lineRest :string }) :{ leadingKeys :string[], finalKey :string, asArrayItem :boolean, tag :string, lineRest :string } => {
+export const TABLE_DEFINITION_exec_groups = (lineRest :string, parseKeys :(this :void, lineRest :string) => { leadingKeys :string[], finalKey :string, lineRest :string }) :{ leadingKeys :string[], finalKey :string, asArrayItem :boolean, tag :string, lineRest :string } => {
 	const asArrayItem :boolean = lineRest[1]==='[';
 	if ( asArrayItem ) {
 		supportArrayOfTables || iterator.throws(SyntaxError(`Array of Tables is not allowed before TOML v0.2` + iterator.where(', which at ')));
@@ -143,8 +143,8 @@ export const KEY_VALUE_PAIR_exec_groups = ({ leadingKeys, finalKey, lineRest } :
 	return { leadingKeys, finalKey, tag, lineRest };
 };
 
-const CONTROL_CHARACTER_EXCLUDE_TAB____ = /*#__PURE__*/( () => theRegExp(/[\x00-\x08\x0B-\x1F\x7F]/).test )();
-const CONTROL_CHARACTER_EXCLUDE_TAB_DEL = /*#__PURE__*/( () => theRegExp(/[\x00-\x08\x0B-\x1F]/).test )();
+const { test: CONTROL_CHARACTER_EXCLUDE_TAB____ } = theRegExp(/[\x00-\x08\x0B-\x1F\x7F]/);
+const { test: CONTROL_CHARACTER_EXCLUDE_TAB_DEL } = theRegExp(/[\x00-\x08\x0B-\x1F]/);
 export
 let __CONTROL_CHARACTER_EXCLUDE_test = CONTROL_CHARACTER_EXCLUDE_TAB____;
 
@@ -188,7 +188,7 @@ export const switchRegExp = (specificationVersion :number) :void => {
 	}
 };
 
-const NUM = /*#__PURE__*/( () => newRegExp`
+const NUM = /*#__PURE__*/newRegExp`
 	(?:
 		0
 		(?:
@@ -208,8 +208,8 @@ const NUM = /*#__PURE__*/( () => newRegExp`
 	|
 		nan
 	)
-` )();
-const IS_AMAZING = /*#__PURE__*/( () => newRegExp`
+`.valueOf();
+const { test: IS_AMAZING } = /*#__PURE__*/newRegExp`
 	^(?:
 		-?${NUM}
 		(?:-${NUM})*
@@ -218,6 +218,6 @@ const IS_AMAZING = /*#__PURE__*/( () => newRegExp`
 	|
 		false
 	)$
-`.test )();
-const BAD_DXOB = /*#__PURE__*/( () => newRegExp`_(?![\dA-Fa-f])`.test )();
+`.valueOf();
+const { test: BAD_DXOB } = /*#__PURE__*/newRegExp`_(?![\dA-Fa-f])`.valueOf();
 export const isAmazing = (keys :string) :boolean => IS_AMAZING(keys) && !BAD_DXOB(keys);

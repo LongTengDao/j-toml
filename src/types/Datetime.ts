@@ -8,6 +8,7 @@ import create from '.Object.create';
 import preventExtensions from '.Object.preventExtensions';
 import freeze from '.Object.freeze';
 import getOwnPropertyDescriptors from '.Object.getOwnPropertyDescriptors';
+import Symbol from '.Symbol';
 import defineProperties from '.null.defineProperties';
 import Null from '.null';
 
@@ -27,7 +28,7 @@ const _31_ = /(?:0[1-9]|[12]\d|3[01])/;
 const _23_ = /(?:[01]\d|2[0-3])/;
 const _59_ = /[0-5]\d/;
 
-const YMD = /*#__PURE__*/( () => newRegExp`
+const YMD = /*#__PURE__*/newRegExp`
 	\d\d\d\d-
 	(?:
 		0
@@ -46,52 +47,52 @@ const YMD = /*#__PURE__*/( () => newRegExp`
 			1-${_30_}
 		)
 	)
-` )();
+`.valueOf();
 
-const HMS = /*#__PURE__*/( () => newRegExp`
+const HMS = /*#__PURE__*/newRegExp`
 	${_23_}:${_59_}:${_59_}
-` )();
+`.valueOf();
 
 export const OFFSET$ = /(?:Z|[+-]\d\d:\d\d)$/;
 
-const Z_exec = /*#__PURE__*/( () => theRegExp<1 | 2 | 3>(/(([+-])\d\d):(\d\d)$/).exec )();
+const { exec: Z_exec } = theRegExp<1 | 2 | 3>(/(([+-])\d\d):(\d\d)$/);
 
-const OFFSET_DATETIME_exec = /*#__PURE__*/( () => newRegExp<1>`
+const { exec: OFFSET_DATETIME_exec } = /*#__PURE__*/newRegExp<1>`
 	^
 	${YMD}
 	[T ]
 	${HMS}
 	(?:\.\d{1,3}(\d*?)0*)?
 	(?:Z|[+-]${_23_}:${_59_})
-	$`.exec )();
+	$`.valueOf();
 
-const OFFSET_DATETIME_ZERO_exec = /*#__PURE__*/( () => newRegExp<1>`
+const { exec: OFFSET_DATETIME_ZERO_exec } = /*#__PURE__*/newRegExp<1>`
 	^
 	${YMD}
 	[T ]
 	${HMS}
 	()
 	Z
-	$`.exec )();
+	$`.valueOf();
 
-const IS_LOCAL_DATETIME = /*#__PURE__*/( () => newRegExp`
+const { test: IS_LOCAL_DATETIME } = /*#__PURE__*/newRegExp`
 	^
 	${YMD}
 	[T ]
 	${HMS}
 	(?:\.\d+)?
-	$`.test )();
+	$`.valueOf();
 
-const IS_LOCAL_DATE = /*#__PURE__*/( () => newRegExp`
+const { test: IS_LOCAL_DATE } = /*#__PURE__*/newRegExp`
 	^
 	${YMD}
-	$`.test )();
+	$`.valueOf();
 
-const IS_LOCAL_TIME = /*#__PURE__*/( () => newRegExp`
+const { test: IS_LOCAL_TIME } = /*#__PURE__*/newRegExp`
 	^
 	${HMS}
 	(?:\.\d+)?
-	$`.test )();
+	$`.valueOf();
 
 const DOT_ZERO = /\.?0+$/;
 const DELIMITER_DOT = /[-T:.]/g;
@@ -137,8 +138,8 @@ const leap = (literal :string) => literal.slice(5, 10)!=='02-29' || +literal.sli
 
 const DATE :NativeDate = /*#__PURE__*/defineProperties(new NativeDate(0), /*#__PURE__*/getOwnPropertyDescriptors(NativeDate.prototype));
 
-const OffsetDateTime_ISOString = Symbol('OffsetDateTime_ISOString');
-const OffsetDateTime_value = Symbol('OffsetDateTime_value');
+const OffsetDateTime_ISOString :unique symbol = Symbol('OffsetDateTime_ISOString') as any;
+const OffsetDateTime_value :unique symbol = Symbol('OffsetDateTime_value') as any;
 const OffsetDateTime_use = (that :InstanceType<typeof OffsetDateTime>, $ :number = 0) => {
 	DATE.setTime(+that[OffsetDateTime_value] + $);
 	return DATE;
@@ -223,8 +224,8 @@ export const OffsetDateTime = /*#__PURE__*/fpc(class OffsetDateTime extends Date
 	
 });
 
-const LocalDateTime_ISOString = Symbol('LocalDateTime_ISOString');
-const LocalDateTime_value = Symbol('LocalDateTime_value');
+const LocalDateTime_ISOString :unique symbol = Symbol('LocalDateTime_ISOString') as any;
+const LocalDateTime_value :unique symbol = Symbol('LocalDateTime_value') as any;
 const LocalDateTime_get = (that :InstanceType<typeof LocalDateTime>, start :number, end :number) => +that[LocalDateTime_ISOString].slice(start, end);
 const LocalDateTime_set = (that :InstanceType<typeof LocalDateTime>, start :number, end :number, value :number) :void => {
 	const string = '' + value;
@@ -273,8 +274,8 @@ export const LocalDateTime = /*#__PURE__*/fpc(class LocalDateTime extends Dateti
 	
 });
 
-const LocalDate_ISOString = Symbol('LocalDate_ISOString');
-const LocalDate_value = Symbol('LocalDate_value');
+const LocalDate_ISOString :unique symbol = Symbol('LocalDate_ISOString') as any;
+const LocalDate_value :unique symbol = Symbol('LocalDate_value') as any;
 const LocalDate_get = (that :InstanceType<typeof LocalDate>, start :number, end :number) => +that[LocalDate_ISOString].slice(start, end);
 const LocalDate_set = (that :InstanceType<typeof LocalDate>, start :number, end :number, value :number) :void => {
 	const string = '' + value;
@@ -310,8 +311,8 @@ export const LocalDate = /*#__PURE__*/fpc(class LocalDate extends Datetime {
 	
 });
 
-const LocalTime_ISOString = Symbol('LocalTime_ISOString');
-const LocalTime_value = Symbol('LocalTime_value');
+const LocalTime_ISOString :unique symbol = Symbol('LocalTime_ISOString') as any;
+const LocalTime_value :unique symbol = Symbol('LocalTime_value') as any;
 const LocalTime_get = (that :InstanceType<typeof LocalTime>, start :number, end :number) => +that[LocalTime_ISOString].slice(start, end);
 const LocalTime_set = (that :InstanceType<typeof LocalTime>, start :number, end :number, value :number) :void => {
 	const string = '' + value;

@@ -7,7 +7,7 @@ import get from '.WeakMap.prototype.get';
 import set from '.WeakMap.prototype.set';
 import create from '.Object.create';
 import isSafeInteger from '.Number.isSafeInteger';
-import ownKeys from '.Reflect.ownKeys';
+import getOwnPropertyNames from '.Object.getOwnPropertyNames';
 import undefined from '.undefined';
 import NULL from '.null.prototype';
 
@@ -21,12 +21,12 @@ export let mustScalar :boolean = true;
 
 export let useWhatToJoinMultilineString :string | null = null;
 export let usingBigInt :boolean | null = true;
-export let IntegerMin :bigint = 0n;
-export let IntegerMax :bigint = 0n;
+export let IntegerMinNumber :bigint = 0n;
+export let IntegerMaxNumber :bigint = 0n;
 
 /* xOptions */
 
-export type XOptions = undefined | null | boolean | Tag | {
+export type XOptions = undefined | null | {
 	tag? :null | Tag,
 	order? :boolean,
 	longer? :boolean,
@@ -35,7 +35,9 @@ export type XOptions = undefined | null | boolean | Tag | {
 	multi? :boolean,
 	comment? :boolean,
 	string? :boolean,
+	literal? :boolean,
 };
+export let preserveLiteral :boolean;
 export let zeroDatetime :boolean;
 export let inlineTable :boolean;
 export let moreDatetime :boolean;
@@ -115,7 +117,7 @@ const collect_on = (tag :string, array :null | Array, table :null | Table, key? 
 	collection[collection_length++] = each;
 };
 const collect_off = () :never => { throw iterator.throws(SyntaxError(`xOptions.tag is not enabled, but found tag syntax` + iterator.where(' at '))); };
-export let collect :(tag :string, ...rest :[ null, Table, string ] | [ Array, null ] | [ Array<Table>, Table, string ]) => void = collect_off;
+export let collect :(this :void, tag :string, ...rest :[ null, Table, string ] | [ Array, null ] | [ Array<Table>, Table, string ]) => void = collect_off;
 export type Process = ( (this :void) => void ) | null;
 export const Process = () :Process => {
 	if ( collection_length ) {
@@ -186,37 +188,31 @@ export const use = (specificationVersion :unknown, multilineStringJoiner :unknow
 		if ( typeof useBigInt!=='number' ) { throw TypeError('TOML.parse(,,,useBigInt)'); }
 		if ( !isSafeInteger(useBigInt) ) { throw RangeError('TOML.parse(,,,useBigInt)'); }
 		usingBigInt = null;
-		if ( useBigInt>=0 ) { IntegerMin = -( IntegerMax = BigInt(useBigInt) ); }
-		else { IntegerMax = -( IntegerMin = BigInt(useBigInt) ) - 1n; }
+		useBigInt>=0
+			? IntegerMinNumber = -( IntegerMaxNumber = BigInt(useBigInt) )
+			: IntegerMaxNumber = -( IntegerMinNumber = BigInt(useBigInt) ) - 1n;
 	}
 	
-	if ( xOptions==null || xOptions===false ) {
+	if ( xOptions==null ) {
 		Table = PlainTable;
 		sError = allowLonger = enableNull = allowInlineTableMultilineAndTrailingCommaEvenNoComma = false;
 		collect = collect_off;
 	}
-	else if ( xOptions===true ) {
-		Table = OrderedTable;
-		allowLonger = sError = enableNull = allowInlineTableMultilineAndTrailingCommaEvenNoComma = true;
-		collect = collect_off;
-	}
-	else if ( typeof xOptions==='function' ) {
-		Table = OrderedTable;
-		allowLonger = sError = enableNull = allowInlineTableMultilineAndTrailingCommaEvenNoComma = true;
-		if ( !mixed ) { throw TypeError('TOML.parse(,,,,tag) needs at least TOML 1.0 to support mixed type array'); }
-		processor = xOptions;
-		collect = collect_on;
+	else if ( typeof xOptions!=='object' ) {
+		throw TypeError(`TOML.parse(,,,${typeof xOptions}`);
 	}
 	else {
-		const { order, longer, exact, null: _null, multi, comment, string, tag, ...unknown } = xOptions;
-		if ( ownKeys(unknown).length ) { throw TypeError('TOML.parse(,,,,xOptions)'); }
+		const { order, longer, exact, null: _null, multi, comment, string, literal, tag, ...unknown } = xOptions;
+		const unknownNames = getOwnPropertyNames(unknown);
+		if ( unknownNames.length ) { throw TypeError(`TOML.parse(,,,,{ ${unknownNames.join(', ')} })`); }
 		Table = order ? OrderedTable : PlainTable;
-		allowLonger = !!longer;
+		allowLonger = !longer;
 		sError = !!exact;
 		enableNull = !!_null;
 		allowInlineTableMultilineAndTrailingCommaEvenNoComma = !!multi;
 		preserveComment = !!comment;
 		disableDigit = !!string;
+		preserveLiteral = !!literal;
 		if ( tag ) {
 			if ( typeof tag!=='function' ) { throw TypeError('TOML.parse(,,,,xOptions.tag)'); }
 			if ( !mixed ) { throw TypeError('TOML.parse(,,,,xOptions) xOptions.tag needs at least TOML 1.0 to support mixed type array'); }

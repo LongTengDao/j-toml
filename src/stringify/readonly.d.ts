@@ -8,7 +8,7 @@ export interface Table extends Null<Layer> {
 
 export type Layer = Value | ArrayOfTables | Table;
 
-export type Value = null | boolean | bigint | number | string | Literal | Datetime | StaticArray | InlineTable;
+export type Value = null | boolean | bigint | number | string | { readonly [_literal] :string | readonly [ string, ...string[] ] } | Datetime | StaticArray | InlineTable;
 
 export type StaticArray = readonly Value[];
 
@@ -19,16 +19,16 @@ export interface InlineTable extends Null<Value> {
 
 export interface Datetime { toISOString () :string }
 
-export type Literal = readonly [ string, ...string[] ];
-
 export type Options = undefined | {
 	readonly integer? :number
 	readonly newline? :'\n' | '\r\n'
 	readonly newlineAround? :'document' | 'section' | 'header' | 'pairs' | 'pair'
 	readonly indent? :string | number
 	readonly T? :'T' | ' '
+	readonly preferCommentFor? :'key' | 'this'
 	readonly xNull? :boolean
 	readonly xBeforeNewlineInMultilineTable? :'' | ','
 };
 
+import type { _literal } from '../types/atom';
 import type Null from '.null';

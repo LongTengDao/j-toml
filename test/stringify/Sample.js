@@ -1,4 +1,4 @@
-'use strict';module.exports=({ stringify, Section, inline, multiline, literal, commentFor }, newline)=>
+'use strict';module.exports=({ stringify, Section, inline, multiline, literal, commentFor, commentForThis }, newline)=>
 	stringify({
 		0: {
 			0: inline({ '-1': { '1e1': 2n } }),
@@ -10,13 +10,12 @@
 		},
 		'1-1': 1n,
 		true: false,
-		[commentFor('c')]: ' comment',
-		c: true,
+		c: true, [commentFor('c')]: ' comment',
 		e: literal`0b0000_0000`,
 		s: '',
 		b: '\b',
 		d: {
-			d: 0n,
+			d: 0n, [commentFor('d')]: ' comment',
 			o: 0n,
 			t: {
 				e: 1n,
@@ -38,9 +37,9 @@
 				
 			}),
 		},
-		sub: Section({
+		sub: Section({ [commentForThis]: ' comment',
 			k: 'v',
-			section: Section({
+			section: Section({ [commentForThis]: ' comment',
 				
 			}),
 		}),
@@ -48,11 +47,11 @@
 			Section({
 				'': 1,
 			}),
-			Section({
+			Section({ [commentForThis]: ' comment',
 				
 			}),
 			Section({
-				sub: Section({
+				sub: Section({ [commentForThis]: ' comment',
 					
 				}),
 			}),

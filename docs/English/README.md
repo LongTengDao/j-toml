@@ -16,14 +16,14 @@ npm install @ltd/j-toml
 ```javascript
 const TOML = require('@ltd/j-toml');
 
-const source  = `
+const source         = `
       I_am_normal    = '...'
       hasOwnProperty = '...'
       constructor    = '...'
       __proto__      = '...'
 `;
 
-const rootTable = TOML.parse(source, '\n');
+const rootTable = TOML.parse(source);
 
 rootTable.I_am_normal    // '...'
 rootTable.hasOwnProperty // '...'
@@ -241,7 +241,7 @@ declare function stringify (rootTable :ReadonlyTable, options? :Readonly<{
         *   type: `'document'` / `'section'` / `'header'` / `'pairs'` / `'pair'`
         *   default: `'header'`
         
-        When serializing, where to insert empty lines to improve readability.
+        While serializing, where to insert empty lines to improve readability.
         
         1.  `'document'`: only make sure the document begins and ends with a empty line for git diff (if the document is empty, only one empty line will be kept);
         2.  `'section'`: further ensures that sections (block tables) are separated by an empty line;
@@ -268,6 +268,13 @@ declare function stringify (rootTable :ReadonlyTable, options? :Readonly<{
         *   default: `'T'`
         
         The delimiter between date and time.
+        
+    -   ##### `options.preferCommentFor`
+        
+        *   type: `'key'` / `'this'`
+        *   default: `'key'`
+
+        See **comment** part below.
         
     -   ##### `options.xNull`
         
@@ -300,19 +307,23 @@ An error is thrown if the options does not meet the requirements, or there is an
 
 This library will not cause stack overflow error unexpectedly due to too deep tables or arrays.
 
-`TOML.Section` `TOML.inline` `TOML.multiline` `TOML.literal` `TOML.commentFor` `TOML.isSection` `TOML.isInline`
----------------------------------------------------------------------------------------------------------------
+`TOML.Section` `TOML.inline` `TOML.multiline` `TOML.multiline.basic` `TOML.basic` `TOML.literal` `TOML.commentFor` `TOML.commentForThis` `TOML.isSection` `TOML.isInline`
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-Due to the flexibility of TOML syntax, while it greatly meeting the needs of reading and writing directly, it also causes great difficulty for serialization solution.
+Due to the flexibility of TOML syntax, which greatly meeting the needs of reading and writing directly, there had been great difficulty for serialization solution.
 
-This library provides several helper functions to try to end this trouble.
+This library provides several helper functions to try to terminate this trouble.
 
-Considering how JS code is read and written, the default mode for this library to treat unmarked table objects is dotted key/value pairs (unless the table is at a layer where such operation is impossible, or the table is an empty table, in which cases it will be serialized in inline mode by default).  
+---
+
+首先是**表**和**数组**。
+
+Considering how JS code is read and written, the default mode for this library to treat unmarked tables is dotted key/value pairs (unless the table is empty or at somewhere such operation is impossible, in which cases it will be serialized in inline mode automatically).  
 You can use the `Section` function to mark a table as a block table (and return the input table), or use the `inline` function to mark the table as an inline table (return the input table as well).  
 You can also use `multiline` function to mark a table as a multiline mode inline table (and return it), but note that this is not the specification allowed currently (remember to specify `options.xBeforeNewlineInMultilineTable` to make such marking will not be ignored when serializing).
 
 ```javascript
-TOML.stringify({
+stringify({
     key: 'value',
     dotted: {
         key: 'value',
@@ -358,7 +369,7 @@ A non-empty array, whose item is table that marked by `Section`, will be seriali
 Otherwise, arrays are treated as static and multi-line by default. If you want single-line mode, you can use the `inline` function to mark it.
 
 ```javascript
-TOML.stringify({
+stringify({
     staticArray: [
         'string',
         { },
@@ -383,22 +394,34 @@ staticArray_singleline = [ 1.0, 2 ]
 
 ```
 
-Another sore point is comment. Obviously we don't want a configuration file that contains comments lose all comment information after being modified by programs.  
-Now you can write `[commentFor(key)]` as key in your tables (this gives you a `symbol` as key, and the value should be the comment content string), so that the comment is after the value belong the `key` in the final serialization!
+Data from `parse` of this library retains the memory of the writing style above, which means there is no need to manually mark them again when re-serialize the modified data.  
+You can transparently tell what style the table from `parse` is written in by `isSection` and `isInline`.
+
+---
+
+Another sore point is **comment**. Obviously we don't want a configuration file that contains comments lose all comment information after being modified by programs.  
+However, comments are comments in nature, so this feature is turned off in `parse` by default, you need to explicitly enable this via `xOptions.comment`.
+
+For brand-new data, you can write `[commentFor(key)]` explicitly as key in your tables (this gives you a `symbol` as key, and the value should be the comment content string, `parse` preserves comments basing on the same mechanism), so that the comment is after the value belong the `key` in the final serialization! (Note that the comment value can not include any newline, or there will be an error thrown.)
 
 ```javascript
-TOML.stringify({
-    [commentFor('key')]: ' this is a key/value pair',
-    key: 'value',
+stringify({
+    
+    key: 'value', [commentFor('key')]: ' this is a key/value pair',
     dotted: {
-        [commentFor('key')]: ' this is a dotted key/value pair',
-        key: 'value',
+        key: 'value', [commentFor('key')]: ' this is a dotted key/value pair',
     },
-    table: {
-        [commentFor('header')]: ' this is a table header (but it cannot be a table in an array of tables)',
-        header: Section({
+    
+    [commentFor('table')]: ' this is a table header',
+    table: Section({ [commentForThis]: 'you can also write table header comment inside',
+    }),
+    // when two writing styles both exist but their values are different, the result depends on `options.preferCommentFor`
+    
+    tables: [
+        Section({ [commentForThis]: ' this is a table header in array of tables',
         }),
-    },
+    ],
+    
 });
 ```
 
@@ -407,20 +430,21 @@ TOML.stringify({
 key = 'value' # this is a key/value pair
 dotted.key = 'value' # this is a dotted key/value pair
 
-[table.header] # this is a table header (but it cannot be a table in an array of tables)
+[table] # this is a table header
+
+[[tables]] # this is a table header in array of tables
 
 ```
 
-Data from `parse` of this library retains the memory of the writing style above, which means there is no need to manually mark them again when reserialize the modified data.  
-You can transparently tell what style the table from `parse` is written in by `isSection` and `isInline`.
+---
 
-There still left string, integer and float. Their writing choices, just as gymnastics scoring points, has no perfect solution to be specified (without solving problem by creating more); and they are atom values, no good way to preserve their preferences in the data producted by `parse`.  
+There still left **string**, **integer** and **float**. Their writing choices, just as gymnastics scoring points, has no perfect solution to be specified (without solving problem by creating more); and they are atom values, no good way to preserve their preferences in the data producted by `parse`.  
 This library provides several helper functions for this purpose, including `literal`, `multiline` (string case) and `multiline.basic` (which enforces the use of multi-line basic string rather than the multi-line literal string tried in preference).
 
-When you need to serialize a brand new temporary data directly, use `literal` to specify the writing style:
+When you need to serialize a brand-new temporary data directly, use `literal` to specify the writing style:
 
 ```javascript
-TOML.stringify({
+stringify({
     underscore: literal`1_000`,
     zero: literal`10.00`,
     base: literal`0o777`,
@@ -473,7 +497,7 @@ multilineString = """
 ```
 
 By default, `multiline` (string case) splits the input string with `'\n'`, for example `'1\b2\n3\b4'` will be treated as `[ '1\b2 ', '3\b4' ]`.  
-But if your requirements are very tricky, such as if your data is parsed by `TOML.parse(source, '\b')`, you can directly the split string array `'1\b2\n3\b4'.split('\b')` (viz `[ '1', '2\n3', '4' ]`), the final serialization result will be:
+But if your requirements are very tricky, such as if your data is parsed by `TOML.parse(source, { joiner: '\b' })`, you can directly the split string array `'1\b2\n3\b4'.split('\b')` (viz `[ '1', '2\n3', '4' ]`), the final serialization result will be:
 
 ```toml
 multilineString = """
@@ -482,28 +506,9 @@ multilineString = """
 4"""
 ```
 
-Note that `literal` or `multiline` (string case) or `multiline.basic` does not return an atomic value, but a placeholder object, which means that this whole data will only be able to be used for `stringify` and nothing else.  
-It was a bit of a hassle, what's worse, you had to mark all other unmodified atom value at the same time, the experience will be really bad.  
-In applications where this behaviour occurs frequently, consider converting the table from `parse` into an instance of a class containing methods like `toTOML` that specify the serialization choice for each property, and use the returned copy for 'stringify', that will improve the experience greatly:
+`multiline.basic` can force a multi-line basic string to be generated, even if the actual value could be directly represented by a multi-line literal string.  
+Similarly, `basic` can force a (single-line) basic string to be generated, even if the actual value could be directly represented by a (single-line) literal string.
 
-```javascript
-const model = new class {
-    base;
-    multilineString;
-    constructor (table) {
-        this.base = table.base;
-        this.multilineString = table.multilineString;
-        return this;
-    }
-    toTOML () {
-        return {
-            base: TOML.literal('0o' + this.base.toString(8).padStart(3, '0')),
-            multilineString: TOML.multiline(this.multilineString),
-        };
-    }
-}(TOML.parse('/path/to/example.toml', '\n'));
-
-model.multilineString += '\b4';
-
-TOML.stringify(model.toTOML());
-```
+Note that `literal` or `multiline` (string case) or `multiline.basic` or `basic` does not return an atomic value, but a placeholder object recording serialization information.  
+When conditions are met (see the `.d.ts` file for details), the object type corresponds to the atomic type, so that it can satisfy common operational requirements in addition to `stringify`.  
+When `parse`, you need to enable the `xOptions.literal`, to preserve atomic value writing style information based on the same mechanism, so that when `stringify` back, writing preferences will be preserved as much as possible.

@@ -1,7 +1,5 @@
 import Error from '.Error';
 import SyntaxError from '.SyntaxError';
-import Infinity from '.Infinity';
-import NaN from '.NaN';
 import undefined from '.undefined';
 
 import { theRegExp } from '@ltd/j-regexp';
@@ -9,6 +7,7 @@ import { theRegExp } from '@ltd/j-regexp';
 import { x } from '../j-lexer';/// external
 
 import * as iterator from '../iterator';
+import { LiteralObject } from '../types/atom';
 import { INLINE, DIRECTLY } from '../types/Table';
 import { newArray, STATICALLY } from '../types/Array';
 import { OffsetDateTime, LocalDateTime, LocalDate, LocalTime, OFFSET$ } from '../types/Datetime';
@@ -19,10 +18,10 @@ import * as options from '../options';
 import * as regexps from '../regexps';
 import { appendTable, prepareTable, prepareInlineTable, assignLiteralString, assignBasicString } from './on-the-spot';
 
-import { commentFor } from '../types/comment';
+import { commentFor, commentForThis } from '../types/comment';
 import { beInline } from '../types/non-atom';
 
-const IS_OFFSET$ = /*#__PURE__*/( () => theRegExp(OFFSET$).test )();
+const { test: IS_OFFSET$ } = theRegExp(OFFSET$);
 
 const parseKeys = (rest :string) :{ leadingKeys :string[], finalKey :string, lineRest :string } => {
 	let lineRest :string = rest;
@@ -31,9 +30,9 @@ const parseKeys = (rest :string) :{ leadingKeys :string[], finalKey :string, lin
 	for ( ; ; ) {
 		lineRest || iterator.throws(SyntaxError(`Empty bare key` + iterator.where(' at ')));
 		if ( lineRest[0]==='"' ) {
-			const key :string = regexps.BASIC_STRING_exec_1(lineRest);
-			lineRest = lineRest.slice(2 + key.length);
-			leadingKeys[++lastIndex] = BasicString(key);
+			const index :number = regexps.BASIC_STRING_exec_1_endIndex(lineRest);
+			leadingKeys[++lastIndex] = BasicString(lineRest.slice(1, index));
+			lineRest = lineRest.slice(index + 1);
 		}
 		else {
 			const isQuoted = lineRest[0]==='\'';
@@ -83,21 +82,10 @@ const push = (lastArray :Array, lineRest :string) :string | S => {
 			return equalStaticArray(options.asArrays(lastArray), lastArray.length, lineRest);
 	}
 	const { 1: literal } = { 2: lineRest } = regexps.VALUE_REST_exec(lineRest) ?? iterator.throws(SyntaxError(`Bad atom value` + iterator.where(' at ')));
-	if ( options.sFloat ) {
-		if ( literal==='inf' || literal==='+inf' ) {
-			options.asFloats(lastArray)[lastArray.length] = Infinity;
-			return lineRest;
-		}
-		if ( literal==='-inf' ) {
-			options.asFloats(lastArray)[lastArray.length] = -Infinity;
-			return lineRest;
-		}
-		if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) {
-			options.asFloats(lastArray)[lastArray.length] = NaN;
-			return lineRest;
-		}
-	}
-	if ( literal.includes(':') ) {
+	if ( literal==='true' ) { options.asBooleans(lastArray)[lastArray.length] = true; }
+	else if ( literal==='false' ) { options.asBooleans(lastArray)[lastArray.length] = false; }
+	else if ( options.enableNull && literal==='null' ) { options.asNulls(lastArray)[lastArray.length] = null; }
+	else if ( literal.includes(':') ) {
 		if ( literal.includes('-') ) {
 			if ( IS_OFFSET$(literal) ) {
 				options.asOffsetDateTimes(lastArray)[lastArray.length] = new OffsetDateTime(literal);
@@ -111,17 +99,17 @@ const push = (lastArray :Array, lineRest :string) :string | S => {
 			options.moreDatetime || iterator.throws(SyntaxError(`Local Time is not allowed before TOML v0.5` + iterator.where(', which at ')));
 			options.asLocalTimes(lastArray)[lastArray.length] = new LocalTime(literal);
 		}
-		return lineRest;
 	}
-	if ( literal.indexOf('-')!==literal.lastIndexOf('-') && literal[0]!=='-' ) {
+	else if ( literal.indexOf('-')!==literal.lastIndexOf('-') && literal[0]!=='-' ) {
 		options.moreDatetime || iterator.throws(SyntaxError(`Local Date is not allowed before TOML v0.5` + iterator.where(', which at ')));
 		options.asLocalDates(lastArray)[lastArray.length] = new LocalDate(literal);
-		return lineRest;
 	}
-	literal==='true' ? options.asBooleans(lastArray)[lastArray.length] = true : literal==='false' ? options.asBooleans(lastArray)[lastArray.length] = false :
-		literal.includes('.') || ( literal.includes('e') || literal.includes('E') ) && !literal.startsWith('0x') ? options.asFloats(lastArray)[lastArray.length] = Float(literal) :
-			options.enableNull && literal==='null' ? options.asNulls(lastArray)[lastArray.length] = null :
-				options.asIntegers(lastArray)[lastArray.length] = Integer(literal);
+	else {
+		literal.includes('.') || literal.includes('n') || ( literal.includes('e') || literal.includes('E') ) && !literal.startsWith('0x')
+			? options.asFloats(lastArray)[lastArray.length] = options.preserveLiteral ? LiteralObject(literal, Float(literal)) : Float(literal)
+			: options.asIntegers(lastArray)[lastArray.length] = options.preserveLiteral ? LiteralObject(literal, Integer(literal)) : Integer(literal)
+		;
+	}
 	return lineRest;
 };
 
@@ -248,21 +236,10 @@ const assign = ({ finalKey, tag, lineRest, table } :ForComment) :string | S => {
 			return equalStaticArray(table, finalKey, lineRest);
 	}
 	const { 1: literal } = { 2: lineRest } = regexps.VALUE_REST_exec(lineRest) ?? iterator.throws(SyntaxError(`Bad atom value` + iterator.where(' at ')));
-	if ( options.sFloat ) {
-		if ( literal==='inf' || literal==='+inf' ) {
-			table[finalKey] = Infinity;
-			return lineRest;
-		}
-		if ( literal==='-inf' ) {
-			table[finalKey] = -Infinity;
-			return lineRest;
-		}
-		if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) {
-			table[finalKey] = NaN;
-			return lineRest;
-		}
-	}
-	if ( literal.includes(':') ) {
+	if ( literal==='true' ) { table[finalKey] = true; }
+	else if ( literal==='false' ) { table[finalKey] = false; }
+	else if ( options.enableNull && literal==='null' ) { table[finalKey] = null; }
+	else if ( literal.includes(':') ) {
 		if ( literal.includes('-') ) {
 			if ( IS_OFFSET$(literal) ) {
 				table[finalKey] = new OffsetDateTime(literal);
@@ -276,18 +253,17 @@ const assign = ({ finalKey, tag, lineRest, table } :ForComment) :string | S => {
 			options.moreDatetime || iterator.throws(SyntaxError(`Local Time is not allowed before TOML v0.5` + iterator.where(', which at ')));
 			table[finalKey] = new LocalTime(literal);
 		}
-		return lineRest;
 	}
-	if ( literal.indexOf('-')!==literal.lastIndexOf('-') && literal[0]!=='-' ) {
+	else if ( literal.indexOf('-')!==literal.lastIndexOf('-') && literal[0]!=='-' ) {
 		options.moreDatetime || iterator.throws(SyntaxError(`Local Date is not allowed before TOML v0.5` + iterator.where(', which at ')));
 		table[finalKey] = new LocalDate(literal);
-		return lineRest;
 	}
-	table[finalKey] =
-		literal==='true' ? true : literal==='false' ? false :
-			literal.includes('.') || ( literal.includes('e') || literal.includes('E') ) && !literal.startsWith('0x') ? Float(literal) :
-				options.enableNull && literal==='null' ? null :
-					Integer(literal);
+	else {
+		table[finalKey] = literal.includes('.') || literal.includes('n') || ( literal.includes('e') || literal.includes('E') ) && !literal.startsWith('0x')
+			? options.preserveLiteral ? LiteralObject(literal, Float(literal)) : Float(literal)
+			: options.preserveLiteral ? LiteralObject(literal, Integer(literal)) : Integer(literal)
+		;
+	}
 	return lineRest;
 };
 
@@ -302,9 +278,9 @@ export default () :Table => {
 				const table :Table = prepareTable(rootTable, leadingKeys);
 				if ( lineRest ) {
 					lineRest[0]==='#' || iterator.throws(SyntaxError(`Unexpect charachtor after table header` + iterator.where(' at ')));
-					if ( options.preserveComment && !asArrayItem ) { table[commentFor(finalKey)] = lineRest.slice(1); }
 				}
 				lastSectionTable = appendTable(table, finalKey, asArrayItem, tag);
+				options.preserveComment && lineRest && ( lastSectionTable[commentForThis] = asArrayItem ? lineRest.slice(1) : table[commentFor(finalKey)] = lineRest.slice(1) );
 			}
 			else if ( line[0]==='#' ) {
 				regexps.__CONTROL_CHARACTER_EXCLUDE_test(line) && iterator.throws(SyntaxError(`Control characters other than Tab are not permitted in comments` + iterator.where(', which was found at ')));

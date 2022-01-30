@@ -1,4 +1,6 @@
-const previous = Symbol('previous');
+import Symbol from '.Symbol';
+
+const previous :unique symbol = Symbol('previous') as any;
 
 type Stack = {
 	readonly next :(_yield? :any) =>

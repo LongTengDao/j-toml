@@ -2,11 +2,7 @@
 `超级选项`
 ==========
 
-只对 `规范版本` `0.4` 以上提供了 TSD 支持。
-
 以下选项默认均不开启。
-
-简便起见，直接传递 `true` 值，将开启除 `超级选项.tag` 外的所有功能；如果传入函数，则会将其作为 `超级选项.tag` 对待，同时开启其它所有功能。
 
 `超级选项.order`
 ----------------
@@ -30,7 +26,7 @@
 *   类型：`boolean`
 *   默认值：`false`
 
-是否禁止太大的浮点数自动变成 `±Infinity`、太小的浮点数自动变成 `±0`。
+是否禁止太大的浮点数自动变成 `±Infinity`、太小的浮点数自动变成 `±0` 或其它失去精度的情况发生。
 
 `超级选项.multi`
 ----------------
@@ -73,36 +69,51 @@ y = 2
 key = null
 ```
 
+`超级选项.literal`
+------------------
+
+*   类型：`boolean`
+*   默认值：`false`
+
+是否保留字符串、整数和浮点数的原始书写形态信息。
+
+注意，这会导致原本解析结果中 `string | bigint | number` 类型的值变成 `object & String | object & BigInt | object & Number`。
+
 `超级选项.comment`
 ------------------
+
+*   类型：`boolean`
+*   默认值：`false`
 
 是否尽可能保留注释信息（仅限直接书写于键值、表头后面的注释），通过 `TOML.commentFor(key)` 得到的 `symbol` 安插在 `key` 所在的表中。
 
 ```toml
 key = 'value' # 这是一个键值对
 dotted.key = 'value' # 这是一个点分隔键值对
-[table.header] # 这是一个表头（不能是表数组中的表）
+[table] # 这是一个表头
+[[tables]] # 这是一个表数组中的头
 ```
 
 这将得到：
 
 ```javascript
 ( {
-    [commentFor('key')]: ' 这是一个键值对',
-    key: 'value',
+    key: 'value', [commentFor('key')]: ' 这是一个键值对',
     dotted: {
-        [commentFor('key')]: ' 这是一个点分隔键值对',
-    	key: 'value',
+        key: 'value', [commentFor('key')]: ' 这是一个点分隔键值对',
     },
-    table: {
-    	[commentFor('header')]: ' 这是一个表头（不能是表数组中的表）',
-    	header: {},
-    },
+    table: { [commentForThis]: ' 这是一个表头' }, [commentFor('table')]: ' 这是一个表头',
+    tables: [
+        { [commentForThis]: ' 这是一个表数组中的头' },
+    ],
 } )
 ```
 
 `超级选项.string`
 ------------------
+
+*   类型：`boolean`
+*   默认值：`false`
 
 禁用形似数字等的键：
 

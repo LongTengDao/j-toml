@@ -10,11 +10,11 @@ import * as options from '../options';
 import Root from './level-loop';
 import { isArrayBufferLike, arrayBufferLike2string } from '../UTF8';
 
-const IS_NON_SCALAR = /*#__PURE__*/( () => theRegExp(/[\uD800-\uDFFF]/u).test )();
+const { test: IS_NON_SCALAR } = theRegExp(/[\uD800-\uDFFF]/u);
 
 let holding :boolean = false;
 
-const parse = (source :Source, specificationVersion :1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1, multilineStringJoiner? :string | { joiner? :string, bigint? :boolean | number, x? :options.XOptions }, useBigInt? :boolean | number, xOptions? :options.XOptions) :Table => {
+const parse = (source :Source, specificationVersion :1.0 | 0.5 | 0.4 | 0.3 | 0.2 | 0.1, multilineStringJoiner? :string | { joiner? :string, bigint? :boolean | number, x? :options.XOptions }, useBigInt? :boolean | number | bigint, xOptions? :options.XOptions) :Table => {
 	if ( holding ) { throw Error('parse during parsing.'); }
 	holding = true;
 	let rootTable :Table;

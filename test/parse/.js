@@ -9,7 +9,8 @@
 	if ( not(expect)(toml) ) {
 		for ( const [ key, value ] of Object.entries(expect) ) {
 			if ( not(value)(toml[key]) ) {
-				throw Error(JSON.stringify(toml[key], (key, value) => typeof value==='bigint' ? '' + value : value, '\t'));
+				console.log(toml[key]);
+				throw Error(key);
 			}
 		}
 	}
@@ -35,8 +36,8 @@
 		throw Error('!multilineStringJoiner');
 	}
 	
-	time('overflow&time&memory:', () => `["${'bt\\b\\t'.repeat(10000_0.00)}${'\\b\\t'.repeat(10000_0.00)}"]`);
-	time('overflow&time', () => 'k=[{'.repeat(20000.0) + '}]'.repeat(20000.0));/// loop (67ms) ≈ JSON (114ms) ≪ generator+Symbol (46s) ≈ closure+WeakMap (48s)
+	time('overflow&time&memory', (n = 2_000_000.0) => `["${'bt\\b\\t'.repeat(n)}"]`);
+	time('overflow&time', (n = 20_000.0) => 'k=[{'.repeat(n) + '}]'.repeat(n));/// loop (67ms) ≈ JSON (114ms) ≪ generator+Symbol (46s) ≈ closure+WeakMap (48s) ? 46s /10= 660ms ?
 	function time (label, Toml) {
 		console.log(label + ':');
 		const toml = Toml();

@@ -3,6 +3,7 @@ import SyntaxError from '.SyntaxError';
 
 import * as iterator from '../iterator';
 import * as regexps from '../regexps';
+import { LiteralObject } from '../types/atom';
 import { newArray, OF_TABLES, isArray, isStatic } from '../types/Array';
 import { DIRECTLY, IMPLICITLY, PAIR, isTable, isInline, directlyIfNot, fromPair } from '../types/Table';
 import * as options from '../options';
@@ -80,23 +81,26 @@ const checkLiteralString = (literal :string) :string => {
 };
 
 export const assignLiteralString = ( (table :Table, finalKey :string, literal :string) :string => {
-	if ( literal[1]!=='\'' || literal[2]!=='\'' ) {
+	if ( !literal.startsWith(`'''`) ) {
 		const $ = regexps.LITERAL_STRING_exec(literal) ?? iterator.throws(SyntaxError(`Bad literal string` + iterator.where(' at ')));
-		table[finalKey] = checkLiteralString($[1]);
+		const value = checkLiteralString($[1]);
+		table[finalKey] = options.preserveLiteral ? LiteralObject(literal.slice(0, value.length + 2), value) : value;
 		return $[2];
 	}
-	literal = literal.slice(3);
-	const $ = regexps.__MULTI_LINE_LITERAL_STRING_exec(literal);
+	const $ = regexps.__MULTI_LINE_LITERAL_STRING_exec(literal.slice(3));
 	if ( $ ) {
-		table[finalKey] = checkLiteralString($[1]) + $[2];
+		const value = checkLiteralString($[1]) + $[2];
+		table[finalKey] = options.preserveLiteral ? LiteralObject(literal.slice(0, value.length + 6), value) : value;
 		return $[3];
 	}
-	const start = new iterator.mark('Multi-line Literal String', literal.length + 3);
-	if ( !literal ) {
+	const start = new iterator.mark('Multi-line Literal String', literal.length);
+	const leadingNewline = !( literal = literal.slice(3) );
+	if ( leadingNewline ) {
 		literal = start.must();
 		const $ = regexps.__MULTI_LINE_LITERAL_STRING_exec(literal);
 		if ( $ ) {
-			table[finalKey] = checkLiteralString($[1]) + $[2];
+			const value = checkLiteralString($[1]) + $[2];
+			table[finalKey] = options.preserveLiteral ? LiteralObject([ `'''`, literal.slice(0, value.length + 3) ], value) : value;
 			return $[3];
 		}
 	}
@@ -106,7 +110,13 @@ export const assignLiteralString = ( (table :Table, finalKey :string, literal :s
 		const $ = regexps.__MULTI_LINE_LITERAL_STRING_exec(line);
 		if ( $ ) {
 			lines[lines.length] = checkLiteralString($[1]) + $[2];
-			table[finalKey] = lines.join(options.useWhatToJoinMultilineString!);
+			const value = lines.join(options.useWhatToJoinMultilineString!);
+			if ( options.preserveLiteral ) {
+				lines[lines.length - 1] += `'''`;
+				leadingNewline ? lines.unshift(`'''`) : lines[0] = `'''${literal}`;
+				table[finalKey] = LiteralObject(lines, value);
+			}
+			else { table[finalKey] = value; }
 			return $[3];
 		}
 		lines[lines.length] = checkLiteralString(line);
@@ -117,46 +127,51 @@ export const assignLiteralString = ( (table :Table, finalKey :string, literal :s
 };
 
 export const assignBasicString = ( (table :Table, finalKey :string, literal :string) :string => {
-	if ( literal[1]!=='"' || literal[2]!=='"' ) {
-		const string = regexps.BASIC_STRING_exec_1(literal);
-		table[finalKey] = BasicString(string);
-		return literal.slice(2 + string.length).replace(regexps.PRE_WHITESPACE, '');
+	if ( !literal.startsWith('"""') ) {
+		const index = regexps.BASIC_STRING_exec_1_endIndex(literal);
+		const value = BasicString(literal.slice(1, index));
+		table[finalKey] = options.preserveLiteral ? LiteralObject(literal.slice(0, index + 1), value) : value;
+		return literal.slice(index + 1).replace(regexps.PRE_WHITESPACE, '');
 	}
-	literal = literal.slice(3);
-	const $ = regexps.MULTI_LINE_BASIC_STRING_exec_0(literal);
-	let { length } = $;
-	if ( literal.startsWith('"""', length) ) {
+	let length = 3 + regexps.MULTI_LINE_BASIC_STRING_exec_0_length(literal.slice(3));
+	if ( literal.length!==length ) {
+		const $ = literal.slice(3, length);
 		regexps.ESCAPED_EXCLUDE_CONTROL_CHARACTER_test($) || iterator.throws(SyntaxError(`Bad multi-line basic string` + iterator.where(' at ')));
-		length += 3;
-		table[finalKey] = BasicString($) + ( literal[length]==='"' ? literal[++length]==='"' ? ( ++length, '""' ) : '"' : '' );
+		const value = BasicString($) + ( literal.startsWith('"', length += 3) ? literal.startsWith('"', ++length) ? ( ++length, '""' ) : '"' : '' );
+		table[finalKey] = options.preserveLiteral ? LiteralObject(literal.slice(0, length), value) : value;
 		return literal.slice(length).replace(regexps.PRE_WHITESPACE, '');
 	}
-	const start = new iterator.mark('Multi-line Basic String', literal.length + 3);
-	const skipped :0 | 1 = literal ? 0 : 1;
+	const start = new iterator.mark('Multi-line Basic String', length);
+	const skipped :0 | 1 = ( literal = literal.slice(3) ) ? 0 : 1;
 	if ( skipped ) {
 		literal = start.must();
-		const $ = regexps.MULTI_LINE_BASIC_STRING_exec_0(literal);
-		let { length } = $;
-		if ( literal.startsWith('"""', length) ) {
+		let length = regexps.MULTI_LINE_BASIC_STRING_exec_0_length(literal);
+		if ( literal.length!==length ) {
+			const $ = literal.slice(0, length);
 			regexps.ESCAPED_EXCLUDE_CONTROL_CHARACTER_test($) || iterator.throws(SyntaxError(`Bad multi-line basic string` + iterator.where(' at ')));
-			length += 3;
-			table[finalKey] = MultilineBasicString($, options.useWhatToJoinMultilineString!, skipped) + ( literal[length]==='"' ? literal[++length]==='"' ? ( ++length, '""' ) : '"' : '' );
+			const value = MultilineBasicString($, options.useWhatToJoinMultilineString!, skipped) + ( literal.startsWith('"', length += 3) ? literal.startsWith('"', ++length) ? ( ++length, '""' ) : '"' : '' );
+			table[finalKey] = options.preserveLiteral ? LiteralObject([ '"""', literal.slice(0, length) ], value) : value;
 			return literal.slice(length).replace(regexps.PRE_WHITESPACE, '');
 		}
 	}
 	options.useWhatToJoinMultilineString ?? start.nowrap();
-	regexps.ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(literal += '\n') || iterator.throws(SyntaxError(`Bad multi-line basic string` + iterator.where(' at ')));
+	regexps.ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(literal + '\n') || iterator.throws(SyntaxError(`Bad multi-line basic string` + iterator.where(' at ')));
 	for ( const lines :[ string, ...string[] ] = [ literal ]; ; ) {
-		let line :string = start.must();
-		const $ = regexps.MULTI_LINE_BASIC_STRING_exec_0(line);
-		let { length } = $;
-		if ( line.startsWith('"""', length) ) {
+		const line :string = start.must();
+		let length = regexps.MULTI_LINE_BASIC_STRING_exec_0_length(line);
+		if ( line.length!==length ) {
+			const $ = line.slice(0, length);
 			regexps.ESCAPED_EXCLUDE_CONTROL_CHARACTER_test($) || iterator.throws(SyntaxError(`Bad multi-line basic string` + iterator.where(' at ')));
-			length += 3;
-			table[finalKey] = MultilineBasicString(lines.join('') + $, options.useWhatToJoinMultilineString!, skipped) + ( line[length]==='"' ? line[++length]==='"' ? ( ++length, '""' ) : '"' : '' );
+			const value = MultilineBasicString(lines.join('\n') + '\n' + $, options.useWhatToJoinMultilineString!, skipped) + ( line.startsWith('"', length += 3) ? line.startsWith('"', ++length) ? ( ++length, '""' ) : '"' : '' );
+			if ( options.preserveLiteral ) {
+				skipped ? lines.unshift('"""') : lines[0] = `"""${literal}`;
+				lines[lines.length] = `${$}"""`;
+				table[finalKey] = LiteralObject(lines, value);
+			}
+			else { table[finalKey] = value; }
 			return line.slice(length).replace(regexps.PRE_WHITESPACE, '');
 		}
-		regexps.ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(line += '\n') || iterator.throws(SyntaxError(`Bad multi-line basic string` + iterator.where(' at ')));
+		regexps.ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(line + '\n') || iterator.throws(SyntaxError(`Bad multi-line basic string` + iterator.where(' at ')));
 		lines[lines.length] = line;
 	}
 } ) as {

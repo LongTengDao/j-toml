@@ -1,4 +1,5 @@
 import Error from '.Error';
+import species from '.Symbol.species';
 import Uint8Array from '.Uint8Array';
 import Buffer from '.Buffer?';
 import fromCharCode from '.String.fromCharCode';
@@ -10,7 +11,7 @@ const message = 'A TOML doc must be a (ful-scalar) valid UTF-8 file, without any
 
 export const arrayBufferLike2string :(this :void, value :ArrayBuffer) => string = Buffer
 	
-	? /*#__PURE__*/( ({ isBuffer, [Symbol.species]: Buf, byteLength, allocUnsafe, from }) => {
+	? /*#__PURE__*/( ({ isBuffer, [species]: Buf, byteLength, allocUnsafe, from }) => {
 		// @ts-ignore
 		if ( typeof Buffer.prototype.utf8Write==='function' ) {
 			const utf8 = Buffer.alloc(7);
@@ -19,11 +20,11 @@ export const arrayBufferLike2string :(this :void, value :ArrayBuffer) => string 
 			if ( utf8.equals(from('𠮷利')) ) {
 				return (arrayBufferLike :Buffer | Uint8Array | ArrayBuffer) :string => {
 					if ( !arrayBufferLike.byteLength ) { return ''; }
-					const buffer :Buffer = isBuffer(arrayBufferLike)
+					const buffer :Buffer = isBuffer(arrayBufferLike)/// isView, length===byteLength!, instanceof Buffer
 						? arrayBufferLike
-						: 'length' in arrayBufferLike/// isView
+						: 'length' in arrayBufferLike/// isView, length===byteLength!
 							? new Buf(arrayBufferLike.buffer, arrayBufferLike.byteOffset, arrayBufferLike.byteLength)
-							: new Buf(arrayBufferLike);
+							: new Buf(arrayBufferLike);/// class.isArrayBuffer!
 					const string :string = buffer.toString();
 					if ( string.includes('\uFFFD') ) {
 						const length :number = byteLength(string);
@@ -40,23 +41,23 @@ export const arrayBufferLike2string :(this :void, value :ArrayBuffer) => string 
 		return (arrayBufferLike :Buffer | Uint8Array | ArrayBuffer) :string => {
 			if ( !arrayBufferLike.byteLength ) { return ''; }
 			const buffer :Buffer =
-				isBuffer(arrayBufferLike)
+				isBuffer(arrayBufferLike)/// isView, length===byteLength!, instanceof Buffer
 					? arrayBufferLike
-					: 'length' in arrayBufferLike/// isView
+					: 'length' in arrayBufferLike/// isView, length===byteLength!
 						? new Buf(arrayBufferLike.buffer, arrayBufferLike.byteOffset, arrayBufferLike.byteLength)
-						: new Buf(arrayBufferLike);
+						: new Buf(arrayBufferLike);/// class.isArrayBuffer!
 			const string :string = buffer.toString();
 			if ( string.includes('\uFFFD') && !from(string).equals(buffer) ) { throw Error(message); }
 			return string[0]==='\uFEFF' ? string.slice(1) : string;
 		};
-	})(Buffer as typeof Buffer & { readonly [Symbol.species] :new (buffer :ArrayBufferLike, byteOffset? :number, byteLength? :number) => Buffer })
+	})(Buffer as typeof Buffer & { readonly [species] :new (buffer :ArrayBufferLike, byteOffset? :number, byteLength? :number) => Buffer })
 	
 	: (arrayBufferLike :Uint8Array | ArrayBuffer) :string => {
 		if ( !arrayBufferLike.byteLength ) { return ''; }
 		const uint8Array :Uint8Array =
-			'length' in arrayBufferLike/// isView
+			'length' in arrayBufferLike/// isView, length===byteLength!
 				? arrayBufferLike
-				: new Uint8Array(arrayBufferLike);
+				: new Uint8Array(arrayBufferLike);/// class.isArrayBuffer!
 		const { length } = uint8Array;
 		const length_1 = length - 1;
 		const length_2 = length_1 - 1;

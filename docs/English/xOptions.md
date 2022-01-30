@@ -2,11 +2,7 @@
 `xOptions`
 ==========
 
-Only provide TSD support when `specificationVersion` is `0.4` or higher.
-
 All following options are not turned on by default.
-
-For simplicity, passing the `true` value directly opens all features except `xOptions.tag`; if the input is a function, it is treated as `xOptions.tag`, and all other features are turned on at the same time.
 
 `xOptions.order`
 ----------------
@@ -30,7 +26,7 @@ Allow the integer type value to exceed 64 bit range (-9,223,372,036,854,775,808 
 *   type: `boolean`
 *   default: `false`
 
-Disallow the float type value too large being `±Infinity`, too small being `±0`.
+Disallow the float type value too large being `±Infinity`, too small being `±0`, or other loss of precision occurs.
 
 `xOptions.multi`
 ----------------
@@ -73,36 +69,51 @@ y = 2
 key = null
 ```
 
+`xOptions.literal`
+------------------
+
+*   type: `boolean`
+*   default: `false`
+
+Whether to preserve original writing style information of string, integer and float.
+
+Note that this will cause `string | bigint | number` types in parsed result becoming `object & String | object & BigInt | object & Number`.
+
 `xOptions.comment`
 ------------------
+
+*   type: `boolean`
+*   default: `false`
 
 Whether to preserve comment information as much as possible (only comments written directly after key/value pairs or table headers), which will be set via the `symbol` returned by `TOML.commentFor(key)` in the table where `key` in.
 
 ```toml
 key = 'value' # this is a key/value pair
 dotted.key = 'value' # this is a dotted key/value pair
-[table.header] # this is a table header (but it cannot be a table in an array of tables)
+[table] # this is a table header
+[[tables]] # this is a table header in array of tables
 ```
 
 This will result in:
 
 ```javascript
 ( {
-    [commentFor('key')]: ' this is a key/value pair',
-    key: 'value',
+    key: 'value', [commentFor('key')]: ' this is a key/value pair',
     dotted: {
-        [commentFor('key')]: ' this is a dotted key/value pair',
-    	key: 'value',
+        key: 'value', [commentFor('key')]: ' this is a dotted key/value pair',
     },
-    table: {
-    	[commentFor('header')]: ' this is a table header (but it cannot be a table in an array of tables)',
-    	header: {},
-    },
+    table: { [commentForThis]: ' this is a table header' }, [commentFor('table')]: ' this is a table header',
+    tables: [
+        { [commentForThis]: ' this is a table header in array of tables' },
+    ],
 } )
 ```
 
 `xOptions.string`
 ------------------
+
+*   type: `boolean`
+*   default: `false`
 
 Disable keys shaped like number, etc.:
 

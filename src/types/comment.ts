@@ -1,21 +1,22 @@
 import TypeError from '.TypeError';
+import SyntaxError from '.SyntaxError';
 import Symbol from '.Symbol';
 import Null from '.null';
 
-const KEYS = /*#__PURE__*/Null(null) as { [key :string] :symbol, [sym :symbol] :string };
-const Sym = (key :string) => {
-	const sym = Symbol(key);
-	KEYS[sym] = key;
-	return KEYS[key] = sym;
-};
-export const commentFor = (key :string) :symbol => KEYS[key] ?? Sym(key);
+import { theRegExp } from '@ltd/j-regexp';
 
-const NEWLINE = /\r?\n/g;
-export const getComment = <T extends string> (table :{ [Key in T] :unknown } & { [keyComment :symbol] :unknown }, key :T) :` #${string}` | `` => {
-	if ( key in KEYS && KEYS[key]! in table ) {
-		const comment = table[KEYS[key]!]!;
-		if ( typeof comment==='string' ) { return ` #${comment.replace(NEWLINE, '')}`; }///
-		throw TypeError(`the value of commentKey must be "string" type, while "${comment===null ? 'null' : typeof comment}" is found`);
+const KEYS = /*#__PURE__*/Null<symbol>(null);
+export const commentFor = (key :string) :symbol => KEYS[key] ??= Symbol(key);
+export const commentForThis :unique symbol = Symbol('this') as any;
+
+const { test: includesNewline } = theRegExp(/\r?\n/g);
+export const getCOMMENT = (table :{ readonly [keyComment :symbol] :unknown }, keyComment :symbol) :` #${string}` | `` => {
+	if ( keyComment in table ) {
+		const comment = table[keyComment];
+		if ( typeof comment!=='string' ) { throw TypeError(`the value of comment must be a string, while "${comment===null ? 'null' : typeof comment}" type is found`); }
+		if ( includesNewline(comment) ) { throw SyntaxError(`the value of comment must be a string and can not include newline`); }
+		return ` #${comment}`;///
 	}
 	return '';
 };
+export const getComment = <T extends string> (table :{ readonly [Key in T] :unknown } & { readonly [keyComment :symbol] :unknown }, key :T) :` #${string}` | `` => key in KEYS ? getCOMMENT(table, KEYS[key]!) : '';

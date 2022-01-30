@@ -26,8 +26,8 @@
             +   new feature: add `1.0`, `0.5`, `0.4`, `0.3`, `0.2`, `0.1` sub functions in `TOML.parse`
     14. 0.  *   fix indent in Markdown docs
     15. 0.  +   new feature: allow to omit the `multilineStringJoiner` parameter, as long as the final parsing does not actually encounter a multi-line string containing a newline to be preserved (not recommended)
-    16. 0.  +   new feature: `stringify` method, and helpers `Section`, `inline`, `multiline`, `multiline.basic`, `literal`, `commentFor`
-            +   new feature: export `OffsetDateTime`, `LocalDateTime`, `LocalDate`, `LocalTime` classes
+    16. 0.  +   new feature: `TOML.stringify` method, and helpers `TOML.Section`, `TOML.inline`, `TOML.multiline`, `TOML.multiline.basic`, `TOML.literal`, `TOML.commentFor`
+            +   new feature: export `TOML.OffsetDateTime`, `TOML.LocalDateTime`, `TOML.LocalDate`, `TOML.LocalTime` classes
             +   new feature (experimental): add `xOptions.comment`, to retain some comment information in the parsing result
             *   bug fix: fix no error thrown when parsing some kind of incorrect Offset Date-Time literal
             *   bug fix: fix parsing stack overflow caused by too much escaping in base string again (also preventive out of memory)
@@ -36,20 +36,33 @@
             *   bug fix: fix parsing stack overflow caused by too many underscores in integer or float
             *   bug fix: fix the problem that `globalThis.require` doesn't exist actually
         1.  *   bug fix: make error position more exact
-            *   bug fix: make `parse` more robust to eradicate broken by overlapped calling
+            *   bug fix: make `TOML.parse` more robust to eradicate broken by overlapped calling
     17. 0.  +   new feature: add parameter `source.require`, avoid statically loading `fs` module, etc. (to read TOML file data for specified `source.path`)
             +   new feature: add support to `Uint8Array` and `ArrayBuffer`
             +   new feature (experimental): add `xOptions.string`, to disable keys shaped like numbers, etc.
             +   new feature: quote keys shaped like number, etc., during `TOML.stringify`
     18. 0.  +   new feature: allow passing rest arguments of `TOML.parse` via an options object
-    19. 0.  +   new feature: export helpers `isSection`, `isInline`
+    19. 0.  +   new feature: export helpers `TOML.isSection`, `TOML.isInline`
     20. 0.  +   new feature: add `UMD` format support to dist
     21. 0.  +   new feature: add `TOML.stringify` option to specify a integer range to serialize `number` type to TOML Integer
-    22. 0.  *   the finalized `OffsetDateTime`, `LocalDateTime`, `LocalDate`, `LocalTime` class methods are officially launched in the document
-            *   officially launch helpers `isSection`, `isInline` in the document
-            *   bug fix: fix the issue when `inline` a table, the mutually-exclusive `Section` state is not removed
+    22. 0.  *   the finalized `TOML.OffsetDateTime`, `TOML.LocalDateTime`, `TOML.LocalDate`, `TOML.LocalTime` class methods are officially launched in the document
+            *   officially launch helpers `TOML.isSection`, `TOML.isInline` in the document
+            *   bug fix: fix the issue when `TOML.inline` a table, the mutually-exclusive `TOML.Section` state is not removed
     23. 0.  *   based on TypeScript 4.5 new features `.d.mts` extension name and `types` category in `exports` field of `package.json`, provide own type declaration file `index.d.mts` for ESM mode of NPM edition
             *   ensure when Node.js engine changes its internal implementation, the fast code could fall back to normal
             *   remove lookbehind syntax in RegExp for Safari compatibility
     24. 0.  *   supplement the docs that the object style arguments of `TOML.parse` which was added since 1.18.0, also applies for the version sub functions of `TOML.parse`
-            *   no longer error in 0.4 and previous version for whitespace after "line ending backslash" (revert the corresponding change in 1.16.0), no longer error in 0.5 and previous version for Tab literal in Basic String, no longer error in 0.5 and previous version for 1 or 2 quotation marks at the end of a multi-line string, no longer error in 0.2 and previous version for non-scalar values of `\u****` in Basic String, because this libarary's support policy for previous versions of the TOML specification is consistent with the principle of not causing unnecessary errors
+            *   no longer error in 0.4 and previous version for whitespace after "line ending backslash" (revert the corresponding change in 1.16.0), no longer error in 0.5 and previous version for Tab literal in Basic String, no longer error in 0.5 and previous version for 1 or 2 quotation marks at the end of a multi-line string, because this libarary's support policy for previous versions of the TOML specification is consistent with the principle of not causing unnecessary errors
+            *   no longer error in 0.2 and previous version for non-scalar values of `\u****` in Basic String
+    25. 0.  *   the requirement in `.d.ts` for date-time value passed into `TOML.stringify` is relaxed to allow native `Date` (actual runtime behavior from the beginning)
+            +   new feature: add `TOML.commentForThis` support for section table in stringify/parse
+            *   change feature: no more silently trimming newlines in comments passed into `TOML.stringify`, but throw an error instead
+            +   the requirement in `.d.ts` for array passed into `TOML.multiline` is relaxed to allow native empty array
+            +   the requirement in `.d.ts` for value passed into `TOML.isInline` is relaxed to allow array
+            +   new feature: helper `TOML.basic`
+            *   change feature (experimental): the validity range of `TOML.parse`'s parameter `xOptions.exact` is enlarged
+            *   change feature (experimental): `TOML.parse`'s parameter `xOptions` do not accept passing boolean or function as shorthand style anymore
+            *   typing change: abandoned the unnecessary complexity of `.d.ts` about `TOML.parse`
+            *   bug fix (experimental): fix the problem that `xOptions.exact` can not treat exponent part including underscore correctly
+            +   new feature (experimental): `xOptions.literal`
+            +   new feature: add value support for literal-related api

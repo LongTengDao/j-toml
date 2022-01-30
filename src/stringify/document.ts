@@ -18,7 +18,7 @@ const name2code = /*#__PURE__*/Null({
 	pair: 4,
 } as const);
 
-const IS_INDENT = /*#__PURE__*/( () => theRegExp(/^[\t ]*$/).test )();
+const { test: IS_INDENT } = theRegExp(/^[\t ]*$/);
 
 const return_false = () => false;
 
@@ -29,7 +29,7 @@ export default class TOMLDocument extends Array<TOMLSection> {
 	0 = new TOMLSection(this);
 	
 	readonly asInteger :(this :void, number :number) => boolean;
-	readonly newline :'' | '\n' | '\r\n';
+	readonly newline :'' | '\n' | '\r\n' = '';
 	readonly newlineUnderSection :boolean;
 	readonly newlineUnderSectionButPair :boolean;
 	readonly newlineUnderHeader :boolean;
@@ -41,6 +41,7 @@ export default class TOMLDocument extends Array<TOMLSection> {
 	readonly nullDisabled :boolean;
 	readonly multilineTableDisabled :boolean;
 	readonly multilineTableComma :boolean;
+	readonly preferCommentForThis :boolean = false;
 	
 	constructor (options :READONLY.Options) {
 		super();
@@ -55,12 +56,17 @@ export default class TOMLDocument extends Array<TOMLSection> {
 		}
 		else { throw TypeError(`TOML.stringify(,{integer}) can only be number`); }
 		const newline = options?.newline;
-		if ( newline===undefined || newline==='\n' || newline==='\r\n' ) { this.newline = newline ?? ''; }
+		if ( newline===undefined ) { this.newline = ''; }
+		if ( newline==='\n' || newline==='\r\n' ) { this.newline = newline; }
 		else {
 			throw typeof newline==='string'
 				? SyntaxError(`TOML.stringify(,{newline}) can only be valid TOML newline`)
 				: TypeError(`TOML.stringify(,{newline}) can only be string`);
 		}
+		const preferCommentFor = options?.preferCommentFor;
+		if ( preferCommentFor===undefined || preferCommentFor==='key' ) {}
+		else if ( preferCommentFor==='this' ) { this.preferCommentForThis = true; }
+		else { throw TypeError(`TOML.stringify(,{preferCommentFor) can only be 'key' or 'this'`); }
 		const around = name2code[options?.newlineAround ?? 'header'] ?? name2code.header;
 		this.newlineUnderSection = around>0;
 		this.newlineUnderSectionButPair = around===1 || around===2;
