@@ -439,7 +439,7 @@ dotted.key = 'value' # this is a dotted key/value pair
 ---
 
 There still left **string**, **integer** and **float**. Their writing choices, just as gymnastics scoring points, has no perfect solution to be specified (without solving problem by creating more); and they are atom values, no good way to preserve their preferences in the data producted by `parse`.  
-This library provides several helper functions for this purpose, including `literal`, `multiline` (string case) and `multiline.basic` (which enforces the use of multi-line basic string rather than the multi-line literal string tried in preference).
+This library provides several helper functions for this purpose, including `literal`, `multiline` (string case), `multiline.basic` and `basic` (which enforce the use of (multi-line) basic string rather than the (multi-line) literal string tried in preference).
 
 When you need to serialize a brand-new temporary data directly, use `literal` to specify the writing style:
 
