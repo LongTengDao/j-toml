@@ -84,9 +84,9 @@ type Table = object;
         *   type: `string`
         
         For the multi-line basic strings and multi-line literal strings, what will be used to join the lines for parsing result.  
-        Note: TOML always use `'\n'` or `'\r\n'` to split the document lines while parsing, which defined in TOML specification, it has nothing to do with this parameter, so don't be mixed up.
+        Note: TOML always use `'\n'` or `'\r\n'` to split the document lines while parsing, which defined in TOML specification, **it has nothing to do with this parameter**, so don't be mixed up.
         
-        If this parameter is not passed in, the parsing process will throw an error where it is actually needed (a multi-line string containing a non-ignored newline):
+        **If this parameter is not passed in**, the parsing process will throw an error where it is actually needed (a multi-line string containing a non-ignored newline):
         
         ```toml
         error = """
@@ -147,14 +147,18 @@ Note: the requirements of 4 types TOML date-time do not fully correspond to the 
 
 *   type: `Error`
 
-There will be an error thrown, when the arguments not meet the requirement or there is any error within the source. Parsing during parsing caused by hacking will also be blocked.
+There will be an error thrown, when the arguments not meet the requirement or there is any error within the source. Parsing during parsing caused by hacking source will also be blocked.
 
 This library will not cause stack overflow error unexpectedly due to too deep tables or arrays, or too many escaping in basic string, or too many underscores in integer or float.
 
 `TOML.parse[1.0]` `TOML.parse[0.5]` `TOML.parse[0.4]` `TOML.parse[0.3]` `TOML.parse[0.2]` `TOML.parse[0.1]`
 -----------------------------------------------------------------------------------------------------------
 
-If there is no special reason (e.g. the downstream program could not deal with `Infinity`、`NaN`、fractional seconds and edge date-time values, Local Date-Time / Local Date / Local Time types, empty string key name, mixed type array even array of tables / table under array of arrays structure yet), the latest version is recommended.
+This library's support policy for previous versions of the TOML specification is under the principle of not causing unnecessary errors.  
+For example, although `""""Hi!""""` is not supported until 1.0, but in 0.5 you can get the same value via `'"Hi!"'`, so there won't be an error thrown;  
+`inf` can really not be expressed until 0.5, so in order to avoid unexpected behavior that a 0.4-compliant downstream program has not considered, the parser behaves version-dependent.
+
+So, if there is no specific reason (e.g. the downstream program could not deal with `Infinity`, `NaN`, fractional seconds and edge date-time values, Local Date-Time / Local Date / Local Time types, empty string key name, mixed type array even array of tables / table under array of arrays structure yet), the latest version is recommended.
 
 ### `arguments` (object style)
 
@@ -234,7 +238,7 @@ declare function stringify (rootTable :ReadonlyTable, options? :Readonly<{
         
         *   type: `'\n'` / `'\r\n'`
         
-        What to use as the newline for serialization. If this parameter is not specified, the function will return an array of strings (representing each line) instead of a whole string.
+        What to use as the newline for serialization. **If this parameter is not specified**, the function will return an array of strings (representing each line) instead of a whole string.
         
     -   ##### `options.newlineAround`
         
@@ -318,7 +322,7 @@ This library provides several helper functions to try to terminate this trouble.
 
 Let's start with **table** and **array**.
 
-Considering how JS code is read and written, the default mode for this library to treat unmarked tables is dotted key/value pairs (unless the table is empty or at somewhere such operation is impossible, in which cases it will be serialized in inline mode automatically).  
+Considering how JS code is read and written, **the default mode for this library to treat unmarked tables is dotted key/value pairs** (unless the table is empty or at somewhere such operation is impossible, in which cases it will be serialized in inline mode automatically).  
 You can use the `Section` function to mark a table as a block table (and return the input table), or use the `inline` function to mark the table as an inline table (return the input table as well).  
 You can also use `multiline` function to mark a table as a multiline mode inline table (and return it), but note that this is not the specification allowed currently (remember to specify `options.xBeforeNewlineInMultilineTable` to make such marking will not be ignored when serializing).
 
@@ -366,7 +370,10 @@ key = 'value'
 ```
 
 A non-empty array, whose items are tables that marked by `Section`, will be serialized as "array of tables". Note that an array's items must all be or all not be tables marked by `Section`.  
-Otherwise, arrays are treated as static and multi-line by default. If you want single-line mode, you can use the `inline` function to mark it (and `multiline.array` to reverse).
+Otherwise, **arrays are treated as static and multi-line by default**. If you want single-line mode, you can use the `inline` function to mark it (and `multiline.array` to reverse).
+
+This default behavior is different with most implementation libraries and a little more cumbersome (in most cases, people expect an objects array to be serialized as an "array of tables" by default).  
+The central reason for this design is, considering how JS code is read and written, "array of table" rather than static array should look marked in code, and its item should better look the same as the section table.
 
 ```javascript
 stringify({
@@ -509,6 +516,6 @@ multilineString = """
 `multiline.basic` can force a multi-line basic string to be generated, even if the actual value could be directly represented by a multi-line literal string.  
 Similarly, `basic` can force a (single-line) basic string to be generated, even if the actual value could be directly represented by a (single-line) literal string.
 
-Note that `literal` or `multiline` (string case) or `multiline.basic` or `basic` does not return an atomic value, but a placeholder object recording serialization information.  
-When conditions are met (see the `.d.ts` file for details), the object type corresponds to the atomic type, so that it can satisfy common operational requirements in addition to `stringify`.  
+Note that `literal` or `multiline` (string case) or `multiline.basic` or `basic` does not return an atomic value (`string`, `number`, `bigint`), but a placeholder object recording serialization information (`object`).  
+When conditions are met (see the `.d.ts` file for details; in simple terms, when the value is clear), the object type corresponds to the atomic type (`String`, `Number`, `BigInt`), so that it can satisfy common operational requirements in addition to `stringify`.  
 When `parse`, you need to enable the `xOptions.literal`, to preserve atomic value writing style information based on the same mechanism, so that when `stringify` back, writing preferences will be preserved as much as possible.

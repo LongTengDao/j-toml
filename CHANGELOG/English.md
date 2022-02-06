@@ -52,7 +52,7 @@
             *   ensure when Node.js engine changes its internal implementation, the fast code could fall back to normal
             *   remove lookbehind syntax in RegExp for Safari compatibility
     24. 0.  *   supplement the docs that the object style arguments of `TOML.parse` which was added since 1.18.0, also applies for the version sub functions of `TOML.parse`
-            *   no longer error in 0.4 and previous version for whitespace after "line ending backslash" (revert the corresponding change in 1.16.0), no longer error in 0.5 and previous version for Tab literal in Basic String, no longer error in 0.5 and previous version for 1 or 2 quotation marks at the end of a multi-line string, because this libarary's support policy for previous versions of the TOML specification is consistent with the principle of not causing unnecessary errors
+            *   no longer error in 0.4 and previous version for whitespace after "line ending backslash" (revert the corresponding change in 1.16.0), no longer error in 0.5 and previous version for Tab literal in Basic String, no longer error in 0.5 and previous version for 1 or 2 quotation marks at the end of a multi-line string, because this library's support policy for previous versions of the TOML specification is consistent with the principle of not causing unnecessary errors
             *   no longer error in 0.2 and previous version for non-scalar values of `\u****` in Basic String
     25. 0.  *   the requirement in `.d.ts` for date-time value passed into `TOML.stringify` is relaxed to allow native `Date` (actual runtime behavior from the beginning)
             +   new feature: add `TOML.commentForThis` support for section table in stringify/parse
