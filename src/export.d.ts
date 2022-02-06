@@ -29,7 +29,11 @@ export function isInline (this :void, value :ReadonlyTable | ReadonlyArray) :boo
 export function Section<T extends ReadonlyTable> (this :void, table :T) :T;
 export function inline<T extends ReadonlyTable | ReadonlyArray> (this :void, value :T) :T;
 export const multiline :{
-	<T extends ReadonlyTable>
+	readonly array :{
+		<T extends ReadonlyArray>
+		(this :void, array :T                               ) :T
+	}
+		<T extends ReadonlyTable>
 		(this :void, table :T                               ) :T
 		(this :void, value :string                          ) :{ [_literal] :[ `"""`, ...string[], `${string}"""` ] | [ `'''`, ...string[], `${string}'''` ] } & object & String
 		(this :void, lines :readonly string[]               ) :{ [_literal] :[ `"""`, ...string[], `${string}"""` ] | [ `'''`, ...string[], `${string}'''` ] } & object

@@ -19,18 +19,19 @@ export default (rootTable :READONLY.Table, options :READONLY.Options) :string | 
 export { inline, Section } from '../types/non-atom';
 export { _literal } from '../types/atom';
 import { LiteralObject } from '../types/atom';
-import { multilineTable } from '../types/non-atom';
+import { multilineTable, multilineArray } from '../types/non-atom';
 import { singlelineBasicString, Lines, multilineString, multilineBasicString, multilineLiteralString, multilineNeedBasic } from './string';
 export const multiline = /*#__PURE__*/( () => {
-	const multiline = (value :READONLY.InlineTable | string | readonly [ ...string[], string ] & { readonly raw? :readonly [ string, ...string[] ] }, string? :string) =>
+	const multiline = (value :READONLY.InlineTable | string | readonly string[], string? :string) =>
 		typeof value==='string' ? LiteralObject(( multilineNeedBasic(value) ? multilineBasicString : multilineLiteralString )(( '\n' + value ).split('\n') as Lines), value) :
 			isArray(value) ? LiteralObject(multilineString(Lines(value)), typeof string==='string' ? string : Null(null)) :
 				multilineTable(value);
-	multiline.basic = (lines :string | readonly [ ...string[], string ] & { readonly raw? :readonly [ string, ...string[] ] }, string? :string) =>
+	multiline.basic = (lines :string | readonly string[], string? :string) =>
 		typeof lines==='string'
 			? LiteralObject(multilineBasicString(( '\n' + lines ).split('\n') as Lines), lines)
 			: LiteralObject(multilineBasicString(Lines(lines)), typeof string==='string' ? string : Null(null))
 	;
+	multiline.array = multilineArray;
 	freeze(multiline);
 	return multiline;
 } )();

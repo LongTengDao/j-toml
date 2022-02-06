@@ -66,3 +66,6 @@
             *   bug fix (experimental): fix the problem that `xOptions.exact` can not treat exponent part including underscore correctly
             +   new feature (experimental): `xOptions.literal`
             +   new feature: add value support for literal-related api
+    26. 0.  *   bug fix: fix the error when `options.newline` of `TOML.stringify` is omitted (since 1.25.0)
+            +   new feature: helper `TOML.multiline.array`
+            *   more strict array of tables check in `TOML.stringify`

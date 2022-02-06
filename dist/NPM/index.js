@@ -4,7 +4,7 @@ typeof define === 'function' && define.amd ? define(factory) :
 (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.TOML = factory());
 })(this, (function () { 'use strict';
 
-const version = '1.25.0';
+const version = '1.26.0';
 
 const Error$1 = {if:Error}.if;
 
@@ -505,7 +505,7 @@ const map_del = WeakMap.prototype['delete'];
 const INLINES = new WeakMap$1                                                     ();
 const SECTIONS = new WeakSet$1                ();
 
-const deInline = /*#__PURE__*/map_del.bind(INLINES)                                                  ;
+const deInline = /*#__PURE__*/map_del.bind(INLINES)                                                                              ;
 const deSection = /*#__PURE__*/del.bind(SECTIONS)                                                  ;
 
 const isInline = /*#__PURE__*/map_has.bind(INLINES)                                                  ;
@@ -519,6 +519,10 @@ const inline =                                                         (value   
 const multilineTable =                                  (value   )    => {
 	beInline(value, false);
 	deSection(value);
+	return value;
+};
+const multilineArray =                                       (value   )    => {
+	deInline(value);
 	return value;
 };
 
@@ -2480,11 +2484,11 @@ class TOMLSection extends Array$1         {
 							}
 							if ( ++index===length ) { break; }
 							table = ( value                           )[index] ;
-							///if ( !isSection(table) ) { throw TypeError(`the first table item marked by Section() means the parent array is an array of tables, which can not include other types or table not marked by Section() any more in the rest items`); }
+							if ( !isSection(table) ) { throw TypeError$1(`the first table item marked by Section() means the parent array is an array of tables, which can not include other types or table not marked by Section() any more in the rest items`); }
 						}
 						continue;
 					}
-					///else { let index = 1; while ( index!==length ) { if ( isSection(value[index++]!) ) { throw TypeError(``); } } }
+					else { let index = 1; while ( index!==length ) { if ( isSection(value[index++] ) ) { throw TypeError$1(`if an array is not array of tables, it can not include any table that marked by Section()`); } } }
 				}
 			}
 			else {
@@ -2715,7 +2719,7 @@ class TOMLDocument extends Array$1              {
 		else { throw TypeError$1(`TOML.stringify(,{integer}) can only be number`); }
 		const newline = options?.newline;
 		if ( newline===undefined ) { this.newline = ''; }
-		if ( newline==='\n' || newline==='\r\n' ) { this.newline = newline; }
+		else if ( newline==='\n' || newline==='\r\n' ) { this.newline = newline; }
 		else {
 			throw typeof newline==='string'
 				? SyntaxError$1(`TOML.stringify(,{newline}) can only be valid TOML newline`)
@@ -2775,15 +2779,16 @@ const stringify = (rootTable                , options                  )        
 	return document.newline ? document.join(document.newline) : document.flat();
 };
 const multiline = /*#__PURE__*/( () => {
-	const multiline = (value                                                                                                                        , string         ) =>
+	const multiline = (value                                                   , string         ) =>
 		typeof value==='string' ? LiteralObject(( multilineNeedBasic(value) ? multilineBasicString : multilineLiteralString )(( '\n' + value ).split('\n')         ), value) :
 			isArray$1(value) ? LiteralObject(multilineString(Lines(value)), typeof string==='string' ? string : Null$1(null)) :
 				multilineTable(value);
-	multiline.basic = (lines                                                                                                 , string         ) =>
+	multiline.basic = (lines                            , string         ) =>
 		typeof lines==='string'
 			? LiteralObject(multilineBasicString(( '\n' + lines ).split('\n')         ), lines)
 			: LiteralObject(multilineBasicString(Lines(lines)), typeof string==='string' ? string : Null$1(null))
 	;
+	multiline.array = multilineArray;
 	freeze(multiline);
 	return multiline;
 } )();

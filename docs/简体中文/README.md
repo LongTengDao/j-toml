@@ -307,8 +307,8 @@ declare function stringify (根表 :只读表, 选项? :Readonly<{
 
 本库不会因为表或数组嵌套层数过深，而意外地造成爆栈错误。
 
-`TOML.Section` `TOML.inline` `TOML.multiline` `TOML.multiline.basic` `TOML.basic` `TOML.literal` `TOML.commentFor` `TOML.commentForThis` `TOML.isSection` `TOML.isInline`
--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+`TOML.Section` `TOML.inline` `TOML.multiline` `TOML.multiline.array` `TOML.multiline.basic` `TOML.basic` `TOML.literal` `TOML.commentFor` `TOML.commentForThis` `TOML.isSection` `TOML.isInline`
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 由于 TOML 语法的灵活性，在极大地满足了人直接阅读和书写的需求的同时，一度给序列化方案造成了巨大的困难。
 
@@ -365,8 +365,8 @@ key = 'value'
 
 ```
 
-一个不为空，且值为 `Section` 标记的表的数组，会被作为“表数组”序列化。  
-否则，数组默认被作为多行模式的静态数组看待。如果你希望单行表示，可以用 `inline` 函数进行标记。
+一个不为空，且值为 `Section` 标记的表的数组，会被作为“表数组”序列化。注意，一个数组的子项必须全是或全不是 `Section` 标记的表。  
+否则，数组默认被作为多行模式的静态数组看待。如果你希望单行表示，可以用 `inline` 函数进行标记（`multiline.array` 可以进行逆操作）。
 
 ```javascript
 stringify({

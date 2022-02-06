@@ -307,8 +307,8 @@ An error is thrown if the options does not meet the requirements, or there is an
 
 This library will not cause stack overflow error unexpectedly due to too deep tables or arrays.
 
-`TOML.Section` `TOML.inline` `TOML.multiline` `TOML.multiline.basic` `TOML.basic` `TOML.literal` `TOML.commentFor` `TOML.commentForThis` `TOML.isSection` `TOML.isInline`
--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+`TOML.Section` `TOML.inline` `TOML.multiline` `TOML.multiline.array` `TOML.multiline.basic` `TOML.basic` `TOML.literal` `TOML.commentFor` `TOML.commentForThis` `TOML.isSection` `TOML.isInline`
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Due to the flexibility of TOML syntax, which greatly meeting the needs of reading and writing directly, there had been great difficulty for serialization solution.
 
@@ -365,8 +365,8 @@ key = 'value'
 
 ```
 
-A non-empty array, whose item is table that marked by `Section`, will be serialized as "array of tables".  
-Otherwise, arrays are treated as static and multi-line by default. If you want single-line mode, you can use the `inline` function to mark it.
+A non-empty array, whose items are tables that marked by `Section`, will be serialized as "array of tables". Note that an array's items must all be or all not be tables marked by `Section`.  
+Otherwise, arrays are treated as static and multi-line by default. If you want single-line mode, you can use the `inline` function to mark it (and `multiline.array` to reverse).
 
 ```javascript
 stringify({

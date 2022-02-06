@@ -3,7 +3,7 @@ export = exports;
 
 declare namespace exports {
 	
-	export const version :'1.25.0';
+	export const version :'1.26.0';
 	
 	export const parse :
 		& {
@@ -34,7 +34,11 @@ declare namespace exports {
 	export function Section<T extends ReadonlyTable> (this :void, table :T) :T;
 	export function inline<T extends ReadonlyTable | ReadonlyArray> (this :void, value :T) :T;
 	export const multiline :{
-		<T extends ReadonlyTable>
+		readonly array :{
+			<T extends ReadonlyArray>
+			(this :void, array :T                               ) :T
+		}
+			<T extends ReadonlyTable>
 			(this :void, table :T                               ) :T
 			(this :void, value :string                          ) :{ [_literal] :[ `"""`, ...string[], `${string}"""` ] | [ `'''`, ...string[], `${string}'''` ] } & object & String
 			(this :void, lines :readonly string[]               ) :{ [_literal] :[ `"""`, ...string[], `${string}"""` ] | [ `'''`, ...string[], `${string}'''` ] } & object

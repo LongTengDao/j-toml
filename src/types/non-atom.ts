@@ -13,7 +13,7 @@ import isArray from '.Array.isArray';
 const INLINES = new WeakMap<READONLY.Table | ArrayLike<READONLY.Value>, boolean>();
 const SECTIONS = new WeakSet<READONLY.Table>();
 
-const deInline = /*#__PURE__*/map_del.bind(INLINES) as (this :void, value :READONLY.Table) => boolean;
+const deInline = /*#__PURE__*/map_del.bind(INLINES) as (this :void, value :READONLY.Table | readonly READONLY.Value[]) => boolean;
 const deSection = /*#__PURE__*/set_del.bind(SECTIONS) as (this :void, table :READONLY.Table) => boolean;
 
 export const isInline = /*#__PURE__*/map_has.bind(INLINES) as (this :void, value :READONLY.Table) => boolean;
@@ -27,6 +27,10 @@ export const inline = <T extends READONLY.InlineTable | READONLY.StaticArray> (v
 export const multilineTable = <T extends READONLY.InlineTable> (value :T) :T => {
 	beInline(value, false);
 	deSection(value);
+	return value;
+};
+export const multilineArray = <T extends readonly READONLY.Value[]> (value :T) :T => {
+	deInline(value);
 	return value;
 };
 

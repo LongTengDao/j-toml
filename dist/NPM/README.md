@@ -1,4 +1,4 @@
-﻿[English](https://GitHub.com/LongTengDao/j-toml/tree/master/docs/English/) | [简体中文](https://GitHub.com/LongTengDao/j-toml/tree/master/docs/简体中文/)
+﻿[English](https://GitHub.com/LongTengDao/j-toml/tree/master/docs/English/) | [简体中文](https://GitHub.com/LongTengDao/j-toml/tree/master/docs/%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87/)
 ___
 
 `@ltd/j-toml` ![](https://img.shields.io/npm/dw/@ltd/j-toml "Downloads") ![](https://img.shields.io/npm/l/@ltd/j-toml "License") ![](https://img.shields.io/npm/v/@ltd/j-toml "Version") ![](https://img.shields.io/github/last-commit/LongTengDao/j-toml "Activity: GitHub last commit")
@@ -309,8 +309,8 @@ An error is thrown if the options does not meet the requirements, or there is an
 
 This library will not cause stack overflow error unexpectedly due to too deep tables or arrays.
 
-`TOML.Section` `TOML.inline` `TOML.multiline` `TOML.multiline.basic` `TOML.basic` `TOML.literal` `TOML.commentFor` `TOML.commentForThis` `TOML.isSection` `TOML.isInline`
--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+`TOML.Section` `TOML.inline` `TOML.multiline` `TOML.multiline.array` `TOML.multiline.basic` `TOML.basic` `TOML.literal` `TOML.commentFor` `TOML.commentForThis` `TOML.isSection` `TOML.isInline`
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Due to the flexibility of TOML syntax, which greatly meeting the needs of reading and writing directly, there had been great difficulty for serialization solution.
 
@@ -318,7 +318,7 @@ This library provides several helper functions to try to terminate this trouble.
 
 ---
 
-首先是**表**和**数组**。
+Let's start with **table** and **array**.
 
 Considering how JS code is read and written, the default mode for this library to treat unmarked tables is dotted key/value pairs (unless the table is empty or at somewhere such operation is impossible, in which cases it will be serialized in inline mode automatically).  
 You can use the `Section` function to mark a table as a block table (and return the input table), or use the `inline` function to mark the table as an inline table (return the input table as well).  
@@ -367,8 +367,8 @@ key = 'value'
 
 ```
 
-A non-empty array, whose item is table that marked by `Section`, will be serialized as "array of tables".  
-Otherwise, arrays are treated as static and multi-line by default. If you want single-line mode, you can use the `inline` function to mark it.
+A non-empty array, whose items are tables that marked by `Section`, will be serialized as "array of tables". Note that an array's items must all be or all not be tables marked by `Section`.  
+Otherwise, arrays are treated as static and multi-line by default. If you want single-line mode, you can use the `inline` function to mark it (and `multiline.array` to reverse).
 
 ```javascript
 stringify({
@@ -441,7 +441,7 @@ dotted.key = 'value' # this is a dotted key/value pair
 ---
 
 There still left **string**, **integer** and **float**. Their writing choices, just as gymnastics scoring points, has no perfect solution to be specified (without solving problem by creating more); and they are atom values, no good way to preserve their preferences in the data producted by `parse`.  
-This library provides several helper functions for this purpose, including `literal`, `multiline` (string case) and `multiline.basic` (which enforces the use of multi-line basic string rather than the multi-line literal string tried in preference).
+This library provides several helper functions for this purpose, including `literal`, `multiline` (string case), `multiline.basic` and `basic` (which enforce the use of (multi-line) basic string rather than the (multi-line) literal string tried in preference).
 
 When you need to serialize a brand-new temporary data directly, use `literal` to specify the writing style:
 
@@ -481,7 +481,7 @@ multilineString = """
 ```
 
 ```javascript
-const table = TOML.parse('/path/to/example.toml', '\n');
+const table = TOML.parse(source, { joiner: '\n' });
 
 table.base = TOML.literal('0o' + table.base.toString(8).padStart(3, '0'));
 table.multilineString = TOML.multiline(table.multilineString + '\b4');

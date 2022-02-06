@@ -80,11 +80,11 @@ export default class TOMLSection extends Array<string> {
 							}
 							if ( ++index===length ) { break; }
 							table = ( value as READONLY.ArrayOfTables )[index]!;
-							///if ( !isSection(table) ) { throw TypeError(`the first table item marked by Section() means the parent array is an array of tables, which can not include other types or table not marked by Section() any more in the rest items`); }
+							if ( !isSection(table) ) { throw TypeError(`the first table item marked by Section() means the parent array is an array of tables, which can not include other types or table not marked by Section() any more in the rest items`); }
 						}
 						continue;
 					}
-					///else { let index = 1; while ( index!==length ) { if ( isSection(value[index++]!) ) { throw TypeError(``); } } }
+					else { let index = 1; while ( index!==length ) { if ( isSection(value[index++]!) ) { throw TypeError(`if an array is not array of tables, it can not include any table that marked by Section()`); } } }
 				}
 			}
 			else {

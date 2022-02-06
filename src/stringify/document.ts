@@ -57,7 +57,7 @@ export default class TOMLDocument extends Array<TOMLSection> {
 		else { throw TypeError(`TOML.stringify(,{integer}) can only be number`); }
 		const newline = options?.newline;
 		if ( newline===undefined ) { this.newline = ''; }
-		if ( newline==='\n' || newline==='\r\n' ) { this.newline = newline; }
+		else if ( newline==='\n' || newline==='\r\n' ) { this.newline = newline; }
 		else {
 			throw typeof newline==='string'
 				? SyntaxError(`TOML.stringify(,{newline}) can only be valid TOML newline`)

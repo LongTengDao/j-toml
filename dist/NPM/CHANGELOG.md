@@ -1,4 +1,4 @@
-﻿[English](https://GitHub.com/LongTengDao/j-toml/tree/master/CHANGELOG/English.md) | [简体中文](https://GitHub.com/LongTengDao/j-toml/tree/master/CHANGELOG/简体中文.md)
+﻿[English](https://GitHub.com/LongTengDao/j-toml/tree/master/CHANGELOG/English.md) | [简体中文](https://GitHub.com/LongTengDao/j-toml/tree/master/CHANGELOG/%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87.md)
 ___
 
 1.  0.  0.  +   new feature: support TOML v1.0.0
@@ -68,3 +68,6 @@ ___
             *   bug fix (experimental): fix the problem that `xOptions.exact` can not treat exponent part including underscore correctly
             +   new feature (experimental): `xOptions.literal`
             +   new feature: add value support for literal-related api
+    26. 0.  *   bug fix: fix the error when `options.newline` of `TOML.stringify` is omitted (since 1.25.0)
+            +   new feature: helper `TOML.multiline.array`
+            *   more strict array of tables check in `TOML.stringify`
