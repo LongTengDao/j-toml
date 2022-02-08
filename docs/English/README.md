@@ -6,8 +6,8 @@
 which is the best config format he had ever seen.  
 (Obviously for exhausted people who tried to design that.)
 
-Node.js
--------
+Node.js 14+
+-----------
 
 ```shell
 npm install @ltd/j-toml

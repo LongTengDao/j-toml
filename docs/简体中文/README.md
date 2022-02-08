@@ -6,8 +6,8 @@
 ——这 TM 可能是“我”见过最好的配置文件书写格式了。  
 ——对于亲手折腾到爆炸的人而言。
 
-Node.js
--------
+Node.js 14+
+-----------
 
 ```shell
 npm install @ltd/j-toml
