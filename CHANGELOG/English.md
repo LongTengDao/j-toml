@@ -69,3 +69,4 @@
     26. 0.  *   bug fix: fix the error when `options.newline` of `TOML.stringify` is omitted (since 1.25.0)
             +   new feature: helper `TOML.multiline.array`
             *   more strict array of tables check in `TOML.stringify`
+    27. 0.  *   remove `??=` syntax for Node 14 compatibility

@@ -46,8 +46,8 @@ export const appendTable = (table :Table, finalKey :string, asArrayItem :boolean
 	else {
 		if ( finalKey in table ) {
 			lastTable = table[finalKey];
-			directlyIfNot(lastTable) || iterator.throws(Error(`Duplicate Table definition` + iterator.where(' at ')));
 			fromPair(lastTable) && iterator.throws(Error(`A table defined implicitly via key/value pair can not be accessed to via []` + iterator.where(', which at ')));
+			directlyIfNot(lastTable) || iterator.throws(Error(`Duplicate Table definition` + iterator.where(' at ')));
 		}
 		else { table[finalKey] = lastTable = new options.Table(DIRECTLY); }
 		tag && options.collect(tag, null, table, finalKey);

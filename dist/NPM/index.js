@@ -4,7 +4,7 @@ typeof define === 'function' && define.amd ? define(factory) :
 (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.TOML = factory());
 })(this, (function () { 'use strict';
 
-const version = '1.26.0';
+const version = '1.27.0';
 
 const Error$1 = {if:Error}.if;
 
@@ -1642,8 +1642,8 @@ const appendTable = (table       , finalKey        , asArrayItem         , tag  
 	else {
 		if ( finalKey in table ) {
 			lastTable = table[finalKey];
-			directlyIfNot(lastTable) || throws(Error$1(`Duplicate Table definition` + where(' at ')));
 			fromPair(lastTable) && throws(Error$1(`A table defined implicitly via key/value pair can not be accessed to via []` + where(', which at ')));
+			directlyIfNot(lastTable) || throws(Error$1(`Duplicate Table definition` + where(' at ')));
 		}
 		else { table[finalKey] = lastTable = new Table(DIRECTLY); }
 		tag && collect(tag, null, table, finalKey);
@@ -1776,7 +1776,7 @@ const assignBasicString = ( (table       , finalKey        , literal        )   
  ;
 
 const KEYS = /*#__PURE__*/Null$1        (null);
-const commentFor = (key        )         => KEYS[key] ??= Symbol$1(key);
+const commentFor = (key        )         => KEYS[key] ?? ( KEYS[key] = Symbol$1(key) );
 const commentForThis                = Symbol$1('this')       ;
 
 const { test: includesNewline } = theRegExp(/\r?\n/g);

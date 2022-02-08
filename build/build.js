@@ -9,14 +9,21 @@ const Markdown = (Path, npm = `\
 ![](https://img.shields.io/npm/v/@ltd/j-toml "Version")
 ![](https://img.shields.io/github/last-commit/LongTengDao/j-toml "Activity: GitHub last commit")`.replace(/\n/g, ' ')) => {
 	return (_English_) => {
+		_English_ = _English_.replace(/^\uFEFF/, '');
 		if ( _English_.includes('\t') ) { throw Error(`.md 中存在 Tab`); }
+		if ( /[\x80-\uFFFF]/.test(_English_) ) { throw Error(`English .md 中存在未被翻译的内容“${/[\x80-\uFFFF]+/.exec(_English_)[0]}”`); }
 		return BOM +
 			i18n.map(lang => `[${lang}](https://GitHub.com/LongTengDao/j-toml/tree/master/${Path(encodeURIComponent(lang))})`).join(' | ') + EOL +
 			'___' + EOL +
-			( npm ? _English_.replace(/(?=\r?\n=)/, () => ` ${npm}`) : _English_ ).replace(/^\uFEFF/, '')//( npm ? EOL + npm + EOL : npm )
-			//.replace(/(?<=^(?: {4})?```+)[^`\r\n]+/gm, '')
-			//.replace(/(?<=^(?: {4})?(?:\d\.|- ) {2})#+ +(.*)/gm, (_, $1) => `**${$1}**`)
-			;
+			( 'copy'
+				? npm ? _English_.replace(/(?=\r?\n=)/, () => ` ${npm}`) : _English_
+				: npm
+					? EOL + npm
+					//.replace(/(?<=^(?: {4})?```+)[^`\r\n]+/gm, '')
+					//.replace(/(?<=^(?: {4})?(?:\d\.|- ) {2})#+ +(.*)/gm, (_, $1) => `**${$1}**`)
+					+ EOL
+					: npm
+			);
 	};
 };
 

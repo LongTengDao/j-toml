@@ -6,7 +6,7 @@ import Null from '.null';
 import { theRegExp } from '@ltd/j-regexp';
 
 const KEYS = /*#__PURE__*/Null<symbol>(null);
-export const commentFor = (key :string) :symbol => KEYS[key] ??= Symbol(key);
+export const commentFor = (key :string) :symbol => KEYS[key] ?? ( KEYS[key] = Symbol(key) );
 export const commentForThis :unique symbol = Symbol('this') as any;
 
 const { test: includesNewline } = theRegExp(/\r?\n/g);
