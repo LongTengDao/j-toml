@@ -53,32 +53,32 @@ const HMS = /*#__PURE__*/newRegExp`
 	${_23_}:${_59_}:${_59_}
 `.valueOf();
 
-export const OFFSET$ = /(?:Z|[+-]\d\d:\d\d)$/;
+export const OFFSET$ = /(?:[Zz]|[+-]\d\d:\d\d)$/;
 
 const { exec: Z_exec } = theRegExp<1 | 2 | 3>(/(([+-])\d\d):(\d\d)$/);
 
 const { exec: OFFSET_DATETIME_exec } = /*#__PURE__*/newRegExp<1>`
 	^
 	${YMD}
-	[T ]
+	[Tt ]
 	${HMS}
 	(?:\.\d{1,3}(\d*?)0*)?
-	(?:Z|[+-]${_23_}:${_59_})
+	(?:[Zz]|[+-]${_23_}:${_59_})
 	$`.valueOf();
 
 const { exec: OFFSET_DATETIME_ZERO_exec } = /*#__PURE__*/newRegExp<1>`
 	^
 	${YMD}
-	[T ]
+	[Tt ]
 	${HMS}
 	()
-	Z
+	[Zz]
 	$`.valueOf();
 
 const { test: IS_LOCAL_DATETIME } = /*#__PURE__*/newRegExp`
 	^
 	${YMD}
-	[T ]
+	[Tt ]
 	${HMS}
 	(?:\.\d+)?
 	$`.valueOf();
@@ -94,8 +94,9 @@ const { test: IS_LOCAL_TIME } = /*#__PURE__*/newRegExp`
 	(?:\.\d+)?
 	$`.valueOf();
 
-const DOT_ZERO = /\.?0+$/;
+const T = /[ t]/;
 const DELIMITER_DOT = /[-T:.]/g;
+const DOT_ZERO = /\.?0+$/;
 const ZERO = /\.(\d*?)0+$/;
 const zeroReplacer = (match :string, p1 :string) => p1;
 
@@ -166,7 +167,7 @@ export const OffsetDateTime = /*#__PURE__*/fpc(class OffsetDateTime extends Date
 	constructor (literal :string) {
 		const { 1: more } = leap(literal) && ( options.zeroDatetime ? OFFSET_DATETIME_ZERO_exec : OFFSET_DATETIME_exec )(literal) || iterator.throws(SyntaxError(`Invalid Offset Date-Time ${literal}` + iterator.where(' at ')));
 		super();
-		this[OffsetDateTime_ISOString] = literal.replace(' ', 'T');
+		this[OffsetDateTime_ISOString] = literal.replace(T, 'T').replace('z', 'Z');
 		this[OffsetDateTime_value] = ( '' + parse(this[OffsetDateTime_ISOString]) ).padStart(15, '0') + ( more ? '.' + more : '' );
 		return this;
 	}
@@ -247,7 +248,7 @@ export const LocalDateTime = /*#__PURE__*/fpc(class LocalDateTime extends Dateti
 		IS_LOCAL_DATETIME(literal) && leap(literal) || iterator.throws(SyntaxError(`Invalid Local Date-Time ${literal}` + iterator.where(' at ')));
 		super();
 		this[LocalDateTime_value] = Value(
-			this[LocalDateTime_ISOString] = literal.replace(' ', 'T')
+			this[LocalDateTime_ISOString] = literal.replace(T, 'T')
 		);
 		return this;
 	}

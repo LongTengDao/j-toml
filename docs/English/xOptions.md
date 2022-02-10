@@ -2,7 +2,7 @@
 `xOptions`
 ==========
 
-All following options are not turned on by default.
+All following options are not turned on by default.  
 
 `xOptions.order`
 ----------------
@@ -10,7 +10,7 @@ All following options are not turned on by default.
 *   type: `boolean`
 *   default: `false`
 
-Keep the key/value pairs order of tables.
+Keep the key/value pairs order of tables.  
 
 `xOptions.longer`
 -----------------
@@ -18,7 +18,7 @@ Keep the key/value pairs order of tables.
 *   type: `boolean`
 *   default: `false`
 
-Allow the integer type value to exceed 64 bit range (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807).
+Allow the integer type value to exceed 64 bit range (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807).  
 
 `xOptions.exact`
 ----------------
@@ -26,7 +26,7 @@ Allow the integer type value to exceed 64 bit range (-9,223,372,036,854,775,808 
 *   type: `boolean`
 *   default: `false`
 
-Disallow the float type value too large being `±Infinity`, too small being `±0`, or other loss of precision occurs.
+Disallow the float type value too large being `±Infinity`, too small being `±0`, or other loss of precision occurs.  
 
 `xOptions.multi`
 ----------------
@@ -35,7 +35,7 @@ Disallow the float type value too large being `±Infinity`, too small being `±0
 *   default: `false`
 
 Multi-line inline table support.  
-Allow trailing comma, even no comma.
+Allow trailing comma, even no comma.  
 
 ```
 # Like inline array:
@@ -63,7 +63,7 @@ y = 2
 *   type: `boolean`
 *   default: `false`
 
-`null` value support (by `null` literal).
+`null` value support (by `null` literal).  
 
 ```
 key = null
@@ -75,9 +75,9 @@ key = null
 *   type: `boolean`
 *   default: `false`
 
-Whether to preserve original writing style information of string, integer and float.
+Whether to preserve original writing style information of string, integer and float.  
 
-Note that this will cause `string | bigint | number` types in parsed result becoming `object & String | object & BigInt | object & Number`.
+Note that this will cause `string | bigint | number` types in parsed result becoming `object & String | object & BigInt | object & Number`.  
 
 `xOptions.comment`
 ------------------
@@ -85,7 +85,7 @@ Note that this will cause `string | bigint | number` types in parsed result beco
 *   type: `boolean`
 *   default: `false`
 
-Whether to preserve comment information as much as possible (only comments written directly after key/value pairs or table headers), which will be set via the `symbol` returned by `TOML.commentFor(key)` in the table where `key` in.
+Whether to preserve comment information as much as possible (only comments written directly after key/value pairs or table headers), which will be set via the `symbol` returned by `TOML.commentFor(key)` in the table where `key` in.  
 
 ```toml
 key = 'value' # this is a key/value pair
@@ -94,7 +94,7 @@ dotted.key = 'value' # this is a dotted key/value pair
 [[tables]] # this is a table header in array of tables
 ```
 
-This will result in:
+This will result in:  
 
 ```javascript
 ( {
@@ -115,7 +115,7 @@ This will result in:
 *   type: `boolean`
 *   default: `false`
 
-Disable keys shaped like number, etc.:
+Disable keys shaped like number, etc.:  
 
 ```toml
 3.14 = 0
@@ -149,14 +149,14 @@ ArrayOf = <tag> [        # processorForEach({ table: root, key: 'ArrayOf',      
 [[Items]] <tag>          # processorForEach({ table: root, key: 'Items',   array: root.Items,   index: 0, tag: 'tag' })
 ```
 
-Tag content could include any non-control character rather than `<` `>` `(` `)` `[` `]` `{` `}` <code>&#92;</code> `"` `'` <code>&#96;</code> `#`, but it must not be empty.
+Tag content could include any non-control character rather than `<` `>` `(` `)` `[` `]` `{` `}` <code>&#92;</code> `"` `'` <code>&#96;</code> `#`, but it must not be empty.  
 
-Tags are processed from after to before.
+Tags are processed from after to before.  
 
 Because TOML has the limitation that root value can only be table for the time being, there is no tag representation designed to replace root table.  
 Anyway, it is not difficult to deal with it after whole table returned.  
-In the future, it is possible to add an extension method to remove both restrictions at the same time.
+In the future, it is possible to add an extension method to remove both restrictions at the same time.  
 
-Tag and its target must be in same line; while the target value after tag could be omitted (and `undefined` would be passed in as the value).
+Tag and its target must be in same line; while the target value after tag could be omitted (and `undefined` would be passed in as the value).  
 
-The `specificationVersion` must be `1.0` or higher, to support feasible mixed type array.
+The `specificationVersion` must be `1.0` or higher, to support feasible mixed type array.  

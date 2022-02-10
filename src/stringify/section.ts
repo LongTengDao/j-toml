@@ -132,9 +132,9 @@ export default class TOMLSection extends Array<string> {
 				}
 				const inlineMode = ofInline(value);
 				if ( isArray(value) ) {
-					inlineMode
-						? this.singlelineArray(indent, value)
-						: this.staticArray(indent, value);
+					inlineMode===undefined
+						? this.staticArray(indent, value)
+						: this.singlelineArray(indent, value, inlineMode);
 					break;
 				}
 				if ( inlineMode!==undefined ) {
@@ -193,19 +193,19 @@ export default class TOMLSection extends Array<string> {
 		return null;
 	}
 	
-	private singlelineArray (indent :string, staticArray :READONLY.StaticArray) {
+	private singlelineArray (indent :string, staticArray :READONLY.StaticArray, inlineMode :0 | 1 | 2 | 3) {
 		const { length } = staticArray;
 		if ( length ) {
-			this.appendInline = '[ ';
+			this.appendInline = inlineMode&0b10 ? '[ ' : '[';
 			this.value(indent, staticArray[0]!, false);
 			let index = 1;
 			while ( index!==length ) {
 				this.appendInline = ', ';
 				this.value(indent, staticArray[index++]!, false);
 			}
-			this.appendInline = ' ]';
+			this.appendInline = inlineMode&0b10 ? ' ]' : ']';
 		}
-		else { this.appendInline = '[ ]'; }
+		else { this.appendInline = inlineMode&0b01 ? '[ ]' : '[]'; }
 	}
 	private staticArray (indent :string, staticArray :READONLY.StaticArray) {
 		this.appendInline = '[';

@@ -4,7 +4,7 @@ typeof define === 'function' && define.amd ? define(factory) :
 (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.TOML = factory());
 })(this, (function () { 'use strict';
 
-const version = '1.27.0';
+const version = '1.28.0';
 
 const Error$1 = {if:Error}.if;
 
@@ -502,18 +502,39 @@ const map_has = WeakMap.prototype.has;
 
 const map_del = WeakMap.prototype['delete'];
 
-const INLINES = new WeakMap$1                                                     ();
+const INLINES = new WeakMap$1                                                                     ();
 const SECTIONS = new WeakSet$1                ();
 
 const deInline = /*#__PURE__*/map_del.bind(INLINES)                                                                              ;
 const deSection = /*#__PURE__*/del.bind(SECTIONS)                                                  ;
 
 const isInline = /*#__PURE__*/map_has.bind(INLINES)                                                  ;
-const ofInline = /*#__PURE__*/get.bind(INLINES)                                                      ;
-const beInline = /*#__PURE__*/set.bind(INLINES)                                                                                                        ;
-const inline =                                                         (value   )    => {
-	beInline(value, true);
-	isArray$1(value) || deSection(value);
+const ofInline = /*#__PURE__*/get.bind(INLINES)     
+	                                                                          
+	                                                               
+	                                       
+ ;
+const beInline = /*#__PURE__*/set.bind(INLINES)     
+	                                                                                  
+	                                                                       
+ ;
+const inline =                                                         (value   , mode                , looping         )    => {
+	if ( isArray$1(value) ) {
+		if ( looping ) { mode = 3; }
+		else {
+			if ( mode===undefined$1 ) { mode = 3; }
+			else if ( mode!==0 && mode!==1 && mode!==2 && mode!==3 ) {
+				throw typeof mode==='number'
+					? RangeError$1(`array inline mode must be 0 | 1 | 2 | 3, not including ${mode}`)
+					: TypeError$1(`array inline mode must be "number" type, not including ${mode===null ? '"null"' : typeof mode}`);
+			}
+		}
+		beInline(value, mode);
+	}
+	else {
+		beInline(value, true);
+		deSection(value);
+	}
 	return value;
 };
 const multilineTable =                                  (value   )    => {
@@ -1130,32 +1151,32 @@ const HMS = /*#__PURE__*/newRegExp`
 	${_23_}:${_59_}:${_59_}
 `.valueOf();
 
-const OFFSET$ = /(?:Z|[+-]\d\d:\d\d)$/;
+const OFFSET$ = /(?:[Zz]|[+-]\d\d:\d\d)$/;
 
 const { exec: Z_exec } = theRegExp           (/(([+-])\d\d):(\d\d)$/);
 
 const { exec: OFFSET_DATETIME_exec } = /*#__PURE__*/newRegExp   `
 	^
 	${YMD}
-	[T ]
+	[Tt ]
 	${HMS}
 	(?:\.\d{1,3}(\d*?)0*)?
-	(?:Z|[+-]${_23_}:${_59_})
+	(?:[Zz]|[+-]${_23_}:${_59_})
 	$`.valueOf();
 
 const { exec: OFFSET_DATETIME_ZERO_exec } = /*#__PURE__*/newRegExp   `
 	^
 	${YMD}
-	[T ]
+	[Tt ]
 	${HMS}
 	()
-	Z
+	[Zz]
 	$`.valueOf();
 
 const { test: IS_LOCAL_DATETIME } = /*#__PURE__*/newRegExp`
 	^
 	${YMD}
-	[T ]
+	[Tt ]
 	${HMS}
 	(?:\.\d+)?
 	$`.valueOf();
@@ -1171,8 +1192,9 @@ const { test: IS_LOCAL_TIME } = /*#__PURE__*/newRegExp`
 	(?:\.\d+)?
 	$`.valueOf();
 
-const DOT_ZERO = /\.?0+$/;
+const T = /[ t]/;
 const DELIMITER_DOT = /[-T:.]/g;
+const DOT_ZERO = /\.?0+$/;
 const ZERO = /\.(\d*?)0+$/;
 const zeroReplacer = (match        , p1        ) => p1;
 
@@ -1243,7 +1265,7 @@ const OffsetDateTime = /*#__PURE__*/fpc(class OffsetDateTime extends Datetime {
 	constructor (literal        ) {
 		const { 1: more } = leap(literal) && ( zeroDatetime ? OFFSET_DATETIME_ZERO_exec : OFFSET_DATETIME_exec )(literal) || throws(SyntaxError$1(`Invalid Offset Date-Time ${literal}` + where(' at ')));
 		super();
-		this[OffsetDateTime_ISOString] = literal.replace(' ', 'T');
+		this[OffsetDateTime_ISOString] = literal.replace(T, 'T').replace('z', 'Z');
 		this[OffsetDateTime_value] = ( '' + parse$2(this[OffsetDateTime_ISOString]) ).padStart(15, '0') + ( more ? '.' + more : '' );
 		return this;
 	}
@@ -1324,7 +1346,7 @@ const LocalDateTime = /*#__PURE__*/fpc(class LocalDateTime extends Datetime {
 		IS_LOCAL_DATETIME(literal) && leap(literal) || throws(SyntaxError$1(`Invalid Local Date-Time ${literal}` + where(' at ')));
 		super();
 		this[LocalDateTime_value] = Value(
-			this[LocalDateTime_ISOString] = literal.replace(' ', 'T')
+			this[LocalDateTime_ISOString] = literal.replace(T, 'T')
 		);
 		return this;
 	}
@@ -1792,6 +1814,7 @@ const getCOMMENT = (table                                            , keyCommen
 const getComment =                    (table                                                                               , key   )                     => key in KEYS ? getCOMMENT(table, KEYS[key] ) : '';
 
 const { test: IS_OFFSET$ } = theRegExp(OFFSET$);
+const { test: IS_EMPTY } = theRegExp(/^\[[\t ]*]/);
 
 const parseKeys = (rest        )                                                                => {
 	let lineRest         = rest;
@@ -1885,28 +1908,32 @@ const push = (lastArray       , lineRest        )             => {
 
 const equalStaticArray = function * (            table       , finalKey        , lineRest        )    {
 	const staticArray        = table[finalKey] = newArray(STATICALLY);
+	if ( IS_EMPTY(lineRest) ) {
+		beInline(staticArray, lineRest[1]===']' ? 0 : 3);
+		return lineRest.slice(lineRest.indexOf(']')).replace(SYM_WHITESPACE, '');
+	}
 	const start = new mark('Static Array', lineRest.length);
+	let inline               = lineRest.startsWith('[ ') || lineRest.startsWith('[\t') ? 3 : 0;
 	lineRest = lineRest.replace(SYM_WHITESPACE, '');
-	let inline = true;
 	while ( !lineRest || lineRest[0]==='#' ) {
-		inline = false;
+		inline = null;
 		lineRest = start.must().replace(PRE_WHITESPACE, '');
 	}
 	if ( lineRest[0]===']' ) {
-		inline && beInline(staticArray, true);
+		inline===null || beInline(staticArray, inline);
 		return lineRest.replace(SYM_WHITESPACE, '');
 	}
 	for ( ; ; ) {
 		const rest             = push(staticArray, lineRest);
 		lineRest = typeof rest==='string' ? rest : yield rest;
 		while ( !lineRest || lineRest[0]==='#' ) {
-			inline = false;
+			inline = null;
 			lineRest = start.must().replace(PRE_WHITESPACE, '');
 		}
 		if ( lineRest[0]===',' ) {
 			lineRest = lineRest.replace(SYM_WHITESPACE, '');
 			while ( !lineRest || lineRest[0]==='#' ) {
-				inline = false;
+				inline = null;
 				lineRest = start.must().replace(PRE_WHITESPACE, '');
 			}
 			if ( lineRest[0]===']' ) { break; }
@@ -1916,7 +1943,7 @@ const equalStaticArray = function * (            table       , finalKey        ,
 			throw throws(SyntaxError$1(`Unexpect character in static array item value` + where(', which is found at ')));
 		}
 	}
-	inline && beInline(staticArray, true);
+	inline===null || beInline(staticArray, inline);
 	return lineRest.replace(SYM_WHITESPACE, '');
 }     
 	                                                                   
@@ -2536,9 +2563,9 @@ class TOMLSection extends Array$1         {
 				}
 				const inlineMode = ofInline(value);
 				if ( isArray$1(value) ) {
-					inlineMode
-						? this.singlelineArray(indent, value)
-						: this.staticArray(indent, value);
+					inlineMode===undefined$1
+						? this.staticArray(indent, value)
+						: this.singlelineArray(indent, value, inlineMode);
 					break;
 				}
 				if ( inlineMode!==undefined$1 ) {
@@ -2597,19 +2624,19 @@ class TOMLSection extends Array$1         {
 		return null;
 	}
 	
-	        singlelineArray (indent        , staticArray                      ) {
+	        singlelineArray (indent        , staticArray                      , inlineMode               ) {
 		const { length } = staticArray;
 		if ( length ) {
-			this.appendInline = '[ ';
+			this.appendInline = inlineMode&0b10 ? '[ ' : '[';
 			this.value(indent, staticArray[0] , false);
 			let index = 1;
 			while ( index!==length ) {
 				this.appendInline = ', ';
 				this.value(indent, staticArray[index++] , false);
 			}
-			this.appendInline = ' ]';
+			this.appendInline = inlineMode&0b10 ? ' ]' : ']';
 		}
-		else { this.appendInline = '[ ]'; }
+		else { this.appendInline = inlineMode&0b01 ? '[ ]' : '[]'; }
 	}
 	        staticArray (indent        , staticArray                      ) {
 		this.appendInline = '[';

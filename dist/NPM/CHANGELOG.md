@@ -72,3 +72,5 @@ ___
             +   new feature: helper `TOML.multiline.array`
             *   more strict array of tables check in `TOML.stringify`
     27. 0.  *   remove `??=` syntax for Node 14 compatibility
+    28. 0.  +   new feature: helper `TOML.inline`'s second optional parameter to control space
+            *   bug fix: allow writing lowercase `t`, `z` in date-time

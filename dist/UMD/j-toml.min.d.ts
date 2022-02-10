@@ -3,7 +3,7 @@ export = exports;
 
 declare namespace exports {
 	
-	export const version :'1.27.0';
+	export const version :'1.28.0';
 	
 	export const parse :
 		& {
@@ -32,7 +32,8 @@ declare namespace exports {
 	export function isInline (this :void, value :ReadonlyTable | ReadonlyArray) :boolean;
 	
 	export function Section<T extends ReadonlyTable> (this :void, table :T) :T;
-	export function inline<T extends ReadonlyTable | ReadonlyArray> (this :void, value :T) :T;
+	export function inline<T extends ReadonlyArray> (this :void, value :T, inlineMode? :0 | 1 | 2 | 3) :T;
+	export function inline<T extends ReadonlyTable> (this :void, value :T) :T;
 	export const multiline :{
 		readonly array :{
 			<T extends ReadonlyArray>
@@ -75,7 +76,7 @@ declare class OffsetDateTime {
 	private [OffsetDateTime_ISOString] :string;
 	private [OffsetDateTime_value] :string;
 	
-	constructor (literal :`${number}-${number}-${number}${'T' | ' '}${number}:${number}:${number}${'' | `.${number}`}${'Z' | `${'+' | '-'}${number}:${number}`}`);
+	constructor (literal :`${number}-${number}-${number}${'T' | 't' | ' '}${number}:${number}:${number}${'' | `.${number}`}${'Z' | 'z' | `${'+' | '-'}${number}:${number}`}`);
 	
 	readonly getUTCFullYear :(this :Readonly<OffsetDateTime>) => _1_10000;
 	readonly getUTCMonth :(this :Readonly<OffsetDateTime>) => _0_11;
@@ -101,7 +102,7 @@ declare class LocalDateTime {
 	private [LocalDateTime_ISOString] :string;
 	private [LocalDateTime_value] :string;
 	
-	constructor (literal :`${number}-${number}-${number}${'T' | ' '}${number}:${number}:${number}${'' | `.${number}`}`);
+	constructor (literal :`${number}-${number}-${number}${'T' | 't' | ' '}${number}:${number}:${number}${'' | `.${number}`}`);
 	
 	readonly getFullYear :(this :Readonly<LocalDateTime>) => _0_9999;
 	readonly setFullYear :(this :LocalDateTime, year :_0_9999) => void;

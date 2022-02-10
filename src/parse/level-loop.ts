@@ -22,6 +22,7 @@ import { commentFor, commentForThis } from '../types/comment';
 import { beInline } from '../types/non-atom';
 
 const { test: IS_OFFSET$ } = theRegExp(OFFSET$);
+const { test: IS_EMPTY } = theRegExp(/^\[[\t ]*]/);
 
 const parseKeys = (rest :string) :{ leadingKeys :string[], finalKey :string, lineRest :string } => {
 	let lineRest :string = rest;
@@ -115,28 +116,32 @@ const push = (lastArray :Array, lineRest :string) :string | S => {
 
 const equalStaticArray = function * (this :void, table :Table, finalKey :string, lineRest :string) :S {
 	const staticArray :Array = table[finalKey] = newArray(STATICALLY);
+	if ( IS_EMPTY(lineRest) ) {
+		beInline(staticArray, lineRest[1]===']' ? 0 : 3);
+		return lineRest.slice(lineRest.indexOf(']')).replace(regexps.SYM_WHITESPACE, '');
+	}
 	const start = new iterator.mark('Static Array', lineRest.length);
+	let inline :null | 0 | 3 = lineRest.startsWith('[ ') || lineRest.startsWith('[\t') ? 3 : 0;
 	lineRest = lineRest.replace(regexps.SYM_WHITESPACE, '');
-	let inline = true;
 	while ( !lineRest || lineRest[0]==='#' ) {
-		inline = false;
+		inline = null;
 		lineRest = start.must().replace(regexps.PRE_WHITESPACE, '');
 	}
 	if ( lineRest[0]===']' ) {
-		inline && beInline(staticArray, true);
+		inline===null || beInline(staticArray, inline);
 		return lineRest.replace(regexps.SYM_WHITESPACE, '');
 	}
 	for ( ; ; ) {
 		const rest :string | S = push(staticArray, lineRest);
 		lineRest = typeof rest==='string' ? rest : yield rest;
 		while ( !lineRest || lineRest[0]==='#' ) {
-			inline = false;
+			inline = null;
 			lineRest = start.must().replace(regexps.PRE_WHITESPACE, '');
 		}
 		if ( lineRest[0]===',' ) {
 			lineRest = lineRest.replace(regexps.SYM_WHITESPACE, '');
 			while ( !lineRest || lineRest[0]==='#' ) {
-				inline = false;
+				inline = null;
 				lineRest = start.must().replace(regexps.PRE_WHITESPACE, '');
 			}
 			if ( lineRest[0]===']' ) { break; }
@@ -146,7 +151,7 @@ const equalStaticArray = function * (this :void, table :Table, finalKey :string,
 			throw iterator.throws(SyntaxError(`Unexpect character in static array item value` + iterator.where(', which is found at ')));
 		}
 	}
-	inline && beInline(staticArray, true);
+	inline===null || beInline(staticArray, inline);
 	return lineRest.replace(regexps.SYM_WHITESPACE, '');
 } as {
 	(this :void, array :Array, finalIndex :number, lineRest :string) :S
