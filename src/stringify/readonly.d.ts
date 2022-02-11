@@ -28,6 +28,7 @@ export type Options = undefined | {
 	readonly preferCommentFor? :'key' | 'this'
 	readonly xNull? :boolean
 	readonly xBeforeNewlineInMultilineTable? :'' | ','
+	readonly forceInlineArraySpacing? :0 | 1 | 2 | 3
 };
 
 import type { _literal } from '../types/atom';

@@ -1,6 +1,7 @@
 import Error from '.Error';
 import TypeError from '.TypeError';
 import assign from '.Object.assign';
+import hasOwn from '.Object.hasOwn?=';
 import undefined from '.undefined';
 
 import { clearRegExp, theRegExp } from '@ltd/j-regexp';
@@ -59,7 +60,11 @@ const parse = (source :Source, specificationVersion :1.0 | 0.5 | 0.4 | 0.3 | 0.2
 			if ( IS_NON_SCALAR(source) ) { throw Error('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any uncoupled UCS-4 character code.'); }
 			if ( typeof multilineStringJoiner==='object' && multilineStringJoiner ) {
 				if ( useBigInt!==undefined || xOptions!==undefined ) { throw TypeError('options mode ? args mode'); }
-				( { joiner: multilineStringJoiner, bigint: useBigInt, x: xOptions } = multilineStringJoiner );
+				let joiner :string | undefined;
+				if ( hasOwn(multilineStringJoiner, 'joiner') ) { joiner = multilineStringJoiner.joiner; }
+				if ( hasOwn(multilineStringJoiner, 'bigint') ) { useBigInt = multilineStringJoiner.bigint; }
+				if ( hasOwn(multilineStringJoiner, 'x') ) { xOptions = multilineStringJoiner.x; }
+				multilineStringJoiner = joiner;
 			}
 			try {
 				options.use(specificationVersion, multilineStringJoiner, useBigInt, xOptions);

@@ -2,7 +2,7 @@ export = exports;
 
 declare namespace exports {
 	
-	export const version :'1.28.0';
+	export const version :'1.29.0';
 	
 	export const parse :
 		& {
@@ -25,6 +25,7 @@ declare namespace exports {
 		readonly T? :'T' | ' '
 		readonly xNull? :boolean
 		readonly xBeforeNewlineInMultilineTable? :',' | ''
+		readonly forceInlineArraySpacing? :0 | 1 | 2 | 3
 	}) :string;
 	
 	export function isSection (this :void, table :ReadonlyTable) :boolean;

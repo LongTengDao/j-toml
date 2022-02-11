@@ -134,7 +134,7 @@ export default class TOMLSection extends Array<string> {
 				if ( isArray(value) ) {
 					inlineMode===undefined
 						? this.staticArray(indent, value)
-						: this.singlelineArray(indent, value, inlineMode);
+						: this.singlelineArray(indent, value, this.document.$singlelineArray ?? inlineMode);
 					break;
 				}
 				if ( inlineMode!==undefined ) {

@@ -4,7 +4,7 @@ typeof define === 'function' && define.amd ? define(factory) :
 (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.TOML = factory());
 })(this, (function () { 'use strict';
 
-const version = '1.28.0';
+const version = '1.29.0';
 
 const Error$1 = {if:Error}.if;
 
@@ -12,7 +12,56 @@ const TypeError$1 = TypeError;
 
 const assign$1 = Object.assign;
 
+const Object$1 = Object;
+
+const isArray$1 = Array.isArray;
+
+const Infinity = 1/0;
+
+const species = Symbol.species;
+
 const undefined$1 = void null;
+
+const fromCharCode = String.fromCharCode;
+
+const Array$1 = Array;
+
+const hasOwnProperty = Object.prototype.hasOwnProperty;
+
+const propertyIsEnumerable = Object.prototype.propertyIsEnumerable;
+
+const NULL = (
+	/* j-globals: null.prototype (internal) */
+	Object.seal
+		? /*#__PURE__*/Object.preventExtensions(Object.create(null))
+		: null
+	/* j-globals: null.prototype (internal) */
+);
+
+var ARGS = { length: 0 };
+
+var isEnum = /*#__PURE__*/propertyIsEnumerable.call.bind(propertyIsEnumerable);
+var hasOwn = (
+	/* j-globals: Object.hasOwn (polyfill) */
+	Object$1.hasOwn || /*#__PURE__*/function () {
+		return hasOwnProperty.bind
+			? hasOwnProperty.call.bind(hasOwnProperty)
+			: function hasOwn (object, key) { return hasOwnProperty.call(object, key); };
+	}()
+	/* j-globals: Object.hasOwn (polyfill) */
+);
+
+var create$1 = Object$1.create;
+function Descriptor (source) {
+	var target = create$1(NULL);
+	if ( hasOwn(source, 'value') ) { target.value = source.value; }
+	if ( hasOwn(source, 'writable') ) { target.writable = source.writable; }
+	if ( hasOwn(source, 'get') ) { target.get = source.get; }
+	if ( hasOwn(source, 'set') ) { target.set = source.set; }
+	if ( hasOwn(source, 'enumerable') ) { target.enumerable = source.enumerable; }
+	if ( hasOwn(source, 'configurable') ) { target.configurable = source.configurable; }
+	return target;
+}
 
 const bind = Function.prototype.bind;
 
@@ -30,70 +79,21 @@ const apply = Reflect.apply;
 
 const Proxy$1 = Proxy;
 
-const create$1 = Object.create;
-
-const NULL = (
-	/* j-globals: null.prototype (internal) */
-	Object.seal
-		? /*#__PURE__*/Object.preventExtensions(Object.create(null))
-		: null
-	/* j-globals: null.prototype (internal) */
-);
+const create = Object.create;
 
 const toStringTag = typeof Symbol==='undefined' ? undefined$1 : Symbol.toStringTag;
 
 const Object_defineProperty = Object.defineProperty;
 
-const Object$1 = Object;
-
-const isArray$1 = Array.isArray;
-
-const Infinity = 1/0;
-
-const species = Symbol.species;
-
-const fromCharCode = String.fromCharCode;
-
-const Array$1 = Array;
-
-const hasOwnProperty = Object.prototype.hasOwnProperty;
-
-const propertyIsEnumerable = Object.prototype.propertyIsEnumerable;
-
-var ARGS = { length: 0 };
-
-var isEnum = /*#__PURE__*/propertyIsEnumerable.call.bind(propertyIsEnumerable);
-var hasOwn = (
-	/* j-globals: Object.hasOwn (polyfill) */
-	Object$1.hasOwn || /*#__PURE__*/function () {
-		return hasOwnProperty.bind
-			? hasOwnProperty.call.bind(hasOwnProperty)
-			: function hasOwn (object, key) { return hasOwnProperty.call(object, key); };
-	}()
-	/* j-globals: Object.hasOwn (polyfill) */
-);
-
-var create = Object$1.create;
-function Descriptor (source) {
-	var target = create(NULL);
-	if ( hasOwn(source, 'value') ) { target.value = source.value; }
-	if ( hasOwn(source, 'writable') ) { target.writable = source.writable; }
-	if ( hasOwn(source, 'get') ) { target.get = source.get; }
-	if ( hasOwn(source, 'set') ) { target.set = source.set; }
-	if ( hasOwn(source, 'enumerable') ) { target.enumerable = source.enumerable; }
-	if ( hasOwn(source, 'configurable') ) { target.configurable = source.configurable; }
-	return target;
-}
-
 const Default = (
 	/* j-globals: default (internal) */
 	function Default (exports, addOnOrigin) {
-		if ( !addOnOrigin ) { addOnOrigin = exports; exports = create$1(NULL); }
+		if ( !addOnOrigin ) { addOnOrigin = exports; exports = create(NULL); }
 		if ( assign$1 ) { assign$1(exports, addOnOrigin); }
 		else { for ( var key in addOnOrigin ) { if ( hasOwn(addOnOrigin, key) ) { exports[key] = addOnOrigin[key]; } } }
 		exports.default = exports;
 		if ( toStringTag ) {
-			var descriptor = create$1(NULL);
+			var descriptor = create(NULL);
 			descriptor.value = 'Module';
 			Object_defineProperty(exports, toStringTag, descriptor);
 		}
@@ -370,7 +370,7 @@ const Null$1 = (
 				? this
 				: typeof origin==='function'
 					? /*#__PURE__*/Nullify(origin)
-					: /*#__PURE__*/assign(/*#__PURE__*/create(NULL), origin);
+					: /*#__PURE__*/assign(/*#__PURE__*/create$1(NULL), origin);
 		}
 		delete Null.name;
 		//try { delete Null.length; } catch (error) {}
@@ -429,12 +429,12 @@ const target2proxy = /*#__PURE__*/newWeakMap()
 	                                                   
  ;
 
-const handlers                       = /*#__PURE__*/assign$1(create$1(NULL), {
+const handlers                       = /*#__PURE__*/assign$1(create(NULL), {
 	defineProperty:                 (target                   , key   , descriptor                    )          => {
 		if ( hasOwn(target, key) ) {
-			return Reflect_defineProperty(target, key, assign$1(create$1(NULL), descriptor));
+			return Reflect_defineProperty(target, key, assign$1(create(NULL), descriptor));
 		}
-		if ( Reflect_defineProperty(target, key, assign$1(create$1(NULL), descriptor)) ) {
+		if ( Reflect_defineProperty(target, key, assign$1(create(NULL), descriptor)) ) {
 			const keeper = target2keeper.get(target) ;
 			keeper[keeper.length] = key;
 			return true;
@@ -490,7 +490,7 @@ const Null = /*#__PURE__*/function () {
 	}
 	//@ts-ignore
 	Null.prototype = null;
-	Object_defineProperty(Null, 'name', assign$1(create$1(NULL), { value: '', configurable: false }));
+	Object_defineProperty(Null, 'name', assign$1(create(NULL), { value: '', configurable: false }));
 	//delete Null.length;
 	freeze(Null);
 	return Null;
@@ -905,7 +905,7 @@ let processor             = null;
 let collection              = [];
 let collection_length         = 0;
 const collect_on = (tag        , array              , table              , key         )       => {
-	const each = create$1(NULL)                                                                           ;
+	const each = create(NULL)                                                                           ;
 	each.tag = tag;
 	if ( table ) {
 		each.table = table;
@@ -1097,7 +1097,7 @@ const getOwnPropertyDescriptors = Object.getOwnPropertyDescriptors;
 const defineProperties = (
 	/* j-globals: null.defineProperties (internal) */
 	function defineProperties (object, descriptorMap) {
-		var created = create$1(NULL);
+		var created = create(NULL);
 		var names = keys(descriptorMap);
 		for ( var length = names.length, index = 0; index<length; ++index ) {
 			var name = names[index];
@@ -1215,7 +1215,7 @@ const Datetime = /*#__PURE__*/( () => {
 			( descriptors[key] = descriptor );
 		}
 	}
-	Datetime.prototype = preventExtensions(create$1(NativeDate.prototype, descriptors));
+	Datetime.prototype = preventExtensions(create(NativeDate.prototype, descriptors));
 	return freeze(Datetime);
 } )();
 
@@ -2267,7 +2267,11 @@ const parse = (source        , specificationVersion                             
 			if ( IS_NON_SCALAR(source) ) { throw Error$1('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any uncoupled UCS-4 character code.'); }
 			if ( typeof multilineStringJoiner==='object' && multilineStringJoiner ) {
 				if ( useBigInt!==undefined$1 || xOptions!==undefined$1 ) { throw TypeError$1('options mode ? args mode'); }
-				( { joiner: multilineStringJoiner, bigint: useBigInt, x: xOptions } = multilineStringJoiner );
+				let joiner                    ;
+				if ( hasOwn(multilineStringJoiner, 'joiner') ) { joiner = multilineStringJoiner.joiner; }
+				if ( hasOwn(multilineStringJoiner, 'bigint') ) { useBigInt = multilineStringJoiner.bigint; }
+				if ( hasOwn(multilineStringJoiner, 'x') ) { xOptions = multilineStringJoiner.x; }
+				multilineStringJoiner = joiner;
 			}
 			try {
 				use(specificationVersion, multilineStringJoiner, useBigInt, xOptions);
@@ -2565,7 +2569,7 @@ class TOMLSection extends Array$1         {
 				if ( isArray$1(value) ) {
 					inlineMode===undefined$1
 						? this.staticArray(indent, value)
-						: this.singlelineArray(indent, value, inlineMode);
+						: this.singlelineArray(indent, value, this.document.$singlelineArray ?? inlineMode);
 					break;
 				}
 				if ( inlineMode!==undefined$1 ) {
@@ -2731,6 +2735,7 @@ class TOMLDocument extends Array$1              {
 	         multilineTableDisabled         ;
 	         multilineTableComma         ;
 	         preferCommentForThis          = false;
+	         $singlelineArray                ;
 	
 	constructor (options                  ) {
 		super();
@@ -2788,6 +2793,21 @@ class TOMLDocument extends Array$1              {
 		else {
 			this.multilineTableDisabled = true;
 			this.multilineTableComma = true;
+		}
+		const $singlelineArray = options?.forceInlineArraySpacing;
+		switch ( $singlelineArray ) {
+			case undefined:
+				break;
+			case 0:
+			case 1:
+			case 2:
+			case 3:
+				this.$singlelineArray = $singlelineArray;
+				break;
+			default:
+				throw typeof $singlelineArray==='number'
+					? RangeError$1(`array inline mode must be 0 | 1 | 2 | 3, not including ${$singlelineArray}`)
+					: TypeError$1(`array inline mode must be "number" type, not including ${$singlelineArray===null ? '"null"' : typeof $singlelineArray}`);
 		}
 		return this;
 	}

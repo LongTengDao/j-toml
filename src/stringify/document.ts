@@ -42,6 +42,7 @@ export default class TOMLDocument extends Array<TOMLSection> {
 	readonly multilineTableDisabled :boolean;
 	readonly multilineTableComma :boolean;
 	readonly preferCommentForThis :boolean = false;
+	readonly $singlelineArray? :0 | 1 | 2 | 3;
 	
 	constructor (options :READONLY.Options) {
 		super();
@@ -99,6 +100,21 @@ export default class TOMLDocument extends Array<TOMLSection> {
 		else {
 			this.multilineTableDisabled = true;
 			this.multilineTableComma = true;
+		}
+		const $singlelineArray = options?.forceInlineArraySpacing;
+		switch ( $singlelineArray ) {
+			case undefined:
+				break;
+			case 0:
+			case 1:
+			case 2:
+			case 3:
+				this.$singlelineArray = $singlelineArray;
+				break;
+			default:
+				throw typeof $singlelineArray==='number'
+					? RangeError(`array inline mode must be 0 | 1 | 2 | 3, not including ${$singlelineArray}`)
+					: TypeError(`array inline mode must be "number" type, not including ${$singlelineArray===null ? '"null"' : typeof $singlelineArray}`);
 		}
 		return this;
 	}

@@ -25,6 +25,7 @@ declare namespace exports {
 		readonly T? :'T' | ' '
 		readonly xNull? :boolean
 		readonly xBeforeNewlineInMultilineTable? :',' | ''
+		readonly forceInlineArraySpacing? :0 | 1 | 2 | 3
 	}) :string;
 	
 	export function isSection (this :void, table :ReadonlyTable) :boolean;

@@ -212,6 +212,7 @@ declare function stringify (rootTable :ReadonlyTable, options? :Readonly<{
     T? :'T' | ' ',
     xNull? :boolean,
     xBeforeNewlineInMultilineTable? :',' | '',
+    forceInlineArraySpacing? :0 | 1 | 2 | 3,
 }>) :string | string[];
 ```
 
@@ -296,6 +297,19 @@ declare function stringify (rootTable :ReadonlyTable, options? :Readonly<{
         For inline tables marked multi-line mode, whether to use a comma before the newline.  
         
         Note that this is not valid in the current version specification, so if this option is not explicitly specified, the incoming inline table will be serialized in single-line mode even if it is marked as multi-line mode.  
+        
+    -   ##### `options.forceInlineArraySpacing`
+        
+        *   type: `0` / `1` / `2` / `3`
+        
+        Regardless of the original writing style of each single-line static array, serialize in the specified mode.  
+        
+        |     | empty | non-empty     |
+        |:---:|:-----:|:-------------:|
+        | `0` | `[]`  | `[0, 1, 2]`   |
+        | `1` | `[ ]` | `[0, 1, 2]`   |
+        | `2` | `[]`  | `[ 0, 1, 2 ]` |
+        | `3` | `[ ]` | `[ 0, 1, 2 ]` |
 
 ### `return`
 
@@ -371,7 +385,7 @@ key = 'value'
 
 A non-empty array, whose items are tables that marked by `Section`, will be serialized as "array of tables". Note that an array's items must all be or all not be tables marked by `Section`.  
 Otherwise, **arrays are treated as static and multi-line by default**. If you want single-line mode, you can use the `inline` function to mark it (and `multiline.array` to reverse).  
-`inline`'s second parameter can give you more abilities to control serializing spaces. `2` means putting spaces between two sides brackets and items, `1` means an empty array should include a space, `3` means both enabled, `0` means both disabled. The default mode is `3`.  
+`inline`'s second parameter can give you more abilities to control serializing spaces. `2` means putting spaces between two sides brackets and items, `1` means an empty array should include a space, `3` means both enabled, `0` means both disabled. The default mode is `3`. This will be ignored when `options.forceInlineArraySpacing` is enabled.  
 
 This default behavior is different with most implementation libraries and a little more cumbersome (in most cases, people expect an objects array to be serialized as an "array of tables" by default).  
 The central reason for this design is, considering how JS code is read and written, "array of table" rather than static array should look marked in code, and its item should better look the same as the section table.  
