@@ -28,7 +28,7 @@ export default class TOMLDocument extends Array<TOMLSection> {
 	
 	0 = new TOMLSection(this);
 	
-	readonly asInteger :(this :void, number :number) => boolean;
+	readonly asInteger :(this :void, number :number) => boolean = return_false;
 	readonly newline :'' | '\n' | '\r\n' = '';
 	readonly newlineUnderSection :boolean;
 	readonly newlineUnderSectionButPair :boolean;
@@ -36,18 +36,21 @@ export default class TOMLDocument extends Array<TOMLSection> {
 	readonly newlineUnderPair :boolean;
 	readonly newlineUnderPairButDotted :boolean;
 	readonly newlineUnderDotted :boolean;
-	readonly indent :string;
-	readonly _ :boolean;
-	readonly nullDisabled :boolean;
-	readonly multilineTableDisabled :boolean;
-	readonly multilineTableComma :boolean;
+	readonly indent :string = '\t';
+	readonly T :'T' | 't' | ' ' = 'T';
+	readonly Z :'Z' | 'z' = 'Z';
+	readonly nullDisabled :boolean = true;
+	readonly multilineTableDisabled :boolean = true;
+	readonly multilineTableComma? :boolean;
 	readonly preferCommentForThis :boolean = false;
 	readonly $singlelineArray? :0 | 1 | 2 | 3;
 	
 	constructor (options :READONLY.Options) {
+		
 		super();
+		
 		const integer = options?.integer;
-		if ( integer===undefined ) { this.asInteger = return_false; }
+		if ( integer===undefined ) {}
 		else if ( integer===MAX_SAFE_INTEGER ) { this.asInteger = isSafeInteger; }
 		else if ( typeof integer==='number' ) {
 			if ( !isSafeInteger(integer) ) { throw RangeError(`TOML.stringify(,{integer}) can only be a safe integer`); }
@@ -56,18 +59,21 @@ export default class TOMLDocument extends Array<TOMLSection> {
 			this.asInteger = (number :number) => isSafeInteger(number) && min<=number && number<=max;
 		}
 		else { throw TypeError(`TOML.stringify(,{integer}) can only be number`); }
+		
 		const newline = options?.newline;
-		if ( newline===undefined ) { this.newline = ''; }
+		if ( newline===undefined ) {}
 		else if ( newline==='\n' || newline==='\r\n' ) { this.newline = newline; }
 		else {
 			throw typeof newline==='string'
 				? SyntaxError(`TOML.stringify(,{newline}) can only be valid TOML newline`)
 				: TypeError(`TOML.stringify(,{newline}) can only be string`);
 		}
+		
 		const preferCommentFor = options?.preferCommentFor;
-		if ( preferCommentFor===undefined || preferCommentFor==='key' ) {}
-		else if ( preferCommentFor==='this' ) { this.preferCommentForThis = true; }
+		if ( preferCommentFor===undefined ) {}
+		else if ( preferCommentFor==='this' || preferCommentFor==='key' ) { this.preferCommentForThis = preferCommentFor==='this'; }
 		else { throw TypeError(`TOML.stringify(,{preferCommentFor) can only be 'key' or 'this'`); }
+		
 		const around = name2code[options?.newlineAround ?? 'header'] ?? name2code.header;
 		this.newlineUnderSection = around>0;
 		this.newlineUnderSectionButPair = around===1 || around===2;
@@ -75,8 +81,9 @@ export default class TOMLDocument extends Array<TOMLSection> {
 		this.newlineUnderPair = around>2;
 		this.newlineUnderPairButDotted = around===3;
 		this.newlineUnderDotted = around>3;
+		
 		const indent = options?.indent;
-		if ( indent===undefined ) { this.indent = '\t'; }
+		if ( indent===undefined ) {}
 		else if ( typeof indent==='string' ) {
 			if ( !IS_INDENT(indent) ) { throw SyntaxError(`TOML.stringify(,{indent}) can only include Tab or Space`); }
 			this.indent = indent;
@@ -86,21 +93,27 @@ export default class TOMLDocument extends Array<TOMLSection> {
 			this.indent = ' '.repeat(indent);
 		}
 		else { throw TypeError(`TOML.stringify(,{indent}) can not be "${typeof indent}" type`); }
-		this._ = options?.T===' ';
-		this.nullDisabled = !options?.xNull;
+		
+		const T = options?.T;
+		if ( T===undefined ) {}
+		else if ( T===' ' || T==='t' || T==='T' ) { this.T = T; }
+		else { throw TypeError(`TOML.stringify(,{T}) can only be "T" or " " or "t"`); }
+		
+		const Z = options?.Z;
+		if ( Z===undefined ) {}
+		else if ( Z==='z' || Z==='Z' ) { this.Z = Z; }
+		else { throw TypeError(`TOML.stringify(,{Z}) can only be "Z" or "z"`); }
+		
+		if ( options?.xNull ) { this.nullDisabled = false; }
+		
 		const xBeforeNewlineInMultilineTable = options?.xBeforeNewlineInMultilineTable;
-		if ( xBeforeNewlineInMultilineTable==='' ) {
+		if ( xBeforeNewlineInMultilineTable===undefined ) {}
+		else if ( xBeforeNewlineInMultilineTable==='' || xBeforeNewlineInMultilineTable===',' ) {
 			this.multilineTableDisabled = false;
-			this.multilineTableComma = false;
+			this.multilineTableComma = !!xBeforeNewlineInMultilineTable;
 		}
-		else if ( xBeforeNewlineInMultilineTable===',' ) {
-			this.multilineTableDisabled = false;
-			this.multilineTableComma = true;
-		}
-		else {
-			this.multilineTableDisabled = true;
-			this.multilineTableComma = true;
-		}
+		else { throw TypeError(`TOML.stringify(,{xBeforeNewlineInMultilineTable}) can only be "" or ","`); }
+		
 		const $singlelineArray = options?.forceInlineArraySpacing;
 		switch ( $singlelineArray ) {
 			case undefined:
@@ -116,7 +129,9 @@ export default class TOMLDocument extends Array<TOMLSection> {
 					? RangeError(`array inline mode must be 0 | 1 | 2 | 3, not including ${$singlelineArray}`)
 					: TypeError(`array inline mode must be "number" type, not including ${$singlelineArray===null ? '"null"' : typeof $singlelineArray}`);
 		}
+		
 		return this;
+		
 	}
 	
 	appendSection () { return this[this.length] = new TOMLSection(this); }

@@ -71,5 +71,6 @@
             *   more strict array of tables check in `TOML.stringify`
     27. 0.  *   remove `??=` syntax for Node 14 compatibility
     28. 0.  +   new feature: helper `TOML.inline`'s second optional parameter to control space, and remember the writing style of single-line static array in `TOML.parse`
-            *   bug fix: allow writing lowercase `t`, `z` in date-time
+            *   bug fix: allow writing lowercase `t`, `z` in date-time for `TOML.parse`
     29. 0.  +   new feature: new `forceInlineArraySpacing` option in `TOML.stringify`
+    30. 0.  +   new feature: new `options.T` option `'t'` support and `options.Z` option in `TOML.stringify`

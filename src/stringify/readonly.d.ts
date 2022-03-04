@@ -24,7 +24,8 @@ export type Options = undefined | {
 	readonly newline? :'\n' | '\r\n'
 	readonly newlineAround? :'document' | 'section' | 'header' | 'pairs' | 'pair'
 	readonly indent? :string | number
-	readonly T? :'T' | ' '
+	readonly T? :'T' | 't' | ' '
+	readonly Z? :'Z' | 'z'
 	readonly preferCommentFor? :'key' | 'this'
 	readonly xNull? :boolean
 	readonly xBeforeNewlineInMultilineTable? :'' | ','

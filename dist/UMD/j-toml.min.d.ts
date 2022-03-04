@@ -3,7 +3,7 @@ export = exports;
 
 declare namespace exports {
 	
-	export const version :'1.29.0';
+	export const version :'1.30.0';
 	
 	export const parse :
 		& {
@@ -23,7 +23,8 @@ declare namespace exports {
 		readonly newline? :'\n' | '\r\n'
 		readonly newlineAround? :'document' | 'section' | 'header' | 'pairs' | 'pair'
 		readonly indent? :string | number
-		readonly T? :'T' | ' '
+		readonly T? :'T' | 't' | ' '
+		readonly Z? :'Z' | 'z'
 		readonly xNull? :boolean
 		readonly xBeforeNewlineInMultilineTable? :',' | ''
 		readonly forceInlineArraySpacing? :0 | 1 | 2 | 3

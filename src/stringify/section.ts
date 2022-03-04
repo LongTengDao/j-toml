@@ -144,7 +144,7 @@ export default class TOMLSection extends Array<string> {
 					break;
 				}
 				if ( isDate(value) ) {
-					this.appendInline = this.document._ ? value.toISOString().replace('T', ' ') : value.toISOString();
+					this.appendInline = value.toISOString().replace('T', this.document.T).replace('Z', this.document.Z);
 					break;
 				}
 				if ( _literal in value ) {

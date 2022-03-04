@@ -211,7 +211,8 @@ declare function stringify (rootTable :ReadonlyTable, options? :Readonly<{
     newline? :'\n' | '\r\n',
     newlineAround? :'document' | 'section' | 'header' | 'pairs' | 'pair',
     indent? :string | number,
-    T? :'T' | ' ',
+    T? :'T' | 't' | ' ',
+    Z? :'Z' | 'z',
     xNull? :boolean,
     xBeforeNewlineInMultilineTable? :',' | '',
     forceInlineArraySpacing? :0 | 1 | 2 | 3,
@@ -271,10 +272,17 @@ declare function stringify (rootTable :ReadonlyTable, options? :Readonly<{
         
     -   ##### `options.T`
         
-        *   type: `'T'` / `' '`
+        *   type: `'T'` / `'t'` / `' '`
         *   default: `'T'`
         
         The delimiter between date and time.  
+        
+    -   ##### `options.Z`
+        
+        *   type: `'Z'` / `'z'`
+        *   default: `'Z'`
+        
+        How to represent offset `Z`.  
         
     -   ##### `options.preferCommentFor`
         

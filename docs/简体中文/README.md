@@ -209,7 +209,8 @@ declare function stringify (根表 :只读表, 选项? :Readonly<{
     newline? :'\n' | '\r\n',
     newlineAround? :'document' | 'section' | 'header' | 'pairs' | 'pair',
     indent? :string | number,
-    T? :'T' | ' ',
+    T? :'T' | 't' | ' ',
+    Z? :'Z' | 'z',
     xNull? :boolean,
     xBeforeNewlineInMultilineTable? :',' | '',
     forceInlineArraySpacing? :0 | 1 | 2 | 3,
@@ -269,10 +270,17 @@ declare function stringify (根表 :只读表, 选项? :Readonly<{
         
     -   ##### `选项.T`
         
-        *   类型：`'T'` / `' '`
+        *   类型：`'T'` / `'t'` / `' '`
         *   默认值：`'T'`
         
         序列化时，用什么来分隔日期与时刻。  
+        
+    -   ##### `选项.Z`
+        
+        *   类型：`'Z'` / `'z'`
+        *   默认值：`'Z'`
+        
+        如何表示时区偏移量 `Z`。  
         
     -   ##### `选项.preferCommentFor`
         

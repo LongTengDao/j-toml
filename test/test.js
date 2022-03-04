@@ -4,13 +4,6 @@ module.exports = require('j-dev')(__dirname + '/..')(async ({ import_default, ge
 	
 	const { not } = require('@ltd/j-validator');
 	
-	{
-		if ( !Buffer.hasOwnProperty(Symbol.species) || ( Buffer[Symbol.species] ?? Buffer )===Buffer ) { throw Error(`node engine changed`); }
-		const utf8 = Buffer.alloc(7);
-		utf8.utf8Write('𠮷利', 0, 7);
-		if ( !utf8.equals(Buffer.from('𠮷利')) ) { throw Error(`node engine changed`); }
-	}
-	
 	const TOML = await import_default('src/default', {
 		require: {
 			'@ltd/j-orderify': require(`${__dirname}/../../../LongTengDao/j-orderify/dist/NPM/index.js`),

@@ -128,7 +128,8 @@ declare module '.Reflect.apply?=' { export default apply;
 	function apply<This, Args extends readonly any[], Target extends (this :This, ...args :Args) => any> (this :void, target :Target, thisArg :This, args :{ readonly [Key in Extract<keyof Args, number | 'length'>] :Args[Key] }) :Target extends (this :This, ...args :Args) => infer R ? R : never;
 }
 declare module '.Reflect.construct' { export default construct;
-	function construct<Args extends readonly any[], Target extends new (...args :Args) => any> (this :void, target :Target, args :Args, newTarget? :new (...args :any) => any) :Target extends new (...args :Args) => infer R ? R : never;
+	function construct<Args extends readonly any[],    Target extends            new (...args :Args) => object                                   > (this :void, target :Target                       , args :Args                                      ) :Target extends new (...args :Args) => infer R ? R : never;
+	function construct<Args extends readonly any[], NewTarget extends ( abstract new (...args :any ) => object ) & { readonly prototype :object }> (this :void, target :new (...args :Args) => object, args :Args, newTarget :new (...args :any) => any) :NewTarget['prototype']                                   ;
 }
 declare module '.Reflect.defineProperty' { export default Reflect.defineProperty; }
 declare module '.Reflect.deleteProperty' { export default Reflect.deleteProperty; }
