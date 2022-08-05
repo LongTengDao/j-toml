@@ -130,9 +130,9 @@ true = false
 *   类型：
     ```typescript
     function 逐个处理器 (每个被标记处 :
-        { table :Table, key :string,                                tag :string } |
-        {                            array :any[],   index :number, tag :string } |
-        { table :Table, key :string, array :Table[], index :number, tag :string }
+        | { table :Table, key :string,                                tag :string }
+        | {                            array :  any[], index :number, tag :string }
+        | { table :Table, key :string, array :Table[], index :number, tag :string }
     ) :void;
     ```
 *   默认值：`null`
@@ -159,4 +159,4 @@ true = false
 
 标签必须与其作用目标在同一行；但其后的目标值可以缺省（此时传入值 `undefined`）。  
 
-需要 `规范版本` 为 `1.0` 以上，以支持可能的混合类型数组。  
+需要 `规范版本` 为 `1.0` 以上（混合类型数组支持）。  

@@ -8,12 +8,12 @@ declare module '.Array.isArray?=' { export default isArray;
 }
 declare module '.Array.prototype' { export default Array.prototype; }
 
+declare module '.ArrayBuffer.isView' { export default isView;
+	function isView (this :void, arg :unknown) :arg is Readonly<ArrayBufferView & { length? :number }>;
+}
+
 declare module '.BigInt' { export default BigInt; }
-declare module '.BigInt.prototype.valueOf?' { export default BigInt.prototype.valueOf; }
-
-declare module '.Boolean.prototype.valueOf' { export default Boolean.prototype.valueOf; }
-
-declare module '.Buffer?' { export default Buffer; }
+declare module '.BigInt.prototype.valueOf' { export default BigInt.prototype.valueOf; }
 
 declare module '.Date' { export default Date; }
 declare module '.Date.parse' { export default Date.parse; }
@@ -41,7 +41,6 @@ declare module '.Math.floor' { export default Math.floor; }
 
 declare module '.NaN' { export default NaN; }
 
-declare module '.Number' { export default Number; }
 declare module '.Number.MAX_SAFE_INTEGER' { export default Number.MAX_SAFE_INTEGER; }
 declare module '.Number.isSafeInteger' { export default Number.isSafeInteger; }
 declare module '.Number.prototype.valueOf' { export default Number.prototype.valueOf; }
@@ -124,9 +123,6 @@ declare module '.Reflect.apply' { export default apply;
 declare module '.Reflect.apply?' { export default apply;
 	function apply<This, Args extends readonly any[], Target extends (this :This, ...args :Args) => any> (this :void, target :Target, thisArg :This, args :{ readonly [Key in Extract<keyof Args, number | 'length'>] :Args[Key] }) :Target extends (this :This, ...args :Args) => infer R ? R : never;
 }
-declare module '.Reflect.apply?=' { export default apply;
-	function apply<This, Args extends readonly any[], Target extends (this :This, ...args :Args) => any> (this :void, target :Target, thisArg :This, args :{ readonly [Key in Extract<keyof Args, number | 'length'>] :Args[Key] }) :Target extends (this :This, ...args :Args) => infer R ? R : never;
-}
 declare module '.Reflect.construct' { export default construct;
 	function construct<Args extends readonly any[],    Target extends            new (...args :Args) => object                                   > (this :void, target :Target                       , args :Args                                      ) :Target extends new (...args :Args) => infer R ? R : never;
 	function construct<Args extends readonly any[], NewTarget extends ( abstract new (...args :any ) => object ) & { readonly prototype :object }> (this :void, target :new (...args :Args) => object, args :Args, newTarget :new (...args :any) => any) :NewTarget['prototype']                                   ;
@@ -146,7 +142,6 @@ declare module '.String.fromCodePoint' { export default String.fromCodePoint; }
 declare module '.String.prototype.valueOf' { export default String.prototype.valueOf; }
 
 declare module '.Symbol' { export default Symbol; }
-declare module '.Symbol.species' { export default Symbol.species; }
 declare module '.Symbol.species?' { export default Symbol.species; }
 declare module '.Symbol.toStringTag?' { export default Symbol.toStringTag; }
 
@@ -160,6 +155,8 @@ declare module '.SyntaxError' { export default SyntaxError_;
 	};
 }
 
+declare module '.TextDecoder' { export default TextDecoder; }
+
 declare module '.TypeError' { export default TypeError_;
 	interface TypeError_ extends TypeError { readonly cause? :Error }
 	const TypeError_ :{
@@ -169,8 +166,6 @@ declare module '.TypeError' { export default TypeError_;
 		new                                   (            message? :string                                ) :TypeError;
 	};
 }
-
-declare module '.Uint8Array' { export default Uint8Array; }
 
 declare module '.WeakMap' { export default constructor;
 	class constructor<K extends object, V> extends WeakMap<K, V> { constructor (entries? :Iterable<{ readonly 0 :K, readonly 1 :V }>) }
@@ -187,6 +182,9 @@ declare module '.WeakSet.prototype.add' { export default WeakSet.prototype.add; 
 declare module '.WeakSet.prototype.delete' { export default WeakSet.prototype.delete; }
 declare module '.WeakSet.prototype.has' { export default WeakSet.prototype.has; }
 
+declare module '.class.isArrayBuffer' { export default isArrayBuffer;
+	function isArrayBuffer (this :void, value :unknown) :value is ArrayBuffer & { readonly length? :undefined };
+}
 declare module '.class.isBigInt' { export default isBigInt;
 	function isBigInt (this :void, value :unknown) :value is BigInt;
 }

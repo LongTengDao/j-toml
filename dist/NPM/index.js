@@ -4,7 +4,7 @@ typeof define === 'function' && define.amd ? define(factory) :
 (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.TOML = factory());
 })(this, (function () { 'use strict';
 
-const version = '1.30.0';
+const version = '1.31.0';
 
 const Error$1 = {if:Error}.if;
 
@@ -17,8 +17,6 @@ const Object$1 = Object;
 const isArray$1 = Array.isArray;
 
 const Infinity = 1/0;
-
-const species = Symbol.species;
 
 const undefined$1 = void null;
 
@@ -38,7 +36,7 @@ const NULL = (
 	/* j-globals: null.prototype (internal) */
 );
 
-var ARGS = { length: 0 };
+const apply = Function.prototype.apply;
 
 var isEnum = /*#__PURE__*/propertyIsEnumerable.call.bind(propertyIsEnumerable);
 var hasOwn = (
@@ -75,7 +73,7 @@ const RegExp$1 = RegExp;
 
 const freeze = Object.freeze;
 
-const apply = Reflect.apply;
+const Reflect_apply = Reflect.apply;
 
 const Proxy$1 = Proxy;
 
@@ -206,7 +204,7 @@ var CONTEXT          = /*#__PURE__*/Context('');
 
 var newRegExp = Proxy$1
 	? /*#__PURE__*/new Proxy$1(RE, {
-		apply: function (RE, thisArg, args                                   ) { return apply(RE, CONTEXT, args); }
+		apply: function (RE, thisArg, args                                   ) { return Reflect_apply(RE, CONTEXT, args); }
 		,
 		get: function (RE, flags        ) { return RE_bind(Context(flags)); }
 		,
@@ -452,7 +450,7 @@ const handlers                       = /*#__PURE__*/assign$1(create(NULL), {
 	},
 	ownKeys:                    (target   ) => target2keeper.get(target)                         ,
 	construct:                                     (target                         , args   , newTarget     )    => orderify(Reflect_construct(target, args, newTarget)),
-	apply:                                        (target                              , thisArg   , args   )    => orderify(apply(target, thisArg, args)),
+	apply:                                        (target                              , thisArg   , args   )    => orderify(Reflect_apply(target, thisArg, args)),
 });
 
 const newProxy =                                              (target   , keeper           )    => {
@@ -822,8 +820,8 @@ let mustScalar          = true;
 
 let useWhatToJoinMultilineString                = null;
 let usingBigInt                 = true;
-let IntegerMinNumber         = 0n;
-let IntegerMaxNumber         = 0n;
+let IntegerMinNumber         = 0;
+let IntegerMaxNumber         = 0;
 
               
 
@@ -990,8 +988,8 @@ const use = (specificationVersion         , multilineStringJoiner         , useB
 		if ( !isSafeInteger(useBigInt) ) { throw RangeError$1('TOML.parse(,,,useBigInt)'); }
 		usingBigInt = null;
 		useBigInt>=0
-			? IntegerMinNumber = -( IntegerMaxNumber = BigInt$1(useBigInt) )
-			: IntegerMaxNumber = -( IntegerMinNumber = BigInt$1(useBigInt) ) - 1n;
+			? IntegerMinNumber = -( IntegerMaxNumber = useBigInt )
+			: IntegerMaxNumber = -( IntegerMinNumber = useBigInt ) - 1;
 	}
 	
 	if ( xOptions==null ) {
@@ -1542,13 +1540,12 @@ const MultilineBasicString = (literal        , useWhatToJoinMultilineString     
 	return parts.join('');
 };
 
-const Number$1 = Number;
-
 const INTEGER_D = /[-+]?(?:0|[1-9][_\d]*)/;
 const { test: BAD_D } = /*#__PURE__*/newRegExp`_(?!\d)`.valueOf();
 const { test: IS_D_INTEGER } = /*#__PURE__*/newRegExp`^${INTEGER_D}$`.valueOf();
 const { test: IS_XOB_INTEGER } = theRegExp(/^0(?:x[\dA-Fa-f][_\dA-Fa-f]*|o[0-7][_0-7]*|b[01][_01]*)$/);
 const { test: BAD_XOB } = /*#__PURE__*/newRegExp`_(?![\dA-Fa-f])`.valueOf();
+const UNDERSCORES$1 = /_/g;
 const UNDERSCORES_SIGN = /_|^[-+]/g;
 
 const IS_INTEGER = (literal        )          => ( IS_D_INTEGER(literal) || /*options.xob && */IS_XOB_INTEGER(literal) ) && !BAD_XOB(literal);
@@ -1568,9 +1565,7 @@ const BigIntInteger = (literal        )         => {
 
 const NumberInteger = (literal        )         => {
 	IS_INTEGER(literal) || throws(SyntaxError$1(`Invalid Integer ${literal}` + where(' at ')));
-	const number = literal[0]==='-'
-		? -literal.replace(UNDERSCORES_SIGN, '')
-		: +literal.replace(UNDERSCORES_SIGN, '');
+	const number = parseInt$1(literal.replace(UNDERSCORES$1, ''));
 	isSafeInteger(number) || throws(RangeError$1(`Integer did not use BitInt must fit Number.isSafeInteger, not includes ${literal}` + where(' meet at ')));
 	return number;
 };
@@ -1578,8 +1573,18 @@ const NumberInteger = (literal        )         => {
 const Integer = (literal        )                  => {
 	if ( usingBigInt===true ) { return BigIntInteger(literal); }
 	if ( usingBigInt===false ) { return NumberInteger(literal); }
-	const bigInt         = BigIntInteger(literal);
-	return IntegerMinNumber<=bigInt && bigInt<=IntegerMaxNumber ? Number$1(bigInt) : bigInt;
+	IS_INTEGER(literal) || throws(SyntaxError$1(`Invalid Integer ${literal}` + where(' at ')));
+	const number         = parseInt$1(literal.replace(UNDERSCORES$1, ''));
+	if ( IntegerMinNumber<=number && number<=IntegerMaxNumber ) { return number; }
+	const bigInt         = literal[0]==='-'
+		? -BigInt$1(literal.replace(UNDERSCORES_SIGN, ''))
+		: BigInt$1(literal.replace(UNDERSCORES_SIGN, ''));
+	allowLonger
+	||
+	-9223372036854775808n<=bigInt && bigInt<=9223372036854775807n// ( min = -(2n**(64n-1n)) || -max-1n ) <= long <= ( max = 2n**(64n-1n)-1n || -min-1n )
+	||
+	throws(RangeError$1(`Integer expect 64 bit range (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807), not includes ${literal}` + where(' meet at ')));
+	return bigInt;
 };
 
 const isFinite$1 = isFinite;
@@ -2096,127 +2101,34 @@ const Root = ()        => {
 	return rootTable;
 };
 
-const Uint8Array$1 = Uint8Array;
+const TextDecoder$1 = TextDecoder;
 
-const Buffer$1 = typeof Buffer==='undefined' ? undefined$1 : Buffer;
+const isView = ArrayBuffer.isView;
+
+const isArrayBuffer = (
+	/* j-globals: class.isArrayBuffer (internal) */
+	/*#__PURE__*/ function () {
+		if ( typeof ArrayBuffer==='function' ) {
+			var byteLength_apply = apply.bind(Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'byteLength').get);
+			return function isArrayBuffer (value) {
+				try { byteLength_apply(value); }
+				catch (error) { return false; }
+				return true;
+			};
+		}
+		return function isArrayBuffer () { return false; };
+	}()
+	/* j-globals: class.isArrayBuffer (internal) */
+);
 
 const isArrayBufferLike = (value        )                       => 'byteLength' in value;///
 
-const message = 'A TOML doc must be a (ful-scalar) valid UTF-8 file, without any unknown code point.';
-
-const arrayBufferLike2string                                             = Buffer$1
-	
-	? /*#__PURE__*/( ({ isBuffer, [species]: Buf, byteLength, allocUnsafe, from }) => {
-		// @ts-ignore
-		if ( typeof Buffer$1.prototype.utf8Write==='function' ) {
-			const utf8 = Buffer$1.alloc(7);
-			// @ts-ignore
-			utf8.utf8Write('𠮷利', 0, 7);
-			if ( utf8.equals(from('𠮷利')) ) {
-				return (arrayBufferLike                                   )         => {
-					if ( !arrayBufferLike.byteLength ) { return ''; }
-					const buffer         = isBuffer(arrayBufferLike)/// isView, length===byteLength!, instanceof Buffer
-						? arrayBufferLike
-						: 'length' in arrayBufferLike/// isView, length===byteLength!
-							? new Buf(arrayBufferLike.buffer, arrayBufferLike.byteOffset, arrayBufferLike.byteLength)
-							: new Buf(arrayBufferLike);/// class.isArrayBuffer!
-					const string         = buffer.toString();
-					if ( string.includes('\uFFFD') ) {
-						const length         = byteLength(string);
-						if ( length!==buffer.length ) { throw Error$1(message); }
-						const utf8 = allocUnsafe(length);
-						// @ts-ignore
-						utf8.utf8Write(string, 0, length);
-						if ( !utf8.equals(buffer) ) { throw Error$1(message); }
-					}
-					return string[0]==='\uFEFF' ? string.slice(1) : string;
-				};
-			}
-		}
-		return (arrayBufferLike                                   )         => {
-			if ( !arrayBufferLike.byteLength ) { return ''; }
-			const buffer         =
-				isBuffer(arrayBufferLike)/// isView, length===byteLength!, instanceof Buffer
-					? arrayBufferLike
-					: 'length' in arrayBufferLike/// isView, length===byteLength!
-						? new Buf(arrayBufferLike.buffer, arrayBufferLike.byteOffset, arrayBufferLike.byteLength)
-						: new Buf(arrayBufferLike);/// class.isArrayBuffer!
-			const string         = buffer.toString();
-			if ( string.includes('\uFFFD') && !from(string).equals(buffer) ) { throw Error$1(message); }
-			return string[0]==='\uFEFF' ? string.slice(1) : string;
-		};
-	})(Buffer$1                                                                                                                             )
-	
-	: (arrayBufferLike                          )         => {
-		if ( !arrayBufferLike.byteLength ) { return ''; }
-		const uint8Array             =
-			'length' in arrayBufferLike/// isView, length===byteLength!
-				? arrayBufferLike
-				: new Uint8Array$1(arrayBufferLike);/// class.isArrayBuffer!
-		const { length } = uint8Array;
-		const length_1 = length - 1;
-		const length_2 = length_1 - 1;
-		const length_3 = length_2 - 1;
-		const stringArray           = [];
-		let stringArray_length         = 0;
-		let index         = 0;
-		do {
-			let codePoint         = uint8Array[index] ;
-			if ( codePoint<0b1100_0000 ) {
-				if ( codePoint<0b1000_0000 ) {
-					stringArray[stringArray_length++] = fromCharCode(codePoint);
-					index += 1;
-					continue;
-				}
-			}
-			else if ( codePoint<0b1110_0000 ) {
-				if ( index<length_1 ) {
-					const secondByte         = uint8Array[index + 1] ;
-					if ( ( secondByte&0b1100_0000 )===0b1000_0000 ) {
-						codePoint = ( codePoint&0b0001_1111 )<<6|( secondByte&0b0011_1111 );
-						if ( 0b0111_1111<codePoint ) {
-							stringArray[stringArray_length++] = fromCharCode(codePoint);
-							index += 2;
-							continue;
-						}
-					}
-				}
-			}
-			else if ( codePoint<0b1111_0000 ) {
-				if ( index<length_2 ) {
-					const secondByte         = uint8Array[index + 1] ;
-					const thirdByte         = uint8Array[index + 2] ;
-					if ( ( secondByte&0b1100_0000 )===0b1000_0000 && ( thirdByte&0b1100_0000 )===0b1000_0000 ) {
-						codePoint = ( codePoint&0b0000_1111 )<<12|( secondByte&0b0011_1111 )<<6|( thirdByte&0b0011_1111 );
-						if ( ( codePoint<0xD800 ? 0x07FF : 0xDFFF )<codePoint ) {
-							stringArray[stringArray_length++] = fromCharCode(codePoint);
-							index += 3;
-							continue;
-						}
-					}
-				}
-			}
-			else {
-				if ( index<length_3 ) {
-					const secondByte         = uint8Array[index + 1] ;
-					const thirdByte         = uint8Array[index + 2] ;
-					const fourthByte         = uint8Array[index + 3] ;
-					if ( ( secondByte&0b1100_0000 )===0b1000_0000 && ( thirdByte&0b1100_0000 )===0b1000_0000 && ( fourthByte&0b1100_0000 )===0b1000_0000 ) {
-						codePoint = ( codePoint&0b0000_1111 )<<18|( secondByte&0b0011_1111 )<<12|( thirdByte&0b0011_1111 )<<6|( fourthByte&0b0011_1111 );
-						if ( 0xFFFF<codePoint && codePoint<0x11_0000 ) {
-							stringArray[stringArray_length++] = fromCodePoint(codePoint);
-							index += 4;
-							continue;
-						}
-					}
-				}
-			}
-			throw Error$1(message);
-		}
-		while ( index!==length );
-		const string = stringArray.join('');
-		return string[0]==='\uFEFF' ? string.slice(1) : string;
-	};
+const textDecoder = /*#__PURE__*/new TextDecoder$1('utf-8', { fatal: true, ignoreBOM: false });
+const arrayBufferLike2string                                             = (arrayBufferLike                          )         => {
+	if ( isView(arrayBufferLike) ? arrayBufferLike.length!==arrayBufferLike.byteLength : !isArrayBuffer(arrayBufferLike) ) { throw TypeError$1(`only Uint8Array or ArrayBuffer is acceptable`); }
+	try { return textDecoder.decode(arrayBufferLike); }
+	catch { throw Error$1('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any unknown code point.'); }
+};
 
 const { test: IS_NON_SCALAR } = theRegExp(/[\uD800-\uDFFF]/u);
 
@@ -2315,53 +2227,85 @@ const DATE = Date.prototype;
 
 const isPrototypeOf = Object.prototype.isPrototypeOf;
 
-const valueOf$3 = String.prototype.valueOf;
+const valueOf$2 = String.prototype.valueOf;
 
 const isString = (
 	/* j-globals: class.isString (internal) */
-	function isString (value) {
-		try { apply(valueOf$3, value, ARGS); }
-		catch (error) { return false; }
-		return true;
-	}
+	/*#__PURE__*/ function () {
+		if ( apply.bind ) {
+			var valueOf_apply = apply.bind(valueOf$2);
+			return function isString (value) {
+				try { valueOf_apply(value); }
+				catch (error) { return false; }
+				return true;
+			};
+		}
+		return function isString (value) {
+			try { valueOf$2.apply(value); }
+			catch (error) { return false; }
+			return true;
+		};
+	}()
 	/* j-globals: class.isString (internal) */
 );
 
-const valueOf$2 = Number.prototype.valueOf;
+const valueOf$1 = Number.prototype.valueOf;
 
 const isNumber = (
 	/* j-globals: class.isNumber (internal) */
-	function isNumber (value) {
-		try { apply(valueOf$2, value, ARGS); }
-		catch (error) { return false; }
-		return true;
-	}
+	/*#__PURE__*/ function () {
+		if ( apply.bind ) {
+			var valueOf_apply = apply.bind(valueOf$1);
+			return function isNumber (value) {
+				try { valueOf_apply(value); }
+				catch (error) { return false; }
+				return true;
+			};
+		}
+		return function isNumber (value) {
+			try { valueOf$1.apply(value); }
+			catch (error) { return false; }
+			return true;
+		};
+	}()
 	/* j-globals: class.isNumber (internal) */
 );
 
-const valueOf$1 = typeof BigInt==='undefined' ? undefined$1 : BigInt.prototype.valueOf;
-
 const isBigInt = (
 	/* j-globals: class.isBigInt (internal) */
-	valueOf$1
-		? function isBigInt (value) {
-			try { apply(valueOf$1, value, ARGS); }
-			catch (error) { return false; }
-			return true;
+	/*#__PURE__*/ function () {
+		if ( typeof BigInt==='function' ) {
+			var valueOf_apply = apply.bind(BigInt.prototype.valueOf);
+			return function isBigInt (value) {
+				try { valueOf_apply(value); }
+				catch (error) { return false; }
+				return true;
+			};
 		}
-		: function isBigInt () { return false; }
+		return function isBigInt () { return false; };
+	}()
 	/* j-globals: class.isBigInt (internal) */
 );
 
-const valueOf = Boolean.prototype.valueOf;
+const valueOf = BigInt.prototype.valueOf;
 
 const isBoolean = (
 	/* j-globals: class.isBoolean (internal) */
-	function isBoolean (value) {
-		try { apply(valueOf, value, ARGS); }
-		catch (error) { return false; }
-		return true;
-	}
+	/*#__PURE__*/ function () {
+		if ( apply.bind ) {
+			var valueOf_apply = apply.bind(valueOf);
+			return function isBoolean (value) {
+				try { valueOf_apply(value); }
+				catch (error) { return false; }
+				return true;
+			};
+		}
+		return function isBoolean (value) {
+			try { valueOf.apply(value); }
+			catch (error) { return false; }
+			return true;
+		};
+	}()
 	/* j-globals: class.isBoolean (internal) */
 );
 

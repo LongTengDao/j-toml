@@ -21,8 +21,8 @@ export let mustScalar :boolean = true;
 
 export let useWhatToJoinMultilineString :string | null = null;
 export let usingBigInt :boolean | null = true;
-export let IntegerMinNumber :bigint = 0n;
-export let IntegerMaxNumber :bigint = 0n;
+export let IntegerMinNumber :number = 0;
+export let IntegerMaxNumber :number = 0;
 
 /* xOptions */
 
@@ -189,8 +189,8 @@ export const use = (specificationVersion :unknown, multilineStringJoiner :unknow
 		if ( !isSafeInteger(useBigInt) ) { throw RangeError('TOML.parse(,,,useBigInt)'); }
 		usingBigInt = null;
 		useBigInt>=0
-			? IntegerMinNumber = -( IntegerMaxNumber = BigInt(useBigInt) )
-			: IntegerMaxNumber = -( IntegerMinNumber = BigInt(useBigInt) ) - 1n;
+			? IntegerMinNumber = -( IntegerMaxNumber = useBigInt )
+			: IntegerMaxNumber = -( IntegerMinNumber = useBigInt ) - 1;
 	}
 	
 	if ( xOptions==null ) {

@@ -130,9 +130,9 @@ true = false
 *   type:
     ```typescript
     function processorForEach (eachTaggedPosition :
-        { table :Table, key :string,                                tag :string } |
-        {                            array :any[],   index :number, tag :string } |
-        { table :Table, key :string, array :Table[], index :number, tag :string }
+        | { table :Table, key :string,                                tag :string }
+        | {                            array :  any[], index :number, tag :string }
+        | { table :Table, key :string, array :Table[], index :number, tag :string }
     ) :void;
     ```
 *   default: `null`
@@ -159,4 +159,4 @@ In the future, it is possible to add an extension method to remove both restrict
 
 Tag and its target must be in same line; while the target value after tag could be omitted (and `undefined` would be passed in as the value).  
 
-The `specificationVersion` must be `1.0` or higher, to support feasible mixed type array.  
+The `specificationVersion` must be `1.0` or higher (because of mixed type array support).  
