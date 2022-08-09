@@ -2,6 +2,7 @@
 '0'.0 = { '-1'.1e1 = 2 }
 3.3.3 = -0.0
 '1-1' = 1
+'-inf' = -nan
 'true' = false
 c = true # comment
 e = 0b0000_0000

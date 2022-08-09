@@ -76,4 +76,6 @@ ___
             *   bug fix: allow writing lowercase `t`, `z` in date-time for `TOML.parse`
     29. 0.  +   new feature: new `forceInlineArraySpacing` option in `TOML.stringify`
     30. 0.  +   new feature: new `options.T` option `'t'` support and `options.Z` option in `TOML.stringify`
-    31. 0.  *   while `TOML.parse` is passed in `Buffer`, `Uint8Array` or `ArrayBuffer`, uniformly use `TextDecoder` instead of `buffer.toString()` or polyfill in non `Node.js` environment as `UTF-8` decoder
+    31. 0.  *   optimizing: `TOML.parse` Integer
+            *   while `TOML.parse` is passed in `Buffer`, `Uint8Array` or `ArrayBuffer`, uniformly use `TextDecoder` instead of `buffer.toString()` or polyfill in non `Node.js` environment as `UTF-8` decoder
+    32. 0.  *   feature perfecting: distinguish between `-NaN` and `NaN`

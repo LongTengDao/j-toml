@@ -10,6 +10,7 @@ import { INTEGER_D, BAD_D } from './Integer';
 import * as iterator from '../iterator';
 import * as options from '../options';
 
+const _NaN = -NaN;
 const _Infinity = -Infinity;
 const { test: IS_FLOAT } = /*#__PURE__*/newRegExp`
 	^
@@ -31,7 +32,8 @@ export const Float = (literal :string) :number => {
 		if ( options.sFloat ) {
 			if ( literal==='inf' || literal==='+inf' ) { return Infinity; }
 			if ( literal==='-inf' ) { return _Infinity; }
-			if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) { return NaN; }
+			if ( literal==='nan' || literal==='+nan' ) { return NaN; }
+			if ( literal==='-nan' ) { return _NaN; }
 		}
 		throw iterator.throws(SyntaxError(`Invalid Float ${literal}` + iterator.where(' at ')));
 	}

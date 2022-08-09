@@ -15,6 +15,8 @@ declare module '.ArrayBuffer.isView' { export default isView;
 declare module '.BigInt' { export default BigInt; }
 declare module '.BigInt.prototype.valueOf' { export default BigInt.prototype.valueOf; }
 
+declare module '.DataView' { export default DataView; }
+
 declare module '.Date' { export default Date; }
 declare module '.Date.parse' { export default Date.parse; }
 declare module '.Date.prototype' { export default Date.prototype; }
@@ -166,6 +168,8 @@ declare module '.TypeError' { export default TypeError_;
 		new                                   (            message? :string                                ) :TypeError;
 	};
 }
+
+declare module '.Uint8Array' { export default Uint8Array; }
 
 declare module '.WeakMap' { export default constructor;
 	class constructor<K extends object, V> extends WeakMap<K, V> { constructor (entries? :Iterable<{ readonly 0 :K, readonly 1 :V }>) }

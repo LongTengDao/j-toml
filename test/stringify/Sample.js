@@ -9,6 +9,7 @@
 			},
 		},
 		'1-1': 1n,
+		'-inf': -NaN,
 		true: false,
 		c: true, [commentFor('c')]: ' comment',
 		e: literal`0b0000_0000`,

@@ -4,7 +4,7 @@ typeof define === 'function' && define.amd ? define(factory) :
 (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.TOML = factory());
 })(this, (function () { 'use strict';
 
-const version = '1.31.0';
+const version = '1.32.0';
 
 const Error$1 = {if:Error}.if;
 
@@ -1591,6 +1591,7 @@ const isFinite$1 = isFinite;
 
 const NaN$1 = 0/0;
 
+const _NaN = -NaN$1;
 const _Infinity$1 = -Infinity;
 const { test: IS_FLOAT } = /*#__PURE__*/newRegExp`
 	^
@@ -1612,7 +1613,8 @@ const Float = (literal        )         => {
 		if ( sFloat ) {
 			if ( literal==='inf' || literal==='+inf' ) { return Infinity; }
 			if ( literal==='-inf' ) { return _Infinity$1; }
-			if ( literal==='nan' || literal==='+nan' || literal==='-nan' ) { return NaN$1; }
+			if ( literal==='nan' || literal==='+nan' ) { return NaN$1; }
+			if ( literal==='-nan' ) { return _NaN; }
 		}
 		throw throws(SyntaxError$1(`Invalid Float ${literal}` + where(' at ')));
 	}
@@ -2393,13 +2395,23 @@ const multilineLiteralString = (lines       )                                   
 	return lines                                          ;
 };
 
+const DataView$1 = DataView;
+
+const Uint8Array$1 = Uint8Array;
+
 const _Infinity = -Infinity;
 const { test: INTEGER_LIKE } = theRegExp(/^-?\d+$/);
 const ensureFloat = (literal        ) => INTEGER_LIKE(literal) ? literal + '.0' : literal;
+const uint8Array = new Uint8Array$1(8);
+const dataView = new DataView$1(uint8Array.buffer);
+const is_NaN = (value        )          => {
+	dataView.setFloat64(0, value);
+	return uint8Array[0]===0xFF;
+};
 
 const float = (value        ) => value
 	? value===Infinity ? 'inf' : value===_Infinity ? '-inf' : ensureFloat('' + value)
-	: value===value ? is(value, 0) ? '0.0' : '-0.0' : 'nan';
+	: value===value ? is(value, 0) ? '0.0' : '-0.0' : is_NaN(value) ? '-nan' : 'nan';
 
 const isDate = /*#__PURE__*/isPrototypeOf.bind(DATE)                                                ;
 
