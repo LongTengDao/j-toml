@@ -79,3 +79,6 @@ ___
     31. 0.  *   optimizing: `TOML.parse` Integer
             *   while `TOML.parse` is passed in `Buffer`, `Uint8Array` or `ArrayBuffer`, uniformly use `TextDecoder` instead of `buffer.toString()` or polyfill in non `Node.js` environment as `UTF-8` decoder
     32. 0.  *   feature perfecting: distinguish between `-NaN` and `NaN`
+    33. 0.  *   more friendly error message for passing in array (usually come from `TOML.stringify` output without setting `options.newline`) to `TOML.parse`
+            *   optimizing: avoid code point check twice for `Buffer`, `Uint8Array` or `ArrayBuffer` passing into `TOML.parse`
+            *   optimizing: `TOML.stringify` for `-NaN`

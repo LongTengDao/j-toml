@@ -174,19 +174,19 @@ export const use = (specificationVersion :unknown, multilineStringJoiner :unknow
 			mustScalar = mixed = moreDatetime = sFloat = inlineTable = false;
 			break;
 		default:
-			throw RangeError('TOML.parse(,specificationVersion)');
+			throw RangeError(`TOML.parse(,specificationVersion)`);
 	}
 	regexps.switchRegExp(specificationVersion);
 	
 	if ( typeof multilineStringJoiner==='string' ) { useWhatToJoinMultilineString = multilineStringJoiner; }
 	else if ( multilineStringJoiner===undefined ) { useWhatToJoinMultilineString = null; }
-	else { throw TypeError('TOML.parse(,,multilineStringJoiner)'); }
+	else { throw TypeError(`TOML.parse(,,multilineStringJoiner)`); }
 	
 	if ( useBigInt===undefined || useBigInt===true ) { usingBigInt = true; }
 	else if ( useBigInt===false ) { usingBigInt = false; }
 	else {
-		if ( typeof useBigInt!=='number' ) { throw TypeError('TOML.parse(,,,useBigInt)'); }
-		if ( !isSafeInteger(useBigInt) ) { throw RangeError('TOML.parse(,,,useBigInt)'); }
+		if ( typeof useBigInt!=='number' ) { throw TypeError(`TOML.parse(,,,useBigInt)`); }
+		if ( !isSafeInteger(useBigInt) ) { throw RangeError(`TOML.parse(,,,useBigInt)`); }
 		usingBigInt = null;
 		useBigInt>=0
 			? IntegerMinNumber = -( IntegerMaxNumber = useBigInt )
@@ -214,8 +214,8 @@ export const use = (specificationVersion :unknown, multilineStringJoiner :unknow
 		disableDigit = !!string;
 		preserveLiteral = !!literal;
 		if ( tag ) {
-			if ( typeof tag!=='function' ) { throw TypeError('TOML.parse(,,,,xOptions.tag)'); }
-			if ( !mixed ) { throw TypeError('TOML.parse(,,,,xOptions) xOptions.tag needs at least TOML 1.0 to support mixed type array'); }
+			if ( typeof tag!=='function' ) { throw TypeError(`TOML.parse(,,,,xOptions.tag)`); }
+			if ( !mixed ) { throw TypeError(`TOML.parse(,,,,xOptions) xOptions.tag needs at least TOML 1.0 to support mixed type array`); }
 			processor = tag;
 			collect = collect_on;
 		}

@@ -1,14 +1,16 @@
-﻿const version = '1.32.0';
+﻿const version = '1.33.0';
 
 const Error$1 = {if:Error}.if;
 
 const TypeError$1 = TypeError;
 
+const isView = ArrayBuffer.isView;
+
+const isArray$1 = Array.isArray;
+
 const assign$1 = Object.assign;
 
 const Object$1 = Object;
-
-const isArray$1 = Array.isArray;
 
 const Infinity = 1/0;
 
@@ -55,6 +57,68 @@ function Descriptor (source) {
 	return target;
 }
 
+const freeze = Object.freeze;
+
+const keys = Object.keys;
+
+const getOwnPropertySymbols = Object.getOwnPropertySymbols;
+
+const Null$1 = (
+	/* j-globals: null (internal) */
+	/*#__PURE__*/function () {
+		var assign = Object.assign || function assign (target, source) {
+			var keys$1, index, key;
+			for ( keys$1 = keys(source), index = 0; index<keys$1.length;++index ) {
+				key = keys$1[index];
+				target[key] = source[key];
+			}
+			if ( getOwnPropertySymbols ) {
+				for ( keys$1 = getOwnPropertySymbols(source), index = 0; index<keys$1.length;++index ) {
+					key = keys$1[index];
+					if ( isEnum(source, key) ) { target[key] = source[key]; }
+				}
+			}
+			return target;
+		};
+		function Nullify (constructor) {
+			delete constructor.prototype.constructor;
+			freeze(constructor.prototype);
+			return constructor;
+		}
+		function Null (origin) {
+			return origin===undefined$1
+				? this
+				: typeof origin==='function'
+					? /*#__PURE__*/Nullify(origin)
+					: /*#__PURE__*/assign(/*#__PURE__*/create$1(NULL), origin);
+		}
+		delete Null.name;
+		//try { delete Null.length; } catch (error) {}
+		Null.prototype = null;
+		freeze(Null);
+		return Null;
+	}()
+	/* j-globals: null (internal) */
+);
+
+const isArrayBuffer = (
+	/* j-globals: class.isArrayBuffer (internal) */
+	/*#__PURE__*/ function () {
+		if ( typeof ArrayBuffer==='function' ) {
+			var byteLength_apply = apply.bind(Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'byteLength').get);
+			return function isArrayBuffer (value) {
+				try { byteLength_apply(value); }
+				catch (error) { return false; }
+				return true;
+			};
+		}
+		return function isArrayBuffer () { return false; };
+	}()
+	/* j-globals: class.isArrayBuffer (internal) */
+);
+
+const TextDecoder$1 = TextDecoder;
+
 const bind = Function.prototype.bind;
 
 const test = RegExp.prototype.test;
@@ -64,8 +128,6 @@ const exec = RegExp.prototype.exec;
 const SyntaxError$1 = SyntaxError;
 
 const RegExp$1 = RegExp;
-
-const freeze = Object.freeze;
 
 const Reflect_apply = Reflect.apply;
 
@@ -271,7 +333,7 @@ const throws = (error       )        => {
 
 const EOL = /\r?\n/;
 const todo = (source        , path        )       => {
-	if ( typeof path!=='string' ) { throw TypeError$1('TOML.parse(,,,,sourcePath)'); }
+	if ( typeof path!=='string' ) { throw TypeError$1(`TOML.parse(,,,,sourcePath)`); }
 	sourcePath = path;
 	sourceLines = source.split(EOL);
 	lastLineIndex = sourceLines.length - 1;
@@ -330,48 +392,6 @@ const has = WeakSet.prototype.has;
 const add = WeakSet.prototype.add;
 
 const del = WeakSet.prototype['delete'];
-
-const keys = Object.keys;
-
-const getOwnPropertySymbols = Object.getOwnPropertySymbols;
-
-const Null$1 = (
-	/* j-globals: null (internal) */
-	/*#__PURE__*/function () {
-		var assign = Object.assign || function assign (target, source) {
-			var keys$1, index, key;
-			for ( keys$1 = keys(source), index = 0; index<keys$1.length;++index ) {
-				key = keys$1[index];
-				target[key] = source[key];
-			}
-			if ( getOwnPropertySymbols ) {
-				for ( keys$1 = getOwnPropertySymbols(source), index = 0; index<keys$1.length;++index ) {
-					key = keys$1[index];
-					if ( isEnum(source, key) ) { target[key] = source[key]; }
-				}
-			}
-			return target;
-		};
-		function Nullify (constructor) {
-			delete constructor.prototype.constructor;
-			freeze(constructor.prototype);
-			return constructor;
-		}
-		function Null (origin) {
-			return origin===undefined$1
-				? this
-				: typeof origin==='function'
-					? /*#__PURE__*/Nullify(origin)
-					: /*#__PURE__*/assign(/*#__PURE__*/create$1(NULL), origin);
-		}
-		delete Null.name;
-		//try { delete Null.length; } catch (error) {}
-		Null.prototype = null;
-		freeze(Null);
-		return Null;
-	}()
-	/* j-globals: null (internal) */
-);
 
 const is = Object.is;
 
@@ -967,19 +987,19 @@ const use = (specificationVersion         , multilineStringJoiner         , useB
 			mustScalar = mixed = moreDatetime = sFloat = inlineTable = false;
 			break;
 		default:
-			throw RangeError$1('TOML.parse(,specificationVersion)');
+			throw RangeError$1(`TOML.parse(,specificationVersion)`);
 	}
 	switchRegExp(specificationVersion);
 	
 	if ( typeof multilineStringJoiner==='string' ) { useWhatToJoinMultilineString = multilineStringJoiner; }
 	else if ( multilineStringJoiner===undefined$1 ) { useWhatToJoinMultilineString = null; }
-	else { throw TypeError$1('TOML.parse(,,multilineStringJoiner)'); }
+	else { throw TypeError$1(`TOML.parse(,,multilineStringJoiner)`); }
 	
 	if ( useBigInt===undefined$1 || useBigInt===true ) { usingBigInt = true; }
 	else if ( useBigInt===false ) { usingBigInt = false; }
 	else {
-		if ( typeof useBigInt!=='number' ) { throw TypeError$1('TOML.parse(,,,useBigInt)'); }
-		if ( !isSafeInteger(useBigInt) ) { throw RangeError$1('TOML.parse(,,,useBigInt)'); }
+		if ( typeof useBigInt!=='number' ) { throw TypeError$1(`TOML.parse(,,,useBigInt)`); }
+		if ( !isSafeInteger(useBigInt) ) { throw RangeError$1(`TOML.parse(,,,useBigInt)`); }
 		usingBigInt = null;
 		useBigInt>=0
 			? IntegerMinNumber = -( IntegerMaxNumber = useBigInt )
@@ -1007,8 +1027,8 @@ const use = (specificationVersion         , multilineStringJoiner         , useB
 		disableDigit = !!string;
 		preserveLiteral = !!literal;
 		if ( tag ) {
-			if ( typeof tag!=='function' ) { throw TypeError$1('TOML.parse(,,,,xOptions.tag)'); }
-			if ( !mixed ) { throw TypeError$1('TOML.parse(,,,,xOptions) xOptions.tag needs at least TOML 1.0 to support mixed type array'); }
+			if ( typeof tag!=='function' ) { throw TypeError$1(`TOML.parse(,,,,xOptions.tag)`); }
+			if ( !mixed ) { throw TypeError$1(`TOML.parse(,,,,xOptions) xOptions.tag needs at least TOML 1.0 to support mixed type array`); }
 			processor = tag;
 			collect = collect_on;
 		}
@@ -2097,126 +2117,6 @@ const Root = ()        => {
 	return rootTable;
 };
 
-const TextDecoder$1 = TextDecoder;
-
-const isView = ArrayBuffer.isView;
-
-const isArrayBuffer = (
-	/* j-globals: class.isArrayBuffer (internal) */
-	/*#__PURE__*/ function () {
-		if ( typeof ArrayBuffer==='function' ) {
-			var byteLength_apply = apply.bind(Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'byteLength').get);
-			return function isArrayBuffer (value) {
-				try { byteLength_apply(value); }
-				catch (error) { return false; }
-				return true;
-			};
-		}
-		return function isArrayBuffer () { return false; };
-	}()
-	/* j-globals: class.isArrayBuffer (internal) */
-);
-
-const isArrayBufferLike = (value        )                       => 'byteLength' in value;///
-
-const textDecoder = /*#__PURE__*/new TextDecoder$1('utf-8', { fatal: true, ignoreBOM: false });
-const arrayBufferLike2string                                             = (arrayBufferLike                          )         => {
-	if ( isView(arrayBufferLike) ? arrayBufferLike.length!==arrayBufferLike.byteLength : !isArrayBuffer(arrayBufferLike) ) { throw TypeError$1(`only Uint8Array or ArrayBuffer is acceptable`); }
-	try { return textDecoder.decode(arrayBufferLike); }
-	catch { throw Error$1('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any unknown code point.'); }
-};
-
-const { test: IS_NON_SCALAR } = theRegExp(/[\uD800-\uDFFF]/u);
-
-let holding          = false;
-
-const parse = (source        , specificationVersion                                   , multilineStringJoiner                                                                                , useBigInt                            , xOptions                   )        => {
-	if ( holding ) { throw Error$1('parse during parsing.'); }
-	holding = true;
-	let rootTable       ;
-	let process                 ;
-	try {
-		let sourcePath         = '';
-		if ( typeof source==='object' && source ) {
-			if ( isArrayBufferLike(source) ) { source = arrayBufferLike2string(source); }
-			else {
-				sourcePath = source.path;
-				if ( typeof sourcePath!=='string' ) { throw TypeError$1('TOML.parse(source.path)'); }
-				const { data, require: req = typeof require==='function' ? require : undefined$1 } = source;
-				if ( req ) {
-					const dirname_ = req.resolve?.paths?.('')?.[0]?.replace(/node_modules$/, '');
-					if ( dirname_ ) {
-						sourcePath = ( req                                          )('path').resolve(dirname_, sourcePath);
-						if ( typeof sourcePath!=='string' ) { throw TypeError$1(`TOML.parse(source.require('path').resolve)`); }
-					}
-					if ( data===undefined$1 ) {
-						const data = ( req                                      )('fs').readFileSync(sourcePath);
-						if ( typeof data==='object' && data && isArrayBufferLike(data) ) { source = arrayBufferLike2string(data); }
-						else { throw TypeError$1(`TOML.parse(source.require('fs').readFileSync)`); }
-					}
-					else if ( typeof data==='string' ) { source = data; }
-					else {
-						if ( typeof data==='object' && data && isArrayBufferLike(data) ) { source = arrayBufferLike2string(data); }
-						else { throw TypeError$1('TOML.parse(source.data)'); }
-					}
-				}
-				else {
-					if ( data===undefined$1 ) { throw TypeError$1('TOML.parse(source.data|source.require)'); }
-					else if ( typeof data==='string' ) { source = data; }
-					else {
-						if ( typeof data==='object' && data && isArrayBufferLike(data) ) { source = arrayBufferLike2string(data); }
-						else { throw TypeError$1('TOML.parse(source.data)'); }
-					}
-				}
-			}
-		}
-		else if ( typeof source!=='string' ) { throw TypeError$1('TOML.parse(source)'); }
-		try {
-			if ( IS_NON_SCALAR(source) ) { throw Error$1('A TOML doc must be a (ful-scalar) valid UTF-8 file, without any uncoupled UCS-4 character code.'); }
-			if ( typeof multilineStringJoiner==='object' && multilineStringJoiner ) {
-				if ( useBigInt!==undefined$1 || xOptions!==undefined$1 ) { throw TypeError$1('options mode ? args mode'); }
-				let joiner                    ;
-				if ( hasOwn(multilineStringJoiner, 'joiner') ) { joiner = multilineStringJoiner.joiner; }
-				if ( hasOwn(multilineStringJoiner, 'bigint') ) { useBigInt = multilineStringJoiner.bigint; }
-				if ( hasOwn(multilineStringJoiner, 'x') ) { xOptions = multilineStringJoiner.x; }
-				multilineStringJoiner = joiner;
-			}
-			try {
-				use(specificationVersion, multilineStringJoiner, useBigInt, xOptions);
-				todo(source, sourcePath);
-				try {
-					source && source[0]==='\uFEFF' && throws(TypeError$1(`TOML content (string) should not start with BOM (U+FEFF)` + where(' at ')));
-					rootTable = Root();
-					process = Process();
-				}
-				finally { done(); }//clearWeakSets();
-			}
-			finally { clear(); }
-		}
-		finally { clearRegExp$1(); }
-	}
-	finally { holding = false; }
-	process?.();
-	return rootTable;
-};
-
-const parse$1 = /*#__PURE__*/assign$1(
-	(source        , specificationVersion                                   , multilineStringJoiner         , useBigInt                   , xOptions                   ) =>
-		typeof specificationVersion==='number'
-			? parse(source, specificationVersion, multilineStringJoiner, useBigInt, xOptions)
-			: parse(source, 1.0, specificationVersion          , multilineStringJoiner                                       , useBigInt                    )
-	,
-	{
-		'1.0': (source        , multilineStringJoiner         , useBigInt                   , xOptions                   ) => parse(source, 0.1, multilineStringJoiner, useBigInt, xOptions),
-		1.0: (source        , multilineStringJoiner         , useBigInt                   , xOptions                   ) => parse(source, 1.0, multilineStringJoiner, useBigInt, xOptions),
-		0.5: (source        , multilineStringJoiner         , useBigInt                   , xOptions                   ) => parse(source, 0.5, multilineStringJoiner, useBigInt, xOptions),
-		0.4: (source        , multilineStringJoiner         , useBigInt                   , xOptions                   ) => parse(source, 0.4, multilineStringJoiner, useBigInt, xOptions),
-		0.3: (source        , multilineStringJoiner         , useBigInt                   , xOptions                   ) => parse(source, 0.3, multilineStringJoiner, useBigInt, xOptions),
-		0.2: (source        , multilineStringJoiner         , useBigInt                   , xOptions                   ) => parse(source, 0.2, multilineStringJoiner, useBigInt, xOptions),
-		0.1: (source        , multilineStringJoiner         , useBigInt                   , xOptions                   ) => parse(source, 0.1, multilineStringJoiner, useBigInt, xOptions),
-	}
-);
-
 const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER;
 
 const DATE = Date.prototype;
@@ -2389,19 +2289,23 @@ const multilineLiteralString = (lines       )                                   
 	return lines                                          ;
 };
 
-const DataView$1 = DataView;
+const Float64Array$1 = Float64Array;
 
 const Uint8Array$1 = Uint8Array;
 
 const _Infinity = -Infinity;
+
 const { test: INTEGER_LIKE } = theRegExp(/^-?\d+$/);
 const ensureFloat = (literal        ) => INTEGER_LIKE(literal) ? literal + '.0' : literal;
-const uint8Array = new Uint8Array$1(8);
-const dataView = new DataView$1(uint8Array.buffer);
-const is_NaN = (value        )          => {
-	dataView.setFloat64(0, value);
-	return uint8Array[0]===0xFF;
-};
+
+const float64Array = new Float64Array$1([ -NaN$1 ]);
+const uint8Array = new Uint8Array$1(float64Array.buffer);
+const is_NaN = uint8Array[7]===0xFF
+	? (value        )          => {
+		float64Array[0] = value;
+		return uint8Array[7]===0b1_1111111;
+	}
+	: () => false;
 
 const float = (value        ) => value
 	? value===Infinity ? 'inf' : value===_Infinity ? '-inf' : ensureFloat('' + value)
@@ -2781,6 +2685,9 @@ class TOMLDocument extends Array$1              {
 	
 }
 
+const linesFromStringify = new WeakSet$1                   ();
+const beLinesFromStringify = /*#__PURE__*/add.bind(linesFromStringify);
+const isLinesFromStringify = /*#__PURE__*/has.bind(linesFromStringify);
 const stringify = (rootTable                , options                  )                    => {
 	const document = new TOMLDocument(options);
 	const section = document[0];
@@ -2788,7 +2695,10 @@ const stringify = (rootTable                , options                  )        
 	x      (section.assignBlock(``, ``, rootTable, getOwnPropertyNames(rootTable)));
 	document.newlineUnderSectionButPair && section.length!==1 && section.appendNewline();
 	document.newlineUnderSection || document[document.length - 1] .appendNewline();
-	return document.newline ? document.join(document.newline) : document.flat();
+	if ( document.newline ) { return document.join(document.newline); }
+	const lines = document.flat();
+	beLinesFromStringify(lines);
+	return lines;
 };
 const multiline = /*#__PURE__*/( () => {
 	const multiline = (value                                                   , string         ) =>
@@ -2823,6 +2733,105 @@ const literal = (literal                               , ...chars          ) => 
 	}
 	return LiteralObject(literal.includes('\n') ? literal.split('\n')                            : literal, Null$1(null));
 };
+
+const textDecoder = /*#__PURE__*/new TextDecoder$1('utf-8', Null$1({ fatal: true, ignoreBOM: false }));
+const binary2string = (arrayBufferLike                          )         => {
+	if ( isView(arrayBufferLike) ? arrayBufferLike.length!==arrayBufferLike.byteLength : !isArrayBuffer(arrayBufferLike) ) { throw TypeError$1(`only Uint8Array or ArrayBuffer is acceptable`); }
+	try { return textDecoder.decode(arrayBufferLike); }
+	catch { throw Error$1(`A TOML doc must be a (ful-scalar) valid UTF-8 file, without any unknown code point.`); }
+};
+const isBinaryLike = (value        )                                    => 'byteLength' in value;///
+
+const { test: includesNonScalar } = theRegExp(/[\uD800-\uDFFF]/u);
+const assertFulScalar = (string        )       => {
+	if ( clearRegExp$1(includesNonScalar(string)) ) { throw Error$1(`A TOML doc must be a (ful-scalar) valid UTF-8 file, without any uncoupled UCS-4 character code.`); }
+};
+
+let holding          = false;
+
+const parse = (source        , specificationVersion                                   , multilineStringJoiner                                                                                , useBigInt                            , xOptions                   )        => {
+	if ( holding ) { throw Error$1(`parse during parsing.`); }
+	holding = true;
+	let rootTable       ;
+	let process                 ;
+	try {
+		let sourcePath         = '';
+		if ( typeof source==='object' && source ) {
+			if ( isArray$1(source) ) { throw TypeError$1(isLinesFromStringify(source) ? `TOML.parse(array from TOML.stringify(,{newline?}))` : `TOML.parse(array)`); }
+			else if ( isBinaryLike(source) ) { source = binary2string(source); }
+			else {
+				sourcePath = source.path;
+				if ( typeof sourcePath!=='string' ) { throw TypeError$1(`TOML.parse(source.path)`); }
+				const { data, require: req = typeof require==='function' ? require : undefined$1 } = source;
+				if ( req ) {
+					const dirname_ = req.resolve?.paths?.('')?.[0]?.replace(/node_modules$/, '');
+					if ( dirname_ ) {
+						sourcePath = ( req                                          )('path').resolve(dirname_, sourcePath);
+						if ( typeof sourcePath!=='string' ) { throw TypeError$1(`TOML.parse(source.require('path').resolve)`); }
+					}
+					if ( data===undefined$1 ) {
+						const data = ( req                                      )('fs').readFileSync(sourcePath);
+						if ( typeof data==='object' && data && isBinaryLike(data) ) { source = binary2string(data); }
+						else { throw TypeError$1(`TOML.parse(source.require('fs').readFileSync)`); }
+					}
+					else if ( typeof data==='string' ) { assertFulScalar(source = data); }
+					else if ( typeof data==='object' && data && isBinaryLike(data) ) { source = binary2string(data); }
+					else { throw TypeError$1(`TOML.parse(source.data)`); }
+				}
+				else {
+					if ( data===undefined$1 ) { throw TypeError$1(`TOML.parse(source.data|source.require)`); }
+					else if ( typeof data==='string' ) { assertFulScalar(source = data); }
+					else if ( typeof data==='object' && data && isBinaryLike(data) ) { source = binary2string(data); }
+					else { throw TypeError$1(`TOML.parse(source.data)`); }
+				}
+			}
+		}
+		else if ( typeof source==='string' ) { assertFulScalar(source); }
+		else { throw TypeError$1(`TOML.parse(source)`); }
+		if ( typeof multilineStringJoiner==='object' && multilineStringJoiner ) {
+			if ( useBigInt!==undefined$1 || xOptions!==undefined$1 ) { throw TypeError$1(`options mode ? args mode`); }
+			let joiner                    ;
+			if ( hasOwn(multilineStringJoiner, 'joiner') ) { joiner = multilineStringJoiner.joiner; }
+			if ( hasOwn(multilineStringJoiner, 'bigint') ) { useBigInt = multilineStringJoiner.bigint; }
+			if ( hasOwn(multilineStringJoiner, 'x') ) { xOptions = multilineStringJoiner.x; }
+			multilineStringJoiner = joiner;
+		}
+		try {
+			use(specificationVersion, multilineStringJoiner, useBigInt, xOptions);
+			try {
+				todo(source, sourcePath);
+				try {
+					source && source[0]==='\uFEFF' && throws(TypeError$1(`TOML content (string) should not start with BOM (U+FEFF)` + where(' at ')));
+					rootTable = Root();
+					process = Process();
+				}
+				finally { done(); }//clearWeakSets();
+			}
+			finally { clearRegExp$1(); }
+		}
+		finally { clear(); }
+	}
+	finally { holding = false; }
+	process?.();
+	return rootTable;
+};
+
+const parse$1 = /*#__PURE__*/assign$1(
+	(source        , specificationVersion                                   , multilineStringJoiner         , useBigInt                   , xOptions                   ) =>
+		typeof specificationVersion==='number'
+			? parse(source, specificationVersion, multilineStringJoiner, useBigInt, xOptions)
+			: parse(source, 1.0, specificationVersion          , multilineStringJoiner                                       , useBigInt                    )
+	,
+	{
+		'1.0': (source        , multilineStringJoiner         , useBigInt                   , xOptions                   ) => parse(source, 0.1, multilineStringJoiner, useBigInt, xOptions),
+		1.0: (source        , multilineStringJoiner         , useBigInt                   , xOptions                   ) => parse(source, 1.0, multilineStringJoiner, useBigInt, xOptions),
+		0.5: (source        , multilineStringJoiner         , useBigInt                   , xOptions                   ) => parse(source, 0.5, multilineStringJoiner, useBigInt, xOptions),
+		0.4: (source        , multilineStringJoiner         , useBigInt                   , xOptions                   ) => parse(source, 0.4, multilineStringJoiner, useBigInt, xOptions),
+		0.3: (source        , multilineStringJoiner         , useBigInt                   , xOptions                   ) => parse(source, 0.3, multilineStringJoiner, useBigInt, xOptions),
+		0.2: (source        , multilineStringJoiner         , useBigInt                   , xOptions                   ) => parse(source, 0.2, multilineStringJoiner, useBigInt, xOptions),
+		0.1: (source        , multilineStringJoiner         , useBigInt                   , xOptions                   ) => parse(source, 0.1, multilineStringJoiner, useBigInt, xOptions),
+	}
+);
 
 const _export = /*#__PURE__*/Default({
 	version,

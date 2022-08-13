@@ -1,3 +1,6 @@
+import WeakSet from '.WeakSet';
+import has from '.WeakSet.prototype.has';
+import add from '.WeakSet.prototype.add';
 import getOwnPropertyNames from '.Object.getOwnPropertyNames';
 import freeze from '.Object.freeze';
 import isArray from '.Array.isArray';
@@ -6,6 +9,9 @@ import Null from '.null';
 import { x } from '../j-lexer';/// external
 
 import TOMLDocument from './document';
+const linesFromStringify = new WeakSet<readonly string[]>();
+const beLinesFromStringify = /*#__PURE__*/add.bind(linesFromStringify);
+export const isLinesFromStringify = /*#__PURE__*/has.bind(linesFromStringify);
 export default (rootTable :READONLY.Table, options :READONLY.Options) :string | string[] => {
 	const document = new TOMLDocument(options);
 	const section = document[0];
@@ -13,7 +19,10 @@ export default (rootTable :READONLY.Table, options :READONLY.Options) :string | 
 	x<void>(section.assignBlock(``, ``, rootTable, getOwnPropertyNames(rootTable)));
 	document.newlineUnderSectionButPair && section.length!==1 && section.appendNewline();
 	document.newlineUnderSection || document[document.length - 1]!.appendNewline();
-	return document.newline ? document.join(document.newline) : document.flat();
+	if ( document.newline ) { return document.join(document.newline); }
+	const lines = document.flat();
+	beLinesFromStringify(lines);
+	return lines;
 };
 
 export { inline, Section } from '../types/non-atom';

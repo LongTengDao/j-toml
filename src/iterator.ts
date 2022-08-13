@@ -17,7 +17,7 @@ export const throws = (error :Error) :never => {
 
 const EOL = /\r?\n/;
 export const todo = (source :string, path :string) :void => {
-	if ( typeof path!=='string' ) { throw TypeError('TOML.parse(,,,,sourcePath)'); }
+	if ( typeof path!=='string' ) { throw TypeError(`TOML.parse(,,,,sourcePath)`); }
 	sourcePath = path;
 	sourceLines = source.split(EOL);
 	lastLineIndex = sourceLines.length - 1;
