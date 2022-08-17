@@ -82,3 +82,4 @@ ___
     33. 0.  *   more friendly error message for passing in array (usually come from `TOML.stringify` output without setting `options.newline`) to `TOML.parse`
             *   optimizing: avoid code point check twice for `Buffer`, `Uint8Array` or `ArrayBuffer` passing into `TOML.parse`
             *   optimizing: `TOML.stringify` for `-NaN`
+        1.  *   bug fix: be compatible with the `NaN` implementation on some runtime environment (like old Edge browser) (since 1.32.0)

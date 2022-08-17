@@ -6,7 +6,7 @@ ___
 
 `@ltd/j-toml` is an implementation of [TOML](https://TOML.io/) ("Tom's Obvious, Minimal Language") written by LongTengDao,  
 which is the best config format he had ever seen.  
-(Obviously for exhausted people who tried to design that.)  
+(Obviously for every people that tried to design a thing like that.)  
 
 Node.js 14+
 -----------
@@ -16,7 +16,7 @@ npm install @ltd/j-toml
 ```
 
 ```javascript
-const TOML = require('@ltd/j-toml');
+const TOML = require('@ltd/j-toml');// or: import * as TOML from '@ltd/j-toml';
 
 const source         = `
       I_am_normal    = '...'
@@ -149,7 +149,7 @@ Note: the requirements of 4 types TOML date-time do not fully correspond to the 
 
 *   type: `Error`
 
-There will be an error thrown, when the arguments not meet the requirement or there is any error within the source. Parsing during parsing caused by hacking source will also be blocked.  
+There will be an error thrown, when the arguments not meet the requirement or there is any error within the source. Parsing during parsing caused by hacking arguments will also be blocked.  
 
 This library will not cause stack overflow error unexpectedly due to too deep tables or arrays, or too many escaping in basic string, or too many underscores in integer or float.  
 

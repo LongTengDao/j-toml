@@ -4,7 +4,7 @@ typeof define === 'function' && define.amd ? define(factory) :
 (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.TOML = factory());
 })(this, (function () { 'use strict';
 
-const version = '1.33.0';
+const version = '1.33.1';
 
 const Error$1 = {if:Error}.if;
 
@@ -2304,18 +2304,17 @@ const _Infinity = -Infinity;
 const { test: INTEGER_LIKE } = theRegExp(/^-?\d+$/);
 const ensureFloat = (literal        ) => INTEGER_LIKE(literal) ? literal + '.0' : literal;
 
-const float64Array = new Float64Array$1([ -NaN$1 ]);
+const float64Array = new Float64Array$1([ NaN$1 ]);
 const uint8Array = new Uint8Array$1(float64Array.buffer);
-const is_NaN = uint8Array[7]===0xFF
-	? (value        )          => {
-		float64Array[0] = value;
-		return uint8Array[7]===0b1_1111111;
-	}
-	: () => false;
+const NaN_7 = uint8Array[7] ;
 
-const float = (value        ) => value
-	? value===Infinity ? 'inf' : value===_Infinity ? '-inf' : ensureFloat('' + value)
-	: value===value ? is(value, 0) ? '0.0' : '-0.0' : is_NaN(value) ? '-nan' : 'nan';
+const float = NaN_7===new Uint8Array$1(new Float64Array$1([ -NaN$1 ]).buffer)[7] 
+	? (value        ) => value
+		? value===Infinity ? 'inf' : value===_Infinity ? '-inf' : ensureFloat('' + value)
+		: value===value ? is(value, 0) ? '0.0' : '-0.0' : 'nan'
+	: (value        ) => value
+		? value===Infinity ? 'inf' : value===_Infinity ? '-inf' : ensureFloat('' + value)
+		: value===value ? is(value, 0) ? '0.0' : '-0.0' : ( float64Array[0] = value, uint8Array[7] )===NaN_7 ? 'nan' : '-nan';
 
 const isDate = /*#__PURE__*/isPrototypeOf.bind(DATE)                                                ;
 
@@ -2756,68 +2755,64 @@ const assertFulScalar = (string        )       => {
 let holding          = false;
 
 const parse = (source        , specificationVersion                                   , multilineStringJoiner                                                                                , useBigInt                            , xOptions                   )        => {
-	if ( holding ) { throw Error$1(`parse during parsing.`); }
-	holding = true;
+	let sourcePath         = '';
+	if ( typeof source==='object' && source ) {
+		if ( isArray$1(source) ) { throw TypeError$1(isLinesFromStringify(source) ? `TOML.parse(array from TOML.stringify(,{newline?}))` : `TOML.parse(array)`); }
+		else if ( isBinaryLike(source) ) { source = binary2string(source); }
+		else {
+			sourcePath = source.path;
+			if ( typeof sourcePath!=='string' ) { throw TypeError$1(`TOML.parse(source.path)`); }
+			const { data, require: req = typeof require==='function' ? require : undefined$1 } = source;
+			if ( req ) {
+				const dirname_ = req.resolve?.paths?.('')?.[0]?.replace(/node_modules$/, '');
+				if ( dirname_ ) {
+					sourcePath = ( req                                          )('path').resolve(dirname_, sourcePath);
+					if ( typeof sourcePath!=='string' ) { throw TypeError$1(`TOML.parse(source.require('path').resolve)`); }
+				}
+				if ( data===undefined$1 ) {
+					const data = ( req                                      )('fs').readFileSync(sourcePath);
+					if ( typeof data==='object' && data && isBinaryLike(data) ) { source = binary2string(data); }
+					else { throw TypeError$1(`TOML.parse(source.require('fs').readFileSync)`); }
+				}
+				else if ( typeof data==='string' ) { assertFulScalar(source = data); }
+				else if ( typeof data==='object' && data && isBinaryLike(data) ) { source = binary2string(data); }
+				else { throw TypeError$1(`TOML.parse(source.data)`); }
+			}
+			else {
+				if ( data===undefined$1 ) { throw TypeError$1(`TOML.parse(source.data|source.require)`); }
+				else if ( typeof data==='string' ) { assertFulScalar(source = data); }
+				else if ( typeof data==='object' && data && isBinaryLike(data) ) { source = binary2string(data); }
+				else { throw TypeError$1(`TOML.parse(source.data)`); }
+			}
+		}
+	}
+	else if ( typeof source==='string' ) { assertFulScalar(source); }
+	else { throw TypeError$1(`TOML.parse(source)`); }
+	if ( typeof multilineStringJoiner==='object' && multilineStringJoiner ) {
+		if ( useBigInt!==undefined$1 || xOptions!==undefined$1 ) { throw TypeError$1(`options mode ? args mode`); }
+		let joiner                    ;
+		if ( hasOwn(multilineStringJoiner, 'joiner') ) { joiner = multilineStringJoiner.joiner; }
+		if ( hasOwn(multilineStringJoiner, 'bigint') ) { useBigInt = multilineStringJoiner.bigint; }
+		if ( hasOwn(multilineStringJoiner, 'x') ) { xOptions = multilineStringJoiner.x; }
+		multilineStringJoiner = joiner;
+	}
 	let rootTable       ;
 	let process                 ;
+	if ( holding ) { throw Error$1(`parsing during parsing.`); }
+	holding = true;
 	try {
-		let sourcePath         = '';
-		if ( typeof source==='object' && source ) {
-			if ( isArray$1(source) ) { throw TypeError$1(isLinesFromStringify(source) ? `TOML.parse(array from TOML.stringify(,{newline?}))` : `TOML.parse(array)`); }
-			else if ( isBinaryLike(source) ) { source = binary2string(source); }
-			else {
-				sourcePath = source.path;
-				if ( typeof sourcePath!=='string' ) { throw TypeError$1(`TOML.parse(source.path)`); }
-				const { data, require: req = typeof require==='function' ? require : undefined$1 } = source;
-				if ( req ) {
-					const dirname_ = req.resolve?.paths?.('')?.[0]?.replace(/node_modules$/, '');
-					if ( dirname_ ) {
-						sourcePath = ( req                                          )('path').resolve(dirname_, sourcePath);
-						if ( typeof sourcePath!=='string' ) { throw TypeError$1(`TOML.parse(source.require('path').resolve)`); }
-					}
-					if ( data===undefined$1 ) {
-						const data = ( req                                      )('fs').readFileSync(sourcePath);
-						if ( typeof data==='object' && data && isBinaryLike(data) ) { source = binary2string(data); }
-						else { throw TypeError$1(`TOML.parse(source.require('fs').readFileSync)`); }
-					}
-					else if ( typeof data==='string' ) { assertFulScalar(source = data); }
-					else if ( typeof data==='object' && data && isBinaryLike(data) ) { source = binary2string(data); }
-					else { throw TypeError$1(`TOML.parse(source.data)`); }
-				}
-				else {
-					if ( data===undefined$1 ) { throw TypeError$1(`TOML.parse(source.data|source.require)`); }
-					else if ( typeof data==='string' ) { assertFulScalar(source = data); }
-					else if ( typeof data==='object' && data && isBinaryLike(data) ) { source = binary2string(data); }
-					else { throw TypeError$1(`TOML.parse(source.data)`); }
-				}
-			}
-		}
-		else if ( typeof source==='string' ) { assertFulScalar(source); }
-		else { throw TypeError$1(`TOML.parse(source)`); }
-		if ( typeof multilineStringJoiner==='object' && multilineStringJoiner ) {
-			if ( useBigInt!==undefined$1 || xOptions!==undefined$1 ) { throw TypeError$1(`options mode ? args mode`); }
-			let joiner                    ;
-			if ( hasOwn(multilineStringJoiner, 'joiner') ) { joiner = multilineStringJoiner.joiner; }
-			if ( hasOwn(multilineStringJoiner, 'bigint') ) { useBigInt = multilineStringJoiner.bigint; }
-			if ( hasOwn(multilineStringJoiner, 'x') ) { xOptions = multilineStringJoiner.x; }
-			multilineStringJoiner = joiner;
-		}
-		try {
-			use(specificationVersion, multilineStringJoiner, useBigInt, xOptions);
-			try {
-				todo(source, sourcePath);
-				try {
-					source && source[0]==='\uFEFF' && throws(TypeError$1(`TOML content (string) should not start with BOM (U+FEFF)` + where(' at ')));
-					rootTable = Root();
-					process = Process();
-				}
-				finally { done(); }//clearWeakSets();
-			}
-			finally { clearRegExp$1(); }
-		}
-		finally { clear(); }
+		use(specificationVersion, multilineStringJoiner, useBigInt, xOptions);
+		todo(source, sourcePath);
+		source && source[0]==='\uFEFF' && throws(TypeError$1(`TOML content (string) should not start with BOM (U+FEFF)` + where(' at ')));
+		rootTable = Root();
+		process = Process();
 	}
-	finally { holding = false; }
+	finally {
+		done();//clearWeakSets();
+		clearRegExp$1();
+		clear();
+		holding = false;
+	}
 	process?.();
 	return rootTable;
 };

@@ -4,7 +4,7 @@
 
 `@ltd/j-toml` 是龙腾道为[汤小明语](https://GitHub.com/LongTengDao/TOML/)（“汤小明的小巧明晰语言”）写的实现。  
 ——这 TM 可能是“我”见过最好的配置文件书写格式了。  
-——对于亲手折腾到爆炸的人而言。  
+——对被配置文件折腾到爆炸的人而言。  
 
 Node.js 14+
 -----------
@@ -14,7 +14,7 @@ npm install @ltd/j-toml
 ```
 
 ```javascript
-const TOML = require('@ltd/j-toml');
+const TOML = require('@ltd/j-toml');// 或：import * as TOML from '@ltd/j-toml';
 
 const 源               = `
       '一个普通的键名' = '...'
