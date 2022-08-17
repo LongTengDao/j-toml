@@ -81,3 +81,4 @@
             *   optimizing: avoid code point check twice for `Buffer`, `Uint8Array` or `ArrayBuffer` passing into `TOML.parse`
             *   optimizing: `TOML.stringify` for `-NaN`
         1.  *   bug fix: be compatible with the `NaN` implementation on some runtime environment (like old Edge browser) (since 1.32.0)
+        2.  *   bug fix: correct leap year judging rule (since 1.5.2)

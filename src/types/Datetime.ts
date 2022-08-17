@@ -135,7 +135,19 @@ type Value          = string;
 
 const Value = (ISOString :string) :Value => ISOString.replace(ZERO, zeroReplacer).replace(DELIMITER_DOT, '');
 
-const leap = (literal :string) => literal.slice(5, 10)!=='02-29' || +literal.slice(0, 4)%4===0 && literal.slice(2, 4)!=='00';
+const validateLeap = (literal :string) :boolean => {
+	if ( literal.startsWith('02-29', 5) ) {
+		const year :number = +literal.slice(0, 4);
+		return (
+			year & 0b11 ? false :
+				year%100 ? true :
+					year%400 ? false :
+						year%3200 ? true :
+							false
+		);
+	}
+	return true;
+};
 
 const DATE :NativeDate = /*#__PURE__*/defineProperties(new NativeDate(0), /*#__PURE__*/getOwnPropertyDescriptors(NativeDate.prototype));
 
@@ -165,7 +177,7 @@ export const OffsetDateTime = /*#__PURE__*/fpc(class OffsetDateTime extends Date
 	toISOString (this :OffsetDateTime) :string { return this[OffsetDateTime_ISOString]; }
 	
 	constructor (literal :string) {
-		const { 1: more } = leap(literal) && ( options.zeroDatetime ? OFFSET_DATETIME_ZERO_exec : OFFSET_DATETIME_exec )(literal) || iterator.throws(SyntaxError(`Invalid Offset Date-Time ${literal}` + iterator.where(' at ')));
+		const { 1: more } = validateLeap(literal) && ( options.zeroDatetime ? OFFSET_DATETIME_ZERO_exec : OFFSET_DATETIME_exec )(literal) || iterator.throws(SyntaxError(`Invalid Offset Date-Time ${literal}` + iterator.where(' at ')));
 		super();
 		this[OffsetDateTime_ISOString] = literal.replace(T, 'T').replace('z', 'Z');
 		this[OffsetDateTime_value] = ( '' + parse(this[OffsetDateTime_ISOString]) ).padStart(15, '0') + ( more ? '.' + more : '' );
@@ -245,7 +257,7 @@ export const LocalDateTime = /*#__PURE__*/fpc(class LocalDateTime extends Dateti
 	toISOString (this :LocalDateTime) :string { return this[LocalDateTime_ISOString]; }
 	
 	constructor (literal :string) {
-		IS_LOCAL_DATETIME(literal) && leap(literal) || iterator.throws(SyntaxError(`Invalid Local Date-Time ${literal}` + iterator.where(' at ')));
+		IS_LOCAL_DATETIME(literal) && validateLeap(literal) || iterator.throws(SyntaxError(`Invalid Local Date-Time ${literal}` + iterator.where(' at ')));
 		super();
 		this[LocalDateTime_value] = Value(
 			this[LocalDateTime_ISOString] = literal.replace(T, 'T')
@@ -295,7 +307,7 @@ export const LocalDate = /*#__PURE__*/fpc(class LocalDate extends Datetime {
 	toISOString (this :LocalDate) :string { return this[LocalDate_ISOString]; }
 	
 	constructor (literal :string) {
-		IS_LOCAL_DATE(literal) && leap(literal) || iterator.throws(SyntaxError(`Invalid Local Date ${literal}` + iterator.where(' at ')));
+		IS_LOCAL_DATE(literal) && validateLeap(literal) || iterator.throws(SyntaxError(`Invalid Local Date ${literal}` + iterator.where(' at ')));
 		super();
 		this[LocalDate_value] = Value(
 			this[LocalDate_ISOString] = literal
