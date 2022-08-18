@@ -141,7 +141,7 @@ type 表 = object;
 
 返回根表（本实现解析出的表，是没有任何继承属性的对象）。  
 
-注意：TOML 四类日期时刻的需求并不能完全对应原生的 `Date` 类型，它们是本库在 `Date` 的基础上实现的，详见 `.d.ts` 文件（`OffsetDateTime`、`LocalDateTime`、`LocalDate`、`LocalTime`）。  
+注意：TOML 四类日期时刻的需求并不能完全对应原生的 `Date` 类型，它们是本库在 `Date` 的基础上实现的，详见 `.d.ts` 文件（`OffsetDateTime`、`LocalDateTime`、`LocalDate`、`LocalTime`，其中 `OffsetDateTime` 提供了不限精度的小数秒支持）。  
 
 ### `throw`
 

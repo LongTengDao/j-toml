@@ -141,7 +141,7 @@ type Table = object;
 
 Return the root table (tables parsed by this implementation are objects without any extended properties).  
 
-Note: the requirements of 4 types TOML date-time do not fully correspond to the native `Date` type, they are implemented by this library on the basis of `Date`, see the `.d.ts` file (`OffsetDateTime`, `LocalDateTime`, `LocalDate`, `LocalTime`) for details.  
+Note: the requirements of 4 types TOML date-time do not fully correspond to the native `Date` type, they are implemented by this library on the basis of `Date`, see the `.d.ts` file (`OffsetDateTime`, `LocalDateTime`, `LocalDate`, `LocalTime`, and `OffsetDateTime` provides fractional second support with unlimited precision) for details.  
 
 ### `throw`
 
