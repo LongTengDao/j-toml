@@ -67,8 +67,12 @@ module.exports = {
 	'date-time': {
 		'offset_date-time_Z': Datetime('1970-01-01 00:00:00.9999Z'),
 		'offset_date-time_0': Datetime('1970-01-01 00:00:00.9999+00:00'),
-		'offset_date-time_2': Datetime('1970-01-01 00:00:00.9999-02:00'),
+		'offset_date-time_-2': Datetime('1970-01-01 00:00:00.9999-02:00'),
 		'offset_date-time_8': Datetime('1970-01-01 00:00:00.9999+08:00'),
+		'offset_date-time_4': Datetime('2004-02-29 00:00:00Z'),
+		'offset_date-time_400': Datetime('2400-02-29 00:00:00Z'),
+		'offset_date-time_60': Datetime('1972-06-30 23:58:59-00:01'),
+		'offset_date-time_-0000': (datetime) => datetime.valueOf()==='\u2000'.repeat(14) + '\u2001' + '-62167305540000',
 		'local_date-time': Datetime('1970-01-01 00:00:00.9999'),
 		local_date: Datetime('1970-01-01'),
 		local_time: Datetime('00:00:00.9999'),

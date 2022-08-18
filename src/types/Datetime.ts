@@ -2,6 +2,7 @@ import SyntaxError from '.SyntaxError';
 import RangeError from '.RangeError';
 import NativeDate from '.Date';
 import parse from '.Date.parse';
+import floor from '.Math.floor';
 import ownKeys from '.Reflect.ownKeys';
 ///import is from '.Object.is';
 import create from '.Object.create';
@@ -135,6 +136,14 @@ type Value          = string;
 
 const Value = (ISOString :string) :Value => ISOString.replace(ZERO, zeroReplacer).replace(DELIMITER_DOT, '');
 
+const d = /./gs;
+const d2u = (d :string) => '\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009'[d as '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9']!;
+const ValueOFFSET = (time :number, more :string) :Value => time<0
+	? ( '' + ( time + 62167305540000 ) ).replace(d, d2u).padStart(14, '\u2000') + more.replace(d, d2u) + time
+	: more
+		? ( time + '.' ).padStart(16, '0') + more
+		: ( '' + time ).padStart(15, '0');
+
 const validateLeap = (literal :string) :boolean => {
 	if ( literal.startsWith('02-29', 5) ) {
 		const year :number = +literal.slice(0, 4);
@@ -148,6 +157,7 @@ const validateLeap = (literal :string) :boolean => {
 	}
 	return true;
 };
+const { test: VALIDATE_LEAP } = /*#__PURE__*/newRegExp.s`^.....(?:06.30|12.31).23:59:59`.valueOf();
 
 const DATE :NativeDate = /*#__PURE__*/defineProperties(new NativeDate(0), /*#__PURE__*/getOwnPropertyDescriptors(NativeDate.prototype));
 
@@ -158,7 +168,7 @@ const OffsetDateTime_use = (that :InstanceType<typeof OffsetDateTime>, $ :number
 	return DATE;
 };
 /*const OffsetDateTime_get = (that :InstanceType<typeof OffsetDateTime>, start :number, end :number) => +that[OffsetDateTime_ISOString].slice(start, end);
-const OffsetDateTime_set = (that :InstanceType<typeof OffsetDateTime>, start :number, end :number, value :number) => {
+const OffsetDateTime_set = (that :InstanceType<typeof OffsetDateTime>, start :number, end :number, value :number, reserveMore :boolean) => {
 	if ( end ) {
 		const string = '' + value;
 		const size = end - start;
@@ -166,7 +176,10 @@ const OffsetDateTime_set = (that :InstanceType<typeof OffsetDateTime>, start :nu
 		that[OffsetDateTime_ISOString] = that[OffsetDateTime_ISOString].slice(0, start) + string.padStart(size, '0') + that[OffsetDateTime_ISOString].slice(end);
 	}
 	const time = parse(that[OffsetDateTime_ISOString]);
-	return that[OffsetDateTime_value] = ( '' + time ).padStart(15, '0') + that[OffsetDateTime_value].slice(15);///time
+	return that[OffsetDateTime_value] = ValueOFFSET(time, that[OffsetDateTime_value].includes('-')
+		? that[OffsetDateTime_value].slice(14, that[OffsetDateTime_value].indexOf('-', 14))
+		: that[OffsetDateTime_value].slice(15)
+	);///time
 };*///
 export const OffsetDateTime = /*#__PURE__*/fpc(class OffsetDateTime extends Datetime {
 	
@@ -177,37 +190,45 @@ export const OffsetDateTime = /*#__PURE__*/fpc(class OffsetDateTime extends Date
 	toISOString (this :OffsetDateTime) :string { return this[OffsetDateTime_ISOString]; }
 	
 	constructor (literal :string) {
-		const { 1: more } = validateLeap(literal) && ( options.zeroDatetime ? OFFSET_DATETIME_ZERO_exec : OFFSET_DATETIME_exec )(literal) || iterator.throws(SyntaxError(`Invalid Offset Date-Time ${literal}` + iterator.where(' at ')));
+		validateLeap(literal) || iterator.throws(SyntaxError(`Invalid Offset Date-Time ${literal}` + iterator.where(' at ')));
+		const with60 = literal.startsWith('60', 17);
+		let without60 = with60 ? literal.slice(0, 17) + '59' + literal.slice(19) : literal;
+		const { 1: more } = ( options.zeroDatetime ? OFFSET_DATETIME_ZERO_exec(without60) : OFFSET_DATETIME_exec(without60) ) ?? iterator.throws(SyntaxError(`Invalid Offset Date-Time ${literal}` + iterator.where(' at ')));
+		const time = parse(without60 = without60.replace(T, 'T').replace('z', 'Z'));
+		if ( with60 ) {
+			DATE.setTime(time);
+			VALIDATE_LEAP(DATE.toISOString()) || iterator.throws(SyntaxError(`Invalid Offset Date-Time ${literal}` + iterator.where(' at ')));
+		}
 		super();
-		this[OffsetDateTime_ISOString] = literal.replace(T, 'T').replace('z', 'Z');
-		this[OffsetDateTime_value] = ( '' + parse(this[OffsetDateTime_ISOString]) ).padStart(15, '0') + ( more ? '.' + more : '' );
+		this[OffsetDateTime_ISOString] = without60;
+		this[OffsetDateTime_value] = ValueOFFSET(time, more);
 		return this;
 	}
 	
 	getUTCFullYear (this :OffsetDateTime) :FullYear { return OffsetDateTime_use(this).getUTCFullYear(); }
 	///get year () :FullYear { return OffsetDateTime_get(this, 0, 4); }
-	///set year (value :FullYear) { OffsetDateTime_set(this, 0, 4, value); }
+	///set year (value :FullYear) { OffsetDateTime_set(this, 0, 4, value, true); }
 	getUTCMonth (this :OffsetDateTime) :Month { return OffsetDateTime_use(this).getUTCMonth(); }
 	///get month () { return OffsetDateTime_get(this, 5, 7); }
-	///set month (value) { OffsetDateTime_set(this, 5, 7, value); }
+	///set month (value) { OffsetDateTime_set(this, 5, 7, value, true); }
 	getUTCDate (this :OffsetDateTime) :Date { return OffsetDateTime_use(this).getUTCDate(); }
 	///get day () :Date { return OffsetDateTime_get(this, 8, 10); }
-	///set day (value :Date) { OffsetDateTime_set(this, 8, 10, value); }
+	///set day (value :Date) { OffsetDateTime_set(this, 8, 10, value, true); }
 	
 	getUTCHours (this :OffsetDateTime) :Hours { return OffsetDateTime_use(this).getUTCHours(); }
 	///get hour () :Hours { return OffsetDateTime_get(this, 11, 13); }
-	///set hour (value :Hours) { OffsetDateTime_set(this, 11, 13, value); }
+	///set hour (value :Hours) { OffsetDateTime_set(this, 11, 13, value, true); }
 	getUTCMinutes (this :OffsetDateTime) :Minutes { return OffsetDateTime_use(this).getUTCMinutes(); }
 	///get minute () :Minutes { return OffsetDateTime_get(this, 14, 16); }
-	///set minute (value :Minutes) { OffsetDateTime_set(this, 14, 16, value); }
+	///set minute (value :Minutes) { OffsetDateTime_set(this, 14, 16, value, true); }
 	getUTCSeconds (this :OffsetDateTime) :Seconds { return OffsetDateTime_use(this).getUTCSeconds(); }
 	///get second () :Seconds { return OffsetDateTime_get(this, 17, 19); }
-	///set second (value :Seconds) { OffsetDateTime_set(this, 17, 19, value); }
+	///set second (value :Seconds) { OffsetDateTime_set(this, 17, 19, value, true); }
 	getUTCMilliseconds (this :OffsetDateTime) :Milliseconds { return OffsetDateTime_use(this).getUTCMilliseconds(); }///
-	///get millisecond () :Milliseconds { return +this[OffsetDateTime_value].slice(12, 15); }///
+	///get millisecond () :Milliseconds { return this[OffsetDateTime_value]%1000; }///
 	/*set millisecond (value :Milliseconds) {
 		this[OffsetDateTime_ISOString] = this[OffsetDateTime_ISOString].slice(0, 19) + ( value ? ( '.' + ( '' + value ).padStart(3, '0') ).replace(DOT_ZERO, '') : '' ) + this[OffsetDateTime_ISOString].slice(this[OffsetDateTime_ISOString].search(OFFSET$));
-		OffsetDateTime_set(this, 0, 0, 0);
+		OffsetDateTime_set(this, 0, 0, 0, false);
 	}*///
 	///get microsecond () :Milliseconds
 	///set microsecond (value :Milliseconds)
@@ -223,15 +244,15 @@ export const OffsetDateTime = /*#__PURE__*/fpc(class OffsetDateTime extends Date
 	///get offset () { return this[OffsetDateTime_ISOString].endsWith('Z') ? 'Z' : this[OffsetDateTime_ISOString].slice(-6); }
 	/*set offset (value) {
 		this[OffsetDateTime_ISOString] = this[OffsetDateTime_ISOString].slice(0, this[OffsetDateTime_ISOString].endsWith('Z') ? -1 : -6) + value;
-		OffsetDateTime_set(this, 0, 0, 0);
+		OffsetDateTime_set(this, 0, 0, 0, true);
 	}*///
-	getTime (this :OffsetDateTime) :Time { return +this[OffsetDateTime_value].slice(0, 15); }///
+	getTime (this :OffsetDateTime) :Time { return floor(+this[OffsetDateTime_value]); }///
 	/*setTime (this :OffsetDateTime, value :Time) :void {
 		value = DATE.setTime(value);
 		const z = Z_exec(this[OffsetDateTime_ISOString]);
 		DATE.setTime(value + ( z ? +z[1]*60 + +( z[2] + z[3] ) : 0 )*60000);
 		this[OffsetDateTime_ISOString] = z ? DATE.toISOString().slice(0, -1) + z[0] : DATE.toISOString();
-		this[OffsetDateTime_value] = ( '' + value ).padStart(15, '0');
+		this[OffsetDateTime_value] = ValueOFFSET(value, '');
 		///return value;
 	}*/
 	

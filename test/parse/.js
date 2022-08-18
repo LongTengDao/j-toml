@@ -9,7 +9,6 @@
 	if ( not(expect)(toml) ) {
 		for ( const [ key, value ] of Object.entries(expect) ) {
 			if ( not(value)(toml[key]) ) {
-				console.log(toml[key]);
 				throw Error(key);
 			}
 		}
@@ -22,6 +21,10 @@
 		[ '+base', `bad = +0b0` ],
 		[ 'BS', `bad = "\\ "` ],
 		[ 'MLBS', `bad = """\\ """` ],
+		[ 'leap', `a=0001-02-29` ],
+		[ 'leap100', `a=0100-02-29` ],
+		[ 'leap3200', `a=3200-02-29` ],
+		[ 'leap60', `a=1970-01-01 00:00:60Z` ],
 		[ '' ],
 	]) ) {
 		try { TOML.parse(source, 1.0, '\n'); }

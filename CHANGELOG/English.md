@@ -82,3 +82,5 @@
             *   optimizing: `TOML.stringify` for `-NaN`
         1.  *   bug fix: be compatible with the `NaN` implementation on some runtime environment (like old Edge browser) (since 1.32.0)
         2.  *   bug fix: correct leap year judging rule (since 1.5.2)
+        3.  *   bug fix: leap second support of `TOML.OffsetDateTime`
+            *   bug fix: value of `TOML.OffsetDateTime` before 1970
