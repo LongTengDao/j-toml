@@ -3,7 +3,7 @@ export = exports;
 
 declare namespace exports {
 	
-	export const version :'1.33.3';
+	export const version :'1.34.0';
 	
 	export const parse :
 		& {
@@ -166,6 +166,12 @@ declare class LocalTime {
 	
 }
 
+export class Keys extends RegExp {
+	readonly lastIndex :number;
+	constructor (keys :ArrayLike<string>);
+	readonly test :(this :Keys, key :string) => boolean;
+}
+
 declare const _literal :unique symbol;
 
 type Source = string | ArrayBufferLike
@@ -205,6 +211,7 @@ type Source = string | ArrayBufferLike
 	};
 
 type XOptions = null | {
+	readonly keys? :null | Keys,
 	readonly order? :boolean,
 	readonly exact? :boolean,
 	readonly multi? :boolean,

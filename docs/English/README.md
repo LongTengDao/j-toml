@@ -101,7 +101,14 @@ type Table = object;
         *   default: `true`
         
         Specify whether you want or not to use `BigInt` for integer type value. A `number` type argument allows you to control it by a max limit, like `Number.MAX_SAFE_INTEGER` (and the min limit from `-options.bigint`, if `options.bigint>=0`; otherwise as the min limit, and the max limit is `-options.bigint-1`).  
-    
+        
+    -   ##### `options.keys`
+        
+        *   type: `TOML.Keys` / `null`
+        *   default: `null`
+        
+        Safe list for keys, to avoid hash attack. Constructing by passing an array of strings into `TOML.Keys`.  
+        
     -   ##### `options.x`
         
         The extensional features not in the specification.  
@@ -228,7 +235,7 @@ declare function stringify (rootTable :ReadonlyTable, options? :Readonly<{
     
 1.  #### `options`
     
-    A readonly object, the options it contains is as follows.  
+    A readonly object, the options it contains is as follows:  
     
     -   ##### `options.integer`
         

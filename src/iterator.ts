@@ -17,7 +17,7 @@ export const throws = (error :Error) :never => {
 
 const EOL = /\r?\n/;
 export const todo = (source :string, path :string) :void => {
-	if ( typeof path!=='string' ) { throw TypeError(`TOML.parse(,,,,sourcePath)`); }
+	if ( typeof path!=='string' ) { throw TypeError(`TOML.parse({ path })`); }
 	sourcePath = path;
 	sourceLines = source.split(EOL);
 	lastLineIndex = sourceLines.length - 1;
@@ -41,8 +41,8 @@ export class mark {
 		lineIndex===lastLineIndex && throws(SyntaxError(`${this.type} is not close until the end of the file` + where(', which started from ', this.lineIndex, sourceLines[this.lineIndex]!.length - this.restColumn + 1)));
 		return sourceLines[++lineIndex]!;
 	}
-	nowrap (this :mark) :never {
-		throw throws(Error(`TOML.parse(,,multilineStringJoiner) must be passed, while the source including multi-line string` + where(', which started from ', this.lineIndex, sourceLines[this.lineIndex]!.length - this.restColumn + 1)));
+	nowrap (this :mark, argsMode :',,' | ',' | '') :never {
+		throw throws(Error(`TOML.parse(${argsMode ? `${argsMode}multilineStringJoiner` : `,{ joiner }`}) must be passed, while the source including multi-line string` + where(', which started from ', this.lineIndex, sourceLines[this.lineIndex]!.length - this.restColumn + 1)));
 	}
 };
 

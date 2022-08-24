@@ -32,14 +32,14 @@ const parseKeys = (rest :string) :{ leadingKeys :string[], finalKey :string, lin
 		lineRest || iterator.throws(SyntaxError(`Empty bare key` + iterator.where(' at ')));
 		if ( lineRest[0]==='"' ) {
 			const index :number = regexps.BASIC_STRING_exec_1_endIndex(lineRest);
-			leadingKeys[++lastIndex] = BasicString(lineRest.slice(1, index));
+			options.KEYS.test(leadingKeys[++lastIndex] = BasicString(lineRest.slice(1, index))) || iterator.throws(Error(`Key not allowed` + iterator.where(' at ')));
 			lineRest = lineRest.slice(index + 1);
 		}
 		else {
 			const isQuoted = lineRest[0]==='\'';
 			const key :string = ( ( isQuoted ? regexps.__LITERAL_KEY_exec : regexps.__BARE_KEY_exec )(lineRest) ?? iterator.throws(SyntaxError(`Bad ${isQuoted ? 'literal string' : 'bare'} key` + iterator.where(' at '))) )[0];
 			lineRest = lineRest.slice(key.length);
-			leadingKeys[++lastIndex] = isQuoted ? key.slice(1, -1) : key;
+			options.KEYS.test(leadingKeys[++lastIndex] = isQuoted ? key.slice(1, -1) : key) || iterator.throws(Error(`Key not allowed` + iterator.where(' at ')));
 		}
 		if ( regexps.IS_DOT_KEY(lineRest) ) { lineRest = lineRest.replace(regexps.DOT_KEY, ''); }
 		else { break; }

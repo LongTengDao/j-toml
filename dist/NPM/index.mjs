@@ -1,30 +1,30 @@
-﻿const version = '1.33.3';
+﻿const version = '1.34.0';
 
-const Error$1 = {if:Error}.if;
+const SyntaxError$1 = SyntaxError;
+
+const RangeError$1 = RangeError;
 
 const TypeError$1 = TypeError;
 
-const isView = ArrayBuffer.isView;
+const RegExp$1 = RegExp;
 
-const isArray$1 = Array.isArray;
+const WeakMap$1 = WeakMap;
 
-const assign$1 = Object.assign;
+const get = WeakMap.prototype.get;
 
-const Object$1 = Object;
+const set = WeakMap.prototype.set;
 
-const floor = Math.floor;
+const create$1 = Object.create;
 
-const Infinity = 1/0;
+const isSafeInteger = Number.isSafeInteger;
+
+const getOwnPropertyNames = Object.getOwnPropertyNames;
+
+const freeze = Object.freeze;
+
+const isPrototypeOf = Object.prototype.isPrototypeOf;
 
 const undefined$1 = void null;
-
-const fromCharCode = String.fromCharCode;
-
-const Array$1 = Array;
-
-const hasOwnProperty = Object.prototype.hasOwnProperty;
-
-const propertyIsEnumerable = Object.prototype.propertyIsEnumerable;
 
 const NULL = (
 	/* j-globals: null.prototype (internal) */
@@ -33,6 +33,38 @@ const NULL = (
 		: null
 	/* j-globals: null.prototype (internal) */
 );
+
+const bind = Function.prototype.bind;
+
+const test = RegExp.prototype.test;
+
+const exec = RegExp.prototype.exec;
+
+const Reflect_apply = Reflect.apply;
+
+const Proxy$1 = Proxy;
+
+const toStringTag = typeof Symbol==='undefined' ? undefined$1 : Symbol.toStringTag;
+
+const Object_defineProperty = Object.defineProperty;
+
+const assign$1 = Object.assign;
+
+const Object$1 = Object;
+
+const floor = Math.floor;
+
+const isArray$1 = Array.isArray;
+
+const Infinity = 1/0;
+
+const fromCharCode = String.fromCharCode;
+
+const Array$1 = Array;
+
+const hasOwnProperty = Object.prototype.hasOwnProperty;
+
+const propertyIsEnumerable = Object.prototype.propertyIsEnumerable;
 
 const apply = Function.prototype.apply;
 
@@ -47,9 +79,9 @@ var hasOwn = (
 	/* j-globals: Object.hasOwn (polyfill) */
 );
 
-var create$1 = Object$1.create;
+var create = Object$1.create;
 function Descriptor (source) {
-	var target = create$1(NULL);
+	var target = create(NULL);
 	if ( hasOwn(source, 'value') ) { target.value = source.value; }
 	if ( hasOwn(source, 'writable') ) { target.writable = source.writable; }
 	if ( hasOwn(source, 'get') ) { target.get = source.get; }
@@ -59,97 +91,15 @@ function Descriptor (source) {
 	return target;
 }
 
-const freeze = Object.freeze;
-
-const keys = Object.keys;
-
-const getOwnPropertySymbols = Object.getOwnPropertySymbols;
-
-const Null$1 = (
-	/* j-globals: null (internal) */
-	/*#__PURE__*/function () {
-		var assign = Object.assign || function assign (target, source) {
-			var keys$1, index, key;
-			for ( keys$1 = keys(source), index = 0; index<keys$1.length;++index ) {
-				key = keys$1[index];
-				target[key] = source[key];
-			}
-			if ( getOwnPropertySymbols ) {
-				for ( keys$1 = getOwnPropertySymbols(source), index = 0; index<keys$1.length;++index ) {
-					key = keys$1[index];
-					if ( isEnum(source, key) ) { target[key] = source[key]; }
-				}
-			}
-			return target;
-		};
-		function Nullify (constructor) {
-			delete constructor.prototype.constructor;
-			freeze(constructor.prototype);
-			return constructor;
-		}
-		function Null (origin) {
-			return origin===undefined$1
-				? this
-				: typeof origin==='function'
-					? /*#__PURE__*/Nullify(origin)
-					: /*#__PURE__*/assign(/*#__PURE__*/create$1(NULL), origin);
-		}
-		delete Null.name;
-		//try { delete Null.length; } catch (error) {}
-		Null.prototype = null;
-		freeze(Null);
-		return Null;
-	}()
-	/* j-globals: null (internal) */
-);
-
-const isArrayBuffer = (
-	/* j-globals: class.isArrayBuffer (internal) */
-	/*#__PURE__*/ function () {
-		if ( typeof ArrayBuffer==='function' ) {
-			var byteLength_apply = apply.bind(Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'byteLength').get);
-			return function isArrayBuffer (value) {
-				try { byteLength_apply(value); }
-				catch (error) { return false; }
-				return true;
-			};
-		}
-		return function isArrayBuffer () { return false; };
-	}()
-	/* j-globals: class.isArrayBuffer (internal) */
-);
-
-const TextDecoder$1 = TextDecoder;
-
-const bind = Function.prototype.bind;
-
-const test = RegExp.prototype.test;
-
-const exec = RegExp.prototype.exec;
-
-const SyntaxError$1 = SyntaxError;
-
-const RegExp$1 = RegExp;
-
-const Reflect_apply = Reflect.apply;
-
-const Proxy$1 = Proxy;
-
-const create = Object.create;
-
-const toStringTag = typeof Symbol==='undefined' ? undefined$1 : Symbol.toStringTag;
-
-const Object_defineProperty = Object.defineProperty;
-
 const Default = (
 	/* j-globals: default (internal) */
 	function Default (exports, addOnOrigin) {
-		if ( !addOnOrigin ) { addOnOrigin = exports; exports = create(NULL); }
+		if ( !addOnOrigin ) { addOnOrigin = exports; exports = create$1(NULL); }
 		if ( assign$1 ) { assign$1(exports, addOnOrigin); }
 		else { for ( var key in addOnOrigin ) { if ( hasOwn(addOnOrigin, key) ) { exports[key] = addOnOrigin[key]; } } }
 		exports.default = exports;
 		if ( toStringTag ) {
-			var descriptor = create(NULL);
+			var descriptor = create$1(NULL);
 			descriptor.value = 'Module';
 			Object_defineProperty(exports, toStringTag, descriptor);
 		}
@@ -318,74 +268,55 @@ var clearRegExp = '$_' in RegExp$1
 
 var clearRegExp$1 = clearRegExp;
 
-/*¡ j-regexp */
+var NEED_TO_ESCAPE_IN_REGEXP = /^[$()*+\-.?[\\\]^{|]/;
+var SURROGATE_PAIR = /^[\uD800-\uDBFF][\uDC00-\uDFFF]/;
+var GROUP = /*#__PURE__*/create$1(NULL)         ;
 
-//import * as options from './options';
-
-const NONE                    = [];
-let sourcePath         = '';
-let sourceLines                    = NONE;
-let lastLineIndex         = -1;
-let lineIndex         = -1;
-
-const throws = (error       )        => {
-	//if ( sourceLines!==NONE ) { done(); options.clear(); }
-	throw error;
-};
-
-const EOL = /\r?\n/;
-const todo = (source        , path        )       => {
-	if ( typeof path!=='string' ) { throw TypeError$1(`TOML.parse(,,,,sourcePath)`); }
-	sourcePath = path;
-	sourceLines = source.split(EOL);
-	lastLineIndex = sourceLines.length - 1;
-	lineIndex = -1;
-};
-
-const next = ()         => sourceLines[++lineIndex] ;
-
-const rest = ()          => lineIndex!==lastLineIndex;
-
-class mark {
-	                 lineIndex = lineIndex;
-	                 type                                                                                           ;
-	                 restColumn        ;
-	constructor (type                                                                                           , restColumn        ) {
-		this.type = type;
-		this.restColumn = restColumn;
-		return this;
-	}
-	must (          )         {
-		lineIndex===lastLineIndex && throws(SyntaxError$1(`${this.type} is not close until the end of the file` + where(', which started from ', this.lineIndex, sourceLines[this.lineIndex] .length - this.restColumn + 1)));
-		return sourceLines[++lineIndex] ;
-	}
-	nowrap (          )        {
-		throw throws(Error$1(`TOML.parse(,,multilineStringJoiner) must be passed, while the source including multi-line string` + where(', which started from ', this.lineIndex, sourceLines[this.lineIndex] .length - this.restColumn + 1)));
-	}
+function groupify (branches                   , uFlag          , noEscape          )         {
+	var group = create$1(NULL)         ;
+	var appendBranch = uFlag ? appendPointBranch : appendCodeBranch;
+	for ( var length         = branches.length, index         = 0; index<length; ++index ) { appendBranch(group, branches[index] ); }
+	return sourcify(group, !noEscape);
 }
-const where = (pre        , rowIndex         = lineIndex, columnNumber         = 0)         => sourceLines===NONE ? '' :
-	sourcePath
-		? `\n    at (${sourcePath}:${rowIndex + 1}:${columnNumber})`
-		: `${pre}line ${rowIndex + 1}: ${sourceLines[rowIndex]}`;
+function appendPointBranch (group       , branch        )       {
+	if ( branch ) {
+		var character         = SURROGATE_PAIR.test(branch) ? branch.slice(0, 2) : branch.charAt(0);
+		appendPointBranch(group[character] || ( group[character] = create$1(NULL)          ), branch.slice(character.length));
+	}
+	else { group[''] = GROUP; }
+}
 
-const done = ()       => {
-	sourcePath = '';
-	sourceLines = NONE;
-};
+function appendCodeBranch (group       , branch        )       {
+	if ( branch ) {
+		var character         = branch.charAt(0);
+		appendCodeBranch(group[character] || ( group[character] = create$1(NULL)          ), branch.slice(1));
+	}
+	else { group[''] = GROUP; }
+}
 
-const RangeError$1 = RangeError;
+function sourcify (group       , needEscape         )         {
+	var branches           = [];
+	var singleCharactersBranch           = [];
+	var noEmptyBranch          = true;
+	for ( var character in group ) {
+		if ( character ) {
+			var sub_branches         = sourcify(group[character] , needEscape);
+			if ( needEscape && NEED_TO_ESCAPE_IN_REGEXP.test(character) ) { character = '\\' + character; }
+			sub_branches ? branches.push(character + sub_branches) : singleCharactersBranch.push(character);
+		}
+		else { noEmptyBranch = false; }
+	}
+	singleCharactersBranch.length && branches.unshift(singleCharactersBranch.length===1 ? singleCharactersBranch[0]  : '[' + singleCharactersBranch.join('') + ']');
+	return branches.length===0
+		? ''
+		: ( branches.length===1 && ( singleCharactersBranch.length || noEmptyBranch )
+			? branches[0]
+			: '(?:' + branches.join('|') + ')'
+		)
+		+ ( noEmptyBranch ? '' : '?' );
+}
 
-const BigInt$1 = BigInt;
-
-const WeakMap$1 = WeakMap;
-
-const get = WeakMap.prototype.get;
-
-const set = WeakMap.prototype.set;
-
-const isSafeInteger = Number.isSafeInteger;
-
-const getOwnPropertyNames = Object.getOwnPropertyNames;
+/*¡ j-regexp */
 
 const WeakSet$1 = WeakSet;
 
@@ -394,6 +325,48 @@ const has = WeakSet.prototype.has;
 const add = WeakSet.prototype.add;
 
 const del = WeakSet.prototype['delete'];
+
+const keys = Object.keys;
+
+const getOwnPropertySymbols = Object.getOwnPropertySymbols;
+
+const Null$1 = (
+	/* j-globals: null (internal) */
+	/*#__PURE__*/function () {
+		var assign = Object.assign || function assign (target, source) {
+			var keys$1, index, key;
+			for ( keys$1 = keys(source), index = 0; index<keys$1.length;++index ) {
+				key = keys$1[index];
+				target[key] = source[key];
+			}
+			if ( getOwnPropertySymbols ) {
+				for ( keys$1 = getOwnPropertySymbols(source), index = 0; index<keys$1.length;++index ) {
+					key = keys$1[index];
+					if ( isEnum(source, key) ) { target[key] = source[key]; }
+				}
+			}
+			return target;
+		};
+		function Nullify (constructor) {
+			delete constructor.prototype.constructor;
+			freeze(constructor.prototype);
+			return constructor;
+		}
+		function Null (origin) {
+			return origin===undefined$1
+				? this
+				: typeof origin==='function'
+					? /*#__PURE__*/Nullify(origin)
+					: /*#__PURE__*/assign(/*#__PURE__*/create(NULL), origin);
+		}
+		delete Null.name;
+		//try { delete Null.length; } catch (error) {}
+		Null.prototype = null;
+		freeze(Null);
+		return Null;
+	}()
+	/* j-globals: null (internal) */
+);
 
 const is = Object.is;
 
@@ -443,12 +416,12 @@ const target2proxy = /*#__PURE__*/newWeakMap()
 	                                                   
  ;
 
-const handlers                       = /*#__PURE__*/assign$1(create(NULL), {
+const handlers                       = /*#__PURE__*/assign$1(create$1(NULL), {
 	defineProperty:                 (target                   , key   , descriptor                    )          => {
 		if ( hasOwn(target, key) ) {
-			return Reflect_defineProperty(target, key, assign$1(create(NULL), descriptor));
+			return Reflect_defineProperty(target, key, assign$1(create$1(NULL), descriptor));
 		}
-		if ( Reflect_defineProperty(target, key, assign$1(create(NULL), descriptor)) ) {
+		if ( Reflect_defineProperty(target, key, assign$1(create$1(NULL), descriptor)) ) {
 			const keeper = target2keeper.get(target) ;
 			keeper[keeper.length] = key;
 			return true;
@@ -504,7 +477,7 @@ const Null = /*#__PURE__*/function () {
 	}
 	//@ts-ignore
 	Null.prototype = null;
-	Object_defineProperty(Null, 'name', assign$1(create(NULL), { value: '', configurable: false }));
+	Object_defineProperty(Null, 'name', assign$1(create$1(NULL), { value: '', configurable: false }));
 	//delete Null.length;
 	freeze(Null);
 	return Null;
@@ -617,6 +590,61 @@ const OrderedTable = /*#__PURE__*/Null$1(class Table extends Null      {
 		return this;
 	}
 });
+
+const Error$1 = {if:Error}.if;
+
+//import * as options from './options';
+
+const NONE                    = [];
+let sourcePath         = '';
+let sourceLines                    = NONE;
+let lastLineIndex         = -1;
+let lineIndex         = -1;
+
+const throws = (error       )        => {
+	//if ( sourceLines!==NONE ) { done(); options.clear(); }
+	throw error;
+};
+
+const EOL = /\r?\n/;
+const todo = (source        , path        )       => {
+	if ( typeof path!=='string' ) { throw TypeError$1(`TOML.parse({ path })`); }
+	sourcePath = path;
+	sourceLines = source.split(EOL);
+	lastLineIndex = sourceLines.length - 1;
+	lineIndex = -1;
+};
+
+const next = ()         => sourceLines[++lineIndex] ;
+
+const rest = ()          => lineIndex!==lastLineIndex;
+
+class mark {
+	                 lineIndex = lineIndex;
+	                 type                                                                                           ;
+	                 restColumn        ;
+	constructor (type                                                                                           , restColumn        ) {
+		this.type = type;
+		this.restColumn = restColumn;
+		return this;
+	}
+	must (          )         {
+		lineIndex===lastLineIndex && throws(SyntaxError$1(`${this.type} is not close until the end of the file` + where(', which started from ', this.lineIndex, sourceLines[this.lineIndex] .length - this.restColumn + 1)));
+		return sourceLines[++lineIndex] ;
+	}
+	nowrap (            argsMode                 )        {
+		throw throws(Error$1(`TOML.parse(${argsMode ? `${argsMode}multilineStringJoiner` : `,{ joiner }`}) must be passed, while the source including multi-line string` + where(', which started from ', this.lineIndex, sourceLines[this.lineIndex] .length - this.restColumn + 1)));
+	}
+}
+const where = (pre        , rowIndex         = lineIndex, columnNumber         = 0)         => sourceLines===NONE ? '' :
+	sourcePath
+		? `\n    at (${sourcePath}:${rowIndex + 1}:${columnNumber})`
+		: `${pre}line ${rowIndex + 1}: ${sourceLines[rowIndex]}`;
+
+const done = ()       => {
+	sourcePath = '';
+	sourceLines = NONE;
+};
 
 /* nested (readable) */
 
@@ -832,6 +860,8 @@ const isAmazing = (keys        )          => IS_AMAZING(keys) && !BAD_DXOB(keys)
 
 let mustScalar          = true;
 
+let ARGS_MODE                  = '';
+
 /* options */
 
 let useWhatToJoinMultilineString                = null;
@@ -851,7 +881,32 @@ let IntegerMaxNumber         = 0;
 	                  
 	                 
 	                  
+	                   
   
+const ANY       = {
+	test: () => true,
+};
+                       
+	                                                    
+ 
+const Keys = class KeysRegExp extends RegExp$1                 {
+	                                   
+	constructor (keys                   ) {
+		super(`^${groupify(keys)}$`);
+		let maxLength = -1;
+		for ( let index = keys.length; index; ) {
+			const { length } = keys[--index] ;
+			if ( length>maxLength ) { maxLength = length; }
+		}
+		this.lastIndex = maxLength+1;
+		return this;
+	}
+	         test (                  key        )          {
+		return key.length<this.lastIndex && super.test(key);
+	}
+};
+const isKeys = /*#__PURE__*/isPrototypeOf.bind(/*#__PURE__*/freeze(Keys.prototype))                                               ;
+let KEYS$1       = ANY;
 let preserveLiteral         ;
 let zeroDatetime         ;
 let inlineTable         ;
@@ -919,7 +974,7 @@ let processor             = null;
 let collection              = [];
 let collection_length         = 0;
 const collect_on = (tag        , array              , table              , key         )       => {
-	const each = create(NULL)                                                                           ;
+	const each = create$1(NULL)                                                                           ;
 	each.tag = tag;
 	if ( table ) {
 		each.table = table;
@@ -954,13 +1009,16 @@ const Process = ()          => {
 /* use & clear */
 
 const clear = ()       => {
+	KEYS$1 = ANY;
 	processor = null;
 	collection.length = collection_length = 0;
 	zeroDatetime = false;
 	useWhatToJoinMultilineString = null;
 };
 
-const use = (specificationVersion         , multilineStringJoiner         , useBigInt         , xOptions          )       => {
+const use = (specificationVersion         , multilineStringJoiner         , useBigInt         , keys         , xOptions          , argsMode                 )       => {
+	
+	ARGS_MODE = argsMode;
 	
 	let mixed         ;
 	switch ( specificationVersion ) {
@@ -995,17 +1053,23 @@ const use = (specificationVersion         , multilineStringJoiner         , useB
 	
 	if ( typeof multilineStringJoiner==='string' ) { useWhatToJoinMultilineString = multilineStringJoiner; }
 	else if ( multilineStringJoiner===undefined$1 ) { useWhatToJoinMultilineString = null; }
-	else { throw TypeError$1(`TOML.parse(,,multilineStringJoiner)`); }
+	else { throw TypeError$1(`TOML.parse(${ARGS_MODE ? `${ARGS_MODE}multilineStringJoiner` : `,{ joiner }`})`); }
 	
 	if ( useBigInt===undefined$1 || useBigInt===true ) { usingBigInt = true; }
 	else if ( useBigInt===false ) { usingBigInt = false; }
 	else {
-		if ( typeof useBigInt!=='number' ) { throw TypeError$1(`TOML.parse(,,,useBigInt)`); }
-		if ( !isSafeInteger(useBigInt) ) { throw RangeError$1(`TOML.parse(,,,useBigInt)`); }
+		if ( typeof useBigInt!=='number' ) { throw TypeError$1(`TOML.parse(${ARGS_MODE ? `${ARGS_MODE},useBigInt` : `,{ bigint }`})`); }
+		if ( !isSafeInteger(useBigInt) ) { throw RangeError$1(`TOML.parse(${ARGS_MODE ? `${ARGS_MODE},useBigInt` : `,{ bigint }`})`); }
 		usingBigInt = null;
 		useBigInt>=0
 			? IntegerMinNumber = -( IntegerMaxNumber = useBigInt )
 			: IntegerMaxNumber = -( IntegerMinNumber = useBigInt ) - 1;
+	}
+	
+	if ( keys==null ) { KEYS$1 = ANY; }
+	else {
+		if ( !isKeys(keys) ) { throw TypeError$1(`TOML.parse(,{ keys })`); }
+		KEYS$1 = keys;
 	}
 	
 	if ( xOptions==null ) {
@@ -1014,12 +1078,12 @@ const use = (specificationVersion         , multilineStringJoiner         , useB
 		collect = collect_off;
 	}
 	else if ( typeof xOptions!=='object' ) {
-		throw TypeError$1(`TOML.parse(,,,${typeof xOptions}`);
+		throw TypeError$1(`TOML.parse(${ARGS_MODE ? `${ARGS_MODE},,xOptions` : `,{ x }`})`);
 	}
 	else {
 		const { order, longer, exact, null: _null, multi, comment, string, literal, tag, ...unknown } = xOptions;
 		const unknownNames = getOwnPropertyNames(unknown);
-		if ( unknownNames.length ) { throw TypeError$1(`TOML.parse(,,,,{ ${unknownNames.join(', ')} })`); }
+		if ( unknownNames.length ) { throw TypeError$1(`TOML.parse(${ARGS_MODE ? `${ARGS_MODE},,{ ${unknownNames.join(', ')} }` : `,{ x: { ${unknownNames.join(', ')} } }`})`); }
 		Table = order ? OrderedTable : PlainTable;
 		allowLonger = !longer;
 		sError = !!exact;
@@ -1029,8 +1093,8 @@ const use = (specificationVersion         , multilineStringJoiner         , useB
 		disableDigit = !!string;
 		preserveLiteral = !!literal;
 		if ( tag ) {
-			if ( typeof tag!=='function' ) { throw TypeError$1(`TOML.parse(,,,,xOptions.tag)`); }
-			if ( !mixed ) { throw TypeError$1(`TOML.parse(,,,,xOptions) xOptions.tag needs at least TOML 1.0 to support mixed type array`); }
+			if ( typeof tag!=='function' ) { throw TypeError$1(`TOML.parse(${ARGS_MODE ? `${ARGS_MODE},,{ tag }` : `,{ x: { tag } }`})`); }
+			if ( !mixed ) { throw TypeError$1(`TOML.parse(${ARGS_MODE ? `${ARGS_MODE},,xOptions` : `,{ x }`}) xOptions.tag needs at least TOML 1.0 to support mixed type array`); }
 			processor = tag;
 			collect = collect_on;
 		}
@@ -1042,6 +1106,26 @@ const use = (specificationVersion         , multilineStringJoiner         , useB
 		: ( { asNulls, asStrings, asTables, asArrays, asBooleans, asFloats, asIntegers, asOffsetDateTimes, asLocalDateTimes, asLocalDates, asLocalTimes } = AS_TYPED );
 	
 };
+
+const isView = ArrayBuffer.isView;
+
+const isArrayBuffer = (
+	/* j-globals: class.isArrayBuffer (internal) */
+	/*#__PURE__*/ function () {
+		if ( typeof ArrayBuffer==='function' ) {
+			var byteLength_apply = apply.bind(Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'byteLength').get);
+			return function isArrayBuffer (value) {
+				try { byteLength_apply(value); }
+				catch (error) { return false; }
+				return true;
+			};
+		}
+		return function isArrayBuffer () { return false; };
+	}()
+	/* j-globals: class.isArrayBuffer (internal) */
+);
+
+const TextDecoder$1 = TextDecoder;
 
 const Symbol$1 = Symbol;
 
@@ -1111,7 +1195,7 @@ const getOwnPropertyDescriptors = Object.getOwnPropertyDescriptors;
 const defineProperties = (
 	/* j-globals: null.defineProperties (internal) */
 	function defineProperties (object, descriptorMap) {
-		var created = create(NULL);
+		var created = create$1(NULL);
 		var names = keys(descriptorMap);
 		for ( var length = names.length, index = 0; index<length; ++index ) {
 			var name = names[index];
@@ -1229,7 +1313,7 @@ const Datetime = /*#__PURE__*/( () => {
 			( descriptors[key] = descriptor );
 		}
 	}
-	Datetime.prototype = preventExtensions(create(NativeDate.prototype, descriptors));
+	Datetime.prototype = preventExtensions(create$1(NativeDate.prototype, descriptors));
 	return freeze(Datetime);
 } )();
 
@@ -1588,6 +1672,8 @@ const MultilineBasicString = (literal        , useWhatToJoinMultilineString     
 	return parts.join('');
 };
 
+const BigInt$1 = BigInt;
+
 const INTEGER_D = /[-+]?(?:0|[1-9][_\d]*)/;
 const { test: BAD_D } = /*#__PURE__*/newRegExp`_(?!\d)`.valueOf();
 const { test: IS_D_INTEGER } = /*#__PURE__*/newRegExp`^${INTEGER_D}$`.valueOf();
@@ -1777,7 +1863,7 @@ const assignLiteralString = ( (table       , finalKey        , literal        ) 
 			return $[3];
 		}
 	}
-	useWhatToJoinMultilineString ?? start.nowrap();
+	useWhatToJoinMultilineString ?? start.nowrap(ARGS_MODE);
 	for ( const lines                          = [ checkLiteralString(literal) ]; ; ) {
 		const line         = start.must();
 		const $ = __MULTI_LINE_LITERAL_STRING_exec(line);
@@ -1827,7 +1913,7 @@ const assignBasicString = ( (table       , finalKey        , literal        )   
 			return literal.slice(length).replace(PRE_WHITESPACE, '');
 		}
 	}
-	useWhatToJoinMultilineString ?? start.nowrap();
+	useWhatToJoinMultilineString ?? start.nowrap(ARGS_MODE);
 	ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(literal + '\n') || throws(SyntaxError$1(`Bad multi-line basic string` + where(' at ')));
 	for ( const lines                          = [ literal ]; ; ) {
 		const line         = start.must();
@@ -1879,14 +1965,14 @@ const parseKeys = (rest        )                                                
 		lineRest || throws(SyntaxError$1(`Empty bare key` + where(' at ')));
 		if ( lineRest[0]==='"' ) {
 			const index         = BASIC_STRING_exec_1_endIndex(lineRest);
-			leadingKeys[++lastIndex] = BasicString(lineRest.slice(1, index));
+			KEYS$1.test(leadingKeys[++lastIndex] = BasicString(lineRest.slice(1, index))) || throws(Error$1(`Key not allowed` + where(' at ')));
 			lineRest = lineRest.slice(index + 1);
 		}
 		else {
 			const isQuoted = lineRest[0]==='\'';
 			const key         = ( ( isQuoted ? __LITERAL_KEY_exec : __BARE_KEY_exec )(lineRest) ?? throws(SyntaxError$1(`Bad ${isQuoted ? 'literal string' : 'bare'} key` + where(' at '))) )[0];
 			lineRest = lineRest.slice(key.length);
-			leadingKeys[++lastIndex] = isQuoted ? key.slice(1, -1) : key;
+			KEYS$1.test(leadingKeys[++lastIndex] = isQuoted ? key.slice(1, -1) : key) || throws(Error$1(`Key not allowed` + where(' at ')));
 		}
 		if ( IS_DOT_KEY(lineRest) ) { lineRest = lineRest.replace(DOT_KEY, ''); }
 		else { break; }
@@ -2154,8 +2240,6 @@ const Root = ()        => {
 const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER;
 
 const DATE = Date.prototype;
-
-const isPrototypeOf = Object.prototype.isPrototypeOf;
 
 const valueOf$2 = String.prototype.valueOf;
 
@@ -2610,12 +2694,12 @@ class TOMLDocument extends Array$1              {
 	
 	         asInteger                                          = return_false;
 	         newline                     = '';
-	         newlineUnderSection         ;
-	         newlineUnderSectionButPair         ;
-	         newlineUnderHeader         ;
-	         newlineUnderPair         ;
-	         newlineUnderPairButDotted         ;
-	         newlineUnderDotted         ;
+	         newlineUnderSection          = true;
+	         newlineUnderSectionButPair          = true;
+	         newlineUnderHeader          = true;
+	         newlineUnderPair          = false;
+	         newlineUnderPairButDotted          = false;
+	         newlineUnderDotted          = false;
 	         indent         = '\t';
 	         T                  = 'T';
 	         Z            = 'Z';
@@ -2629,7 +2713,9 @@ class TOMLDocument extends Array$1              {
 		
 		super();
 		
-		const integer = options?.integer;
+		if ( options==null ) { return this; }
+		
+		const { integer } = options;
 		if ( integer===undefined ) ;
 		else if ( integer===MAX_SAFE_INTEGER ) { this.asInteger = isSafeInteger; }
 		else if ( typeof integer==='number' ) {
@@ -2640,7 +2726,7 @@ class TOMLDocument extends Array$1              {
 		}
 		else { throw TypeError$1(`TOML.stringify(,{integer}) can only be number`); }
 		
-		const newline = options?.newline;
+		const { newline } = options;
 		if ( newline===undefined ) ;
 		else if ( newline==='\n' || newline==='\r\n' ) { this.newline = newline; }
 		else {
@@ -2649,12 +2735,12 @@ class TOMLDocument extends Array$1              {
 				: TypeError$1(`TOML.stringify(,{newline}) can only be string`);
 		}
 		
-		const preferCommentFor = options?.preferCommentFor;
+		const { preferCommentFor } = options;
 		if ( preferCommentFor===undefined ) ;
 		else if ( preferCommentFor==='this' || preferCommentFor==='key' ) { this.preferCommentForThis = preferCommentFor==='this'; }
 		else { throw TypeError$1(`TOML.stringify(,{preferCommentFor) can only be 'key' or 'this'`); }
 		
-		const around = name2code[options?.newlineAround ?? 'header'] ?? name2code.header;
+		const around = name2code[options.newlineAround ?? 'header'] ?? name2code.header;
 		this.newlineUnderSection = around>0;
 		this.newlineUnderSectionButPair = around===1 || around===2;
 		this.newlineUnderHeader = around>1;
@@ -2662,7 +2748,7 @@ class TOMLDocument extends Array$1              {
 		this.newlineUnderPairButDotted = around===3;
 		this.newlineUnderDotted = around>3;
 		
-		const indent = options?.indent;
+		const { indent } = options;
 		if ( indent===undefined ) ;
 		else if ( typeof indent==='string' ) {
 			if ( !IS_INDENT(indent) ) { throw SyntaxError$1(`TOML.stringify(,{indent}) can only include Tab or Space`); }
@@ -2674,19 +2760,19 @@ class TOMLDocument extends Array$1              {
 		}
 		else { throw TypeError$1(`TOML.stringify(,{indent}) can not be "${typeof indent}" type`); }
 		
-		const T = options?.T;
+		const { T } = options;
 		if ( T===undefined ) ;
 		else if ( T===' ' || T==='t' || T==='T' ) { this.T = T; }
 		else { throw TypeError$1(`TOML.stringify(,{T}) can only be "T" or " " or "t"`); }
 		
-		const Z = options?.Z;
+		const { Z } = options;
 		if ( Z===undefined ) ;
 		else if ( Z==='z' || Z==='Z' ) { this.Z = Z; }
 		else { throw TypeError$1(`TOML.stringify(,{Z}) can only be "Z" or "z"`); }
 		
-		if ( options?.xNull ) { this.nullDisabled = false; }
+		if ( options.xNull ) { this.nullDisabled = false; }
 		
-		const xBeforeNewlineInMultilineTable = options?.xBeforeNewlineInMultilineTable;
+		const { xBeforeNewlineInMultilineTable } = options;
 		if ( xBeforeNewlineInMultilineTable===undefined ) ;
 		else if ( xBeforeNewlineInMultilineTable==='' || xBeforeNewlineInMultilineTable===',' ) {
 			this.multilineTableDisabled = false;
@@ -2694,7 +2780,7 @@ class TOMLDocument extends Array$1              {
 		}
 		else { throw TypeError$1(`TOML.stringify(,{xBeforeNewlineInMultilineTable}) can only be "" or ","`); }
 		
-		const $singlelineArray = options?.forceInlineArraySpacing;
+		const $singlelineArray = options.forceInlineArraySpacing;
 		switch ( $singlelineArray ) {
 			case undefined:
 				break;
@@ -2782,7 +2868,7 @@ const assertFulScalar = (string        )       => {
 
 let holding          = false;
 
-const parse = (source        , specificationVersion                                   , multilineStringJoiner                                                                                , useBigInt                            , xOptions                   )        => {
+const parse = (source        , specificationVersion                                   , multilineStringJoiner                                                                                                                       , bigint                                       , x                              , argsMode                 )        => {
 	let sourcePath         = '';
 	if ( typeof source==='object' && source ) {
 		if ( isArray$1(source) ) { throw TypeError$1(isLinesFromStringify(source) ? `TOML.parse(array from TOML.stringify(,{newline?}))` : `TOML.parse(array)`); }
@@ -2816,20 +2902,23 @@ const parse = (source        , specificationVersion                             
 	}
 	else if ( typeof source==='string' ) { assertFulScalar(source); }
 	else { throw TypeError$1(`TOML.parse(source)`); }
+	let joiner                    ;
+	let keys                                 ;
 	if ( typeof multilineStringJoiner==='object' && multilineStringJoiner ) {
-		if ( useBigInt!==undefined$1 || xOptions!==undefined$1 ) { throw TypeError$1(`options mode ? args mode`); }
-		let joiner                    ;
-		if ( hasOwn(multilineStringJoiner, 'joiner') ) { joiner = multilineStringJoiner.joiner; }
-		if ( hasOwn(multilineStringJoiner, 'bigint') ) { useBigInt = multilineStringJoiner.bigint; }
-		if ( hasOwn(multilineStringJoiner, 'x') ) { xOptions = multilineStringJoiner.x; }
-		multilineStringJoiner = joiner;
+		if ( bigint!==undefined$1 || x!==undefined$1 ) { throw TypeError$1(`options mode ? args mode`); }
+		joiner = multilineStringJoiner.joiner;
+		bigint = multilineStringJoiner.bigint;
+		keys = multilineStringJoiner.keys;
+		x = multilineStringJoiner.x;
+		argsMode = '';
 	}
+	else { joiner = multilineStringJoiner; }
 	let rootTable       ;
 	let process                 ;
 	if ( holding ) { throw Error$1(`parsing during parsing.`); }
 	holding = true;
 	try {
-		use(specificationVersion, multilineStringJoiner, useBigInt, xOptions);
+		use(specificationVersion, joiner, bigint, keys, x, argsMode);
 		todo(source, sourcePath);
 		source && source[0]==='\uFEFF' && throws(TypeError$1(`TOML content (string) should not start with BOM (U+FEFF)` + where(' at ')));
 		rootTable = Root();
@@ -2837,9 +2926,9 @@ const parse = (source        , specificationVersion                             
 	}
 	finally {
 		done();//clearWeakSets();
-		clearRegExp$1();
 		clear();
 		holding = false;
+		clearRegExp$1();
 	}
 	process?.();
 	return rootTable;
@@ -2848,17 +2937,17 @@ const parse = (source        , specificationVersion                             
 const parse$1 = /*#__PURE__*/assign$1(
 	(source        , specificationVersion                                   , multilineStringJoiner         , useBigInt                   , xOptions                   ) =>
 		typeof specificationVersion==='number'
-			? parse(source, specificationVersion, multilineStringJoiner, useBigInt, xOptions)
-			: parse(source, 1.0, specificationVersion          , multilineStringJoiner                                       , useBigInt                    )
+			? parse(source, specificationVersion, multilineStringJoiner, useBigInt, xOptions, ',,')
+			: parse(source, 1.0, specificationVersion          , multilineStringJoiner                                       , useBigInt                    , ',')
 	,
 	{
-		'1.0': (source        , multilineStringJoiner         , useBigInt                   , xOptions                   ) => parse(source, 0.1, multilineStringJoiner, useBigInt, xOptions),
-		1.0: (source        , multilineStringJoiner         , useBigInt                   , xOptions                   ) => parse(source, 1.0, multilineStringJoiner, useBigInt, xOptions),
-		0.5: (source        , multilineStringJoiner         , useBigInt                   , xOptions                   ) => parse(source, 0.5, multilineStringJoiner, useBigInt, xOptions),
-		0.4: (source        , multilineStringJoiner         , useBigInt                   , xOptions                   ) => parse(source, 0.4, multilineStringJoiner, useBigInt, xOptions),
-		0.3: (source        , multilineStringJoiner         , useBigInt                   , xOptions                   ) => parse(source, 0.3, multilineStringJoiner, useBigInt, xOptions),
-		0.2: (source        , multilineStringJoiner         , useBigInt                   , xOptions                   ) => parse(source, 0.2, multilineStringJoiner, useBigInt, xOptions),
-		0.1: (source        , multilineStringJoiner         , useBigInt                   , xOptions                   ) => parse(source, 0.1, multilineStringJoiner, useBigInt, xOptions),
+		'1.0': (source        , multilineStringJoiner         , useBigInt                   , xOptions                   ) => parse(source, 0.1, multilineStringJoiner, useBigInt, xOptions, ','),
+		1.0: (source        , multilineStringJoiner         , useBigInt                   , xOptions                   ) => parse(source, 1.0, multilineStringJoiner, useBigInt, xOptions, ','),
+		0.5: (source        , multilineStringJoiner         , useBigInt                   , xOptions                   ) => parse(source, 0.5, multilineStringJoiner, useBigInt, xOptions, ','),
+		0.4: (source        , multilineStringJoiner         , useBigInt                   , xOptions                   ) => parse(source, 0.4, multilineStringJoiner, useBigInt, xOptions, ','),
+		0.3: (source        , multilineStringJoiner         , useBigInt                   , xOptions                   ) => parse(source, 0.3, multilineStringJoiner, useBigInt, xOptions, ','),
+		0.2: (source        , multilineStringJoiner         , useBigInt                   , xOptions                   ) => parse(source, 0.2, multilineStringJoiner, useBigInt, xOptions, ','),
+		0.1: (source        , multilineStringJoiner         , useBigInt                   , xOptions                   ) => parse(source, 0.1, multilineStringJoiner, useBigInt, xOptions, ','),
 	}
 );
 
@@ -2869,8 +2958,9 @@ const _export = /*#__PURE__*/Default({
 	Section, inline, multiline, basic, literal, commentFor, commentForThis,
 	OffsetDateTime, LocalDateTime, LocalDate, LocalTime,
 	isInline, isSection,
+	Keys,
 });
 
-export { LocalDate, LocalDateTime, LocalTime, OffsetDateTime, Section, basic, commentFor, commentForThis, _export as default, inline, isInline, isSection, literal, multiline, parse$1 as parse, stringify, version };
+export { Keys, LocalDate, LocalDateTime, LocalTime, OffsetDateTime, Section, basic, commentFor, commentForThis, _export as default, inline, isInline, isSection, literal, multiline, parse$1 as parse, stringify, version };
 
 //# sourceMappingURL=index.mjs.map

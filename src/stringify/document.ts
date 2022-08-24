@@ -30,12 +30,12 @@ export default class TOMLDocument extends Array<TOMLSection> {
 	
 	readonly asInteger :(this :void, number :number) => boolean = return_false;
 	readonly newline :'' | '\n' | '\r\n' = '';
-	readonly newlineUnderSection :boolean;
-	readonly newlineUnderSectionButPair :boolean;
-	readonly newlineUnderHeader :boolean;
-	readonly newlineUnderPair :boolean;
-	readonly newlineUnderPairButDotted :boolean;
-	readonly newlineUnderDotted :boolean;
+	readonly newlineUnderSection :boolean = true;
+	readonly newlineUnderSectionButPair :boolean = true;
+	readonly newlineUnderHeader :boolean = true;
+	readonly newlineUnderPair :boolean = false;
+	readonly newlineUnderPairButDotted :boolean = false;
+	readonly newlineUnderDotted :boolean = false;
 	readonly indent :string = '\t';
 	readonly T :'T' | 't' | ' ' = 'T';
 	readonly Z :'Z' | 'z' = 'Z';
@@ -49,7 +49,9 @@ export default class TOMLDocument extends Array<TOMLSection> {
 		
 		super();
 		
-		const integer = options?.integer;
+		if ( options==null ) { return this; }
+		
+		const { integer } = options;
 		if ( integer===undefined ) {}
 		else if ( integer===MAX_SAFE_INTEGER ) { this.asInteger = isSafeInteger; }
 		else if ( typeof integer==='number' ) {
@@ -60,7 +62,7 @@ export default class TOMLDocument extends Array<TOMLSection> {
 		}
 		else { throw TypeError(`TOML.stringify(,{integer}) can only be number`); }
 		
-		const newline = options?.newline;
+		const { newline } = options;
 		if ( newline===undefined ) {}
 		else if ( newline==='\n' || newline==='\r\n' ) { this.newline = newline; }
 		else {
@@ -69,12 +71,12 @@ export default class TOMLDocument extends Array<TOMLSection> {
 				: TypeError(`TOML.stringify(,{newline}) can only be string`);
 		}
 		
-		const preferCommentFor = options?.preferCommentFor;
+		const { preferCommentFor } = options;
 		if ( preferCommentFor===undefined ) {}
 		else if ( preferCommentFor==='this' || preferCommentFor==='key' ) { this.preferCommentForThis = preferCommentFor==='this'; }
 		else { throw TypeError(`TOML.stringify(,{preferCommentFor) can only be 'key' or 'this'`); }
 		
-		const around = name2code[options?.newlineAround ?? 'header'] ?? name2code.header;
+		const around = name2code[options.newlineAround ?? 'header'] ?? name2code.header;
 		this.newlineUnderSection = around>0;
 		this.newlineUnderSectionButPair = around===1 || around===2;
 		this.newlineUnderHeader = around>1;
@@ -82,7 +84,7 @@ export default class TOMLDocument extends Array<TOMLSection> {
 		this.newlineUnderPairButDotted = around===3;
 		this.newlineUnderDotted = around>3;
 		
-		const indent = options?.indent;
+		const { indent } = options;
 		if ( indent===undefined ) {}
 		else if ( typeof indent==='string' ) {
 			if ( !IS_INDENT(indent) ) { throw SyntaxError(`TOML.stringify(,{indent}) can only include Tab or Space`); }
@@ -94,19 +96,19 @@ export default class TOMLDocument extends Array<TOMLSection> {
 		}
 		else { throw TypeError(`TOML.stringify(,{indent}) can not be "${typeof indent}" type`); }
 		
-		const T = options?.T;
+		const { T } = options;
 		if ( T===undefined ) {}
 		else if ( T===' ' || T==='t' || T==='T' ) { this.T = T; }
 		else { throw TypeError(`TOML.stringify(,{T}) can only be "T" or " " or "t"`); }
 		
-		const Z = options?.Z;
+		const { Z } = options;
 		if ( Z===undefined ) {}
 		else if ( Z==='z' || Z==='Z' ) { this.Z = Z; }
 		else { throw TypeError(`TOML.stringify(,{Z}) can only be "Z" or "z"`); }
 		
-		if ( options?.xNull ) { this.nullDisabled = false; }
+		if ( options.xNull ) { this.nullDisabled = false; }
 		
-		const xBeforeNewlineInMultilineTable = options?.xBeforeNewlineInMultilineTable;
+		const { xBeforeNewlineInMultilineTable } = options;
 		if ( xBeforeNewlineInMultilineTable===undefined ) {}
 		else if ( xBeforeNewlineInMultilineTable==='' || xBeforeNewlineInMultilineTable===',' ) {
 			this.multilineTableDisabled = false;
@@ -114,7 +116,7 @@ export default class TOMLDocument extends Array<TOMLSection> {
 		}
 		else { throw TypeError(`TOML.stringify(,{xBeforeNewlineInMultilineTable}) can only be "" or ","`); }
 		
-		const $singlelineArray = options?.forceInlineArraySpacing;
+		const $singlelineArray = options.forceInlineArraySpacing;
 		switch ( $singlelineArray ) {
 			case undefined:
 				break;

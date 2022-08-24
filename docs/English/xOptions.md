@@ -4,13 +4,13 @@
 
 All following options are not turned on by default.  
 
-`xOptions.order`
+`xOptions.exact`
 ----------------
 
 *   type: `boolean`
 *   default: `false`
 
-Keep the key/value pairs order of tables.  
+Disallow the float type value too large being `±Infinity`, too small being `±0`, or other loss of precision occurs.  
 
 `xOptions.longer`
 -----------------
@@ -20,13 +20,13 @@ Keep the key/value pairs order of tables.
 
 Allow the integer type value to exceed 64 bit range (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807).  
 
-`xOptions.exact`
+`xOptions.order`
 ----------------
 
 *   type: `boolean`
 *   default: `false`
 
-Disallow the float type value too large being `±Infinity`, too small being `±0`, or other loss of precision occurs.  
+Keep the key/value pairs order of tables.  
 
 `xOptions.multi`
 ----------------
@@ -57,16 +57,19 @@ x = 1
 y = 2
 ```
 
-`xOptions.null`
----------------
+`xOptions.string`
+------------------
 
 *   type: `boolean`
 *   default: `false`
 
-`null` value support (by `null` literal).  
+Disable keys shaped like number, etc.:  
 
-```
-key = null
+```toml
+3.14 = 0
+-1 = 1
+0.2-0.1 = 3
+true = false
 ```
 
 `xOptions.literal`
@@ -109,19 +112,16 @@ This will result in:
 } )
 ```
 
-`xOptions.string`
-------------------
+`xOptions.null`
+---------------
 
 *   type: `boolean`
 *   default: `false`
 
-Disable keys shaped like number, etc.:  
+`null` value support (by `null` literal).  
 
-```toml
-3.14 = 0
--1 = 1
-0.2-0.1 = 3
-true = false
+```
+key = null
 ```
 
 `xOptions.tag`

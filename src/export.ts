@@ -1,5 +1,6 @@
 import version from './version?text';
 
+import { Keys } from './options';
 import parse from './parse/';
 import stringify, { Section, inline, multiline, basic, literal } from './stringify/';
 import { OffsetDateTime, LocalDateTime, LocalDate, LocalTime } from './types/Datetime';
@@ -14,6 +15,7 @@ export default /*#__PURE__*/Default({
 	Section, inline, multiline, basic, literal, commentFor, commentForThis,
 	OffsetDateTime, LocalDateTime, LocalDate, LocalTime,
 	isInline, isSection,
+	Keys,
 });
 
 export {
@@ -23,4 +25,5 @@ export {
 	Section, inline, multiline, basic, literal, commentFor, commentForThis,
 	OffsetDateTime, LocalDateTime, LocalDate, LocalTime,
 	isInline, isSection,
+	Keys,
 };
