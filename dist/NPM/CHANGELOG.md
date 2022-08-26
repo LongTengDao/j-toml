@@ -89,3 +89,4 @@ ___
     34. 0.  +   new feature: add `TOML.Keys` and `options.keys` for parsing, to avoid hash attack
             *   follow docs: not only get own properties of `options` object which passed into `TOML.parse` anymore (which is never said in the docs before)
             *   more friendly error message for `TOML.parse` arguments error
+    35. 0.  *   optimizing: the internal implementation of `TOML.parse` `xOptions.tag` changed from array to linked list

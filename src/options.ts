@@ -126,42 +126,42 @@ export let
 
 /* xOptions.tag */
 
-let processor :Tag | null = null;
 type Tag = (this :void, each :Each) => void;
+let processor :Tag | null = null;
+let each :Each | null = null;
 type Each =
-	{ table :Table, key :string,                                     tag :string } |
-	{                            array :Array,        index :number, tag :string } |
-	{ table :Table, key :string, array :Array<Table>, index :number, tag :string };
-let collection :Array<Each> = [];
-let collection_length :number = 0;
+	| { table :Table, key :string,                                     tag :string, _linked :Each | null }
+	| {                            array :Array,        index :number, tag :string, _linked :Each | null }
+	| { table :Table, key :string, array :Array<Table>, index :number, tag :string, _linked :Each | null }
+;
 const collect_on = (tag :string, array :null | Array, table :null | Table, key? :string) :void => {
-	const each = create(NULL) as { table :Table, key :string, array :Array, index :number, tag :string };
-	each.tag = tag;
+	const _each = create(NULL) as { table :Table, key :string, array :Array, index :number, tag :string, _linked :Each | null };
+	_each._linked = each;
+	_each.tag = tag;
 	if ( table ) {
-		each.table = table;
-		each.key = key!;
+		_each.table = table;
+		_each.key = key!;
 	}
 	if ( array ) {
-		each.array = array;
-		each.index = array.length;
+		_each.array = array;
+		_each.index = array.length;
 	}
-	collection[collection_length++] = each;
+	each = _each;
 };
 const collect_off = () :never => { throw iterator.throws(SyntaxError(`xOptions.tag is not enabled, but found tag syntax` + iterator.where(' at '))); };
 export let collect :(this :void, tag :string, ...rest :[ null, Table, string ] | [ Array, null ] | [ Array<Table>, Table, string ]) => void = collect_off;
 export type Process = ( (this :void) => void ) | null;
 export const Process = () :Process => {
-	if ( collection_length ) {
-		let index = collection_length;
-		const process = processor!;
-		const queue = collection;
-		collection = [];
+	if ( each ) {
+		const _processor = processor!;
+		let _each :Each | null = each;
+		each = null;
 		return () :void => {
-			do {
-				process(queue[--index]!);
-				queue.length = index;
-			}
-			while ( index );
+			const processor = _processor;
+			let each :Each | null = _each!;
+			_each = null;
+			do { processor(each); }
+			while ( each = each._linked );
 		};
 	}
 	return null;
@@ -171,10 +171,8 @@ export const Process = () :Process => {
 
 export const clear = () :void => {
 	KEYS = ANY;
-	processor = null;
-	collection.length = collection_length = 0;
+	useWhatToJoinMultilineString = processor = each = null;
 	zeroDatetime = false;
-	useWhatToJoinMultilineString = null;
 };
 
 export const use = (specificationVersion :unknown, multilineStringJoiner :unknown, useBigInt :unknown, keys :unknown, xOptions :XOptions, argsMode :',,' | ',' | '') :void => {

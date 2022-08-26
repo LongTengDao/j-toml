@@ -1,4 +1,4 @@
-﻿const version = '1.34.0';
+﻿const version = '1.35.0';
 
 const SyntaxError$1 = SyntaxError;
 
@@ -963,44 +963,44 @@ let
 	asLocalDates    ,
 	asLocalTimes    ;
 
-/* xOptions.tag */
+                  
 
-let processor             = null;
                                             
+let processor             = null;
+let each              = null;
            
-	                                                                                
-	                                                                                
-	                                                                               
-let collection              = [];
-let collection_length         = 0;
+	                                                                                                      
+	                                                                                                      
+	                                                                                                      
+ 
 const collect_on = (tag        , array              , table              , key         )       => {
-	const each = create$1(NULL)                                                                           ;
-	each.tag = tag;
+	const _each = create$1(NULL)                                                                                                 ;
+	_each._linked = each;
+	_each.tag = tag;
 	if ( table ) {
-		each.table = table;
-		each.key = key ;
+		_each.table = table;
+		_each.key = key ;
 	}
 	if ( array ) {
-		each.array = array;
-		each.index = array.length;
+		_each.array = array;
+		_each.index = array.length;
 	}
-	collection[collection_length++] = each;
+	each = _each;
 };
 const collect_off = ()        => { throw throws(SyntaxError$1(`xOptions.tag is not enabled, but found tag syntax` + where(' at '))); };
 let collect                                                                                                                          = collect_off;
                                                       
 const Process = ()          => {
-	if ( collection_length ) {
-		let index = collection_length;
-		const process = processor ;
-		const queue = collection;
-		collection = [];
+	if ( each ) {
+		const _processor = processor ;
+		let _each              = each;
+		each = null;
 		return ()       => {
-			do {
-				process(queue[--index] );
-				queue.length = index;
-			}
-			while ( index );
+			const processor = _processor;
+			let each              = _each ;
+			_each = null;
+			do { processor(each); }
+			while ( each = each._linked );
 		};
 	}
 	return null;
@@ -1010,10 +1010,8 @@ const Process = ()          => {
 
 const clear = ()       => {
 	KEYS$1 = ANY;
-	processor = null;
-	collection.length = collection_length = 0;
+	useWhatToJoinMultilineString = processor = each = null;
 	zeroDatetime = false;
-	useWhatToJoinMultilineString = null;
 };
 
 const use = (specificationVersion         , multilineStringJoiner         , useBigInt         , keys         , xOptions          , argsMode                 )       => {
