@@ -2,7 +2,7 @@ export = exports;
 
 declare namespace exports {
 	
-	export const version :'1.35.0';
+	export const version :'1.35.1';
 	
 	export const parse :
 		& {
@@ -61,7 +61,7 @@ declare namespace exports {
 	export function commentFor (this :void, key :string) :symbol;
 	export const commentForThis :unique symbol;
 	
-	export { OffsetDateTime, LocalDateTime, LocalDate, LocalTime };
+	export { OffsetDateTime, LocalDateTime, LocalDate, LocalTime, Keys };
 	
 	export { exports as default };
 	
@@ -165,7 +165,7 @@ declare class LocalTime {
 	
 }
 
-export class Keys extends RegExp {
+class Keys extends RegExp {
 	readonly lastIndex :number;
 	constructor (keys :ArrayLike<string>);
 	readonly test :(this :Keys, key :string) => boolean;

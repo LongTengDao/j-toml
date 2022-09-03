@@ -79,11 +79,12 @@ type Table = object;
     
 1.  #### `options`
     
-    A readonly object, the options it contains is as follows:  
+    An optional readonly object, the options it contains is as follows:  
     
     -   ##### `options.joiner`
         
         *   type: `string`
+        *   optional
         
         For the multi-line basic strings and multi-line literal strings, what will be used to join the lines for parsing result.  
         Note: TOML always use `'\n'` or `'\r\n'` to split the document lines while parsing, which defined in TOML specification, **it has nothing to do with this parameter**, so don't be mixed up.  
@@ -237,17 +238,19 @@ declare function stringify (rootTable :ReadonlyTable, options? :Readonly<{
     
 1.  #### `options`
     
-    A readonly object, the options it contains is as follows:  
+    An optional readonly object, the options it contains is as follows:  
     
     -   ##### `options.integer`
         
         *   type: `number`
+        *   optional
         
         Specify a range, then the integer `number` type value in that will be serialized to TOML Integer. This argument allows you to control the max limit exactly, like `Number.MAX_SAFE_INTEGER` (and the min limit from `-options.integer`, if `options.integer>=0`; otherwise as the min limit, and the max limit is `-options.integer-1`).  
         
     -   ##### `options.newline`
         
         *   type: `'\n'` / `'\r\n'`
+        *   optional
         
         What to use as the newline for serialization. **If this parameter is not specified**, the function will return an array of strings (representing each line) instead of a whole string.  
         
@@ -310,6 +313,7 @@ declare function stringify (rootTable :ReadonlyTable, options? :Readonly<{
     -   ##### `options.xBeforeNewlineInMultilineTable`
         
         *   type: `','` / `''`
+        *   optional
         
         For inline tables marked multi-line mode, whether to use a comma before the newline.  
         
@@ -318,6 +322,7 @@ declare function stringify (rootTable :ReadonlyTable, options? :Readonly<{
     -   ##### `options.forceInlineArraySpacing`
         
         *   type: `0` / `1` / `2` / `3`
+        *   optional
         
         Regardless of the original writing style of each single-line static array, serialize in the specified mode.  
         
