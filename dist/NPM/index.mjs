@@ -1,4 +1,4 @@
-﻿const version = '1.35.1';
+﻿const version = '1.35.2';
 
 const SyntaxError$1 = SyntaxError;
 

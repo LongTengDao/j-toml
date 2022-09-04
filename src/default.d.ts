@@ -165,7 +165,7 @@ declare class LocalTime {
 	
 }
 
-class Keys extends RegExp {
+declare class Keys extends RegExp {
 	readonly lastIndex :number;
 	constructor (keys :ArrayLike<string>);
 	readonly test :(this :Keys, key :string) => boolean;

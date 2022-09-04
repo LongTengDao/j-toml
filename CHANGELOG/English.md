@@ -89,3 +89,4 @@
             *   more friendly error message for `TOML.parse` arguments error
     35. 0.  *   optimizing: the internal implementation of `TOML.parse` `xOptions.tag` changed from array to linked list
         1.  *   fix typing file (since 1.34.0)
+        2.  *   fix typing file (since 1.35.1)

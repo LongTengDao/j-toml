@@ -4,7 +4,7 @@ typeof define === 'function' && define.amd ? define(factory) :
 (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.TOML = factory());
 })(this, (function () { 'use strict';
 
-const version = '1.35.1';
+const version = '1.35.2';
 
 const SyntaxError$1 = SyntaxError;
 
