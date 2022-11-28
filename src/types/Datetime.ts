@@ -58,7 +58,7 @@ export const OFFSET$ = /(?:[Zz]|[+-]\d\d:\d\d)$/;
 
 const { exec: Z_exec } = theRegExp<1 | 2 | 3>(/(([+-])\d\d):(\d\d)$/);
 
-const { exec: OFFSET_DATETIME_exec } = /*#__PURE__*/newRegExp<1>`
+const { exec: OFFSET_DATETIME_exec } = /*#__PURE__*/newRegExp`
 	^
 	${YMD}
 	[Tt ]
@@ -67,7 +67,7 @@ const { exec: OFFSET_DATETIME_exec } = /*#__PURE__*/newRegExp<1>`
 	(?:[Zz]|[+-]${_23_}:${_59_})
 	$`.valueOf();
 
-const { exec: OFFSET_DATETIME_ZERO_exec } = /*#__PURE__*/newRegExp<1>`
+const { exec: OFFSET_DATETIME_ZERO_exec } = /*#__PURE__*/newRegExp`
 	^
 	${YMD}
 	[Tt ]
@@ -193,7 +193,7 @@ export const OffsetDateTime = /*#__PURE__*/fpc(class OffsetDateTime extends Date
 		validateLeap(literal) || iterator.throws(SyntaxError(`Invalid Offset Date-Time ${literal}` + iterator.where(' at ')));
 		const with60 = literal.startsWith('60', 17);
 		let without60 = with60 ? literal.slice(0, 17) + '59' + literal.slice(19) : literal;
-		const { 1: more } = ( options.zeroDatetime ? OFFSET_DATETIME_ZERO_exec(without60) : OFFSET_DATETIME_exec(without60) ) ?? iterator.throws(SyntaxError(`Invalid Offset Date-Time ${literal}` + iterator.where(' at ')));
+		const { 1: more = '' } = ( options.zeroDatetime ? OFFSET_DATETIME_ZERO_exec(without60) : OFFSET_DATETIME_exec(without60) ) || iterator.throws(SyntaxError(`Invalid Offset Date-Time ${literal}` + iterator.where(' at ')));
 		const time = parse(without60 = without60.replace(T, 'T').replace('z', 'Z'));
 		if ( with60 ) {
 			DATE.setTime(time);

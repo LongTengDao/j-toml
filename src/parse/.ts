@@ -3,6 +3,7 @@ import TypeError from '.TypeError';
 import isView from '.ArrayBuffer.isView';
 import isArray from '.Array.isArray';
 import assign from '.Object.assign';
+import apply from '.Reflect.apply';
 import undefined from '.undefined';
 import Null from '.null';
 import isArrayBuffer from '.class.isArrayBuffer';
@@ -40,10 +41,22 @@ const parse = (source :Source, specificationVersion :1.0 | 0.5 | 0.4 | 0.3 | 0.2
 			if ( typeof sourcePath!=='string' ) { throw TypeError(`TOML.parse(source.path)`); }
 			const { data, require: req = typeof require==='function' ? require : undefined } = source;
 			if ( req ) {
-				const dirname_ = req.resolve?.paths?.('')?.[0]?.replace(/node_modules$/, '');
-				if ( dirname_ ) {
-					sourcePath = ( req as (id :'path') => typeof import('path') )('path').resolve(dirname_, sourcePath);
-					if ( typeof sourcePath!=='string' ) { throw TypeError(`TOML.parse(source.require('path').resolve)`); }
+				const { resolve } = req;
+				if ( resolve!=null ) {
+					const { paths } = resolve;
+					if ( paths!=null ) {
+						const ret = apply(paths, resolve, [ '' ]);
+						if ( ret!=null ) {
+							const val = ret[0];
+							if ( val!=null ) {
+								const dirname_ = val.replace(/node_modules$/, '');
+								if ( dirname_ ) {
+									sourcePath = ( req as (id :'path') => typeof import('path') )('path').resolve(dirname_, sourcePath);
+									if ( typeof sourcePath!=='string' ) { throw TypeError(`TOML.parse(source.require('path').resolve)`); }
+								}
+							}
+						}
+					}
 				}
 				if ( data===undefined ) {
 					const data = ( req as (id :'fs') => typeof import('fs') )('fs').readFileSync(sourcePath);
@@ -92,7 +105,7 @@ const parse = (source :Source, specificationVersion :1.0 | 0.5 | 0.4 | 0.3 | 0.2
 		holding = false;
 		clearRegExp();
 	}
-	process?.();
+	process && process();
 	return rootTable;
 };
 

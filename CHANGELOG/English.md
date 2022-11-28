@@ -17,7 +17,7 @@
             *   no more do `require('path').isAbsolute(source.path)` check
     10. 0.  *   update dependency `@ltd/j-orderify` (use `copyWithin` to optimize `ownKeys` `splice` instead of modifying `constructor[Symbol.species]`)
     11. 0.  *   change date-time internal implementation from private to symbol, to support `Proxy` use case
-    12. 0.  *   remove stage 3 class field syntax for compatibility
+    12. 0.  *   compatibility: remove stage 3 class field syntax
             +   add ESM edition (with full tree shaking support)
         1.  *   fix typing file path
         2.  *   bug fix: fix ESM support of `package.json`
@@ -49,8 +49,8 @@
             *   officially launch helpers `TOML.isSection`, `TOML.isInline` in the document
             *   bug fix: fix the issue when `TOML.inline` a table, the mutually-exclusive `TOML.Section` state is not removed
     23. 0.  *   based on TypeScript 4.5 new features `.d.mts` extension name and `types` category in `exports` field of `package.json`, provide own type declaration file `index.d.mts` for ESM mode of NPM edition
-            *   ensure when Node.js engine changes its internal implementation, the fast code could fall back to normal
-            *   remove lookbehind syntax in RegExp for Safari compatibility
+            *   compatibility: ensure when Node.js engine changes its internal implementation, the fast code could fall back to normal
+            *   compatibility: remove lookbehind syntax in RegExp for Safari
     24. 0.  *   supplement the docs that the object style arguments of `TOML.parse` which was added since 1.18.0, also applies for the version sub functions of `TOML.parse`
             *   no longer error in 0.4 and previous version for whitespace after "line ending backslash" (revert the corresponding change in 1.16.0), no longer error in 0.5 and previous version for Tab literal in Basic String, no longer error in 0.5 and previous version for 1 or 2 quotation marks at the end of a multi-line string, because this library's support policy for previous versions of the TOML specification is consistent with the principle of not causing unnecessary errors
             *   no longer error in 0.2 and previous version for non-scalar values of `\u****` in Basic String
@@ -69,7 +69,7 @@
     26. 0.  *   bug fix: fix the error when `options.newline` of `TOML.stringify` is omitted (since 1.25.0)
             +   new feature: helper `TOML.multiline.array`
             *   more strict array of tables check in `TOML.stringify`
-    27. 0.  *   remove `??=` syntax for Node 14 compatibility
+    27. 0.  *   compatibility: remove `??=` syntax for Node 14 compatibility
     28. 0.  +   new feature: helper `TOML.inline`'s second optional parameter to control space, and remember the writing style of single-line static array in `TOML.parse`
             *   bug fix: allow writing lowercase `t`, `z` in date-time for `TOML.parse`
     29. 0.  +   new feature: new `forceInlineArraySpacing` option in `TOML.stringify`
@@ -90,3 +90,6 @@
     35. 0.  *   optimizing: the internal implementation of `TOML.parse` `xOptions.tag` changed from array to linked list
         1.  *   fix typing file (since 1.34.0)
         2.  *   fix typing file (since 1.35.1)
+        3.  *   bug fix: fix Offset Date-Time before 1970 without fractional seconds parsing crash (since 1.33.3)
+            *   compatibility: remove `?.` and `??` syntax
+            *   compatibility: remove `bigint` syntax (but using `TOML.parse` in environment without `BigInt` support, the related option must be set to `false`, otherwise, an error will be thrown)

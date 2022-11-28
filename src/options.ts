@@ -1,6 +1,8 @@
 import SyntaxError from '.SyntaxError';
 import RangeError from '.RangeError';
 import TypeError from '.TypeError';
+import Error from '.Error';
+import BigInt from '.BigInt?';
 import RegExp from '.RegExp';
 import WeakMap from '.WeakMap';
 import get from '.WeakMap.prototype.get';
@@ -224,6 +226,7 @@ export const use = (specificationVersion :unknown, multilineStringJoiner :unknow
 			? IntegerMinNumber = -( IntegerMaxNumber = useBigInt )
 			: IntegerMaxNumber = -( IntegerMinNumber = useBigInt ) - 1;
 	}
+	if ( !BigInt && usingBigInt!==false ) { throw Error(`Can't work without TOML.parse(${ARGS_MODE ? `${ARGS_MODE},useBigInt` : `,{ bigint }`}) being set to false, because the host doesn't have BigInt support`); }
 	
 	if ( keys==null ) { KEYS = ANY; }
 	else {

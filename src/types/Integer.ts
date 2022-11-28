@@ -1,6 +1,6 @@
 import SyntaxError from '.SyntaxError';
 import RangeError from '.RangeError';
-import BigInt from '.BigInt';
+import BigInt from '.BigInt?';
 import parseInt from '.parseInt';
 import isSafeInteger from '.Number.isSafeInteger';
 
@@ -19,16 +19,15 @@ const UNDERSCORES_SIGN = /_|^[-+]/g;
 
 const IS_INTEGER = (literal :string) :boolean => ( IS_D_INTEGER(literal) || /*options.xob && */IS_XOB_INTEGER(literal) ) && !BAD_XOB(literal);
 
+const MIN :bigint = BigInt && -/*#__PURE__*/BigInt('0x8000000000000000');// -(2n**(64n-1n)) || -MAX-1n
+const MAX :bigint = BigInt && /*#__PURE__*/BigInt('0x7FFFFFFFFFFFFFFF');// 2n**(64n-1n)-1n || -MIN-1n
+
 const BigIntInteger = (literal :string) :bigint => {
 	IS_INTEGER(literal) || iterator.throws(SyntaxError(`Invalid Integer ${literal}` + iterator.where(' at ')));
 	const bigInt :bigint = literal[0]==='-'
 		? -BigInt(literal.replace(UNDERSCORES_SIGN, ''))
 		: BigInt(literal.replace(UNDERSCORES_SIGN, ''));
-	options.allowLonger
-	||
-	-9223372036854775808n<=bigInt && bigInt<=9223372036854775807n// ( min = -(2n**(64n-1n)) || -max-1n ) <= long <= ( max = 2n**(64n-1n)-1n || -min-1n )
-	||
-	iterator.throws(RangeError(`Integer expect 64 bit range (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807), not includes ${literal}` + iterator.where(' meet at ')));
+	options.allowLonger || MIN<=bigInt && bigInt<=MAX || iterator.throws(RangeError(`Integer expect 64 bit range (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807), not includes ${literal}` + iterator.where(' meet at ')));
 	return bigInt;
 };
 
@@ -48,10 +47,6 @@ export const Integer = (literal :string) :bigint | number => {
 	const bigInt :bigint = literal[0]==='-'
 		? -BigInt(literal.replace(UNDERSCORES_SIGN, ''))
 		: BigInt(literal.replace(UNDERSCORES_SIGN, ''));
-	options.allowLonger
-	||
-	-9223372036854775808n<=bigInt && bigInt<=9223372036854775807n// ( min = -(2n**(64n-1n)) || -max-1n ) <= long <= ( max = 2n**(64n-1n)-1n || -min-1n )
-	||
-	iterator.throws(RangeError(`Integer expect 64 bit range (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807), not includes ${literal}` + iterator.where(' meet at ')));
+	options.allowLonger || MIN<=bigInt && bigInt<=MAX || iterator.throws(RangeError(`Integer expect 64 bit range (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807), not includes ${literal}` + iterator.where(' meet at ')));
 	return bigInt;
 };

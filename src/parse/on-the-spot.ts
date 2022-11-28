@@ -82,7 +82,7 @@ const checkLiteralString = (literal :string) :string => {
 
 export const assignLiteralString = ( (table :Table, finalKey :string, literal :string) :string => {
 	if ( !literal.startsWith(`'''`) ) {
-		const $ = regexps.LITERAL_STRING_exec(literal) ?? iterator.throws(SyntaxError(`Bad literal string` + iterator.where(' at ')));
+		const $ = regexps.LITERAL_STRING_exec(literal) || iterator.throws(SyntaxError(`Bad literal string` + iterator.where(' at ')));
 		const value = checkLiteralString($[1]);
 		table[finalKey] = options.preserveLiteral ? LiteralObject(literal.slice(0, value.length + 2), value) : value;
 		return $[2];
@@ -104,7 +104,7 @@ export const assignLiteralString = ( (table :Table, finalKey :string, literal :s
 			return $[3];
 		}
 	}
-	options.useWhatToJoinMultilineString ?? start.nowrap(options.ARGS_MODE);
+	options.useWhatToJoinMultilineString===null && start.nowrap(options.ARGS_MODE);
 	for ( const lines :[ string, ...string[] ] = [ checkLiteralString(literal) ]; ; ) {
 		const line :string = start.must();
 		const $ = regexps.__MULTI_LINE_LITERAL_STRING_exec(line);
@@ -154,7 +154,7 @@ export const assignBasicString = ( (table :Table, finalKey :string, literal :str
 			return literal.slice(length).replace(regexps.PRE_WHITESPACE, '');
 		}
 	}
-	options.useWhatToJoinMultilineString ?? start.nowrap(options.ARGS_MODE);
+	options.useWhatToJoinMultilineString===null && start.nowrap(options.ARGS_MODE);
 	regexps.ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(literal + '\n') || iterator.throws(SyntaxError(`Bad multi-line basic string` + iterator.where(' at ')));
 	for ( const lines :[ string, ...string[] ] = [ literal ]; ; ) {
 		const line :string = start.must();

@@ -37,7 +37,7 @@ const parseKeys = (rest :string) :{ leadingKeys :string[], finalKey :string, lin
 		}
 		else {
 			const isQuoted = lineRest[0]==='\'';
-			const key :string = ( ( isQuoted ? regexps.__LITERAL_KEY_exec : regexps.__BARE_KEY_exec )(lineRest) ?? iterator.throws(SyntaxError(`Bad ${isQuoted ? 'literal string' : 'bare'} key` + iterator.where(' at '))) )[0];
+			const key :string = ( ( isQuoted ? regexps.__LITERAL_KEY_exec : regexps.__BARE_KEY_exec )(lineRest) || iterator.throws(SyntaxError(`Bad ${isQuoted ? 'literal string' : 'bare'} key` + iterator.where(' at '))) )[0];
 			lineRest = lineRest.slice(key.length);
 			options.KEYS.test(leadingKeys[++lastIndex] = isQuoted ? key.slice(1, -1) : key) || iterator.throws(Error(`Key not allowed` + iterator.where(' at ')));
 		}
@@ -60,7 +60,7 @@ const parseKeys = (rest :string) :{ leadingKeys :string[], finalKey :string, lin
 
 const push = (lastArray :Array, lineRest :string) :string | S => {
 	if ( lineRest[0]==='<' ) {
-		const { 1: tag } = { 2: lineRest } = regexps._VALUE_PAIR_exec(lineRest) ?? iterator.throws(SyntaxError(`Bad tag ` + iterator.where(' at ')));
+		const { 1: tag } = { 2: lineRest } = regexps._VALUE_PAIR_exec(lineRest) || iterator.throws(SyntaxError(`Bad tag ` + iterator.where(' at ')));
 		options.collect(tag, lastArray, null);
 		switch ( lineRest && lineRest[0] ) {
 			case ',':
@@ -82,7 +82,7 @@ const push = (lastArray :Array, lineRest :string) :string | S => {
 		case '[':
 			return equalStaticArray(options.asArrays(lastArray), lastArray.length, lineRest);
 	}
-	const { 1: literal } = { 2: lineRest } = regexps.VALUE_REST_exec(lineRest) ?? iterator.throws(SyntaxError(`Bad atom value` + iterator.where(' at ')));
+	const { 1: literal } = { 2: lineRest } = regexps.VALUE_REST_exec(lineRest) || iterator.throws(SyntaxError(`Bad atom value` + iterator.where(' at ')));
 	if ( literal==='true' ) { options.asBooleans(lastArray)[lastArray.length] = true; }
 	else if ( literal==='false' ) { options.asBooleans(lastArray)[lastArray.length] = false; }
 	else if ( options.enableNull && literal==='null' ) { options.asNulls(lastArray)[lastArray.length] = null; }
@@ -240,7 +240,7 @@ const assign = ({ finalKey, tag, lineRest, table } :ForComment) :string | S => {
 		case '[':
 			return equalStaticArray(table, finalKey, lineRest);
 	}
-	const { 1: literal } = { 2: lineRest } = regexps.VALUE_REST_exec(lineRest) ?? iterator.throws(SyntaxError(`Bad atom value` + iterator.where(' at ')));
+	const { 1: literal } = { 2: lineRest } = regexps.VALUE_REST_exec(lineRest) || iterator.throws(SyntaxError(`Bad atom value` + iterator.where(' at ')));
 	if ( literal==='true' ) { table[finalKey] = true; }
 	else if ( literal==='false' ) { table[finalKey] = false; }
 	else if ( options.enableNull && literal==='null' ) { table[finalKey] = null; }

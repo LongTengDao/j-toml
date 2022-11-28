@@ -4,13 +4,19 @@ typeof define === 'function' && define.amd ? define(factory) :
 (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.TOML = factory());
 })(this, (function () { 'use strict';
 
-const version = '1.35.2';
+const version = '1.35.3';
 
 const SyntaxError$1 = SyntaxError;
 
 const RangeError$1 = RangeError;
 
 const TypeError$1 = TypeError;
+
+const Error$1 = {if:Error}.if;
+
+const undefined$1 = void null;
+
+const BigInt$1 = typeof BigInt==='undefined' ? undefined$1 : BigInt;
 
 const RegExp$1 = RegExp;
 
@@ -30,8 +36,6 @@ const freeze = Object.freeze;
 
 const isPrototypeOf = Object.prototype.isPrototypeOf;
 
-const undefined$1 = void null;
-
 const NULL = (
 	/* j-globals: null.prototype (internal) */
 	Object.seal
@@ -46,7 +50,7 @@ const test = RegExp.prototype.test;
 
 const exec = RegExp.prototype.exec;
 
-const Reflect_apply = Reflect.apply;
+const apply$1 = Reflect.apply;
 
 const Proxy$1 = Proxy;
 
@@ -218,7 +222,7 @@ var CONTEXT          = /*#__PURE__*/Context('');
 
 var newRegExp = Proxy$1
 	? /*#__PURE__*/new Proxy$1(RE, {
-		apply: function (RE, thisArg, args                                   ) { return Reflect_apply(RE, CONTEXT, args); }
+		apply: function (RE, thisArg, args                                   ) { return apply$1(RE, CONTEXT, args); }
 		,
 		get: function (RE, flags        ) { return RE_bind(Context(flags)); }
 		,
@@ -445,7 +449,7 @@ const handlers                       = /*#__PURE__*/assign$1(create$1(NULL), {
 	},
 	ownKeys:                    (target   ) => target2keeper.get(target)                         ,
 	construct:                                     (target                         , args   , newTarget     )    => orderify(Reflect_construct(target, args, newTarget)),
-	apply:                                        (target                              , thisArg   , args   )    => orderify(Reflect_apply(target, thisArg, args)),
+	apply:                                        (target                              , thisArg   , args   )    => orderify(apply$1(target, thisArg, args)),
 });
 
 const newProxy =                                              (target   , keeper           )    => {
@@ -596,8 +600,6 @@ const OrderedTable = /*#__PURE__*/Null$1(class Table extends Null      {
 		return this;
 	}
 });
-
-const Error$1 = {if:Error}.if;
 
 //import * as options from './options';
 
@@ -775,13 +777,13 @@ const TABLE_DEFINITION_exec_groups = (lineRest        , parseKeys               
 	( lineRest.length>1 ? lineRest[1]===']'===asArrayItem : !asArrayItem ) || throws(SyntaxError$1(`Square brackets of Table definition statement not match` + where(' at ')));
 	lineRest = lineRest.slice(asArrayItem ? 2 : 1).replace(PRE_WHITESPACE, '');
 	let tag        ;
-	if ( lineRest && lineRest[0]==='<' ) { ( { 1: tag, 2: lineRest } = TAG_REST_exec(lineRest) ?? throws(SyntaxError$1(`Bad tag` + where(' at '))) ); }
+	if ( lineRest && lineRest[0]==='<' ) { ( { 1: tag, 2: lineRest } = TAG_REST_exec(lineRest) || throws(SyntaxError$1(`Bad tag` + where(' at '))) ); }
 	else { tag = ''; }
 	return { leadingKeys, finalKey, asArrayItem, tag, lineRest };
 };
 
 const KEY_VALUE_PAIR_exec_groups = ({ leadingKeys, finalKey, lineRest }                                                               )                                                                             => {
-	const { 1: tag = '' } = { 2: lineRest } = KEY_VALUE_PAIR_exec(lineRest) ?? throws(SyntaxError$1(`Keys must equal something` + where(', but missing at ')));
+	const { 1: tag = '' } = { 2: lineRest } = KEY_VALUE_PAIR_exec(lineRest) || throws(SyntaxError$1(`Keys must equal something` + where(', but missing at ')));
 	tag || lineRest && lineRest[0]!=='#' || throws(SyntaxError$1(`Value can not be missing after euqal sign` + where(', which is found at ')));
 	return { leadingKeys, finalKey, tag, lineRest };
 };
@@ -1069,6 +1071,7 @@ const use = (specificationVersion         , multilineStringJoiner         , useB
 			? IntegerMinNumber = -( IntegerMaxNumber = useBigInt )
 			: IntegerMaxNumber = -( IntegerMinNumber = useBigInt ) - 1;
 	}
+	if ( !BigInt$1 && usingBigInt!==false ) { throw Error$1(`Can't work without TOML.parse(${ARGS_MODE ? `${ARGS_MODE},useBigInt` : `,{ bigint }`}) being set to false, because the host doesn't have BigInt support`); }
 	
 	if ( keys==null ) { KEYS$1 = ANY; }
 	else {
@@ -1257,7 +1260,7 @@ const OFFSET$ = /(?:[Zz]|[+-]\d\d:\d\d)$/;
 
 const { exec: Z_exec } = theRegExp           (/(([+-])\d\d):(\d\d)$/);
 
-const { exec: OFFSET_DATETIME_exec } = /*#__PURE__*/newRegExp   `
+const { exec: OFFSET_DATETIME_exec } = /*#__PURE__*/newRegExp`
 	^
 	${YMD}
 	[Tt ]
@@ -1266,7 +1269,7 @@ const { exec: OFFSET_DATETIME_exec } = /*#__PURE__*/newRegExp   `
 	(?:[Zz]|[+-]${_23_}:${_59_})
 	$`.valueOf();
 
-const { exec: OFFSET_DATETIME_ZERO_exec } = /*#__PURE__*/newRegExp   `
+const { exec: OFFSET_DATETIME_ZERO_exec } = /*#__PURE__*/newRegExp`
 	^
 	${YMD}
 	[Tt ]
@@ -1392,7 +1395,7 @@ const OffsetDateTime = /*#__PURE__*/fpc(class OffsetDateTime extends Datetime {
 		validateLeap(literal) || throws(SyntaxError$1(`Invalid Offset Date-Time ${literal}` + where(' at ')));
 		const with60 = literal.startsWith('60', 17);
 		let without60 = with60 ? literal.slice(0, 17) + '59' + literal.slice(19) : literal;
-		const { 1: more } = ( zeroDatetime ? OFFSET_DATETIME_ZERO_exec(without60) : OFFSET_DATETIME_exec(without60) ) ?? throws(SyntaxError$1(`Invalid Offset Date-Time ${literal}` + where(' at ')));
+		const { 1: more = '' } = ( zeroDatetime ? OFFSET_DATETIME_ZERO_exec(without60) : OFFSET_DATETIME_exec(without60) ) || throws(SyntaxError$1(`Invalid Offset Date-Time ${literal}` + where(' at ')));
 		const time = parse$2(without60 = without60.replace(T, 'T').replace('z', 'Z'));
 		if ( with60 ) {
 			DATE$1.setTime(time);
@@ -1676,8 +1679,6 @@ const MultilineBasicString = (literal        , useWhatToJoinMultilineString     
 	return parts.join('');
 };
 
-const BigInt$1 = BigInt;
-
 const INTEGER_D = /[-+]?(?:0|[1-9][_\d]*)/;
 const { test: BAD_D } = /*#__PURE__*/newRegExp`_(?!\d)`.valueOf();
 const { test: IS_D_INTEGER } = /*#__PURE__*/newRegExp`^${INTEGER_D}$`.valueOf();
@@ -1688,16 +1689,15 @@ const UNDERSCORES_SIGN = /_|^[-+]/g;
 
 const IS_INTEGER = (literal        )          => ( IS_D_INTEGER(literal) || /*options.xob && */IS_XOB_INTEGER(literal) ) && !BAD_XOB(literal);
 
+const MIN         = BigInt$1 && -/*#__PURE__*/BigInt$1('0x8000000000000000');// -(2n**(64n-1n)) || -MAX-1n
+const MAX         = BigInt$1 && /*#__PURE__*/BigInt$1('0x7FFFFFFFFFFFFFFF');// 2n**(64n-1n)-1n || -MIN-1n
+
 const BigIntInteger = (literal        )         => {
 	IS_INTEGER(literal) || throws(SyntaxError$1(`Invalid Integer ${literal}` + where(' at ')));
 	const bigInt         = literal[0]==='-'
 		? -BigInt$1(literal.replace(UNDERSCORES_SIGN, ''))
 		: BigInt$1(literal.replace(UNDERSCORES_SIGN, ''));
-	allowLonger
-	||
-	-9223372036854775808n<=bigInt && bigInt<=9223372036854775807n// ( min = -(2n**(64n-1n)) || -max-1n ) <= long <= ( max = 2n**(64n-1n)-1n || -min-1n )
-	||
-	throws(RangeError$1(`Integer expect 64 bit range (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807), not includes ${literal}` + where(' meet at ')));
+	allowLonger || MIN<=bigInt && bigInt<=MAX || throws(RangeError$1(`Integer expect 64 bit range (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807), not includes ${literal}` + where(' meet at ')));
 	return bigInt;
 };
 
@@ -1717,11 +1717,7 @@ const Integer = (literal        )                  => {
 	const bigInt         = literal[0]==='-'
 		? -BigInt$1(literal.replace(UNDERSCORES_SIGN, ''))
 		: BigInt$1(literal.replace(UNDERSCORES_SIGN, ''));
-	allowLonger
-	||
-	-9223372036854775808n<=bigInt && bigInt<=9223372036854775807n// ( min = -(2n**(64n-1n)) || -max-1n ) <= long <= ( max = 2n**(64n-1n)-1n || -min-1n )
-	||
-	throws(RangeError$1(`Integer expect 64 bit range (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807), not includes ${literal}` + where(' meet at ')));
+	allowLonger || MIN<=bigInt && bigInt<=MAX || throws(RangeError$1(`Integer expect 64 bit range (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807), not includes ${literal}` + where(' meet at ')));
 	return bigInt;
 };
 
@@ -1845,7 +1841,7 @@ const checkLiteralString = (literal        )         => {
 
 const assignLiteralString = ( (table       , finalKey        , literal        )         => {
 	if ( !literal.startsWith(`'''`) ) {
-		const $ = LITERAL_STRING_exec(literal) ?? throws(SyntaxError$1(`Bad literal string` + where(' at ')));
+		const $ = LITERAL_STRING_exec(literal) || throws(SyntaxError$1(`Bad literal string` + where(' at ')));
 		const value = checkLiteralString($[1]);
 		table[finalKey] = preserveLiteral ? LiteralObject(literal.slice(0, value.length + 2), value) : value;
 		return $[2];
@@ -1867,7 +1863,7 @@ const assignLiteralString = ( (table       , finalKey        , literal        ) 
 			return $[3];
 		}
 	}
-	useWhatToJoinMultilineString ?? start.nowrap(ARGS_MODE);
+	useWhatToJoinMultilineString===null && start.nowrap(ARGS_MODE);
 	for ( const lines                          = [ checkLiteralString(literal) ]; ; ) {
 		const line         = start.must();
 		const $ = __MULTI_LINE_LITERAL_STRING_exec(line);
@@ -1917,7 +1913,7 @@ const assignBasicString = ( (table       , finalKey        , literal        )   
 			return literal.slice(length).replace(PRE_WHITESPACE, '');
 		}
 	}
-	useWhatToJoinMultilineString ?? start.nowrap(ARGS_MODE);
+	useWhatToJoinMultilineString===null && start.nowrap(ARGS_MODE);
 	ESCAPED_EXCLUDE_CONTROL_CHARACTER_test(literal + '\n') || throws(SyntaxError$1(`Bad multi-line basic string` + where(' at ')));
 	for ( const lines                          = [ literal ]; ; ) {
 		const line         = start.must();
@@ -1943,7 +1939,7 @@ const assignBasicString = ( (table       , finalKey        , literal        )   
  ;
 
 const KEYS = /*#__PURE__*/Null$1        (null);
-const commentFor = (key        )         => KEYS[key] ?? ( KEYS[key] = Symbol$1(key) );
+const commentFor = (key        )         => KEYS[key] || ( KEYS[key] = Symbol$1(key) );
 const commentForThis                = Symbol$1('this')       ;
 
 const { test: includesNewline } = theRegExp(/\r?\n/g);
@@ -1974,7 +1970,7 @@ const parseKeys = (rest        )                                                
 		}
 		else {
 			const isQuoted = lineRest[0]==='\'';
-			const key         = ( ( isQuoted ? __LITERAL_KEY_exec : __BARE_KEY_exec )(lineRest) ?? throws(SyntaxError$1(`Bad ${isQuoted ? 'literal string' : 'bare'} key` + where(' at '))) )[0];
+			const key         = ( ( isQuoted ? __LITERAL_KEY_exec : __BARE_KEY_exec )(lineRest) || throws(SyntaxError$1(`Bad ${isQuoted ? 'literal string' : 'bare'} key` + where(' at '))) )[0];
 			lineRest = lineRest.slice(key.length);
 			KEYS$1.test(leadingKeys[++lastIndex] = isQuoted ? key.slice(1, -1) : key) || throws(Error$1(`Key not allowed` + where(' at ')));
 		}
@@ -1997,7 +1993,7 @@ const parseKeys = (rest        )                                                
 
 const push = (lastArray       , lineRest        )             => {
 	if ( lineRest[0]==='<' ) {
-		const { 1: tag } = { 2: lineRest } = _VALUE_PAIR_exec(lineRest) ?? throws(SyntaxError$1(`Bad tag ` + where(' at ')));
+		const { 1: tag } = { 2: lineRest } = _VALUE_PAIR_exec(lineRest) || throws(SyntaxError$1(`Bad tag ` + where(' at ')));
 		collect(tag, lastArray, null);
 		switch ( lineRest && lineRest[0] ) {
 			case ',':
@@ -2019,7 +2015,7 @@ const push = (lastArray       , lineRest        )             => {
 		case '[':
 			return equalStaticArray(asArrays(lastArray), lastArray.length, lineRest);
 	}
-	const { 1: literal } = { 2: lineRest } = VALUE_REST_exec(lineRest) ?? throws(SyntaxError$1(`Bad atom value` + where(' at ')));
+	const { 1: literal } = { 2: lineRest } = VALUE_REST_exec(lineRest) || throws(SyntaxError$1(`Bad atom value` + where(' at ')));
 	if ( literal==='true' ) { asBooleans(lastArray)[lastArray.length] = true; }
 	else if ( literal==='false' ) { asBooleans(lastArray)[lastArray.length] = false; }
 	else if ( enableNull && literal==='null' ) { asNulls(lastArray)[lastArray.length] = null; }
@@ -2177,7 +2173,7 @@ const assign = ({ finalKey, tag, lineRest, table }            )             => {
 		case '[':
 			return equalStaticArray(table, finalKey, lineRest);
 	}
-	const { 1: literal } = { 2: lineRest } = VALUE_REST_exec(lineRest) ?? throws(SyntaxError$1(`Bad atom value` + where(' at ')));
+	const { 1: literal } = { 2: lineRest } = VALUE_REST_exec(lineRest) || throws(SyntaxError$1(`Bad atom value` + where(' at ')));
 	if ( literal==='true' ) { table[finalKey] = true; }
 	else if ( literal==='false' ) { table[finalKey] = false; }
 	else if ( enableNull && literal==='null' ) { table[finalKey] = null; }
@@ -2542,9 +2538,11 @@ class TOMLSection extends Array$1         {
 				}
 				const inlineMode = ofInline(value);
 				if ( isArray$1(value) ) {
-					inlineMode===undefined$1
-						? this.staticArray(indent, value)
-						: this.singlelineArray(indent, value, this.document.$singlelineArray ?? inlineMode);
+					if ( inlineMode===undefined$1 ) { this.staticArray(indent, value); }
+					else {
+						const { $singlelineArray = inlineMode } = this.document;
+						this.singlelineArray(indent, value, $singlelineArray);
+					}
 					break;
 				}
 				if ( inlineMode!==undefined$1 ) {
@@ -2639,7 +2637,7 @@ class TOMLSection extends Array$1         {
 		}
 		else { this.appendInline = '{ }'; }
 	}
-	        multilineTable (indent        , inlineTable                      , comma         ) {
+	        multilineTable (indent        , inlineTable                      , comma                     ) {
 		this.appendInline = '{';
 		this.assignMultiline(indent, inlineTable, ``, getOwnPropertyNames(inlineTable), comma);
 		this.appendLine = indent + '}';
@@ -2657,7 +2655,7 @@ class TOMLSection extends Array$1         {
 			else { this.appendInline = ', '; }
 		}
 	}
-	        assignMultiline                                 (indent        , inlineTable   , keys_                   , keys                            , comma         ) {
+	        assignMultiline                                 (indent        , inlineTable   , keys_                   , keys                            , comma                     ) {
 		const indent_ = indent + this.document.indent;
 		for ( const key of keys ) {
 			const value                 = inlineTable[key] ;
@@ -2744,7 +2742,7 @@ class TOMLDocument extends Array$1              {
 		else if ( preferCommentFor==='this' || preferCommentFor==='key' ) { this.preferCommentForThis = preferCommentFor==='this'; }
 		else { throw TypeError$1(`TOML.stringify(,{preferCommentFor) can only be 'key' or 'this'`); }
 		
-		const around = name2code[options.newlineAround ?? 'header'] ?? name2code.header;
+		const { [options.newlineAround || 'header']: around = name2code.header } = name2code;
 		this.newlineUnderSection = around>0;
 		this.newlineUnderSectionButPair = around===1 || around===2;
 		this.newlineUnderHeader = around>1;
@@ -2882,10 +2880,22 @@ const parse = (source        , specificationVersion                             
 			if ( typeof sourcePath!=='string' ) { throw TypeError$1(`TOML.parse(source.path)`); }
 			const { data, require: req = typeof require==='function' ? require : undefined$1 } = source;
 			if ( req ) {
-				const dirname_ = req.resolve?.paths?.('')?.[0]?.replace(/node_modules$/, '');
-				if ( dirname_ ) {
-					sourcePath = ( req                                          )('path').resolve(dirname_, sourcePath);
-					if ( typeof sourcePath!=='string' ) { throw TypeError$1(`TOML.parse(source.require('path').resolve)`); }
+				const { resolve } = req;
+				if ( resolve!=null ) {
+					const { paths } = resolve;
+					if ( paths!=null ) {
+						const ret = apply$1(paths, resolve, [ '' ]);
+						if ( ret!=null ) {
+							const val = ret[0];
+							if ( val!=null ) {
+								const dirname_ = val.replace(/node_modules$/, '');
+								if ( dirname_ ) {
+									sourcePath = ( req                                          )('path').resolve(dirname_, sourcePath);
+									if ( typeof sourcePath!=='string' ) { throw TypeError$1(`TOML.parse(source.require('path').resolve)`); }
+								}
+							}
+						}
+					}
 				}
 				if ( data===undefined$1 ) {
 					const data = ( req                                      )('fs').readFileSync(sourcePath);
@@ -2934,7 +2944,7 @@ const parse = (source        , specificationVersion                             
 		holding = false;
 		clearRegExp$1();
 	}
-	process?.();
+	process && process();
 	return rootTable;
 };
 

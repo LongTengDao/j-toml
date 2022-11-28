@@ -132,9 +132,11 @@ export default class TOMLSection extends Array<string> {
 				}
 				const inlineMode = ofInline(value);
 				if ( isArray(value) ) {
-					inlineMode===undefined
-						? this.staticArray(indent, value)
-						: this.singlelineArray(indent, value, this.document.$singlelineArray ?? inlineMode);
+					if ( inlineMode===undefined ) { this.staticArray(indent, value); }
+					else {
+						const { $singlelineArray = inlineMode } = this.document;
+						this.singlelineArray(indent, value, $singlelineArray);
+					}
 					break;
 				}
 				if ( inlineMode!==undefined ) {
@@ -229,7 +231,7 @@ export default class TOMLSection extends Array<string> {
 		}
 		else { this.appendInline = '{ }'; }
 	}
-	private multilineTable (indent :string, inlineTable :READONLY.InlineTable, comma :boolean) {
+	private multilineTable (indent :string, inlineTable :READONLY.InlineTable, comma :boolean | undefined) {
 		this.appendInline = '{';
 		this.assignMultiline(indent, inlineTable, ``, getOwnPropertyNames(inlineTable), comma);
 		this.appendLine = indent + '}';
@@ -247,7 +249,7 @@ export default class TOMLSection extends Array<string> {
 			else { this.appendInline = ', '; }
 		}
 	}
-	private assignMultiline<T extends READONLY.InlineTable> (indent :string, inlineTable :T, keys_ :`` | `${string}.`, keys :Extract<keyof T, string>[], comma :boolean) {
+	private assignMultiline<T extends READONLY.InlineTable> (indent :string, inlineTable :T, keys_ :`` | `${string}.`, keys :Extract<keyof T, string>[], comma :boolean | undefined) {
 		const indent_ = indent + this.document.indent;
 		for ( const key of keys ) {
 			const value :READONLY.Value = inlineTable[key]!;

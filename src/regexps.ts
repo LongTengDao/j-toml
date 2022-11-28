@@ -132,13 +132,13 @@ export const TABLE_DEFINITION_exec_groups = (lineRest :string, parseKeys :(this 
 	( lineRest.length>1 ? lineRest[1]===']'===asArrayItem : !asArrayItem ) || iterator.throws(SyntaxError(`Square brackets of Table definition statement not match` + iterator.where(' at ')));
 	lineRest = lineRest.slice(asArrayItem ? 2 : 1).replace(PRE_WHITESPACE, '');
 	let tag :string;
-	if ( lineRest && lineRest[0]==='<' ) { ( { 1: tag, 2: lineRest } = TAG_REST_exec(lineRest) ?? iterator.throws(SyntaxError(`Bad tag` + iterator.where(' at '))) ); }
+	if ( lineRest && lineRest[0]==='<' ) { ( { 1: tag, 2: lineRest } = TAG_REST_exec(lineRest) || iterator.throws(SyntaxError(`Bad tag` + iterator.where(' at '))) ); }
 	else { tag = ''; }
 	return { leadingKeys, finalKey, asArrayItem, tag, lineRest };
 };
 
 export const KEY_VALUE_PAIR_exec_groups = ({ leadingKeys, finalKey, lineRest } :{ leadingKeys :string[], finalKey :string, lineRest :string }) :{ leadingKeys :string[], finalKey :string, tag :string, lineRest :string } => {
-	const { 1: tag = '' } = { 2: lineRest } = KEY_VALUE_PAIR_exec(lineRest) ?? iterator.throws(SyntaxError(`Keys must equal something` + iterator.where(', but missing at ')));
+	const { 1: tag = '' } = { 2: lineRest } = KEY_VALUE_PAIR_exec(lineRest) || iterator.throws(SyntaxError(`Keys must equal something` + iterator.where(', but missing at ')));
 	tag || lineRest && lineRest[0]!=='#' || iterator.throws(SyntaxError(`Value can not be missing after euqal sign` + iterator.where(', which is found at ')));
 	return { leadingKeys, finalKey, tag, lineRest };
 };

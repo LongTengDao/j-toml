@@ -76,7 +76,7 @@ export default class TOMLDocument extends Array<TOMLSection> {
 		else if ( preferCommentFor==='this' || preferCommentFor==='key' ) { this.preferCommentForThis = preferCommentFor==='this'; }
 		else { throw TypeError(`TOML.stringify(,{preferCommentFor) can only be 'key' or 'this'`); }
 		
-		const around = name2code[options.newlineAround ?? 'header'] ?? name2code.header;
+		const { [options.newlineAround || 'header']: around = name2code.header } = name2code;
 		this.newlineUnderSection = around>0;
 		this.newlineUnderSectionButPair = around===1 || around===2;
 		this.newlineUnderHeader = around>1;
