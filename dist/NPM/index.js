@@ -4,7 +4,7 @@ typeof define === 'function' && define.amd ? define(factory) :
 (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.TOML = factory());
 })(this, (function () { 'use strict';
 
-const version = '1.35.3';
+const version = '1.36.0';
 
 const SyntaxError$1 = SyntaxError;
 
@@ -104,16 +104,19 @@ function Descriptor (source) {
 const Default = (
 	/* j-globals: default (internal) */
 	function Default (exports, addOnOrigin) {
-		if ( !addOnOrigin ) { addOnOrigin = exports; exports = create$1(NULL); }
+		if ( !addOnOrigin && typeof exports!=='function' ) {
+			addOnOrigin = exports;
+			exports = create$1(NULL);
+		}
 		if ( assign$1 ) { assign$1(exports, addOnOrigin); }
 		else { for ( var key in addOnOrigin ) { if ( hasOwn(addOnOrigin, key) ) { exports[key] = addOnOrigin[key]; } } }
 		exports.default = exports;
-		if ( toStringTag ) {
+		if ( typeof exports==='function' ) { exports.prototype && freeze(exports.prototype); }
+		else if ( toStringTag ) {
 			var descriptor = create$1(NULL);
 			descriptor.value = 'Module';
 			Object_defineProperty(exports, toStringTag, descriptor);
 		}
-		typeof exports==='function' && exports.prototype && freeze(exports.prototype);
 		return freeze(exports);
 	}
 	/* j-globals: default (internal) */
@@ -1311,7 +1314,7 @@ const Datetime = /*#__PURE__*/( () => {
 	//                                > .getTime() : Date.parse('T')
 	// [Symbol.toPrimitive]('number') > .valueOf()
 	//                                > .toISOString()
-	const descriptors = Null$1(null)                                         ;
+	const descriptors = Null$1(null)                                                                     ;
 	{
 		const descriptor = Null$1(null);
 		for ( const key of ownKeys(NativeDate.prototype                                         ) ) {
@@ -1320,6 +1323,7 @@ const Datetime = /*#__PURE__*/( () => {
 			( descriptors[key] = descriptor );
 		}
 	}
+	descriptors[Symbol$1.toStringTag] = Null$1({ value: 'Date' });
 	Datetime.prototype = preventExtensions(create$1(NativeDate.prototype, descriptors));
 	return freeze(Datetime);
 } )();

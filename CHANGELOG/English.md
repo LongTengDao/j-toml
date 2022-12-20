@@ -93,3 +93,4 @@
         3.  *   bug fix: fix Offset Date-Time before 1970 without fractional seconds parsing crash (since 1.33.3)
             *   compatibility: remove `?.` and `??` syntax
             *   compatibility: remove `bigint` syntax (but using `TOML.parse` in environment without `BigInt` support, the related option must be set to `false`, otherwise, an error will be thrown)
+    36. 0.  +   new feature: add non-`Object` `Symbol.toStringTag` for date-time implementation

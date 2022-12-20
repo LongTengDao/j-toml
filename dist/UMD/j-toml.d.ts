@@ -3,7 +3,7 @@ export = exports;
 
 declare namespace exports {
 	
-	export const version :'1.35.3';
+	export const version :'1.36.0';
 	
 	export const parse :
 		& {

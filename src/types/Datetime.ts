@@ -109,7 +109,7 @@ const Datetime = /*#__PURE__*/( () => {
 	//                                > .getTime() : Date.parse('T')
 	// [Symbol.toPrimitive]('number') > .valueOf()
 	//                                > .toISOString()
-	const descriptors = Null(null) as { [Key in keyof NativeDate] :object };
+	const descriptors = Null(null) as { [Key in keyof NativeDate | typeof Symbol.toStringTag] :object };
 	{
 		const descriptor = Null(null);
 		for ( const key of ownKeys(NativeDate.prototype as NativeDate & { constructor :unknown }) ) {
@@ -118,6 +118,7 @@ const Datetime = /*#__PURE__*/( () => {
 			( descriptors[key] = descriptor );
 		}
 	}
+	descriptors[Symbol.toStringTag] = Null({ value: 'Date' });
 	Datetime.prototype = preventExtensions(create(NativeDate.prototype, descriptors));
 	return freeze(Datetime);
 } )();
