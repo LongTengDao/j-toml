@@ -1,4 +1,4 @@
-﻿const version = '1.36.0';
+﻿const version = '1.37.0';
 
 const SyntaxError$1 = SyntaxError;
 
@@ -1308,7 +1308,7 @@ const Datetime = /*#__PURE__*/( () => {
 	//                                > .getTime() : Date.parse('T')
 	// [Symbol.toPrimitive]('number') > .valueOf()
 	//                                > .toISOString()
-	const descriptors = Null$1(null)                                                                     ;
+	const descriptors = Null$1(null)                                         ;
 	{
 		const descriptor = Null$1(null);
 		for ( const key of ownKeys(NativeDate.prototype                                         ) ) {
@@ -1317,7 +1317,6 @@ const Datetime = /*#__PURE__*/( () => {
 			( descriptors[key] = descriptor );
 		}
 	}
-	descriptors[Symbol$1.toStringTag] = Null$1({ value: 'Date' });
 	Datetime.prototype = preventExtensions(create$1(NativeDate.prototype, descriptors));
 	return freeze(Datetime);
 } )();
@@ -1385,6 +1384,8 @@ const OffsetDateTime = /*#__PURE__*/fpc(class OffsetDateTime extends Datetime {
 	
 	[OffsetDateTime_ISOString]        ;
 	[OffsetDateTime_value]       ;
+	
+	get [Symbol$1.toStringTag] () { return 'OffsetDateTime'         ; }
 	
 	         valueOf (                    )        { return this[OffsetDateTime_value]; }
 	toISOString (                    )         { return this[OffsetDateTime_ISOString]; }
@@ -1474,6 +1475,8 @@ const LocalDateTime = /*#__PURE__*/fpc(class LocalDateTime extends Datetime {
 	[LocalDateTime_ISOString]        ;
 	[LocalDateTime_value]       ;
 	
+	get [Symbol$1.toStringTag] () { return 'LocalDateTime'         ; }
+	
 	         valueOf (                   )        { return this[LocalDateTime_value]; }
 	toISOString (                   )         { return this[LocalDateTime_ISOString]; }
 	
@@ -1524,6 +1527,8 @@ const LocalDate = /*#__PURE__*/fpc(class LocalDate extends Datetime {
 	[LocalDate_ISOString]        ;
 	[LocalDate_value]       ;
 	
+	get [Symbol$1.toStringTag] () { return 'LocalDate'         ; }
+	
 	         valueOf (               )        { return this[LocalDate_value]; }
 	toISOString (               )         { return this[LocalDate_ISOString]; }
 	
@@ -1560,6 +1565,8 @@ const LocalTime = /*#__PURE__*/fpc(class LocalTime extends Datetime {
 	
 	[LocalTime_ISOString]        ;
 	[LocalTime_value]       ;
+	
+	get [Symbol$1.toStringTag] () { return 'LocalTime'         ; }
 	
 	         valueOf (               )        { return this[LocalTime_value]; }
 	toISOString (               )         { return this[LocalTime_ISOString]; }

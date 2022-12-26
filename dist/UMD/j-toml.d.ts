@@ -3,7 +3,7 @@ export = exports;
 
 declare namespace exports {
 	
-	export const version :'1.36.0';
+	export const version :'1.37.0';
 	
 	export const parse :
 		& {
@@ -72,6 +72,8 @@ declare class OffsetDateTime {
 	
 	readonly toJSON :Date['toJSON'];
 	
+	readonly [Symbol.toStringTag] :'OffsetDateTime';
+	
 	readonly toISOString :(this :Readonly<OffsetDateTime>) => `${number}-${number}-${number}T${number}:${number}:${number}${'' | `.${number}`}${'Z' | `${'+' | '-'}${number}:${number}`}`;
 	readonly valueOf :(this :Readonly<OffsetDateTime>) => `${number}${'' | `.${number}`}`;
 	
@@ -97,6 +99,8 @@ declare class OffsetDateTime {
 declare class LocalDateTime {
 	
 	readonly toJSON :Date['toJSON'];
+	
+	readonly [Symbol.toStringTag] :'LocalDateTime';
 	
 	readonly toISOString :(this :Readonly<LocalDateTime>) => `${number}-${number}-${number}T${number}:${number}:${number}${'' | `.${number}`}`;
 	readonly valueOf :(this :Readonly<LocalDateTime>) => `${number}`;
@@ -127,6 +131,8 @@ declare class LocalDate {
 	
 	readonly toJSON :Date['toJSON'];
 	
+	readonly [Symbol.toStringTag] :'LocalDate';
+	
 	readonly toISOString :(this :Readonly<LocalDate>) => `${number}-${number}-${number}`;
 	readonly valueOf :(this :Readonly<LocalDate>) => `${number}`;
 	
@@ -146,6 +152,8 @@ declare class LocalDate {
 declare class LocalTime {
 	
 	readonly toJSON :Date['toJSON'];
+	
+	readonly [Symbol.toStringTag] :'LocalTime';
 	
 	readonly toISOString :(this :Readonly<LocalTime>) => `${number}:${number}:${number}${'' | `.${number}`}`;
 	readonly valueOf :(this :Readonly<LocalTime>) => `${number}`;

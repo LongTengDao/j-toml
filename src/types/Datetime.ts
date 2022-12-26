@@ -109,7 +109,7 @@ const Datetime = /*#__PURE__*/( () => {
 	//                                > .getTime() : Date.parse('T')
 	// [Symbol.toPrimitive]('number') > .valueOf()
 	//                                > .toISOString()
-	const descriptors = Null(null) as { [Key in keyof NativeDate | typeof Symbol.toStringTag] :object };
+	const descriptors = Null(null) as { [Key in keyof NativeDate] :object };
 	{
 		const descriptor = Null(null);
 		for ( const key of ownKeys(NativeDate.prototype as NativeDate & { constructor :unknown }) ) {
@@ -118,7 +118,6 @@ const Datetime = /*#__PURE__*/( () => {
 			( descriptors[key] = descriptor );
 		}
 	}
-	descriptors[Symbol.toStringTag] = Null({ value: 'Date' });
 	Datetime.prototype = preventExtensions(create(NativeDate.prototype, descriptors));
 	return freeze(Datetime);
 } )();
@@ -186,6 +185,8 @@ export const OffsetDateTime = /*#__PURE__*/fpc(class OffsetDateTime extends Date
 	
 	[OffsetDateTime_ISOString] :string;
 	[OffsetDateTime_value] :Value;
+	
+	get [Symbol.toStringTag] () { return 'OffsetDateTime' as const; }
 	
 	override valueOf (this :OffsetDateTime) :Value { return this[OffsetDateTime_value]; }
 	toISOString (this :OffsetDateTime) :string { return this[OffsetDateTime_ISOString]; }
@@ -275,6 +276,8 @@ export const LocalDateTime = /*#__PURE__*/fpc(class LocalDateTime extends Dateti
 	[LocalDateTime_ISOString] :string;
 	[LocalDateTime_value] :Value;
 	
+	get [Symbol.toStringTag] () { return 'LocalDateTime' as const; }
+	
 	override valueOf (this :LocalDateTime) :Value { return this[LocalDateTime_value]; }
 	toISOString (this :LocalDateTime) :string { return this[LocalDateTime_ISOString]; }
 	
@@ -325,6 +328,8 @@ export const LocalDate = /*#__PURE__*/fpc(class LocalDate extends Datetime {
 	[LocalDate_ISOString] :string;
 	[LocalDate_value] :Value;
 	
+	get [Symbol.toStringTag] () { return 'LocalDate' as const; }
+	
 	override valueOf (this :LocalDate) :Value { return this[LocalDate_value]; }
 	toISOString (this :LocalDate) :string { return this[LocalDate_ISOString]; }
 	
@@ -361,6 +366,8 @@ export const LocalTime = /*#__PURE__*/fpc(class LocalTime extends Datetime {
 	
 	[LocalTime_ISOString] :string;
 	[LocalTime_value] :Value;
+	
+	get [Symbol.toStringTag] () { return 'LocalTime' as const; }
 	
 	override valueOf (this :LocalTime) :Value { return this[LocalTime_value]; }
 	toISOString (this :LocalTime) :string { return this[LocalTime_ISOString]; }
