@@ -35,6 +35,10 @@ export const Float = (literal :string) :number => {
 			if ( literal==='nan' || literal==='+nan' ) { return NaN; }
 			if ( literal==='-nan' ) { return _NaN; }
 		}
+		else if ( !options.sError ) {
+			if ( literal==='inf' || literal==='+inf' ) { return Infinity; }
+			if ( literal==='-inf' ) { return _Infinity; }
+		}
 		throw iterator.throws(SyntaxError(`Invalid Float ${literal}` + iterator.where(' at ')));
 	}
 	const withoutUnderscores :string = literal.replace(UNDERSCORES, '');

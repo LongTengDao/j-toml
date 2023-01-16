@@ -166,9 +166,9 @@ This library will not cause stack overflow error unexpectedly due to too deep ta
 
 This library's support policy for previous versions of the TOML specification is under the principle of not causing unnecessary errors.  
 For example, although `""""Hi!""""` is not supported until 1.0, but in 0.5 you can get the same value via `'"Hi!"'`, so there won't be an error thrown;  
-`inf` can really not be expressed until 0.5, so in order to avoid unexpected behavior that a 0.4-compliant downstream program has not considered, the parser behaves version-dependent.  
+`nan` can really not be expressed until 0.5, so in order to avoid unexpected behavior that a 0.4-compliant downstream program has not considered, the parser behaves version-dependent.  
 
-So, if there is no specific reason (e.g. the downstream program could not deal with `Infinity`, `NaN`, fractional seconds and edge date-time values, Local Date-Time / Local Date / Local Time types, empty string key name, mixed type array even array of tables / table under array of arrays structure yet), the latest version is recommended.  
+So, if there is no specific reason (e.g. the downstream program could not deal with `NaN`, fractional seconds and edge date-time values, Local Date-Time / Local Date / Local Time types, empty string key name, mixed type array even array of tables / table under array of arrays structure yet), the latest version is recommended.  
 
 ### `arguments` (object style)
 

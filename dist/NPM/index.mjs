@@ -1,4 +1,4 @@
-﻿const version = '1.37.0';
+﻿const version = '1.38.0';
 
 const SyntaxError$1 = SyntaxError;
 
@@ -1754,6 +1754,10 @@ const Float = (literal        )         => {
 			if ( literal==='-inf' ) { return _Infinity$1; }
 			if ( literal==='nan' || literal==='+nan' ) { return NaN$1; }
 			if ( literal==='-nan' ) { return _NaN; }
+		}
+		else if ( !sError ) {
+			if ( literal==='inf' || literal==='+inf' ) { return Infinity; }
+			if ( literal==='-inf' ) { return _Infinity$1; }
 		}
 		throw throws(SyntaxError$1(`Invalid Float ${literal}` + where(' at ')));
 	}

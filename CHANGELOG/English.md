@@ -95,3 +95,4 @@
             *   compatibility: remove `bigint` syntax (but using `TOML.parse` in environment without `BigInt` support, the related option must be set to `false`, otherwise, an error will be thrown)
     36. 0.  +   new feature: add non-`Object` `Symbol.toStringTag` for date-time implementation
     37. 0.  +   new feature: use different `Symbol.toStringTag` for the four types of date-time
+    38. 0.  +   no longer error in 0.4 and previous version for positive or negative infinity, because they could be expressed by going out of range, and this library's support policy for previous versions of the TOML specification is consistent with the principle of not causing unnecessary errors
