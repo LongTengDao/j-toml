@@ -3,6 +3,8 @@
 ==========
 
 All following options are not turned on by default.  
+Changes to the following are not considered break changes.  
+The options object containing unknown properties (possibly obsolete options) will result in an error.  
 
 `xOptions.exact`
 ----------------
